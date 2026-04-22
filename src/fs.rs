@@ -21,14 +21,12 @@ pub struct RelPath {
 
 impl AbsPath {
     /// Creates new AbsPath from an absolute path.
-    pub fn new(path: PathBuf) -> Result<Self> {
+    pub fn new(path: PathBuf) -> Self {
         assert!(path.is_absolute());
-        let res = Self { path: path };
-        res.validate()?;
-        Ok(res)
+        Self { path: path }
     }
 
-    /// Validate path is still valid.
+    /// Validate path is valid.
     pub fn validate(&self) -> Result<()> {
         let norm_path = self.path.canonicalize()?;
         if norm_path != self.path {
@@ -51,9 +49,21 @@ impl RelPath {
     }
 
     /// Add a prefix to turn relative path into absolute path.
-    pub fn to_absolute(&self, base: &AbsPath) -> Result<AbsPath> {
+    pub fn to_absolute(&self, base: &AbsPath) -> AbsPath {
         let abs = base.path.join(&self.path);
         AbsPath::new(abs)
+    }
+}
+
+impl From<PathBuf> for AbsPath {
+    fn from(value: PathBuf) -> Self {
+        Self::new(value)
+    }
+}
+
+impl From<PathBuf> for RelPath {
+    fn from(value: PathBuf) -> Self {
+        Self::new(value)
     }
 }
 
