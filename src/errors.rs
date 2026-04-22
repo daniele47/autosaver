@@ -7,6 +7,7 @@ pub enum Error {
     NonCanonicalPath,
 }
 
+/// Result type for the entire crate, using `Error` error type.
 pub type Result<T> = std::result::Result<T, Error>;
 
 impl From<std::io::Error> for Error {
