@@ -41,6 +41,12 @@ impl AbsPath {
         Ok(self)
     }
 
+    /// Get relative path.
+    pub fn to_relative(&self, prefix: &AbsPath) -> Result<RelPath> {
+        let rel = self.path.strip_prefix(&prefix.path)?;
+        Ok(RelPath::new(rel.to_path_buf()))
+    }
+
     /// Get FileType.
     pub fn file_type(&self) -> Result<FileType> {
         Ok(self.path.metadata()?.file_type())
