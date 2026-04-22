@@ -1,31 +1,35 @@
 use std::path::PathBuf;
 
 #[derive(Debug)]
-pub struct AbsPath(PathBuf);
+pub struct AbsPath {
+    path: PathBuf,
+}
 
 #[derive(Debug)]
-pub struct RelPath(PathBuf);
+pub struct RelPath {
+    path: PathBuf,
+}
 
 impl From<PathBuf> for AbsPath {
     fn from(value: PathBuf) -> Self {
-        Self(value)
+        Self { path: value }
     }
 }
 
 impl From<AbsPath> for PathBuf {
     fn from(value: AbsPath) -> Self {
-        value.0
+        value.path
     }
 }
 
 impl From<PathBuf> for RelPath {
     fn from(value: PathBuf) -> Self {
-        Self(value)
+        Self { path: value }
     }
 }
 
 impl From<RelPath> for PathBuf {
     fn from(value: RelPath) -> Self {
-        value.0
+        value.path
     }
 }
