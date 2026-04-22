@@ -33,6 +33,7 @@ impl AbsPath {
 
     /// Validate path is valid.
     pub fn validate(self) -> Result<Self> {
+        assert!(self.path.is_absolute());
         let norm_path = self.path.canonicalize()?;
         if norm_path != self.path {
             return Err(Error::NonCanonicalPath);
