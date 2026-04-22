@@ -1,5 +1,6 @@
 //! This module has the Error type used throught the entire crate.
 
+/// Error type for the entire crate.
 #[derive(Debug)]
 pub enum Error {
     IoError(std::io::Error),
