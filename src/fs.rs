@@ -1,10 +1,11 @@
 //! This module implements various filesystem wrappers, to garantee safer fs operations.
 //!
 //! ```rust
-//! todo!("add a simple example showcasing this module functionalities!!!")
+//! todo!("add a simple example showcasing this module functionalities!!!");
+//! todo!("add tests for this module");
 //! ```
 
-use std::path::PathBuf;
+use std::{fs::FileType, path::PathBuf};
 
 use crate::errors::{Error, Result};
 
@@ -28,6 +29,11 @@ impl AbsPath {
         }
         Ok(Self { path: norm_path })
     }
+
+    /// Get FileType.
+    pub fn file_type(&self) -> Result<FileType> {
+        Ok(self.path.metadata()?.file_type())
+    }
 }
 
 impl RelPath {
@@ -35,6 +41,12 @@ impl RelPath {
     pub fn new(path: PathBuf) -> Self {
         assert!(path.is_relative());
         Self { path }
+    }
+
+    /// Add a prefix to turn relative path into absolute path.
+    pub fn to_absolute(&self, base: &AbsPath) -> Result<AbsPath> {
+        let abs = base.path.join(&self.path);
+        AbsPath::new(abs)
     }
 }
 

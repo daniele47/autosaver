@@ -1,3 +1,5 @@
+//! This module has the Error type used throught the entire crate.
+
 use std::path::PathBuf;
 
 pub enum Error {
