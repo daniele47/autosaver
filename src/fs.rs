@@ -92,3 +92,15 @@ impl From<RelPath> for PathBuf {
         value.path
     }
 }
+
+impl From<&str> for AbsPath {
+    fn from(s: &str) -> Self {
+        Self::new(PathBuf::from(s))
+    }
+}
+
+impl From<&str> for RelPath {
+    fn from(s: &str) -> Self {
+        Self::new(PathBuf::from(s))
+    }
+}
