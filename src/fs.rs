@@ -11,7 +11,7 @@ use crate::errors::{Error, Result};
 
 /// Struct storing an absolute path.
 ///
-/// Note: it doesn't make garantees the path exists, nor that it is not in a symlinked location.
+/// Note: it doesn't make guarantees the path exists, nor that it is not in a symlinked location.
 /// Thus those needs to be validated using `validate` method or manually somehow.
 #[derive(Debug)]
 pub struct AbsPath {
