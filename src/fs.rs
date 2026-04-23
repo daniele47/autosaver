@@ -1,5 +1,8 @@
 //! This module implements various filesystem wrappers, to guarantee safer fs operations.
 //!
+//! All operations are thought out to avoid symlinks and symlinked paths, as those will
+//! easily end up causing weird edge cases I don't want to have to deal with!
+//!
 //! ```rust
 //! todo!("add a simple example showcasing this module functionalities!!!");
 //! todo!("add tests for this module");
@@ -53,7 +56,7 @@ impl AbsPath {
 
     /// Get FileType.
     ///
-    /// Can also be used to check if path exists, simply by checking if result is not an error.
+    /// Can also be used to check if path exists, simply by checking if the result is not an error.
     pub fn file_type(&self) -> Result<FileType> {
         // note: .symlink_metadata() doesn't follow symlinks, whilst
         // .metadata() would, and thus not report symlinks as such
