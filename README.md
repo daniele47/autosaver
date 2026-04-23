@@ -6,7 +6,6 @@ Copy-based dotfiles tracking cli, written in rust
 
 - [x] in fs module, add list_files and all_files functions
 - [x] add proper and comprehensive tests for fs module
-- [ ] add all_files check in dotfiles to make sure NO SYMLINK in the directory!
 - [x] make list_files and all_files return BTreeSet which is always sorted!
 
 ## ideas
