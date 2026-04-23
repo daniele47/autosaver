@@ -133,6 +133,13 @@ impl AbsPath {
 
         Ok(())
     }
+
+    /// Copy file into destination.
+    pub fn copy_file(&self, dst: &AbsPath) -> Result<()> {
+        dst.create_file()?;
+        fs::copy(&self.path, &dst.path)?;
+        Ok(())
+    }
 }
 
 impl RelPath {
