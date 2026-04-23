@@ -402,9 +402,22 @@ mod tests {
         let root = setup_test_directory();
 
         let all_paths = root.all_files().unwrap();
+        let path_names: HashSet<_> = all_paths
+            .iter()
+            .map(|p| p.path.file_name().unwrap().to_str().unwrap())
+            .collect();
 
-        // Check paths found
-        // TODO: missing
+        // Should contain all files and directories (top level and nested)
+        assert!(path_names.contains("file1.txt"));
+        assert!(path_names.contains("file2.txt"));
+        assert!(path_names.contains("subdir1"));
+        assert!(path_names.contains("subdir2"));
+        assert!(path_names.contains("empty_dir"));
+        assert!(path_names.contains("file3.txt"));
+        assert!(path_names.contains("file4.txt"));
+        assert!(path_names.contains("subsubdir1"));
+        assert!(path_names.contains("file5.txt"));
+        assert!(path_names.contains("file6.txt"));
 
         // Assert count of paths found
         assert_eq!(all_paths.len(), 10);
