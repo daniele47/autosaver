@@ -61,7 +61,7 @@ impl AbsPath {
     /// Note: there could be some directory left created on failure!
     pub fn create_dir(&self) -> Result<()> {
         if self.exists() && !self.file_type()?.is_dir() {
-            self.purge_path(false)?;
+            self.purge_path()?;
         }
         Ok(fs::create_dir_all(&self.path)?)
     }
@@ -70,12 +70,17 @@ impl AbsPath {
     ///
     /// Notes:
     /// - There could be some directory left created on failure!
-    /// - If `allow_recursive_delete` is true, this will delete directory recursively, if
-    ///   path is a directory. THIS IS DANGEROUS, BE CAREFUL!!!
-    pub fn create_file(&self, allow_recursive_delete: bool) -> Result<()> {
-        if self.exists() && !self.file_type()?.is_file() {
-            self.purge_path(allow_recursive_delete)?;
+    /// - This is unable to delete not empty dirs, for safety reasons, thus it will fail if path
+    ///   has a not empty directory!
+    pub fn create_file(&self) -> Result<()> {
+        if self.exists() {
+            if self.file_type()?.is_file() {
+                return Ok(());
+            }
+            self.purge_path()?;
         }
+        // note: this parent call is not fully safe, as path could not be normalized beforehand
+        // not much i can do differently though ¯\_(ツ)_/¯
         if let Some(parent) = self.path.parent() {
             fs::create_dir_all(parent)?;
         }
@@ -106,22 +111,16 @@ impl AbsPath {
 
     /// Purge path, whatever file type it is.
     ///
-    /// Note: if `allow_recursive_delete` is true, THIS FUNCTION BECOMES DANGEROUS, as it
-    /// can now delete directories recursively!!!
-    pub fn purge_path(&self, allow_recursive_delete: bool) -> Result<()> {
+    /// Note: this is unable to delete not empty dirs, for safety reasons!!!
+    pub fn purge_path(&self) -> Result<()> {
         if !self.exists() {
             return Ok(());
         }
 
         // delete whatever is in the path
         let path = self.path.canonicalize()?;
-        let metadata = path.symlink_metadata()?;
-        if metadata.is_dir() {
-            if allow_recursive_delete {
-                fs::remove_dir_all(&self.path)?;
-            } else {
-                fs::remove_dir(&self.path)?;
-            }
+        if path.symlink_metadata()?.is_dir() {
+            fs::remove_dir(&self.path)?;
         } else {
             fs::remove_file(&self.path)?;
         }
@@ -158,18 +157,6 @@ impl From<PathBuf> for AbsPath {
 impl From<PathBuf> for RelPath {
     fn from(value: PathBuf) -> Self {
         Self::new(value)
-    }
-}
-
-impl From<AbsPath> for PathBuf {
-    fn from(value: AbsPath) -> Self {
-        value.path
-    }
-}
-
-impl From<RelPath> for PathBuf {
-    fn from(value: RelPath) -> Self {
-        value.path
     }
 }
 
