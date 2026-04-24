@@ -82,4 +82,5 @@ Ideas:
 - [x] resolve seems to work, BUT error result is broken (return entire cycle)
 - [x] implement tests for resolve method in profile.rs
 - [ ] implement modules and profiles parsers
-- [ ] implement module resolve func, which like profile resolve, takes raw input and actually makes it workable with
+- [ ] implement resolve and extend functions in module.rs
+- [ ] for resolve and extend functions in module.rs implement tests
