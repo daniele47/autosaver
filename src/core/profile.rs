@@ -170,11 +170,14 @@ mod tests {
 
         let expected = Profile::new(
             "root".to_string(),
-            vec!["module1".to_string(), "module2".to_string()],
+            vec![
+                "module1".to_string(),
+                "module2".to_string(),
+                "module3".to_string(),
+            ],
             ProfileType::Composite,
         );
 
-        assert!(actual.is_ok());
         assert_eq!(expected, actual.unwrap());
     }
 
