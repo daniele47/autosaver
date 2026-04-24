@@ -77,3 +77,4 @@ Ideas:
 - [x] in fs module, add list_files and all_files functions
 - [x] add proper and comprehensive tests for fs module
 - [x] make list_files and all_files return BTreeSet which is always sorted!
+- [x] make error more context aware

@@ -57,7 +57,11 @@ impl AbsPath {
 
     /// Get canonicalized path.
     pub fn canonicalize(&self) -> Result<Self> {
-        Ok(self.path.canonicalize()?.into())
+        Ok(self
+            .path
+            .canonicalize()
+            .map_err(|e| Error::IoError(e, self.path.clone()))?
+            .into())
     }
 
     /// Get relative path.
@@ -84,12 +88,16 @@ impl AbsPath {
     ///
     /// Note: it follows symlinks! Use `symlink_metadata` to not follow symlinks.
     pub fn metadata(&self) -> Result<Metadata> {
-        self.path.metadata().map_err(Error::from)
+        self.path
+            .metadata()
+            .map_err(|e| Error::IoError(e, self.path.clone()))
     }
 
     /// Get Symlink metadata.
     pub fn symlink_metadata(&self) -> Result<Metadata> {
-        self.path.symlink_metadata().map_err(Error::from)
+        self.path
+            .symlink_metadata()
+            .map_err(|e| Error::IoError(e, self.path.clone()))
     }
 
     /// Check if path exists.
@@ -104,7 +112,7 @@ impl AbsPath {
         if self.exists() && !self.metadata()?.is_dir() {
             self.purge_path(false)?;
         }
-        Ok(fs::create_dir_all(&self.path)?)
+        Ok(fs::create_dir_all(&self.path).map_err(|e| Error::IoError(e, self.path.clone()))?)
     }
 
     /// Create file, with all missing parents.
@@ -122,9 +130,9 @@ impl AbsPath {
         // note: this parent call is not fully safe, as path could not be normalized beforehand
         // not much i can do differently though ¯\_(ツ)_/¯
         if let Some(parent) = self.path.parent() {
-            fs::create_dir_all(parent)?;
+            fs::create_dir_all(parent).map_err(|e| Error::IoError(e, self.path.clone()))?;
         }
-        File::create(&self.path)?;
+        File::create(&self.path).map_err(|e| Error::IoError(e, self.path.clone()))?;
         Ok(())
     }
 
@@ -159,15 +167,18 @@ impl AbsPath {
         }
 
         // delete whatever is in the path
-        let path = self.path.canonicalize()?;
-        if path.symlink_metadata()?.is_dir() {
+        let path = self.path.canonicalize();
+        let path = path.map_err(|e| Error::IoError(e, self.path.clone()))?;
+        let metadata = path.symlink_metadata();
+        let metadata = metadata.map_err(|e| Error::IoError(e, self.path.clone()))?;
+        if metadata.is_dir() {
             if allow_recursive_deletion {
-                fs::remove_dir_all(&self.path)?;
+                fs::remove_dir_all(&self.path).map_err(|e| Error::IoError(e, self.path.clone()))?;
             } else {
-                fs::remove_dir(&self.path)?;
+                fs::remove_dir(&self.path).map_err(|e| Error::IoError(e, self.path.clone()))?;
             }
         } else {
-            fs::remove_file(&self.path)?;
+            fs::remove_file(&self.path).map_err(|e| Error::IoError(e, self.path.clone()))?;
         }
 
         // clear empty parent dirs
@@ -184,7 +195,7 @@ impl AbsPath {
     /// Note: `allow_recursive_deletion` purges even not empty dirs if in dst path
     pub fn copy_file(&self, dst: &AbsPath, allow_recursive_deletion: bool) -> Result<()> {
         dst.create_file(allow_recursive_deletion)?;
-        fs::copy(&self.path, &dst.path)?;
+        fs::copy(&self.path, &dst.path).map_err(|e| Error::IoError(e, self.path.clone()))?;
         Ok(())
     }
 
@@ -192,7 +203,8 @@ impl AbsPath {
     ///
     /// Notes: this will get ALL files, even directories, symlinks, all rust can get.
     pub fn list_files(&self) -> Result<BTreeSet<AbsPath>> {
-        Ok(fs::read_dir(&self.path)?
+        Ok(fs::read_dir(&self.path)
+            .map_err(|e| Error::IoError(e, self.path.clone()))?
             .filter_map(|entry| entry.ok())
             .map(|entry| AbsPath::new(entry.path()))
             .collect())
