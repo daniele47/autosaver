@@ -5,8 +5,13 @@ use std::{fmt::Display, path::PathBuf};
 /// Error type for the entire crate.
 #[derive(Debug)]
 pub enum Error {
-    // fs errors
+    /// All kind of filesystem related errors.
     IoError(std::io::Error, PathBuf),
+
+    /// Profile definition includes cycles.
+    ///
+    /// First string is the profile name, the second is the child where the cycle happens.
+    ProfileCycle(String, String),
 }
 
 /// Result type for the entire crate, using `Error` error type.
@@ -17,6 +22,9 @@ impl Display for Error {
         match self {
             Error::IoError(error, path) => {
                 write!(f, "IO error on path '{}' : {}", path.display(), error)
+            }
+            Error::ProfileCycle(p, c) => {
+                write!(f, "Profile '{}' reaches a cycle from child '{}'", p, c)
             }
         }
     }

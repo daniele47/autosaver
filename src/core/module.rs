@@ -3,7 +3,7 @@
 use crate::core::fs::RelPath;
 
 /// Policy to use for module entries.
-#[derive(Debug, Default, PartialEq, Eq)]
+#[derive(Debug, Default, PartialEq, Eq, Clone, Copy)]
 pub enum ModulePolicy {
     /// Check always both if file doesn't exist and if file differs.
     #[default]
@@ -15,14 +15,14 @@ pub enum ModulePolicy {
 }
 
 /// Represents a single module entry, aka a path and its policy.
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct ModuleEntry {
     path: RelPath,
     policy: ModulePolicy,
 }
 
 /// Represents a module, aka an orderer list of path with their policies.
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Module {
     entries: Vec<ModuleEntry>,
 }

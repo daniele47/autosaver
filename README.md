@@ -78,4 +78,5 @@ Ideas:
 - [x] add proper and comprehensive tests for fs module
 - [x] make list_files and all_files return BTreeSet which is always sorted!
 - [x] make error more context aware
-- [ ] finish implementing resolve method in profile.rs, and implement tests for it!
+- [x] finish implementing resolve method in profile.rs
+- [ ] implement tests for resolve method in profile.rs
