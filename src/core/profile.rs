@@ -106,7 +106,9 @@ impl Profile {
             }
         }
 
-        Ok(Self::new(self.name.clone(), entries, self.ptype))
+        let res = Self::new(self.name.clone(), entries, self.ptype);
+        assert!(res.is_resolved(loader));
+        Ok(res)
     }
 }
 
