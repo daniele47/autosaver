@@ -70,6 +70,7 @@ Ideas:
     - shebang like first line in config files, to differenciate between profiles and modules
     - profiles could themselves include other profiles too! (decide how to handle recursion eventually!)
     - use proper subcommands instead of flags: save / restore / ... (flags only for config things, like specifying the profile to use)
+    - --help for flags/commands, --docs for ENTIRE cli manual, explaining everything
 
 ## todo
 
