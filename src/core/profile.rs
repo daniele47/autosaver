@@ -127,7 +127,11 @@ mod tests {
             let mut profiles = vec![
                 Profile::new(
                     "root".to_string(),
-                    vec!["composite1".to_string(), "module1".to_string()],
+                    vec![
+                        "composite1".to_string(),
+                        "module1".to_string(),
+                        "composite3".to_string(),
+                    ],
                     ProfileType::Composite,
                 ),
                 Profile::new(
@@ -137,12 +141,18 @@ mod tests {
                 ),
                 Profile::new(
                     "composite2".to_string(),
+                    vec!["module4".to_string()],
+                    ProfileType::Composite,
+                ),
+                Profile::new(
+                    "composite3".to_string(),
                     vec!["module3".to_string()],
                     ProfileType::Composite,
                 ),
                 Profile::new("module1".to_string(), vec![], ProfileType::Module),
                 Profile::new("module2".to_string(), vec![], ProfileType::Module),
                 Profile::new("module3".to_string(), vec![], ProfileType::Module),
+                Profile::new("module4".to_string(), vec![], ProfileType::Module),
             ];
             profiles.extend(extra_profiles);
             for p in profiles {
@@ -174,6 +184,7 @@ mod tests {
                 "module1".to_string(),
                 "module2".to_string(),
                 "module3".to_string(),
+                "module4".to_string(),
             ],
             ProfileType::Composite,
         );
@@ -183,6 +194,25 @@ mod tests {
 
     #[test]
     fn test_resolve_failure() {
-        todo!()
+        let mut profile = Profile::new(
+            "root".to_string(),
+            vec!["composite1".to_string(), "module1".to_string()],
+            ProfileType::Composite,
+        );
+        let mut loader = TestProfileLoader::new(vec![Profile::new(
+            "composite2".to_string(),
+            vec!["composite1".to_string()],
+            ProfileType::Composite,
+        )]);
+        let actual = profile.resolve(&mut loader);
+
+        let err = actual.unwrap_err();
+        match err {
+            Error::ProfileCycle(root, child) => {
+                assert_eq!(root.as_str(), "root");
+                assert_eq!(child.as_str(), "composite1");
+            }
+            _ => unreachable!(),
+        }
     }
 }

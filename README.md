@@ -80,4 +80,4 @@ Ideas:
 - [x] make error more context aware
 - [x] finish implementing resolve method in profile.rs
 - [x] resolve seems to work, BUT error result is broken (return entire cycle)
-- [ ] implement tests for resolve method in profile.rs
+- [x] implement tests for resolve method in profile.rs
