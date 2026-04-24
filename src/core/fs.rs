@@ -61,8 +61,11 @@ impl AbsPath {
     }
 
     /// Get relative path.
-    pub fn to_relative(&self, prefix: &AbsPath) -> Result<RelPath> {
-        Ok(self.path.strip_prefix(&prefix.path)?.to_path_buf().into())
+    pub fn to_relative(&self, prefix: &AbsPath) -> Option<RelPath> {
+        self.path
+            .strip_prefix(&prefix.path)
+            .map(|p| p.to_path_buf().into())
+            .ok()
     }
 
     /// Append to path.
