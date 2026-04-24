@@ -79,4 +79,5 @@ Ideas:
 - [x] make list_files and all_files return BTreeSet which is always sorted!
 - [x] make error more context aware
 - [x] finish implementing resolve method in profile.rs
+- [ ] resolve seems to work, BUT error result is broken (return entire cycle)
 - [ ] implement tests for resolve method in profile.rs
