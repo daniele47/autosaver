@@ -1,6 +1,6 @@
 //! This module implements structs and methods to handle dotfiles modules.
 
-use crate::core::fs::{self, AbsPath, RelPath};
+use crate::core::fs::{AbsPath, RelPath};
 
 /// Policy to use for module entries.
 #[derive(Debug, Default, PartialEq, Eq, Clone, Copy)]

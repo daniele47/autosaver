@@ -274,6 +274,30 @@ impl From<&str> for RelPath {
     }
 }
 
+impl TryFrom<AbsPath> for String {
+    type Error = Error;
+
+    fn try_from(value: AbsPath) -> std::result::Result<Self, Self::Error> {
+        value
+            .path
+            .to_str()
+            .ok_or(Error::InvalidPathString(value.path.clone()))
+            .map(String::from)
+    }
+}
+
+impl TryFrom<RelPath> for String {
+    type Error = Error;
+
+    fn try_from(value: RelPath) -> std::result::Result<Self, Self::Error> {
+        value
+            .path
+            .to_str()
+            .ok_or(Error::InvalidPathString(value.path.clone()))
+            .map(String::from)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -8,9 +8,12 @@ pub enum Error {
     /// All kind of filesystem related errors.
     IoError(std::io::Error, PathBuf),
 
+    /// Invalid path string when trying to convert from PathBuf.
+    InvalidPathString(PathBuf),
+
     /// Profile definition includes cycles.
     ///
-    /// First string is the profile name, the second is the child where the cycle happens.
+    /// First string is the profile name, the second is the child where the cycle was found.
     ProfileCycle(String, String),
 }
 
@@ -23,6 +26,7 @@ impl Display for Error {
             Error::IoError(error, path) => {
                 write!(f, "IO error on path '{}' : {}", path.display(), error)
             }
+            Error::InvalidPathString(p) => write!(f, "Invalid path string: {}", p.display()),
             Error::ProfileCycle(p, c) => {
                 write!(f, "Profile '{}' reaches a cycle from child '{}'", p, c)
             }

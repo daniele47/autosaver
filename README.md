@@ -76,7 +76,7 @@ only have neovim and tmux, for example
 - [ ] implement `resolve` and `extend` functions in module.rs
 - [ ] for `resolve` and `extend` functions in module.rs implement tests
 - [ ] add function in `fs` module to do buffered reads (`BufReader` seems to implement a `.lines()` method!!!)
-- [ ] required way to convert `AbsPath` and `RelPath` to String (best idea: use TryFrom and an error variant!)
+- [x] required way to convert `AbsPath` and `RelPath` to String (best idea: use TryFrom and an error variant!)
 
 ### long term todos
 
