@@ -1,2 +1,1 @@
-#[derive(Debug)]
-pub struct Profile {}
+//! This module implements structs and methods to handle dotfiles profiles.

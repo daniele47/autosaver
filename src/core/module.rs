@@ -1,3 +1,5 @@
+//! This module implements structs and methods to handle dotfiles modules.
+
 use crate::core::fs::RelPath;
 
 /// Policy to use for module entries.
