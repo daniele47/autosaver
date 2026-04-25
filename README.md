@@ -80,6 +80,7 @@ only have neovim and tmux, for example
 - [ ] `resolve` func needs to be careful of duplicates by equivalent names (.config/nvim vs .config/nvim/)
 - [ ] `resolve_and_merge` function or smt, to allow resolving multiple Modules, and to merge results into a single module
 - [ ] `resolve_and_merge` add test
+- [ ] make sure to remove all print from all tests and code! just brutally grep to find them all!
 
 ### long term todos
 
