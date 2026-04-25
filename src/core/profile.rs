@@ -29,7 +29,10 @@ pub trait ProfileLoader {
 impl Profile {
     /// Create new profile.
     pub fn new(name: String, entries: Vec<String>, ptype: ProfileType) -> Self {
-        assert_eq!(entries.is_empty(), ptype == ProfileType::Module);
+        match ptype {
+            ProfileType::Module => assert!(entries.is_empty()),
+            _ => {}
+        }
         Self {
             name,
             entries,
