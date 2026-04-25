@@ -63,6 +63,11 @@ For example: if `neovim`, `tmux`, `plasma-desktop` are possible modules,
 `minimal-cli` or `kde-linux` are possible profiles and minimal-cli would
 only have neovim and tmux, for example
 
+## universal rules
+
+1. no `unwraps` in the code, use explicit `assertions` to validate invariants
+2. `tests` only for important and complex functions that are hard to get right
+
 ## todo
 
 - [x] in fs module, add `list_files` and `all_files` functions
@@ -92,5 +97,4 @@ only have neovim and tmux, for example
       symlinks in the dotfiles repo, ...
 - [ ] add `help` action to get direct help on possible args and flags to the cli
 - [ ] add `doc` action to print an entire manual with all things to know about the script
-
 - [ ] do i need `version` action? i doubt i should. No backward compatibility, KISS!
