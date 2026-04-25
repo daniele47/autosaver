@@ -20,6 +20,9 @@ pub enum Error {
     ///
     /// First string is the profile name, the second is the child where the cycle was found.
     ProfileCycle(String, String),
+
+    /// Failure to load a profile
+    ProfileNotLoaded(String),
 }
 
 /// Result type for the entire crate, using `Error` error type.
@@ -40,6 +43,7 @@ impl Display for Error {
                 let prefix = prefix.display();
                 write!(f, "Invalid prefix '{path}' for path '{prefix}'")
             }
+            Error::ProfileNotLoaded(p) => write!(f, "Profile could not be loaded: {p}"),
         }
     }
 }
