@@ -33,10 +33,8 @@ pub struct Module {
 }
 
 impl ModulePolicy {
-    /// Get priority for `ModulePriority`.
-    ///
-    /// Note: Lower values have higher precedence.
-    pub fn priority(&self) -> u64 {
+    fn priority(&self) -> u64 {
+        // Note: Lower values have higher precedence.
         match self {
             ModulePolicy::Track => 2,
             ModulePolicy::NotDiff => 1,
@@ -83,7 +81,7 @@ impl Module {
                     vacant.insert(entry.policy);
                 }
                 Entry::Occupied(mut occupied) => {
-                    if occupied.get().priority() < entry.policy.priority() {
+                    if entry.policy.priority() < occupied.get().priority() {
                         occupied.insert(entry.policy);
                     }
                 }
@@ -132,5 +130,79 @@ impl Module {
             }
         }
         Self::new(entries).cleanup()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::core::fs::{AbsPath, RelPath};
+
+    #[test]
+    fn test_resolve() -> Result<()> {
+        // Create temp directory
+        let tmp = AbsPath::new_tmp("test_resolve");
+        tmp.create_dir()?;
+
+        // Create test structure
+        let dir1 = tmp.join(&RelPath::from("dir1"));
+        let dir2 = tmp.join(&RelPath::from("dir2"));
+        let file1 = tmp.join(&RelPath::from("file1.txt"));
+        let file2 = dir1.join(&RelPath::from("file2.txt"));
+        let file3 = dir1.join(&RelPath::from("file3.txt"));
+        let subdir = dir1.join(&RelPath::from("subdir"));
+        let file4 = subdir.join(&RelPath::from("file4.txt"));
+
+        dir1.create_dir()?;
+        dir2.create_dir()?;
+        subdir.create_dir()?;
+        file1.create_file(false)?;
+        file2.create_file(false)?;
+        file3.create_file(false)?;
+        file4.create_file(false)?;
+
+        // Create module with overlapping entries
+        let module = Module::new(vec![
+            ModuleEntry::new(RelPath::from("dir1"), ModulePolicy::Track),
+            ModuleEntry::new(RelPath::from("dir1"), ModulePolicy::NotDiff),
+            ModuleEntry::new(RelPath::from("dir1/file3.txt"), ModulePolicy::Track),
+            ModuleEntry::new(RelPath::from("dir1/subdir"), ModulePolicy::NotDiff),
+            ModuleEntry::new(RelPath::from("file1.txt"), ModulePolicy::Ignore),
+        ]);
+
+        // Resolve
+        let resolved = module.resolve(&tmp)?;
+        for entry in resolved.entries() {
+            println!("{entry:?}");
+        }
+
+        // Verify count
+        assert_eq!(resolved.entries().len(), 4);
+
+        // Verify each expected path exists with correct policy
+        for entry in resolved.entries() {
+            let path_str = String::try_from(entry.path().clone())?;
+
+            match path_str.as_str() {
+                "dir1/file2.txt" => {
+                    assert_eq!(*entry.policy(), ModulePolicy::NotDiff);
+                }
+                "dir1/file3.txt" => {
+                    assert_eq!(*entry.policy(), ModulePolicy::NotDiff);
+                }
+                "dir1/subdir/file4.txt" => {
+                    assert_eq!(*entry.policy(), ModulePolicy::NotDiff);
+                }
+                "file1.txt" => {
+                    assert_eq!(*entry.policy(), ModulePolicy::Ignore);
+                }
+                other => panic!("Unexpected path: {}", other),
+            }
+        }
+
+        // Cleanup
+        tmp.purge_path(true)?;
+
+        Ok(())
     }
 }
