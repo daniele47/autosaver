@@ -98,6 +98,7 @@ only have neovim and tmux, for example
 - [x] make sure to remove all print from all tests and code! just brutally grep to find them all!
 - [ ] enforce rule (5) everywhere
 - [ ] profile resolver might actually need to be a DFS instead of BFS!
+- [ ] make errors actually be a struct variant (aka {io: ..., path: ...} instead of (ioError,AbsPath)
 
 ### long term todos
 
