@@ -66,11 +66,11 @@ impl AbsPath {
     }
 
     /// Get relative path.
-    pub fn to_relative(&self, prefix: &AbsPath) -> Option<RelPath> {
+    pub fn to_relative(&self, prefix: &AbsPath) -> Result<RelPath> {
         self.path
             .strip_prefix(&prefix.path)
             .map(|p| p.to_path_buf().into())
-            .ok()
+            .map_err(|_| Error::InvalidPathPrefix(self.path.clone(), prefix.path.clone()))
     }
 
     /// Get path as a lossy string

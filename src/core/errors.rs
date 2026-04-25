@@ -8,6 +8,11 @@ pub enum Error {
     /// All kind of filesystem related errors.
     IoError(std::io::Error, PathBuf),
 
+    /// Could not remove a prefix from a path string.
+    ///
+    /// First string is the actual path, second string is the prefix.
+    InvalidPathPrefix(PathBuf, PathBuf),
+
     /// Invalid path string when trying to convert from PathBuf.
     InvalidPathString(PathBuf),
 
@@ -29,6 +34,11 @@ impl Display for Error {
             Error::InvalidPathString(p) => write!(f, "Invalid path string: {}", p.display()),
             Error::ProfileCycle(p, c) => {
                 write!(f, "Profile '{}' reaches a cycle from child '{}'", p, c)
+            }
+            Error::InvalidPathPrefix(path, prefix) => {
+                let path = path.display();
+                let prefix = prefix.display();
+                write!(f, "Invalid prefix '{path}' for path '{prefix}'")
             }
         }
     }
