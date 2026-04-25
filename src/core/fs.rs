@@ -228,6 +228,9 @@ impl AbsPath {
     }
 
     /// Buffered line by line read of files
+    ///
+    /// Note: since this uses a buffered reader, read could costantly fail. It is thus necessary
+    /// to handle the potential error on every each line read! The error is of type std::io::Error!
     pub fn read_lines(&self) -> Result<Lines<BufReader<File>>> {
         let file = File::open(&self.path).map_err(|e| Error::IoError(e, self.path.clone()))?;
         Ok(BufReader::new(file).lines())
