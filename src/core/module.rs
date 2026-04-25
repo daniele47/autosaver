@@ -91,7 +91,7 @@ impl Module {
         }
         let entries: Vec<_> = paths
             .iter()
-            .map(|f| ModuleEntry::new(RelPath::from(f.0.as_str()), f.1.clone()))
+            .map(|f| ModuleEntry::new(RelPath::from(f.0.as_str()), *f.1))
             .collect();
         Ok(Module::new(entries))
     }

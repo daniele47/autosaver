@@ -259,6 +259,18 @@ impl From<PathBuf> for RelPath {
     }
 }
 
+impl From<AbsPath> for PathBuf {
+    fn from(value: AbsPath) -> Self {
+        value.path
+    }
+}
+
+impl From<RelPath> for PathBuf {
+    fn from(value: RelPath) -> Self {
+        value.path
+    }
+}
+
 impl From<&str> for AbsPath {
     fn from(s: &str) -> Self {
         Self::new(PathBuf::from(s))
