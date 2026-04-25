@@ -6,23 +6,19 @@ use std::{fmt::Display, path::PathBuf};
 #[derive(Debug)]
 pub enum Error {
     /// All kind of filesystem related errors.
-    IoError(std::io::Error, PathBuf),
+    IoError { io: std::io::Error, path: PathBuf },
 
     /// Could not remove a prefix from a path string.
-    ///
-    /// First string is the actual path, second string is the prefix.
-    InvalidPathPrefix(PathBuf, PathBuf),
+    InvalidPathPrefix { path: PathBuf, prefix: PathBuf },
 
     /// Invalid path string when trying to convert from PathBuf.
-    InvalidPathString(PathBuf),
+    InvalidPathString { path: PathBuf },
 
     /// Profile definition includes cycles.
-    ///
-    /// First string is the profile name, the second is the child where the cycle was found.
-    ProfileCycle(String, String),
+    ProfileCycle { name: String, child: String },
 
     /// Failure to load a profile
-    ProfileNotLoaded(String),
+    ProfileNotLoaded { name: String, reason: String },
 }
 
 /// Result type for the entire crate, using `Error` error type.
@@ -31,19 +27,23 @@ pub type Result<T> = std::result::Result<T, Error>;
 impl Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Error::IoError(error, path) => {
-                write!(f, "IO error on path '{}' : {}", path.display(), error)
+            Error::IoError { io: e, path: p } => {
+                write!(f, "IO error on path '{}' : {e}", p.display())
             }
-            Error::InvalidPathString(p) => write!(f, "Invalid path string: {}", p.display()),
-            Error::ProfileCycle(p, c) => {
-                write!(f, "Profile '{}' reaches a cycle from child '{}'", p, c)
+            Error::InvalidPathPrefix { path: p, prefix: r } => {
+                let p = p.display();
+                let r = r.display();
+                write!(f, "Invalid prefix '{p}' for path '{r}'")
             }
-            Error::InvalidPathPrefix(path, prefix) => {
-                let path = path.display();
-                let prefix = prefix.display();
-                write!(f, "Invalid prefix '{path}' for path '{prefix}'")
+            Error::InvalidPathString { path: p } => {
+                write!(f, "Invalid path string: {}", p.display())
             }
-            Error::ProfileNotLoaded(p) => write!(f, "Profile could not be loaded: {p}"),
+            Error::ProfileCycle { name: n, child: c } => {
+                write!(f, "Profile '{n}' reaches a cycle from child '{c}'")
+            }
+            Error::ProfileNotLoaded { name: n, reason: r } => {
+                write!(f, "Profile '{n}' could not be loaded: {r}")
+            }
         }
     }
 }

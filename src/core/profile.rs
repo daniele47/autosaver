@@ -93,7 +93,10 @@ impl Profile {
                         }
                         faulty_child = parent;
                     }
-                    return Err(Error::ProfileCycle(self.name.clone(), faulty_child.clone()));
+                    return Err(Error::ProfileCycle {
+                        name: self.name.clone(),
+                        child: faulty_child.clone(),
+                    });
                 }
 
                 // add child to various variables
@@ -174,7 +177,10 @@ mod tests {
             self.profiles
                 .get(name)
                 .cloned()
-                .ok_or(Error::ProfileNotLoaded(name.into()))
+                .ok_or(Error::ProfileNotLoaded {
+                    name: name.into(),
+                    reason: "Test code failure".into(),
+                })
         }
     }
 
@@ -226,8 +232,8 @@ mod tests {
         match actual {
             Ok(_) => {}
             Err(err) => match err {
-                Error::ProfileCycle(root, child) => {
-                    assert_eq!(root.as_str(), "root");
+                Error::ProfileCycle { name, child } => {
+                    assert_eq!(name.as_str(), "root");
                     assert_eq!(child.as_str(), "composite1");
                 }
                 _ => unreachable!(),

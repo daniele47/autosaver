@@ -103,7 +103,7 @@ kde-plasma
 - [x] ~make sure to remove all print from all tests and code! just brutally grep to find them all!~
 - [ ] profile resolver might actually need to be a DFS instead of BFS!
 - [ ] make cycle detection more powerful and detect 1 full cycle, for way better error msg!
-- [ ] make errors actually be a struct variant (aka {io: ..., path: ...} instead of (ioError,AbsPath)
+- [x] make errors actually be a struct variant (aka {io: ..., path: ...} instead of (ioError,AbsPath)
 - [x] ~move `compile.sh` file into `builds/` itself (tweak logic to make it still work + .gitignore fix)~
 
 ### long term todos
