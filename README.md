@@ -67,7 +67,13 @@ kde-plasma
     - Or they might just be for dangerous operations, aka probably only for all fs operations
     - I could even log crashes potentially?
 
-- in build directory, add a readme file to document entirely all the steps to release a new version
+
+- add versions:
+    - use cargo OWN version (see `src/main/version.rs` for an easy example)
+    - keep version `0.1.0` until i start compiling the first binaries
+    - from then on, release a `1.0.0` and bump the version every time i release a new binary, following semver
+    - in build directory, add a readme file to document entirely all the steps to release a new version
+    - find out how to do codeberg releases properly, which will then be used to download binaries from my bash script
 
 ## universal rules
 
