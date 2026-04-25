@@ -69,6 +69,7 @@ only have neovim and tmux, for example
 2. Do `tests` only for important and complex functions that are hard to get right
 3. Make sure tests `always cleanup resources` even on panic
 4. Make sure there are no weird debug print ever left in code, except if meant as part of the cli
+5. Add more comments to complex functions, just to give general ideas on what is going on
 
 ## ideas
 
