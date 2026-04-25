@@ -99,6 +99,7 @@ only have neovim and tmux, for example
 - [ ] profile resolver might actually need to be a DFS instead of BFS!
 - [ ] make cycle detection more powerful and detect 1 full cycle, for way better error msg!
 - [ ] make errors actually be a struct variant (aka {io: ..., path: ...} instead of (ioError,AbsPath)
+- [ ] move `compile.sh` file into `builds/` itself (tweak logic to make it still work + .gitignore fix)
 
 ### long term todos
 
