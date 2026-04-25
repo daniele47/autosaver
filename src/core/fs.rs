@@ -4,6 +4,7 @@ use std::{
     collections::{BTreeSet, HashSet},
     env,
     fs::{self, File, Metadata},
+    io::{BufRead, BufReader, Lines},
     path::PathBuf,
 };
 
@@ -224,6 +225,12 @@ impl AbsPath {
         }
 
         Ok(files)
+    }
+
+    /// Buffered line by line read of files
+    pub fn read_lines(&self) -> Result<Lines<BufReader<File>>> {
+        let file = File::open(&self.path).map_err(|e| Error::IoError(e, self.path.clone()))?;
+        Ok(BufReader::new(file).lines())
     }
 }
 
