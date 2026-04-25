@@ -78,6 +78,8 @@ only have neovim and tmux, for example
 - [x] add function in `fs` module to do buffered reads (`BufReader` seems to implement a `.lines()` method!!!)
 - [x] required way to convert `AbsPath` and `RelPath` to String (best idea: use TryFrom and an error variant!)
 - [ ] `resolve` func needs to be careful of duplicates by equivalent names (.config/nvim vs .config/nvim/)
+- [ ] `resolve_and_merge` function or smt, to allow resolving multiple Modules, and to merge results into a single module
+- [ ] `resolve_and_merge` add test
 
 ### long term todos
 

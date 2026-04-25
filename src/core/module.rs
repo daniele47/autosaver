@@ -95,12 +95,7 @@ impl Module {
         Ok(Self::new(entries))
     }
 
-    /// Cleanup and resolves all entries to actual normal files.
-    ///
-    /// In particular it removes duplicated entries, it leaves only those with most policy
-    /// priority, it gets all files from directories and so on.
-    ///
-    /// Note: base specifies the prefix to use for all entries
+    /// Resolves raw module into a list of all actual files, relative to `base` as the base directory.
     pub fn resolve(&self, base: &AbsPath) -> Result<Self> {
         self.resolve_with_seen(base, &mut Default::default())
     }
