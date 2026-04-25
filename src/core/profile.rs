@@ -1,6 +1,6 @@
 //! This module implements structs and methods to handle dotfiles profiles.
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
 use crate::core::errors::{Error, Result};
 
@@ -114,6 +114,8 @@ impl Profile {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashMap;
+
     use super::*;
 
     #[derive(Debug)]
