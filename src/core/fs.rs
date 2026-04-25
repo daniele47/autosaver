@@ -248,6 +248,11 @@ impl RelPath {
     pub fn to_absolute(&self, base: &AbsPath) -> AbsPath {
         base.path.join(&self.path).into()
     }
+
+    /// Append to path.
+    pub fn join(&self, suffix: &RelPath) -> Self {
+        self.path.join(&suffix.path).into()
+    }
 }
 
 impl From<PathBuf> for AbsPath {
