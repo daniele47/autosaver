@@ -2,7 +2,10 @@
 
 use std::collections::{HashMap, hash_map::Entry};
 
-use crate::core::{errors::Result, fs::{AbsPath, RelPath}};
+use crate::core::{
+    errors::Result,
+    fs::{AbsPath, RelPath},
+};
 
 /// Policy to use for module entries.
 #[derive(Debug, Default, PartialEq, Eq, Clone, Copy)]
@@ -52,8 +55,8 @@ impl ModuleEntry {
     }
 
     /// Get policy.
-    pub fn policy(&self) -> &ModulePolicy {
-        &self.policy
+    pub fn policy(&self) -> ModulePolicy {
+        self.policy
     }
 }
 
@@ -61,6 +64,17 @@ impl Module {
     /// Create new Module.
     pub fn new(entries: Vec<ModuleEntry>) -> Self {
         Self { entries }
+    }
+
+    /// Create module filling all files inside a directory, relative path to that directory
+    pub fn new_from_dir(dir: &AbsPath, policy: ModulePolicy) -> Result<Self> {
+        let mut entries = vec![];
+        for file in dir.all_files()? {
+            if file.metadata()?.is_file() {
+                entries.push(ModuleEntry::new(file.to_relative(dir)?, policy));
+            }
+        }
+        Ok(Self::new(entries))
     }
 
     /// Get all entries.
@@ -116,7 +130,7 @@ impl Module {
                 }
                 // if path is a file, collect the file itself only
                 else if metadata.is_file() {
-                    files.push((raw_abs_path, *raw_entry.policy()));
+                    files.push((raw_abs_path, raw_entry.policy()));
                 }
                 paths.extend(files);
             }
@@ -126,11 +140,12 @@ impl Module {
 
     /// Resolves raw module into a list of all actual files, relative to `base` as the base directory.
     pub fn resolve(&self, base: &AbsPath) -> Result<Self> {
-        Self::cleanup_paths(self.resolve_module(base)?, base)
+        let mut res = Self::cleanup_paths(self.resolve_module(base)?, base)?;
+        res.sort();
+        Ok(res)
     }
 
-    /// Sort by path.
-    pub fn sort(&mut self) {
+    fn sort(&mut self) {
         self.entries.sort_by_cached_key(|e| e.path.to_str_lossy());
     }
 }
@@ -201,7 +216,7 @@ mod tests {
 
             match path_str.as_str() {
                 "file1.txt" => {
-                    assert_eq!(*entry.policy(), ModulePolicy::Ignore);
+                    assert_eq!(entry.policy(), ModulePolicy::Ignore);
                 }
                 _ => {}
             }
@@ -209,6 +224,55 @@ mod tests {
 
         // Cleanup
         tmp.purge_path(true)?;
+        Ok(())
+    }
+
+    #[test]
+    fn test_new_from_dir() -> Result<()> {
+        // Create temp directory
+        let tmp = AbsPath::new_tmp("test_new_from_dir");
+        tmp.create_dir()?;
+        let _guard = purge_path_even_on_panic(&tmp);
+
+        // Create test files
+        let file1 = tmp.joins(&["file1.txt"]);
+        let file2 = tmp.joins(&["file2.txt"]);
+        let subdir = tmp.joins(&["subdir"]);
+        let file3 = subdir.joins(&["file3.txt"]);
+        let file4 = subdir.joins(&["file4.txt"]);
+        let empty_dir = tmp.joins(&["empty_dir"]);
+
+        file1.create_file(false)?;
+        file2.create_file(false)?;
+        subdir.create_dir()?;
+        file3.create_file(false)?;
+        file4.create_file(false)?;
+        empty_dir.create_dir()?;
+
+        // Create module from directory
+        let module = Module::new_from_dir(&tmp, ModulePolicy::NotDiff)?;
+
+        // Should contain all files (including nested), but NOT directories
+        assert_eq!(module.entries().len(), 4);
+
+        // Collect paths for verification
+        let paths: Vec<String> = module
+            .entries()
+            .iter()
+            .map(|e| e.path().to_str_lossy())
+            .collect();
+
+        // Verify all files are present with correct policy
+        assert!(paths.contains(&"file1.txt".to_string()));
+        assert!(paths.contains(&"file2.txt".to_string()));
+        assert!(paths.contains(&RelPath::from("subdir").joins(&["file3.txt"]).to_str_lossy()));
+        assert!(paths.contains(&RelPath::from("subdir").joins(&["file4.txt"]).to_str_lossy()));
+
+        // Verify all entries have Track policy
+        for entry in module.entries() {
+            assert_eq!(entry.policy(), ModulePolicy::NotDiff);
+        }
+
         Ok(())
     }
 }

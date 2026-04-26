@@ -105,7 +105,7 @@ kde-plasma
 - [x] ~move `compile.sh` file into `builds/` itself (tweak logic to make it still work + .gitignore fix)~
 - [ ] think of proper operations for modules:
     - [ ] merge 2 modules (aka resolve 2 modules, and then make sure there are no duplicated paths once all normalized)
-    - [ ] easy way to create module from a directory (aka use that dir as base, and get all relative paths within it)
+    - [x] easy way to create module from a directory (aka use that dir as base, and get all relative paths within it)
     - [ ] interesect 2 modules
     - [ ] NOTE: consider them all need to get the result istantly, since Modules lose abspath information, required to canonicalize!
 
