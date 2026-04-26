@@ -67,7 +67,6 @@ kde-plasma
     - Or they might just be for dangerous operations, aka probably only for all fs operations
     - I could even log crashes potentially?
 
-
 - add versions:
     - use cargo OWN version (see `src/main/version.rs` for an easy example)
     - keep version `0.1.0` until i start compiling the first binaries
@@ -98,14 +97,17 @@ kde-plasma
 - [x] ~add function in `fs` module to do buffered reads (`BufReader` seems to implement a `.lines()` method!!!)~
 - [x] ~required way to convert `AbsPath` and `RelPath` to String (best idea: use TryFrom and an error variant!)~
 - [x] ~`resolve` func needs to be careful of duplicates by equivalent names (.config/nvim vs .config/nvim/)~
-- [ ] `resolve_and_merge` function or smt, to allow resolving multiple Modules, and to merge results into a single module
-- [ ] `resolve_and_merge` add test
 - [x] ~make sure to remove all print from all tests and code! just brutally grep to find them all!~
 - [x] ~profile resolver might actually need to be a DFS instead of BFS!~
 - [x] ~profile resolver needs to actually add modules to stack too! otherwise breaks!~
 - [x] ~make cycle detection more powerful and detect 1 full cycle, for way better error msg! (use `Three-colors DFS`)~
 - [x] ~make errors actually be a struct variant (aka {io: ..., path: ...} instead of (ioError,AbsPath)~
 - [x] ~move `compile.sh` file into `builds/` itself (tweak logic to make it still work + .gitignore fix)~
+- [ ] think of proper operations for modules:
+    - [ ] merge 2 modules (aka resolve 2 modules, and then make sure there are no duplicated paths once all normalized)
+    - [ ] easy way to create module from a directory (aka use that dir as base, and get all relative paths within it)
+    - [ ] interesect 2 modules
+    - [ ] NOTE: consider them all need to get the result istantly, since Modules lose abspath information, required to canonicalize!
 
 ### long term todos
 
