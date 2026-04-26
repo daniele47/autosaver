@@ -36,7 +36,7 @@ Copy-based dotfiles tracking cli, written in rust
 - [x] ~add filter to `list_files`~
 - [x] ~add more filters (symlinks only and dirs only?)~
 - [x] ~rename crate to `autosaver`~
-- [ ] rename repo name to `autosaver` (both on github and codeberg!)
+- [x] ~rename repo name to `autosaver`~
 - [x] ~grep -r to find all `dotfiles / dotfiles-rust` and replace them with `autosaver`~
 - [ ] add the inverse of `read_lines()` to write line by line
 
@@ -63,7 +63,10 @@ Copy-based dotfiles tracking cli, written in rust
     - Or they might just be for dangerous operations, aka probably only for all fs operations
     - I could even log crashes potentially?
 
-- make the final script store things in $HOME dir, so that the entire dir can be tracked without any issue whatsoever
-    - downloaded rust binary: `.cache/autosaver/...`
-    - file with defaults to use if nothing else is specified `.config/autosaver/...`
-        - NOTE: might be dangerous! Do i want it? if i do, maybe it should show a conferm prompt? Idk, think about it!
+- make `autosaver` compatible with all sort of syncing mecchanism
+    - do i need to store binary version for any reason? or am i ok with always downloading latest? prolly latest, as that fixes bugs!
+    - make the final script store things in $HOME dir, so that the entire dir can be tracked without any issue whatsoever
+        - downloaded rust binary: `.cache/autosaver/...`
+        - file with defaults to use if nothing else is specified `.config/autosaver/...`
+            - NOTE: might be dangerous! Do i want it? if i do, maybe it should show a conferm prompt? Idk, think about it!
+
