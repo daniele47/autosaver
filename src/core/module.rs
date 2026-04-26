@@ -82,8 +82,10 @@ impl Module {
         &self.entries
     }
 
-    fn cleanup_paths(paths: Vec<(AbsPath, ModulePolicy)>, base: &AbsPath) -> Result<Self> {
-        let mut values = HashMap::<String, (AbsPath, ModulePolicy)>::new();
+    fn cleanup_paths(paths: Vec<(AbsPath, AbsPath, ModulePolicy)>) -> Result<Self> {
+        // Note: first abspath is the full path, second is the path prefix!
+
+        let mut values = HashMap::<String, (AbsPath, AbsPath, ModulePolicy)>::new();
         let mut entries = vec![];
 
         // make sure files are unique BASED on canonicalized path
@@ -92,26 +94,26 @@ impl Module {
             match values.entry(path_str) {
                 Entry::Occupied(mut entry) => {
                     let old = entry.get();
-                    if path.1.priority() < old.1.priority() {
-                        entry.insert((path.0, path.1));
+                    if path.2.priority() < old.2.priority() {
+                        entry.insert(path);
                     }
                 }
                 Entry::Vacant(entry) => {
-                    entry.insert((path.0, path.1));
+                    entry.insert(path);
                 }
             }
         }
 
         // collect into proper result type
-        for (_, (path, policy)) in values {
-            let entry = ModuleEntry::new(path.to_relative(base)?, policy);
+        for (_, (path, base, policy)) in values {
+            let entry = ModuleEntry::new(path.to_relative(&base)?, policy);
             entries.push(entry);
         }
 
         Ok(Self::new(entries))
     }
 
-    fn resolve_module(&self, base: &AbsPath) -> Result<Vec<(AbsPath, ModulePolicy)>> {
+    fn resolve_module(&self, base: &AbsPath) -> Result<Vec<(AbsPath, AbsPath, ModulePolicy)>> {
         let mut paths = vec![];
         for raw_entry in &self.entries {
             let raw_abs_path = raw_entry.path.to_absolute(base);
@@ -124,13 +126,13 @@ impl Module {
                     let all_files = raw_abs_path.all_files()?;
                     for f in all_files {
                         if f.metadata()?.is_file() {
-                            files.push((f, raw_entry.policy));
+                            files.push((f, base.clone(), raw_entry.policy));
                         }
                     }
                 }
                 // if path is a file, collect the file itself only
                 else if metadata.is_file() {
-                    files.push((raw_abs_path, raw_entry.policy()));
+                    files.push((raw_abs_path, base.clone(), raw_entry.policy()));
                 }
                 paths.extend(files);
             }
@@ -142,9 +144,18 @@ impl Module {
     ///
     /// This guarantees the result will be sorted based on lossy path string!
     pub fn resolve(&self, base: &AbsPath) -> Result<Self> {
-        let mut res = Self::cleanup_paths(self.resolve_module(base)?, base)?;
+        let mut res = Self::cleanup_paths(self.resolve_module(base)?)?;
         res.sort();
         Ok(res)
+    }
+
+    /// Takes two modules, resolves them and merges them by removing duplicated canonicalized paths.
+    ///
+    /// This guarantees the result will be sorted based on lossy path string!
+    pub fn resolve_merge(&self, base: &AbsPath, oth: &Self, oth_base: &AbsPath) -> Result<Self> {
+        let res1 = self.resolve(base)?;
+        let res2 = oth.resolve(oth_base)?;
+        todo!()
     }
 
     fn sort(&mut self) {
