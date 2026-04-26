@@ -232,4 +232,64 @@ mod tests {
         tmp.purge_path(true)?;
         Ok(())
     }
+
+    #[test]
+    fn test_merge_bases() -> Result<()> {
+        // Create temp directory
+        let tmp = AbsPath::new_tmp("test_merge_bases");
+        tmp.create_dir()?;
+        let _guard = purge_path_even_on_panic(&tmp);
+
+        // Create directories and files
+        let base1 = tmp.joins(&["home"]);
+        let base2 = tmp.joins(&["backup"]);
+        let file1_base1 = base1.joins(&["only_in_home.txt"]);
+        let file2_base1 = base1.joins(&["in_both.txt"]);
+        let subdir_base1 = base1.joins(&["subdir"]);
+        let file3_base1 = subdir_base1.joins(&["nested_home.txt"]);
+        let file4_base1 = subdir_base1.joins(&["nested2.txt"]);
+        let file1_base2 = base2.joins(&["only_in_backup.txt"]);
+        let file2_base2 = base2.joins(&["in_both.txt"]);
+        let subdir_base2 = base2.joins(&["subdir"]);
+        let file3_base2 = subdir_base2.joins(&["nested_backup.txt"]);
+        let file4_base2 = subdir_base2.joins(&["nested2.txt"]);
+        base1.create_dir()?;
+        base2.create_dir()?;
+        subdir_base1.create_dir()?;
+        subdir_base2.create_dir()?;
+        file1_base1.create_file(false)?;
+        file1_base2.create_file(false)?;
+        file2_base1.create_file(false)?;
+        file2_base2.create_file(false)?;
+        file3_base1.create_file(false)?;
+        file3_base2.create_file(false)?;
+        file4_base1.create_file(false)?;
+        file4_base2.create_file(false)?;
+
+        // Create module that tracks paths
+        let module = Module::new(vec![
+            ModuleEntry::new(RelPath::from("in_neither.txt"), ModulePolicy::Track),
+            ModuleEntry::new(RelPath::from("only_in_home.txt"), ModulePolicy::Ignore),
+            ModuleEntry::new(RelPath::from("only_in_backup.txt"), ModulePolicy::NotDiff),
+            ModuleEntry::new(RelPath::from("in_both.txt"), ModulePolicy::Track),
+            ModuleEntry::new(RelPath::from("subdir"), ModulePolicy::Ignore),
+        ]);
+
+        // Merge bases
+        let merged = module.merge_bases(&base1, &base2)?;
+        assert_eq!(merged.entries().len(), 6);
+
+        // Collect paths for verification
+        let paths: HashMap<_, _> = merged
+            .entries()
+            .iter()
+            .map(|e| (e.path().to_str_lossy(), e.policy()))
+            .collect();
+
+        assert_eq!(paths.get("in_neither.txt".into()), None);
+        assert_eq!(paths.get("only_in_home.txt".into()), Some(&ModulePolicy::Ignore));
+        assert_eq!(paths.get("only_in_backup.txt".into()), Some(&ModulePolicy::NotDiff));
+
+        Ok(())
+    }
 }

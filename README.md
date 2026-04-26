@@ -103,7 +103,7 @@ kde-plasma
 - [x] ~make cycle detection more powerful and detect 1 full cycle, for way better error msg! (use `Three-colors DFS`)~
 - [x] ~make errors actually be a struct variant (aka {io: ..., path: ...} instead of (ioError,AbsPath)~
 - [x] ~move `compile.sh` file into `builds/` itself (tweak logic to make it still work + .gitignore fix)~
-- [ ] modules require only two ops: `resolve` (to turn raw into proper) and `merge_bases` (to sync same module with different bases)
+- [x] modules require only two ops: `resolve` (to turn raw into proper) and `merge_bases` (to sync same module with different bases)
 - [ ] add a filter closure on `all_files` operation in `fs` module
 
 
