@@ -23,6 +23,9 @@ pub struct RelPath {
 }
 
 impl AbsPath {
+    pub const FILTER_FILES: fn(&AbsPath) -> bool = Self::filter_files;
+    pub const FILTER_ALL: fn(&AbsPath) -> bool = Self::filter_all;
+
     /// Creates new AbsPath from an absolute path.
     pub fn new(path: PathBuf) -> Self {
         assert!(path.is_absolute());
@@ -246,6 +249,13 @@ impl AbsPath {
             .collect())
     }
 
+    fn filter_files(path: &AbsPath) -> bool {
+        path.metadata().map_or(false, |m| m.is_file())
+    }
+    fn filter_all(_: &AbsPath) -> bool {
+        true
+    }
+
     /// List all files recursively inside a directory.
     ///
     /// Note: this will get ALL files, even directories, symlinks, all rust can get.
@@ -255,7 +265,10 @@ impl AbsPath {
     /// found but yet to be explored, and a hashset of all paths explored until now, canonicalized.
     /// The hash set allows to easily check if a new directory was already explored, and if so,
     /// avoid exploring it again. This easily resolves all symlink loops that could be created.
-    pub fn all_files(&self) -> Result<BTreeSet<AbsPath>> {
+    pub fn all_files<F>(&self, filter: F) -> Result<BTreeSet<AbsPath>>
+    where
+        F: Fn(&AbsPath) -> bool,
+    {
         let mut files = BTreeSet::new();
         let mut norm_files = HashSet::new();
         let mut stack = Vec::new();
@@ -265,7 +278,7 @@ impl AbsPath {
         // avoid endless recursion if there are symlinks creating endless loops
         while let Some(item) = stack.pop() {
             let dir_files = item.list_files()?;
-            for dir_file in &dir_files {
+            for dir_file in dir_files.iter().filter(|f| filter(f)) {
                 let canon = dir_file.canonicalize()?;
                 if norm_files.contains(&canon) {
                     continue;
@@ -532,7 +545,7 @@ mod tests {
         let root = setup_test_directory()?;
         let _guard = purge_path_even_on_panic(&root);
 
-        let all_paths = root.all_files()?;
+        let all_paths = root.all_files(AbsPath::FILTER_ALL)?;
         let path_names: HashSet<_> = all_paths
             .iter()
             .filter_map(|f| f.path.file_name().and_then(|name| name.to_str()))

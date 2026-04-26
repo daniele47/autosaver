@@ -114,11 +114,8 @@ impl Module {
 
                 // if path is directory, collect all files within the directory
                 if metadata.is_dir() {
-                    let all_files = raw_abs_path.all_files()?;
-                    for f in all_files {
-                        if f.metadata()?.is_file() {
-                            files.push((f, base.clone(), raw_entry.policy));
-                        }
+                    for f in raw_abs_path.all_files(AbsPath::FILTER_FILES)? {
+                        files.push((f, base.clone(), raw_entry.policy));
                     }
                 }
                 // if path is a file, collect the file itself only
@@ -287,8 +284,14 @@ mod tests {
             .collect();
 
         assert_eq!(paths.get("in_neither.txt".into()), None);
-        assert_eq!(paths.get("only_in_home.txt".into()), Some(&ModulePolicy::Ignore));
-        assert_eq!(paths.get("only_in_backup.txt".into()), Some(&ModulePolicy::NotDiff));
+        assert_eq!(
+            paths.get("only_in_home.txt".into()),
+            Some(&ModulePolicy::Ignore)
+        );
+        assert_eq!(
+            paths.get("only_in_backup.txt".into()),
+            Some(&ModulePolicy::NotDiff)
+        );
 
         Ok(())
     }
