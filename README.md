@@ -1,4 +1,4 @@
-# dotfiles-rust
+# autosaver
 
 Copy-based dotfiles tracking cli, written in rust
 
@@ -37,7 +37,8 @@ Copy-based dotfiles tracking cli, written in rust
 - [x] ~add more filters (symlinks only and dirs only?)~
 - [x] ~rename crate to `autosaver`~
 - [ ] rename repo name to `autosaver` (both on github and codeberg!)
-- [ ] grep -r to find all `dotfiles / dotfiles-rust` and replace them with `autosaver`
+- [x] ~grep -r to find all `dotfiles / dotfiles-rust` and replace them with `autosaver`~
+- [ ] add the inverse of `read_lines()` to write line by line
 
 ## long term items
 

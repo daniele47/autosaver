@@ -57,3 +57,12 @@ kde-plasma
 
 - For example: if `neovim`, `tmux`, `plasma-desktop` are possible modules, `minimal-cli` or `kde-linux` are possible 
   profiles and minimal-cli would only have neovim and tmux, for example
+
+# terminology
+
+- `dotfiles` vs `autosaver`:
+    - dotfiles: it refers to the directory that will make use of this autosaver binary to actually track system config files
+    - autosaver: it refers to this rust crate and to the rust binary (and to the bash wrapper)
+- `profile` vs `module`:
+    - profile: (also called composite profile) is a list of profiles or modules
+    - module: it is techinically a profile with itself as the only entry, but it also has different config file format

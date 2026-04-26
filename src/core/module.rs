@@ -1,4 +1,4 @@
-//! This module implements structs and methods to handle dotfiles modules.
+//! This module implements structs and methods to handle autosaver modules.
 
 use std::collections::{HashMap, HashSet, hash_map::Entry};
 

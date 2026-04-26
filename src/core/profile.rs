@@ -1,4 +1,4 @@
-//! This module implements structs and methods to handle dotfiles profiles.
+//! This module implements structs and methods to handle autosaver profiles.
 
 use std::collections::HashSet;
 
@@ -13,7 +13,7 @@ pub enum ProfileType {
     Module,
 }
 
-/// Represents a dotfiles profile.
+/// Represents a autosaver profile.
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Profile {
     name: String,
