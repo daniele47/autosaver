@@ -4,7 +4,7 @@ use std::{
     collections::{BTreeSet, HashSet},
     env,
     fs::{self, File, Metadata},
-    io::{BufRead, BufReader},
+    io::{BufRead, BufReader, BufWriter, Write},
     path::PathBuf,
 };
 
@@ -318,6 +318,18 @@ impl AbsPath {
             })
         }))
     }
+
+    /// Buffered line by line write to file
+    ///
+    /// Returns a writer that implements `Write` and `BufWrite`, allowing efficient
+    /// line-by-line writing. The writer will be automatically flushed when dropped.
+    pub fn write_lines(&self) -> Result<impl Write> {
+        let file = File::create(&self.path).map_err(|e| Error::IoError {
+            io: e,
+            path: self.path.clone(),
+        })?;
+        Ok(BufWriter::new(file))
+    }
 }
 
 impl RelPath {
@@ -606,6 +618,66 @@ mod tests {
         // Try to purge non-empty directory without recursive flag (should fail)
         let result = root.purge_path(false);
         assert!(result.is_err());
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_read_write_lines() -> Result<()> {
+        let root = AbsPath::new_tmp("test_read_write_lines");
+        root.purge_path(true)?;
+        root.create_dir()?;
+        let _guard = purge_path_even_on_panic(&root);
+
+        let test_file = root.joins(&["test_read_write.txt"]);
+
+        // Test data to write
+        let lines_to_write = vec![
+            "🐛 Fixed the thing that wasn't broken (but now it is, will fix tomorrow)",
+            "sudo rm -rf /* --no-preserve-root  (jk jk... unless?)",
+            "TODO: actually implement this feature later™️",
+            "WHY DOES RUST BORROW CHECKER HATE ME??? I JUST WANT TO LIVE",
+            "if (it_works) { don't_touch_it(); } else { blame_the_intern(); }",
+            "Commit message: 'fixed stuff' (256 files changed, 1337 insertions, 420 deletions)",
+            "Pushed directly to main at 3am because YOLO 🔥",
+            "This comment will definitely not cause merge conflicts",
+            "I have no idea what I'm doing - but it compiles! 🦀",
+            "Last line, I promise. Please work in CI. Please. 🙏",
+        ];
+
+        // Write lines to file
+        {
+            let mut writer = test_file.write_lines()?;
+            for line in &lines_to_write {
+                writeln!(writer, "{}", line).map_err(|e| Error::IoError {
+                    io: e,
+                    path: test_file.path.clone(),
+                })?;
+            }
+        }
+
+        // Verify file exists and was created
+        assert!(test_file.exists());
+        assert!(test_file.metadata()?.is_file());
+
+        // Read lines back
+        let reader = test_file.read_lines()?;
+        let read_lines: Vec<String> = reader.collect::<Result<Vec<String>>>()?;
+
+        // Verify we read the correct number of lines
+        assert_eq!(read_lines.len(), lines_to_write.len());
+
+        // Verify content matches exactly
+        for (expected, actual) in lines_to_write.iter().zip(read_lines.iter()) {
+            assert_eq!(expected, actual, "Line content mismatch");
+        }
+
+        // Also test empty file case
+        let empty_file = root.joins(&["empty.txt"]);
+        empty_file.create_file(false)?;
+        let reader = empty_file.read_lines()?;
+        let empty_lines: Vec<String> = reader.collect::<Result<_>>()?;
+        assert!(empty_lines.is_empty());
 
         Ok(())
     }

@@ -38,8 +38,8 @@ Copy-based dotfiles tracking cli, written in rust
 - [x] ~rename crate to `autosaver`~
 - [x] ~rename repo name to `autosaver`~
 - [x] ~grep -r to find all `dotfiles / dotfiles-rust` and replace them with `autosaver`~
-- [ ] add the inverse of `read_lines()` to write line by line
-- [ ] add a test for `read_lines()` and `write_lines()`
+- [x] add the inverse of `read_lines()` to write line by line
+- [x] add a test for `read_lines()` and `write_lines()`
 
 ## long term items
 
