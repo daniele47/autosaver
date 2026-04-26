@@ -60,8 +60,8 @@ Copy-based dotfiles tracking cli, written in rust
     - I could even log crashes potentially?
 
 - make the final script store things in $HOME dir, so that the entire dir can be tracked without any issue whatsoever
-    - downloaded rust binary: `.cache/dotfiles-rust/...`
-    - file with defaults to use if nothing else is specified `.config/dotfiles-rust/...`
+    - downloaded rust binary: `.cache/autosaver/...`
+    - file with defaults to use if nothing else is specified `.config/autosaver/...`
         - NOTE: might be dangerous! Do i want it? if i do, maybe it should show a conferm prompt? Idk, think about it!
-    - NOTE: use `dotfiles-rust` for dirs, as `dotfiles` might easily collide!
 
+- rename crate to `autosaver`
