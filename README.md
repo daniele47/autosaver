@@ -35,6 +35,7 @@ Copy-based dotfiles tracking cli, written in rust
 - [x] ~modules require only two ops: `resolve` (to turn raw into proper) and `merge_bases` (to sync same module with different bases)~
 - [x] ~add filter to `list_files`~
 - [x] ~add more filters (symlinks only and dirs only?)~
+- [x] ~rename crate to `autosaver`~
 
 ## long term items
 
@@ -63,5 +64,3 @@ Copy-based dotfiles tracking cli, written in rust
     - downloaded rust binary: `.cache/autosaver/...`
     - file with defaults to use if nothing else is specified `.config/autosaver/...`
         - NOTE: might be dangerous! Do i want it? if i do, maybe it should show a conferm prompt? Idk, think about it!
-
-- rename crate to `autosaver`

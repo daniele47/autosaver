@@ -1,4 +1,4 @@
-use dotfiles_rust::core::{errors::Result, fs::AbsPath};
+use autosaver::core::{errors::Result, fs::AbsPath};
 
 fn main() -> Result<()> {
     let abs = AbsPath::from("/etc/passwd");
