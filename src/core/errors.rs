@@ -15,7 +15,7 @@ pub enum Error {
     InvalidPathString { path: PathBuf },
 
     /// Profile definition includes cycles.
-    ProfileCycle { name: String, child: String },
+    ProfileCycle { name: String, cycle: Vec<String> },
 
     /// Failure to load a profile
     ProfileNotLoaded { name: String, reason: String },
@@ -38,8 +38,14 @@ impl Display for Error {
             Error::InvalidPathString { path: p } => {
                 write!(f, "Invalid path string: {}", p.display())
             }
-            Error::ProfileCycle { name: n, child: c } => {
-                write!(f, "Profile '{n}' reaches a cycle from child '{c}'")
+            Error::ProfileCycle { name: n, cycle: c } => {
+                let cstr = c
+                    .iter()
+                    .chain(c.first())
+                    .map(|s| s.as_str())
+                    .collect::<Vec<_>>()
+                    .join(" → ");
+                write!(f, "Profile '{n}' reaches a cycle: {cstr}")
             }
             Error::ProfileNotLoaded { name: n, reason: r } => {
                 write!(f, "Profile '{n}' could not be loaded: {r}")
