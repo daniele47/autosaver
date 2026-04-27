@@ -1,7 +1,9 @@
 //! This module has utilities to parse all kind of profile configuration files.
 
-use crate::core::{module::Module, profile::Profile};
+use crate::core::{errors::Result, fs::LineReader, module::Module, profile::Profile};
 
+/// All possible kind of parsed configs.
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ParsedConfig {
     Profile(Profile),
     Module(Module),
@@ -14,16 +16,44 @@ enum RawKind {
 }
 
 struct RawItem {
-    line: u64,
+    line: usize,
     content: String,
     kind: RawKind,
 }
 
-struct RawConfig<I>
-where
-    I: Iterator<Item = RawItem>,
-{
-    items: I,
+fn parse_line(line: (usize, Result<String>)) -> Result<Option<RawItem>> {
+    let str = line.1?;
+    let line = line.0;
+    let content;
+    let kind;
+
+    // option line
+    if str.starts_with("/!") {
+        kind = RawKind::Option;
+        content = str[2..].trim().to_string();
+    }
+    // comment line
+    else if str.is_empty() || str.starts_with("/") {
+        return Ok(None);
+    }
+    // data line
+    else {
+        kind = RawKind::Data;
+        content = str[2..].trim().to_string();
+    }
+
+    Ok(Some(RawItem {
+        line,
+        content,
+        kind,
+    }))
+}
+
+fn parse(reader: impl LineReader) -> impl Iterator<Item = Result<RawItem>> {
+    reader
+        .into_iter()
+        .enumerate()
+        .filter_map(|i| parse_line(i).transpose())
 }
 
 // TO BE REMOVED ONCE ALL IS IMPLEMENTED:
