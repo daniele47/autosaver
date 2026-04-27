@@ -163,7 +163,6 @@ kde-plasma
 ```
 
 - autosaver: bash wrapper script to get rust binary (downloaded/compiled) and run it
-- .defaults: NOT TRACKED file to store default configurations, things like what module/profile to use by default
 - configs: all modules and profile configurations, one config x file
 - modules: simple list of files to track
 - profiles: groups of modules to apply sequentially
