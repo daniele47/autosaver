@@ -39,9 +39,9 @@ Copy-based dotfiles tracking cli, written in rust
 - [x] ~rename repo name to `autosaver`~
 - [x] ~grep -r to find all `dotfiles / dotfiles-rust` and replace them with `autosaver`~
 - [x] ~add the inverse of `read_lines()` to write line by line~
-- [x] ~add a test for `read_lines()` and `write_lines()`~
-- [ ] NOTE: `write_lines()` is not symmetrical with `read_lines()`. consider if you want write_lines to take in an iterator of lines instead!
-- [ ] yup, i indeed do not like the current `write_line()`, which does not have my own return type. think of way to integrate this nicely.
+- [ ] add a test for `read_lines()` and `write_lines()`
+- [x] ~NOTE: `write_lines()` is not symmetrical with `read_lines()`. consider if you want write_lines to take in an iterator of lines instead!~
+- [x] ~yup, i indeed do not like the current `write_line()`, which does not have my own return type. think of way to integrate this nicely.~
 
 ## long term items
 

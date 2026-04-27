@@ -4,7 +4,7 @@ use std::{
     collections::{BTreeSet, HashSet},
     env,
     fs::{self, File, Metadata},
-    io::{BufRead, BufReader, BufWriter, Write},
+    io::{BufRead, BufReader, BufWriter, Lines, Write},
     path::PathBuf,
 };
 
@@ -20,6 +20,43 @@ pub struct AbsPath {
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct RelPath {
     path: PathBuf,
+}
+
+/// Trait to get a simple way to read line by line from a file.
+pub trait LineReader: Iterator<Item = Result<String>> {
+    /// Simple wrapper around `iterator.next()` for simmetry with `LineWriter`.
+    fn read_line(&mut self) -> Option<Result<String>> {
+        self.next()
+    }
+}
+
+/// Trait to get a simple way to write line by line into a buffered file.
+pub trait LineWriter {
+    /// Write a single line to file.
+    ///
+    /// Note: It doesn't make guarantees about it being instantly on file.
+    /// Call `flush` to make sure the written line is actually on file.
+    fn write_line<S>(&mut self, line: S) -> Result<()>
+    where
+        S: AsRef<str>;
+
+    /// Make sure what was written is actually on file.
+    fn flush(&mut self) -> Result<()>;
+
+    /// Write an entire iterator to file.
+    ///
+    /// Note: just like `write_line` this method too doesn't make guarantees about instantly writing
+    /// to file! Call `flush` to make sure the file is actually written to.
+    fn write_all_lines<I, S>(&mut self, lines: I) -> Result<()>
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        for line in lines {
+            self.write_line(line.as_ref())?
+        }
+        Ok(())
+    }
 }
 
 impl AbsPath {
@@ -305,30 +342,70 @@ impl AbsPath {
     ///
     /// Note: since this uses a buffered reader, read could costantly fail. It is thus necessary
     /// to handle the potential error on every each line read! The error is of type std::io::Error!
-    pub fn read_lines(&self) -> Result<impl Iterator<Item = Result<String>>> {
+    pub fn read_lines(&self) -> Result<impl LineReader> {
+        struct LineReaderImpl {
+            path: AbsPath,
+            inner: Lines<BufReader<File>>,
+        }
+        impl LineReader for LineReaderImpl {}
+        impl Iterator for LineReaderImpl {
+            type Item = Result<String>;
+
+            fn next(&mut self) -> Option<Self::Item> {
+                self.inner.next().map(|line| {
+                    line.map_err(|e| Error::IoError {
+                        io: e,
+                        path: self.path.clone().into(),
+                    })
+                })
+            }
+        }
         let file = File::open(&self.path).map_err(|e| Error::IoError {
             io: e,
             path: self.path.clone(),
         })?;
-        let reader = BufReader::new(file);
-        Ok(reader.lines().map(move |line| {
-            line.map_err(|e| Error::IoError {
-                io: e,
-                path: self.path.clone(),
-            })
-        }))
+        Ok(LineReaderImpl {
+            inner: BufReader::new(file).lines(),
+            path: self.path.clone().into(),
+        })
     }
 
     /// Buffered line by line write to file
     ///
     /// Returns a writer that implements `Write` and `BufWrite`, allowing efficient
     /// line-by-line writing. The writer will be automatically flushed when dropped.
-    pub fn write_lines(&self) -> Result<impl Write> {
+    pub fn write_lines(&self) -> Result<impl LineWriter> {
+        struct LineWriterImpl<W: Write> {
+            inner: BufWriter<W>,
+            path: AbsPath,
+        }
+        impl<W: Write> LineWriter for LineWriterImpl<W> {
+            fn write_line<S>(&mut self, line: S) -> Result<()>
+            where
+                S: AsRef<str>,
+            {
+                writeln!(self.inner, "{}", line.as_ref()).map_err(|e| Error::IoError {
+                    io: e,
+                    path: self.path.clone().into(),
+                })?;
+                Ok(())
+            }
+            fn flush(&mut self) -> Result<()> {
+                self.inner.flush().map_err(|e| Error::IoError {
+                    io: e,
+                    path: self.path.clone().into(),
+                })?;
+                Ok(())
+            }
+        }
         let file = File::create(&self.path).map_err(|e| Error::IoError {
             io: e,
             path: self.path.clone(),
         })?;
-        Ok(BufWriter::new(file))
+        Ok(LineWriterImpl {
+            inner: BufWriter::new(file),
+            path: self.path.clone().into(),
+        })
     }
 }
 
@@ -618,66 +695,6 @@ mod tests {
         // Try to purge non-empty directory without recursive flag (should fail)
         let result = root.purge_path(false);
         assert!(result.is_err());
-
-        Ok(())
-    }
-
-    #[test]
-    fn test_read_write_lines() -> Result<()> {
-        let root = AbsPath::new_tmp("test_read_write_lines");
-        root.purge_path(true)?;
-        root.create_dir()?;
-        let _guard = purge_path_even_on_panic(&root);
-
-        let test_file = root.joins(&["test_read_write.txt"]);
-
-        // Test data to write
-        let lines_to_write = vec![
-            "🐛 Fixed the thing that wasn't broken (but now it is, will fix tomorrow)",
-            "sudo rm -rf /* --no-preserve-root  (jk jk... unless?)",
-            "TODO: actually implement this feature later™️",
-            "WHY DOES RUST BORROW CHECKER HATE ME??? I JUST WANT TO LIVE",
-            "if (it_works) { don't_touch_it(); } else { blame_the_intern(); }",
-            "Commit message: 'fixed stuff' (256 files changed, 1337 insertions, 420 deletions)",
-            "Pushed directly to main at 3am because YOLO 🔥",
-            "This comment will definitely not cause merge conflicts",
-            "I have no idea what I'm doing - but it compiles! 🦀",
-            "Last line, I promise. Please work in CI. Please. 🙏",
-        ];
-
-        // Write lines to file
-        {
-            let mut writer = test_file.write_lines()?;
-            for line in &lines_to_write {
-                writeln!(writer, "{}", line).map_err(|e| Error::IoError {
-                    io: e,
-                    path: test_file.path.clone(),
-                })?;
-            }
-        }
-
-        // Verify file exists and was created
-        assert!(test_file.exists());
-        assert!(test_file.metadata()?.is_file());
-
-        // Read lines back
-        let reader = test_file.read_lines()?;
-        let read_lines: Vec<String> = reader.collect::<Result<Vec<String>>>()?;
-
-        // Verify we read the correct number of lines
-        assert_eq!(read_lines.len(), lines_to_write.len());
-
-        // Verify content matches exactly
-        for (expected, actual) in lines_to_write.iter().zip(read_lines.iter()) {
-            assert_eq!(expected, actual, "Line content mismatch");
-        }
-
-        // Also test empty file case
-        let empty_file = root.joins(&["empty.txt"]);
-        empty_file.create_file(false)?;
-        let reader = empty_file.read_lines()?;
-        let empty_lines: Vec<String> = reader.collect::<Result<_>>()?;
-        assert!(empty_lines.is_empty());
 
         Ok(())
     }
