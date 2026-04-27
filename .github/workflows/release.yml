@@ -84,6 +84,14 @@ jobs:
         if: matrix.platform.use_cross
         run: cargo install cross --git https://github.com/cross-rs/cross
 
+      - name: Test with cross
+        if: matrix.platform.use_cross
+        run: cross test --release --target ${{ matrix.platform.target }}
+
+      - name: Test natively
+        if: ${{ !matrix.platform.use_cross }}
+        run: cargo test --release --target ${{ matrix.platform.target }}
+
       - name: Build with cross
         if: matrix.platform.use_cross
         run: cross build --release --target ${{ matrix.platform.target }}
