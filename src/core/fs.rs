@@ -715,7 +715,7 @@ mod tests {
 
         // Read lines back
         let reader = test_file.read_lines()?;
-        let lines_out: Vec<String> = reader.map(|line| line.unwrap()).collect();
+        let lines_out: Vec<String> = reader.map(|line| line).collect::<Result<_>>()?;
 
         assert_eq!(lines_in, lines_out);
 
