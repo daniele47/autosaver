@@ -67,21 +67,37 @@ NOTE: - ignore for now, start tracking higher level features added and bugs solv
 
 ## long term items
 
-### cli items
+### docs/help
 
-- [ ] add `cleanup` action which acts like untracked FOR ALL MODULES + all possible cleanups,
-      such as allow deleting backup dirs without a respective config file, check there are NO
-      symlinks in the dotfiles repo, ...
-- [ ] add `help` action to get direct help on possible args and flags to the cli
-- [ ] add `doc` action to print an entire manual with all things to know about the script
-- [ ] add `version`, but no versioning system. NO backward compatibility! version will just be useful for checks on the binary!
+- Flag or subcommand? Current idea: 
+    - `--help` flag for just a simplified list of commands and flags (`--help` NEEDS to be appliable to ALL subcommands too, and when cli parsing fails!)
+    - `docs` command (with subcommands for each section) for a more throughout explanation of everything.
+
+- Create docs for:
+    - General explanations of how the whole dotfiles system works (modules, profiles, backup dirs, ...)
+    - Where dotifles required for this script are placed:
+        - `.config/autosaver` for various defaults (like the default profile)
+    - Configuration files format (general format rules and all rules specific to profile types: `module`, `profile`, ...)
+
+- Specify profile to apply operation to:
+    - allow a command to store said default in `.config` 
+        - NOTE: this should probably always prompt, asking if said profile is ok
+        - NOTE: this is ALWAYS overriden by all other specified profiles via cli
+    - have a way to specify the profile
+    - have a flag to specify ALL profiles (or even better: assume it's all, when no specific profile is passed!)
+
+- Subcommands:
+    - `save` to apply save action on specified profile
+    - `restore` to apply restore action on specified profile
+    - `cleanup` action which acts like untracked FOR ALL MODULES + all possible cleanups,
+    - `set` to set various configuration option ONLY on the current machine
+    - `show` to show all configuration options on the current machine
+    - `doc` action to print an entire manual with all things to know about the script
+    - `version`, but no versioning system. NO backward compatibility! version will just be useful for checks on the binary!
 
 ### various items
 
-- [ ] have an `--all` flag to specify ALL profiles (or even better: assume it's all, when no specific profile is passed!)
-- [ ] allow customizing the `HOME` directory to apply backup to
-
-### ideas
+- allow customizing the `HOME` directory to apply backup to
 
 - logs for every operation?
     - I could have them shoved into .logs dir, and one file x command run with timestamp so can be easily ordered

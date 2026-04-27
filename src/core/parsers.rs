@@ -1,3 +1,1 @@
-// TODO:
-// - add docs
-// - add parsers for modules and profiles (implement them as methods on Profile and on Modules)
+//! Module to parse all kind of profile configuration files.
