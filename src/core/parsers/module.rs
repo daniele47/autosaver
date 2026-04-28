@@ -84,7 +84,7 @@ mod tests {
                 let entries = module.entries();
                 assert_eq!(entries.len(), 2);
                 assert_eq!(entries[0].path().to_str_lossy(), "src/lib.rs");
-                assert_eq!(entries[0].policy(), ModulePolicy::default());
+                assert_eq!(entries[0].policy(), ModulePolicy::Track);
                 assert_eq!(entries[1].path().to_str_lossy(), "target/");
                 assert_eq!(entries[1].policy(), ModulePolicy::Ignore);
             }

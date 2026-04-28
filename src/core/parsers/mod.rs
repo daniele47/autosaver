@@ -98,3 +98,62 @@ impl RawParser {
             .filter_map(|i| Self::parse_line(i).transpose())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::collections::VecDeque;
+
+    use super::*;
+
+    struct TestReader(VecDeque<Result<String>>);
+
+    impl Iterator for TestReader {
+        type Item = Result<String>;
+
+        fn next(&mut self) -> Option<Self::Item> {
+            self.0.pop_front()
+        }
+    }
+
+    impl LineReader for TestReader {}
+
+    #[test]
+    fn test_raw_parser() -> Result<()> {
+        let lines: VecDeque<Result<String>> = VecDeque::from([
+            Ok("/! type module".to_string()),
+            Ok("/ this is a comment".to_string()),
+            Ok("src/lib.rs".to_string()),
+            Ok("   /! policy track   ".to_string()),
+            Ok("   ".to_string()),
+            Ok("target/".to_string()),
+        ]);
+        let reader = TestReader(lines);
+
+        let items: Vec<RawItem> = RawParser::parse(reader).collect::<Result<Vec<_>>>()?;
+
+        print!("{items:#?}");
+        assert_eq!(items.len(), 4);
+
+        // First: option line
+        assert_eq!(items[0].line, 1);
+        assert_eq!(items[0].content, "type module");
+        assert!(matches!(items[0].kind, RawKind::Option));
+
+        // Second: data line (comment skipped)
+        assert_eq!(items[1].line, 3);
+        assert_eq!(items[1].content, "src/lib.rs");
+        assert!(matches!(items[1].kind, RawKind::Data));
+
+        // Third: option line with whitespace trimmed
+        assert_eq!(items[2].line, 4);
+        assert_eq!(items[2].content, "/! policy track");
+        assert!(matches!(items[2].kind, RawKind::Data));
+
+        // Fourth: data line (empty line skipped)
+        assert_eq!(items[3].line, 6);
+        assert_eq!(items[3].content, "target/");
+        assert!(matches!(items[3].kind, RawKind::Data));
+
+        Ok(())
+    }
+}
