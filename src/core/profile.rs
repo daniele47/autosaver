@@ -2,15 +2,18 @@
 
 use std::collections::HashSet;
 
-use crate::core::errors::{Error, Result};
+use crate::core::{
+    errors::{Error, Result},
+    module::Module,
+};
 
 /// Represents the profile type.
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum ProfileType {
     /// Profile storing list of profiles.
     Composite,
     /// Special leaf profile with no children.
-    Module,
+    Module(Module),
 }
 
 /// Represents a autosaver profile.
@@ -30,7 +33,7 @@ impl Profile {
     /// Create new profile.
     pub fn new(name: String, entries: Vec<String>, ptype: ProfileType) -> Self {
         match ptype {
-            ProfileType::Module => assert!(entries.is_empty()),
+            ProfileType::Module(_) => assert!(entries.is_empty()),
             _ => {}
         }
         Self {
@@ -60,7 +63,7 @@ impl Profile {
         for child in &self.entries {
             let child_profile = loader.load(child);
             if let Ok(cp) = child_profile {
-                if cp.ptype != ProfileType::Module {
+                if !matches!(cp.ptype, ProfileType::Module(_)) {
                     return false;
                 }
             } else {
@@ -110,7 +113,7 @@ impl Profile {
 
             // check if leaf profile
             let item_profile = loader.load(&item_name)?;
-            if item_profile.ptype == ProfileType::Module {
+            if matches!(item_profile.ptype, ProfileType::Module(_)) {
                 entries.push(item_name.clone());
                 visited.insert(item_name);
                 continue;
@@ -125,7 +128,7 @@ impl Profile {
         }
 
         // assert resolved profile is indeed resolved
-        let res = Self::new(self.name.clone(), entries, self.ptype);
+        let res = Self::new(self.name.clone(), entries, self.ptype.clone());
         assert!(res.is_resolved(loader));
         Ok(res)
     }
@@ -147,6 +150,7 @@ mod tests {
             let mut loader = Self {
                 profiles: HashMap::new(),
             };
+            let empty_module = Module::empty();
             let mut profiles = vec![
                 Profile::new(
                     "root".to_string(),
@@ -172,10 +176,26 @@ mod tests {
                     vec!["module3".to_string()],
                     ProfileType::Composite,
                 ),
-                Profile::new("module1".to_string(), vec![], ProfileType::Module),
-                Profile::new("module2".to_string(), vec![], ProfileType::Module),
-                Profile::new("module3".to_string(), vec![], ProfileType::Module),
-                Profile::new("module4".to_string(), vec![], ProfileType::Module),
+                Profile::new(
+                    "module1".to_string(),
+                    vec![],
+                    ProfileType::Module(empty_module.clone()),
+                ),
+                Profile::new(
+                    "module2".to_string(),
+                    vec![],
+                    ProfileType::Module(empty_module.clone()),
+                ),
+                Profile::new(
+                    "module3".to_string(),
+                    vec![],
+                    ProfileType::Module(empty_module.clone()),
+                ),
+                Profile::new(
+                    "module4".to_string(),
+                    vec![],
+                    ProfileType::Module(empty_module.clone()),
+                ),
             ];
             profiles.extend(extra_profiles);
             for p in profiles {

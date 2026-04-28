@@ -66,6 +66,11 @@ impl Module {
         Self { entries }
     }
 
+    /// Create new empty Module. Useful for tests
+    pub fn empty() -> Self {
+        Self::new(vec![])
+    }
+
     /// Get all entries.
     pub fn entries(&self) -> &[ModuleEntry] {
         &self.entries

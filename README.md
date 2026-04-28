@@ -73,7 +73,11 @@ NOTE: - ignore for now, start tracking higher level features added and bugs solv
 - [x] yup, i indeed do not like the current `write_line()`, which does not have my own return type. think of way to integrate this nicely.
 - [ ] add tests for `parsers` (one x each parser type)
 - [ ] should avoid splitting profile types, and just have them all in Profile somehow!
+- [ ] rework profile:
+    - [ ] move list of entries into new struct `Composite`
+    - [ ] that way `Profile` now a struct that stores name + profileType (enum with variants contained within)
 - [ ] move profile name validity checker to inside `Profile` instead of hardcoded in parser
+- [ ] go back to using tuple variants in error type
 
 ## long term items
 
