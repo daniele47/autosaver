@@ -4,7 +4,7 @@ use crate::core::{errors::Result, fs::LineReader, module::Module, profile::Profi
 
 /// All possible kind of parsed configs.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum ParsedConfig {
+pub enum ConfigParser {
     Profile(Profile),
     Module(Module),
 }
@@ -23,7 +23,8 @@ struct RawItem {
     kind: RawKind,
 }
 
-impl ParsedConfig {
+impl ConfigParser {
+    /// Parse config file line by line into proper struct.
     pub fn parse(reader: impl LineReader) -> Result<Self> {
         let mut raw_reader = parse(reader);
         if let Some(first) = raw_reader.next() {

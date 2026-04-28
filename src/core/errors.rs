@@ -17,8 +17,14 @@ pub enum Error {
     /// Profile definition includes cycles.
     ProfileCycle { name: String, cycle: Vec<String> },
 
-    /// Failure to load a profile.
-    ProfileNotLoaded { name: String, reason: String },
+    /// Profile does not exist.
+    ProfileLoadingFailure { name: String, reason: String },
+
+    /// Config file doesn't specify the profile type.
+    MissingProfileType { name: String },
+
+    /// Invalid option line in config file.
+    InvalidOptionLine { name: String, line: (usize, String) },
 }
 
 /// Result type for the entire crate, using `Error` error type.
@@ -47,8 +53,16 @@ impl Display for Error {
                     .join(" → ");
                 write!(f, "Profile '{name}' reaches a cycle: {cstr}")
             }
-            Error::ProfileNotLoaded { name, reason } => {
-                write!(f, "Profile '{name}' could not be loaded: {reason}")
+            Error::ProfileLoadingFailure { name, reason } => {
+                write!(f, "Profile {name} could not be loaded: {reason}")
+            }
+            Error::MissingProfileType { name } => {
+                write!(f, "Profile {name} lacks the profile type option line")
+            }
+            Error::InvalidOptionLine { name, line } => {
+                let n = line.0;
+                let l = &line.1;
+                write!(f, "Invalid option line ({n}) in profile {l} : {name}")
             }
         }
     }

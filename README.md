@@ -71,7 +71,6 @@ NOTE: - ignore for now, start tracking higher level features added and bugs solv
 - [x] add a test for `read_lines()` and `write_lines()`
 - [x] NOTE: `write_lines()` is not symmetrical with `read_lines()`. consider if you want write_lines to take in an iterator of lines instead!
 - [x] yup, i indeed do not like the current `write_line()`, which does not have my own return type. think of way to integrate this nicely.
-- [ ] ProfileNotLoaded error variant is fully useless. just replace it with all proper errors
 
 ## long term items
 

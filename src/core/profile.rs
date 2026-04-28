@@ -190,7 +190,7 @@ mod tests {
             self.profiles
                 .get(name)
                 .cloned()
-                .ok_or(Error::ProfileNotLoaded {
+                .ok_or(Error::ProfileLoadingFailure {
                     name: name.into(),
                     reason: "Test code failure".into(),
                 })
