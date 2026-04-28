@@ -76,7 +76,7 @@ Copy-based dotfiles tracking cli, written in rust
     - Configuration files format (general format rules and all rules specific to profile types: `module`, `profile`, ...)
 
 - Specify profile to apply operation to:
-    - allow a command to store said default in `.config` 
+    - allow a command to store said default in `.config` (or maybe track inside dir itself? how?)
         - NOTE: this should probably always prompt, asking if said profile is ok
         - NOTE: this is ALWAYS overriden by all other specified profiles via cli
     - have a way to specify the profile
