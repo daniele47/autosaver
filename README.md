@@ -70,7 +70,7 @@ NOTE: - ignore for now, start tracking higher level features added and bugs solv
 - [x] add a test for `read_lines()` and `write_lines()`
 - [x] NOTE: `write_lines()` is not symmetrical with `read_lines()`. consider if you want write_lines to take in an iterator of lines instead!
 - [x] yup, i indeed do not like the current `write_line()`, which does not have my own return type. think of way to integrate this nicely.
-- [ ] implement modules and profiles `parsers`
+- [x] implement modules and profiles `parsers`
 - [ ] add tests for `parsers` (one x each parser type)
 - [x] should avoid splitting profile types, and just have them all in Profile somehow!
 - [x] move list of entries into new struct `Composite`, into its own `composite.rs` module in `profile/` dir

@@ -4,6 +4,11 @@ use crate::core::{
     profile::{Profile, ProfileType, composite::Composite},
 };
 
+const VALID_PROFILE_NAMES: fn(&str) -> bool = |c| {
+    c.chars()
+        .all(|c| c.is_alphanumeric() || c == '-' || c == '_')
+};
+
 #[derive(Debug)]
 pub(super) struct CompositeParser {}
 
@@ -24,11 +29,7 @@ impl CompositeParser {
 
                 // normal data lines, aka profile names here
                 RawKind::Data => {
-                    if !line
-                        .content
-                        .chars()
-                        .all(|c| c.is_alphanumeric() || c == '-' || c == '_')
-                    {
+                    if !VALID_PROFILE_NAMES(line.content.as_str()) {
                         // limit valid profile names!
                         return Err(Error::InvalidDataLine(profile, line.line, line.content));
                     }
