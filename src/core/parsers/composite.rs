@@ -8,7 +8,10 @@ use crate::core::{
 pub(super) struct CompositeParser {}
 
 impl CompositeParser {
-    pub(super) fn parse(profile: String, raw: impl Iterator<Item = Result<RawItem>>) -> Result<Profile> {
+    pub(super) fn parse(
+        profile: String,
+        raw: impl Iterator<Item = Result<RawItem>>,
+    ) -> Result<Profile> {
         let mut entries = vec![];
 
         for line in raw {

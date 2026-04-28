@@ -5,7 +5,10 @@
 //! - parsing into the actual config
 
 use crate::core::{
-    error::{Error, Result}, fs::LineReader, parsers::{composite::CompositeParser, module::ModuleParser}, profile::Profile
+    error::{Error, Result},
+    fs::LineReader,
+    parsers::{composite::CompositeParser, module::ModuleParser},
+    profile::Profile,
 };
 
 mod composite;
