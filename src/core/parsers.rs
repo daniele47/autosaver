@@ -1,6 +1,6 @@
 //! This module has utilities to parse all kind of profile configuration files.
 
-use crate::core::{errors::Result, module::Module, profile::Profile};
+use crate::core::{errors::Result, fs::LineReader, module::Module, profile::Profile};
 
 /// All possible kind of parsed configs.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -21,6 +21,13 @@ struct RawItem {
     line: usize,
     content: String,
     kind: RawKind,
+}
+
+impl ParsedConfig {
+    pub fn parse(reader: impl LineReader) -> Result<Self> {
+        let raw_reader = parse(reader);
+        todo!()
+    }
 }
 
 fn parse_line(line: (usize, Result<String>)) -> Result<Option<RawItem>> {
@@ -56,7 +63,7 @@ fn parse_line(line: (usize, Result<String>)) -> Result<Option<RawItem>> {
     }))
 }
 
-fn parse(reader: impl Iterator<Item = Result<String>>) -> impl Iterator<Item = Result<RawItem>> {
+fn parse(reader: impl LineReader) -> impl Iterator<Item = Result<RawItem>> {
     reader
         .into_iter()
         .enumerate()
