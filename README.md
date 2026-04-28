@@ -58,51 +58,21 @@ Copy-based dotfiles tracking cli, written in rust
 ### 1.0.0
 
 - [ ] full integration tests, not just individual module tests, to test some scenarios
-- [ ] complete set of working cli functionality, including `docs` and `--help` command/flag
-
-## long term items
-
-### docs/help
-
-- Flag or subcommand? Current idea: 
-    - `--help` flag for just a simplified list of commands and flags (`--help` NEEDS to be appliable to ALL subcommands too, and when cli parsing fails!)
-    - `docs` command (with subcommands for each section) for a more throughout explanation of everything.
-
-- Create docs for:
-    - General explanations of how the whole dotfiles system works (modules, profiles, backup dirs, ...)
-    - Profiles naming limits (only alphanumeric, `-`, `_`)
-    - Where dotifles required for this script are placed:
-        - `.config/autosaver` for various defaults (like the default profile)
-    - Configuration files format (general format rules and all rules specific to profile types: `module`, `profile`, ...)
-
-- Specify profile to apply operation to:
-    - allow a command to store said default in `.config` (or maybe track inside dir itself? how?)
-        - NOTE: this should probably always prompt, asking if said profile is ok
-        - NOTE: this is ALWAYS overriden by all other specified profiles via cli
-    - have a way to specify the profile
-    - have a flag to specify ALL profiles (or even better: assume it's all, when no specific profile is passed!)
-
-- Subcommands:
+- [ ] complete set of working cli functionality, including `help` command
+    - `list` to just list changed files
     - `save` to apply save action on specified profile
     - `restore` to apply restore action on specified profile
     - `cleanup` action which acts like untracked FOR ALL MODULES + all possible cleanups,
-    - `set` to set various configuration option ONLY on the current machine
-    - `show` to show all configuration options on the current machine
-    - `doc` action to print an entire manual with all things to know about the script
+    - `help` action to print an entire manual with all things to know about the script
+        - (?) `help docs` action to print an entire manual with all things to know about the script
+        - (?) each command should get its own help
     - `version`, but no versioning system. NO backward compatibility! version will just be useful for checks on the binary!
-
-### various items
-
-- allow customizing the `HOME` directory to apply backup to
+- [ ] bash wrapper script to take care of downloading the rust binary and all        
+    - (?) keep a timestamp of latest update check? so that i can actually propose to update if current binary is old once in a while
+        
+## potential future features
 
 - logs for every operation?
-    - I could have them shoved into .logs dir, and one file x command run with timestamp so can be easily ordered
-    - Or they might just be for dangerous operations, aka probably only for all fs operations
-    - I could even log crashes potentially?
-
-- make `autosaver` compatible with all sort of syncing mecchanism
-    - do i need to store binary version for any reason? or am i ok with always downloading latest? prolly latest, as that fixes bugs!
-    - make the final script store things in $HOME dir, so that the entire dir can be tracked without any issue whatsoever
-        - downloaded rust binary: `.cache/autosaver/...`
-        - file with defaults to use if nothing else is specified `.config/autosaver/...`
-            - NOTE: might be dangerous! Do i want it? if i do, maybe it should show a conferm prompt? Idk, think about it!
+    - I could have them shoved into `.cache/autosaver/logs` dir, and one file x command run with timestamp 
+        so can be easily ordered + automatic log rotation to keep old latest X log files
+    - Idea is that it would be potentially useful to log EVERYTHING!
