@@ -72,9 +72,9 @@ NOTE: - ignore for now, start tracking higher level features added and bugs solv
 - [x] yup, i indeed do not like the current `write_line()`, which does not have my own return type. think of way to integrate this nicely.
 - [ ] implement modules and profiles `parsers`
 - [ ] add tests for `parsers` (one x each parser type)
-- [ ] should avoid splitting profile types, and just have them all in Profile somehow!
-- [ ] move list of entries into new struct `Composite`, into its own `composite.rs` module in `profile/` dir
-- [ ] that way `Profile` now a struct that stores name + profileType (enum with variants contained within)
+- [x] should avoid splitting profile types, and just have them all in Profile somehow!
+- [x] move list of entries into new struct `Composite`, into its own `composite.rs` module in `profile/` dir
+- [x] that way `Profile` now a struct that stores name + profileType (enum with variants contained within)
 - [x] move `profile.rs`, `composite.rs` (new module to create), `modules.rs` into `profile/` dir
 - [ ] move profile name validity checker to inside `Profile` instead of hardcoded in parser
 - [x] go back to using tuple variants in error type

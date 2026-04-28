@@ -4,17 +4,17 @@ use std::collections::HashSet;
 
 use crate::core::{
     error::{Error, Result},
-    profile::module::Module,
+    profile::{composite::Composite, module::Module},
 };
 
-pub mod module;
 pub mod composite;
+pub mod module;
 
 /// Represents the profile type.
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum ProfileType {
     /// Profile storing list of profiles.
-    Composite,
+    Composite(Composite),
     /// Special leaf profile with no children.
     Module(Module),
 }
@@ -23,7 +23,6 @@ pub enum ProfileType {
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Profile {
     name: String,
-    entries: Vec<String>,
     ptype: ProfileType,
 }
 
@@ -34,26 +33,16 @@ pub trait ProfileLoader {
 
 impl Profile {
     /// Create new profile.
-    pub fn new(name: String, entries: Vec<String>, ptype: ProfileType) -> Self {
+    pub fn new(name: String, ptype: ProfileType) -> Self {
         match ptype {
-            ProfileType::Module(_) => assert!(entries.is_empty()),
             _ => {}
         }
-        Self {
-            name,
-            entries,
-            ptype,
-        }
+        Self { name, ptype }
     }
 
     /// Get profile name.
     pub fn name(&self) -> &str {
         &self.name
-    }
-
-    /// Get profile entries.
-    pub fn entries(&self) -> &[String] {
-        &self.entries
     }
 
     /// Get profile type.
@@ -63,17 +52,22 @@ impl Profile {
 
     /// Check if profile is resolved, aka all children are modules.
     pub fn is_resolved(&self, loader: &mut impl ProfileLoader) -> bool {
-        for child in &self.entries {
-            let child_profile = loader.load(child);
-            if let Ok(cp) = child_profile {
-                if !matches!(cp.ptype, ProfileType::Module(_)) {
-                    return false;
+        match &self.ptype {
+            ProfileType::Composite(composite) => {
+                for child in composite.entries() {
+                    let child_profile = loader.load(child);
+                    if let Ok(cp) = child_profile {
+                        if !matches!(cp.ptype, ProfileType::Module(_)) {
+                            return false;
+                        }
+                    } else {
+                        return false;
+                    }
                 }
-            } else {
-                return false;
+                true
             }
+            ProfileType::Module(_) => true,
         }
-        true
     }
 
     /// Profile Resolver function.
@@ -122,13 +116,22 @@ impl Profile {
             // add item and children to stack + add item to path
             path.push(item_name.clone());
             stack.push((item_name.clone(), true));
-            for child in item_profile.entries.iter().rev() {
-                stack.push((child.clone(), false));
+            match item_profile.ptype {
+                ProfileType::Composite(composite) => {
+                    for child in composite.entries().iter().rev() {
+                        stack.push((child.clone(), false));
+                    }
+                }
+                _ => {}
             }
         }
 
         // assert resolved profile is indeed resolved
-        let res = Self::new(self.name.clone(), entries, self.ptype.clone());
+        assert!(matches!(self.ptype, ProfileType::Composite(_)));
+        let res = Self::new(
+            self.name.clone(),
+            ProfileType::Composite(Composite::new(entries)),
+        );
         assert!(res.is_resolved(loader));
         Ok(res)
     }
@@ -154,46 +157,41 @@ mod tests {
             let mut profiles = vec![
                 Profile::new(
                     "root".to_string(),
-                    vec![
+                    ProfileType::Composite(Composite::new(vec![
                         "composite1".to_string(),
                         "module1".to_string(),
                         "composite3".to_string(),
-                    ],
-                    ProfileType::Composite,
+                    ])),
                 ),
                 Profile::new(
                     "composite1".to_string(),
-                    vec!["composite2".to_string(), "module2".to_string()],
-                    ProfileType::Composite,
+                    ProfileType::Composite(Composite::new(vec![
+                        "composite2".to_string(),
+                        "module2".to_string(),
+                    ])),
                 ),
                 Profile::new(
                     "composite2".to_string(),
-                    vec!["module4".to_string()],
-                    ProfileType::Composite,
+                    ProfileType::Composite(Composite::new(vec!["module4".to_string()])),
                 ),
                 Profile::new(
                     "composite3".to_string(),
-                    vec!["module3".to_string()],
-                    ProfileType::Composite,
+                    ProfileType::Composite(Composite::new(vec!["module3".to_string()])),
                 ),
                 Profile::new(
                     "module1".to_string(),
-                    vec![],
                     ProfileType::Module(empty_module.clone()),
                 ),
                 Profile::new(
                     "module2".to_string(),
-                    vec![],
                     ProfileType::Module(empty_module.clone()),
                 ),
                 Profile::new(
                     "module3".to_string(),
-                    vec![],
                     ProfileType::Module(empty_module.clone()),
                 ),
                 Profile::new(
                     "module4".to_string(),
-                    vec![],
                     ProfileType::Module(empty_module.clone()),
                 ),
             ];
@@ -221,8 +219,10 @@ mod tests {
     fn test_resolve_success() -> Result<()> {
         let mut profile = Profile::new(
             "root".to_string(),
-            vec!["composite1".to_string(), "module1".to_string()],
-            ProfileType::Composite,
+            ProfileType::Composite(Composite::new(vec![
+                "composite1".to_string(),
+                "module1".to_string(),
+            ])),
         );
         let mut loader = TestProfileLoader::new(vec![]);
 
@@ -230,13 +230,12 @@ mod tests {
         let actual = profile.resolve(&mut loader)?;
         let expected = Profile::new(
             "root".to_string(),
-            vec![
+            ProfileType::Composite(Composite::new(vec![
                 "module4".to_string(),
                 "module2".to_string(),
                 "module1".to_string(),
                 "module3".to_string(),
-            ],
-            ProfileType::Composite,
+            ])),
         );
         assert_eq!(expected, actual);
 
@@ -251,13 +250,14 @@ mod tests {
     fn test_resolve_failure() -> Result<()> {
         let mut profile = Profile::new(
             "root".to_string(),
-            vec!["composite1".to_string(), "module1".to_string()],
-            ProfileType::Composite,
+            ProfileType::Composite(Composite::new(vec![
+                "composite1".to_string(),
+                "module1".to_string(),
+            ])),
         );
         let mut loader = TestProfileLoader::new(vec![Profile::new(
             "composite2".to_string(),
-            vec!["composite1".to_string()],
-            ProfileType::Composite,
+            ProfileType::Composite(Composite::new(vec!["composite1".to_string()])),
         )]);
 
         // Make sure resolve fails when a loop exists

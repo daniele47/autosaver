@@ -71,6 +71,11 @@ impl Module {
         Self::new(vec![])
     }
 
+    /// Add new entry.
+    pub fn add_entry(&mut self, entry: ModuleEntry) {
+        self.entries.push(entry);
+    }
+
     /// Get all entries.
     pub fn entries(&self) -> &[ModuleEntry] {
         &self.entries
