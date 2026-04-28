@@ -35,7 +35,15 @@ fn main() -> Result<()> {
     let reader = tmpfile.line_reader()?;
     let profile = Profile::parse("neovim".to_string(), reader)?;
 
-    println!("{profile:#?}");
+    println!("\nPARSED:\n{profile:#?}");
+
+    match profile.ptype() {
+        autosaver::core::profile::ProfileType::Composite(_composite) => todo!(),
+        autosaver::core::profile::ProfileType::Module(module) => {
+            let resolved_profile = module.resolve(&AbsPath::from(env!("HOME")))?;
+            println!("\nRESOLVED:\n{resolved_profile:#?}");
+        }
+    }
 
     Ok(())
 }
