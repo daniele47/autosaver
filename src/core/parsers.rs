@@ -8,7 +8,7 @@ use crate::core::{
     errors::{Error, Result},
     fs::LineReader,
     module::Module,
-    profile::Profile,
+    profile::{Profile, ProfileType},
 };
 
 /// All possible kind of parsed configs.
@@ -118,16 +118,43 @@ impl RawParser {
 
 impl ModuleParser {
     fn parse(profile: String, raw: impl Iterator<Item = Result<RawItem>>) -> Result<Module> {
-        let entries = vec![];
-
-        for line in raw {}
-
-        Ok(Module::new(entries))
+        todo!()
     }
 }
 
 impl ProfileParser {
     fn parse(profile: String, raw: impl Iterator<Item = Result<RawItem>>) -> Result<Profile> {
-        todo!()
+        let mut entries = vec![];
+
+        for line in raw {
+            let line = line?;
+            match line.kind {
+                // composite profile has NO options lines
+                RawKind::Option => {
+                    return Err(Error::InvalidOptionLine {
+                        name: profile,
+                        line: (line.line, line.content),
+                    });
+                }
+
+                // normal data lines, aka profile names here
+                RawKind::Data => {
+                    if !line
+                        .content
+                        .chars()
+                        .all(|c| c.is_alphanumeric() || c == '-' || c == '_')
+                    {
+                        // limit valid profile names!
+                        return Err(Error::InvalidDataLine {
+                            name: profile,
+                            line: (line.line, line.content),
+                        });
+                    }
+                    entries.push(line.content);
+                }
+            }
+        }
+
+        Ok(Profile::new(profile, entries, ProfileType::Composite))
     }
 }

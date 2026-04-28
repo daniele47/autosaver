@@ -72,6 +72,8 @@ NOTE: - ignore for now, start tracking higher level features added and bugs solv
 - [x] NOTE: `write_lines()` is not symmetrical with `read_lines()`. consider if you want write_lines to take in an iterator of lines instead!
 - [x] yup, i indeed do not like the current `write_line()`, which does not have my own return type. think of way to integrate this nicely.
 - [ ] add tests for `parsers` (one x each parser type)
+- [ ] should avoid splitting profile types, and just have them all in Profile somehow!
+- [ ] move profile name validity checker to inside `Profile` instead of hardcoded in parser
 
 ## long term items
 
@@ -83,6 +85,7 @@ NOTE: - ignore for now, start tracking higher level features added and bugs solv
 
 - Create docs for:
     - General explanations of how the whole dotfiles system works (modules, profiles, backup dirs, ...)
+    - Profiles naming limits (only alphanumeric, `-`, `_`)
     - Where dotifles required for this script are placed:
         - `.config/autosaver` for various defaults (like the default profile)
     - Configuration files format (general format rules and all rules specific to profile types: `module`, `profile`, ...)
@@ -118,7 +121,6 @@ NOTE: - ignore for now, start tracking higher level features added and bugs solv
         - downloaded rust binary: `.cache/autosaver/...`
         - file with defaults to use if nothing else is specified `.config/autosaver/...`
             - NOTE: might be dangerous! Do i want it? if i do, maybe it should show a conferm prompt? Idk, think about it!
-
 
 ## architecture
 

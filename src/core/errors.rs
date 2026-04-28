@@ -25,6 +25,9 @@ pub enum Error {
 
     /// Invalid option line in config file.
     InvalidOptionLine { name: String, line: (usize, String) },
+
+    /// Invalid data line in config file.
+    InvalidDataLine { name: String, line: (usize, String) },
 }
 
 /// Result type for the entire crate, using `Error` error type.
@@ -63,6 +66,11 @@ impl Display for Error {
                 let n = line.0;
                 let l = &line.1;
                 write!(f, "Invalid option line ({n}) in profile {l} : {name}")
+            }
+            Error::InvalidDataLine { name, line } => {
+                let n = line.0;
+                let l = &line.1;
+                write!(f, "Invalid data line ({n}) in profile {l} : {name}")
             }
         }
     }
