@@ -286,7 +286,7 @@ impl AbsPath {
         // Depth first search of all files, using a hashset of already found canonicalized paths, to
         // avoid endless recursion if there are symlinks creating endless loops
         while let Some(item) = stack.pop() {
-            for dir_file in item.list_files(|f| filter(f))? {
+            for dir_file in item.list_files(AbsPath::FILTER_ALL)? {
                 let canon = dir_file.canonicalize()?;
                 if norm_files.contains(&canon) {
                     continue;
@@ -299,7 +299,7 @@ impl AbsPath {
             }
         }
 
-        Ok(files)
+        Ok(files.into_iter().filter(filter).collect())
     }
 
     /// Buffered line by line read of files

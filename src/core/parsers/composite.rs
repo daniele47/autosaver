@@ -4,13 +4,16 @@ use crate::core::{
     profile::{Profile, ProfileType, composite::Composite},
 };
 
-const VALID_PROFILE_NAMES: fn(&str) -> bool = |c| {
-    c.chars()
-        .all(|c| c.is_alphanumeric() || c == '-' || c == '_')
-};
+const VALID_PROFILE_NAMES: fn(&str) -> bool = valid_profile_names;
 
 #[derive(Debug)]
 pub(super) struct CompositeParser {}
+
+fn valid_profile_names(profile: &str) -> bool {
+    profile
+        .chars()
+        .all(|c| c.is_alphanumeric() || c == '-' || c == '_')
+}
 
 impl CompositeParser {
     pub(super) fn parse(

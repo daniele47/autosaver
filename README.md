@@ -51,7 +51,7 @@ Copy-based dotfiles tracking cli, written in rust
 - [x] move `profile.rs`, `composite.rs` (new module to create), `modules.rs` into `profile/` dir
 - [x] go back to using tuple variants in error type
 - [x] properly split parsers, such that they are all submodules of parsers module, BUT ALL HIDDEN!
-- [ ] `find_all` file filter does not work (aka it gets applied istantly, and dirs are never even traversed!)
+- [x] `find_all` file filter does not work (aka it gets applied istantly, and dirs are never even traversed!)
 
 ## blockers
 
