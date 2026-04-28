@@ -1,6 +1,7 @@
 use autosaver::core::{
     error::Result,
     fs::{AbsPath, LineWriter},
+    profile::Profile,
 };
 
 fn purge_path_even_on_panic(tmpdir: &AbsPath) -> impl Drop {
@@ -20,17 +21,21 @@ fn main() -> Result<()> {
     tmpdir.create_dir()?;
     let _guard = purge_path_even_on_panic(&tmpdir);
 
-    let tmpfile = tmpdir.joins(&["tmpfile.txt"]);
-    let mut writer = tmpfile.write_lines()?;
-    writer.write_line("Line 1")?;
-    writer.write_line("Line 2")?;
-    writer.write_line("It's the final line!!!")?;
+    let tmpfile = tmpdir.joins(&["neovim.conf"]);
+    let mut writer = tmpfile.line_writer()?;
+    writer.write_line("/! type module")?;
+    writer.write_line("")?;
+    writer.write_line("// just testing with neovim configuration as an example")?;
+    writer.write_line(".config/nvim")?;
+    writer.write_line("")?;
+    writer.write_line("/! policy ignore")?;
+    writer.write_line(".config/nvim/lazy-lock.json")?;
     writer.flush()?;
 
-    println!("\nReading {}:", tmpfile.to_str_lossy());
-    for line in tmpfile.read_lines()? {
-        println!("{}", line?);
-    }
+    let reader = tmpfile.line_reader()?;
+    let profile = Profile::parse("neovim".to_string(), reader)?;
+
+    println!("{profile:#?}");
 
     Ok(())
 }

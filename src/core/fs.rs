@@ -306,7 +306,7 @@ impl AbsPath {
     ///
     /// Note: since this uses a buffered reader, read could costantly fail. It is thus necessary
     /// to handle the potential error on every each line read! The error is of type std::io::Error!
-    pub fn read_lines(&self) -> Result<impl LineReader> {
+    pub fn line_reader(&self) -> Result<impl LineReader> {
         // implement line reader
         struct LineReaderImpl {
             path: AbsPath,
@@ -335,7 +335,7 @@ impl AbsPath {
     ///
     /// Returns a writer that implements `Write` and `BufWrite`, allowing efficient
     /// line-by-line writing. The writer will be automatically flushed when dropped.
-    pub fn write_lines(&self) -> Result<impl LineWriter> {
+    pub fn line_writer(&self) -> Result<impl LineWriter> {
         // implement line writer
         struct LineWriterImpl<W: Write> {
             inner: BufWriter<W>,
@@ -663,12 +663,12 @@ mod tests {
         let lines_in = vec!["first line", "second line", "third line"];
 
         // Write lines
-        let mut writer = test_file.write_lines()?;
+        let mut writer = test_file.line_writer()?;
         writer.write_all_lines(lines_in.iter())?;
         writer.flush()?;
 
         // Read lines back
-        let reader = test_file.read_lines()?;
+        let reader = test_file.line_reader()?;
         let lines_out: Vec<String> = reader.map(|line| line).collect::<Result<_>>()?;
 
         assert_eq!(lines_in, lines_out);
