@@ -5,7 +5,7 @@
 //! - parsing into the actual config
 
 use crate::core::{
-    errors::{Error, Result},
+    error::{Error, Result},
     fs::LineReader,
     profile::{Profile, ProfileType, module::Module},
 };

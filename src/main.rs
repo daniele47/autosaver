@@ -1,5 +1,5 @@
 use autosaver::core::{
-    errors::Result,
+    error::Result,
     fs::{AbsPath, LineWriter},
 };
 

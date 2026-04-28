@@ -8,7 +8,7 @@ use std::{
     path::PathBuf,
 };
 
-use crate::core::errors::{Error, Result};
+use crate::core::error::{Error, Result};
 
 /// Struct storing an absolute path.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]

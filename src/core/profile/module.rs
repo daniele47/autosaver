@@ -3,7 +3,7 @@
 use std::collections::{HashMap, HashSet, hash_map::Entry};
 
 use crate::core::{
-    errors::Result,
+    error::Result,
     fs::{AbsPath, RelPath},
 };
 

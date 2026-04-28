@@ -3,7 +3,7 @@
 use std::collections::HashSet;
 
 use crate::core::{
-    errors::{Error, Result},
+    error::{Error, Result},
     profile::module::Module,
 };
 
