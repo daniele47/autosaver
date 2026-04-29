@@ -67,16 +67,16 @@ enum TextType {
     Warning,
 }
 
-const WHITE: &'static str = "\x1b[37m";
-const RED: &'static str = "\x1b[31m";
-const LGREEN: &'static str = "\x1b[32m";
-const GREEN: &'static str = "\x1b[32m";
-const YELLOW: &'static str = "\x1b[33m";
-const BLUE: &'static str = "\x1b[34m";
-const PURPLE: &'static str = "\x1b[35m";
-const BOLD: &'static str = "\x1b[1m";
-const UNDERLINE: &'static str = "\x1b[4m";
-const RESET: &'static str = "\x1b[m";
+const WHITE: &str = "\x1b[37m";
+const RED: &str = "\x1b[31m";
+const LGREEN: &str = "\x1b[32m";
+const GREEN: &str = "\x1b[32m";
+const YELLOW: &str = "\x1b[33m";
+const BLUE: &str = "\x1b[34m";
+const PURPLE: &str = "\x1b[35m";
+const BOLD: &str = "\x1b[1m";
+const UNDERLINE: &str = "\x1b[4m";
+const RESET: &str = "\x1b[m";
 
 impl TermStyle {
     /// Create new TermStyle
