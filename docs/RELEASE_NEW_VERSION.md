@@ -20,4 +20,7 @@ versioning system use the same versions
 ## how will versions work
 
 - first release ever will be `1.0.0`
-- from then on, just bump version by semver logic, when and only when, a new release is required
+- from then on follow semver logic:
+    - patch version update: bug fixes
+    - minor version update: introduction of new backward compatible features
+    - major version update: introduction of new features breaking old version functionality
