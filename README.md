@@ -53,6 +53,7 @@ Copy-based dotfiles tracking cli, written in rust
 - [x] properly split parsers, such that they are all submodules of parsers module, BUT ALL HIDDEN!
 - [x] `find_all` file filter does not work (aka it gets applied istantly, and dirs are never even traversed!)
 - [ ] add a default implementation for all my traits
+- [ ] use `ok_or_else` always, to avoid useless clone operations
 
 ## blockers
 

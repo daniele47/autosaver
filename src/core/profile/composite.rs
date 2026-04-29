@@ -1,6 +1,6 @@
 //! This module implements structs and methods to handle autosaver composite profile.
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use crate::core::{
     error::{Error, Result},
@@ -16,6 +16,33 @@ pub struct Composite {
 /// Allow generic implementation of how profiles are loaded.
 pub trait ProfileLoader {
     fn load(&mut self, name: &str) -> Result<Profile>;
+}
+
+/// Simple implementation of profile loader.
+pub struct HashMapProfileLoader {
+    profiles: HashMap<String, Profile>,
+}
+
+impl HashMapProfileLoader {
+    /// Create new empty HashMapProfileLoader.
+    pub fn new() -> Self {
+        Self {
+            profiles: Default::default(),
+        }
+    }
+
+    /// Allow mutating the profiles.
+    pub fn profiles(&mut self) -> &mut HashMap<String, Profile> {
+        &mut self.profiles
+    }
+}
+
+impl ProfileLoader for HashMapProfileLoader {
+    fn load(&mut self, name: &str) -> Result<Profile> {
+        self.profiles.get(name).cloned().ok_or_else(|| {
+            Error::ProfileLoadingFailure(name.into(), "Profile was not in the hashmap".into())
+        })
+    }
 }
 
 impl Composite {
@@ -125,83 +152,64 @@ mod tests {
 
     use super::*;
 
-    #[derive(Debug)]
-    struct TestProfileLoader {
-        profiles: HashMap<String, Profile>,
-    }
-
-    impl TestProfileLoader {
-        fn new(extra_profiles: Vec<Profile>) -> Self {
-            let mut loader = Self {
-                profiles: HashMap::new(),
-            };
-            let empty_module = Module::empty();
-            let mut profiles = vec![
-                Profile::new(
-                    "root".to_string(),
-                    ProfileType::Composite(Composite::new(vec![
-                        "composite1".to_string(),
-                        "module1".to_string(),
-                        "composite3".to_string(),
-                    ])),
-                ),
-                Profile::new(
+    fn new_loader(extra_profiles: Vec<Profile>) -> HashMapProfileLoader {
+        let mut loader = HashMapProfileLoader {
+            profiles: HashMap::new(),
+        };
+        let empty_module = Module::empty();
+        let mut profiles = vec![
+            Profile::new(
+                "root".to_string(),
+                ProfileType::Composite(Composite::new(vec![
                     "composite1".to_string(),
-                    ProfileType::Composite(Composite::new(vec![
-                        "composite2".to_string(),
-                        "module2".to_string(),
-                    ])),
-                ),
-                Profile::new(
-                    "composite2".to_string(),
-                    ProfileType::Composite(Composite::new(vec!["module4".to_string()])),
-                ),
-                Profile::new(
-                    "composite3".to_string(),
-                    ProfileType::Composite(Composite::new(vec!["module3".to_string()])),
-                ),
-                Profile::new(
                     "module1".to_string(),
-                    ProfileType::Module(empty_module.clone()),
-                ),
-                Profile::new(
+                    "composite3".to_string(),
+                ])),
+            ),
+            Profile::new(
+                "composite1".to_string(),
+                ProfileType::Composite(Composite::new(vec![
+                    "composite2".to_string(),
                     "module2".to_string(),
-                    ProfileType::Module(empty_module.clone()),
-                ),
-                Profile::new(
-                    "module3".to_string(),
-                    ProfileType::Module(empty_module.clone()),
-                ),
-                Profile::new(
-                    "module4".to_string(),
-                    ProfileType::Module(empty_module.clone()),
-                ),
-            ];
-            profiles.extend(extra_profiles);
-            for p in profiles {
-                loader.profiles.insert(p.name().to_string(), p);
-            }
-            loader
+                ])),
+            ),
+            Profile::new(
+                "composite2".to_string(),
+                ProfileType::Composite(Composite::new(vec!["module4".to_string()])),
+            ),
+            Profile::new(
+                "composite3".to_string(),
+                ProfileType::Composite(Composite::new(vec!["module3".to_string()])),
+            ),
+            Profile::new(
+                "module1".to_string(),
+                ProfileType::Module(empty_module.clone()),
+            ),
+            Profile::new(
+                "module2".to_string(),
+                ProfileType::Module(empty_module.clone()),
+            ),
+            Profile::new(
+                "module3".to_string(),
+                ProfileType::Module(empty_module.clone()),
+            ),
+            Profile::new(
+                "module4".to_string(),
+                ProfileType::Module(empty_module.clone()),
+            ),
+        ];
+        profiles.extend(extra_profiles);
+        for p in profiles {
+            loader.profiles.insert(p.name().to_string(), p);
         }
-    }
-
-    impl ProfileLoader for TestProfileLoader {
-        fn load(&mut self, name: &str) -> Result<Profile> {
-            self.profiles
-                .get(name)
-                .cloned()
-                .ok_or(Error::ProfileLoadingFailure(
-                    name.into(),
-                    "Test code failure".into(),
-                ))
-        }
+        loader
     }
 
     #[test]
     fn test_resolve_success() -> Result<()> {
         let mut profile = Composite::new(vec!["composite1".to_string(), "module1".to_string()]);
         let profile_name = "root";
-        let mut loader = TestProfileLoader::new(vec![]);
+        let mut loader = new_loader(vec![]);
 
         // Check resolve works as intended
         let actual = profile.resolve(profile_name, &mut loader)?;
@@ -223,7 +231,7 @@ mod tests {
     #[test]
     fn test_resolve_failure() -> Result<()> {
         let mut profile = Composite::new(vec!["composite1".to_string(), "module1".to_string()]);
-        let mut loader = TestProfileLoader::new(vec![Profile::new(
+        let mut loader = new_loader(vec![Profile::new(
             "composite2".to_string(),
             ProfileType::Composite(Composite::new(vec!["composite1".to_string()])),
         )]);
