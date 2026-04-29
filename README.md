@@ -59,7 +59,6 @@ Copy-based dotfiles tracking cli, written in rust
     - `restore` to apply restore action on specified profile
     - `--help` to show help relative to the subcommand
     - `--version` to simply print the binary current version
-    - `--assumeyes` / `--assumeno` (inspired by dnf) to skip all confermations
     - NOTE: flags priority comes from order! `./command --help --version` shows the help msg, `./command --version --help` shows the version!
 - [ ] bash wrapper script to take care of downloading the rust binary and all        
     - (?) keep a timestamp of latest update check? so that i can actually propose to update if current binary is old once in a while
@@ -70,13 +69,13 @@ Copy-based dotfiles tracking cli, written in rust
     - `profile` all commands related to profile management
         - `new` / `rename` / `delete` / `edit` to manage profiles from the cli
         - `ls` to list all available profiles
-        - `tree` for a nicely formatted tree of all composite profiles and their nodes
+        - `tree` for a nicely formatted tree of all composite profiles and their nodes (look at cargo tree for inspiration)
     - `cleanup` action for all sort of cleanups
         - `symlinks` to list and possible delete all 
         - `profiles` to check profile files, and delete the ones with wrong format, or without backup and whatnot
         - `untracked` to check if in one or all profiles there are untracked files that can be removed
     - `--verbose` flag (related to logs)
-    - some sort of commands to automatically create/delete/rename profiles?
+    - `--assumeyes` / `--assumeno` (inspired by dnf) to skip all confermations
 
 - logs for every operation?
     - I could have them shoved into `.cache/autosaver/logs` dir, and one file x command run with timestamp 
