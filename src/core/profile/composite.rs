@@ -19,6 +19,7 @@ pub trait ProfileLoader {
 }
 
 /// Simple implementation of profile loader.
+#[derive(Debug, Clone, Default)]
 pub struct HashMapProfileLoader {
     profiles: HashMap<String, Profile>,
 }
@@ -26,9 +27,7 @@ pub struct HashMapProfileLoader {
 impl HashMapProfileLoader {
     /// Create new empty HashMapProfileLoader.
     pub fn new() -> Self {
-        Self {
-            profiles: Default::default(),
-        }
+        Default::default()
     }
 
     /// Allow mutating the profiles.
@@ -127,13 +126,10 @@ impl Composite {
             // add item and children to stack + add item to path
             path.push(item_name.clone());
             stack.push((item_name.clone(), true));
-            match item_profile.ptype {
-                ProfileType::Composite(composite) => {
-                    for child in composite.entries().iter().rev() {
-                        stack.push((child.clone(), false));
-                    }
+            if let ProfileType::Composite(composite) = item_profile.ptype {
+                for child in composite.entries().iter().rev() {
+                    stack.push((child.clone(), false));
                 }
-                _ => {}
             }
         }
 

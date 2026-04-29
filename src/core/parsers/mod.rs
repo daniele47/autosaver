@@ -48,11 +48,11 @@ impl Profile {
                 "type composite" => CompositeParser::parse(profile, raw),
                 "type module" => ModuleParser::parse(profile, raw),
                 _ => {
-                    return Err(Error::InvalidOptionLine(profile, 1, content));
+                    Err(Error::InvalidOptionLine(profile, 1, content))
                 }
             }
         } else {
-            return Err(Error::MissingProfileType(profile));
+            Err(Error::MissingProfileType(profile))
         }
     }
 }
@@ -65,9 +65,9 @@ impl RawParser {
         let kind;
 
         // option line
-        if str.starts_with("/!") {
+        if let Some(stripped) = str.strip_prefix("/!") {
             kind = RawKind::Option;
-            content = str[2..].trim().to_string();
+            content = stripped.trim().to_string();
         }
         // comment line
         else if str.starts_with("/") {
