@@ -54,7 +54,7 @@ fn main() -> Result<()> {
     // create profile with both
     let tmpfile4 = tmpdir.joins(&["all.conf"]);
     let mut writer = tmpfile4.line_writer()?;
-    writer.write_all_lines(["/! type composite", "", "neovim", "tmux", "tools"])?;
+    writer.write_all_lines(["/! type composite", "tmux", "tmux", "tools"])?;
 
     // load all profiles
     let mut profile_loader = HashMapProfileLoader::new();
@@ -73,11 +73,11 @@ fn main() -> Result<()> {
         match profile.1.ptype() {
             ProfileType::Composite(composite) => {
                 let composite = composite.resolve(profile.0.as_str(), &mut profile_loader)?;
-                println!("RESOLVED COMPOSITE: {composite:#?}\n\n");
+                println!("RESOLVED COMPOSITE {}:\n {composite:#?}\n\n", profile.0);
             }
             ProfileType::Module(module) => {
                 let module = module.resolve(&AbsPath::from(env::var("HOME").unwrap().as_str()));
-                println!("RESOLVED MODULE: {module:#?}\n\n");
+                println!("RESOLVED MODULE {}:\n {module:#?}\n\n", profile.0);
             }
         }
     }
