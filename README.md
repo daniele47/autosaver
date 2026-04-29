@@ -45,7 +45,7 @@ Copy-based dotfiles tracking cli, written in rust
 - [x] `find_all` file filter does not work (aka it gets applied istantly, and dirs are never even traversed!)
 - [x] add a default implementation for all my traits
 - [x] use `ok_or_else` always, to avoid useless clone operations
-- [ ] implement a simple flag parser just parsing flags, nothing else!
+- [x] implement a simple flag parser just parsing flags, nothing else!
 
 ## blockers
 
@@ -57,8 +57,9 @@ Copy-based dotfiles tracking cli, written in rust
     - `save` to apply save action on specified profile
     - `restore` to apply restore action on specified profile
     - `cleanup` action which acts like untracked FOR ALL MODULES + all possible cleanups,
-    - `help` action to print commands, flags and small description of program functionality.
-    - `version`, but no versioning system. NO backward compatibility! version will just be useful for checks on the binary!
+    - `--help` to show help relative to the subcommand
+    - `--version` to simply print the binary current version
+    - NOTE: flags priority comes from order! `./command --help --version` shows the help msg, `./command --version --help` shows the version!
 - [ ] bash wrapper script to take care of downloading the rust binary and all        
     - (?) keep a timestamp of latest update check? so that i can actually propose to update if current binary is old once in a while
         
@@ -68,3 +69,4 @@ Copy-based dotfiles tracking cli, written in rust
     - I could have them shoved into `.cache/autosaver/logs` dir, and one file x command run with timestamp 
         so can be easily ordered + automatic log rotation to keep old latest X log files
     - Idea is that it would be potentially useful to log EVERYTHING!
+    - `--verbose` flag
