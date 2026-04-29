@@ -101,33 +101,21 @@ impl RawParser {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::VecDeque;
+    use crate::core::fs::AnyLineReader;
 
     use super::*;
 
-    struct TestReader(VecDeque<Result<String>>);
-
-    impl Iterator for TestReader {
-        type Item = Result<String>;
-
-        fn next(&mut self) -> Option<Self::Item> {
-            self.0.pop_front()
-        }
-    }
-
-    impl LineReader for TestReader {}
-
     #[test]
     fn test_raw_parser() -> Result<()> {
-        let lines: VecDeque<Result<String>> = VecDeque::from([
+        let lines = [
             Ok("/! type module".to_string()),
             Ok("/ this is a comment".to_string()),
             Ok("src/lib.rs".to_string()),
             Ok("   /! policy track   ".to_string()),
             Ok("   ".to_string()),
             Ok("target/".to_string()),
-        ]);
-        let reader = TestReader(lines);
+        ];
+        let reader = AnyLineReader::new(lines.into_iter());
 
         let items: Vec<RawItem> = RawParser::parse(reader).collect::<Result<Vec<_>>>()?;
 

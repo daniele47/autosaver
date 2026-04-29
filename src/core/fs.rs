@@ -54,6 +54,37 @@ pub trait LineWriter {
     }
 }
 
+/// Simple generic implementation of LineReader that preserves the lazy evaluation capabilities.
+pub struct AnyLineReader<I>
+where
+    I: Iterator<Item = Result<String>>,
+{
+    iter: I,
+}
+
+impl<I> AnyLineReader<I>
+where
+    I: Iterator<Item = Result<String>>,
+{
+    /// Create new AnyLineReader that stores an iterator.
+    pub fn new(iter: I) -> Self {
+        Self { iter }
+    }
+}
+
+impl<I> Iterator for AnyLineReader<I>
+where
+    I: Iterator<Item = Result<String>>,
+{
+    type Item = Result<String>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iter.next()
+    }
+}
+
+impl<I> LineReader for AnyLineReader<I> where I: Iterator<Item = Result<String>> {}
+
 impl AbsPath {
     pub const FILTER_ALL: fn(&AbsPath) -> bool = Self::filter_all;
     pub const FILTER_FILES: fn(&AbsPath) -> bool = Self::filter_files;
