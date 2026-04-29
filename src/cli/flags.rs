@@ -1,43 +1,97 @@
-//! Module to parse cmdline flags.
-//!
-//! Very simple logic:
-//! - parse letter flags, with/without an argument if specified for them
-//! - parse word flags, with/without an argument if specified for them
-//! - collect remaining arguments into a vector
+//! Module to parse cmdline flags and splits flags from not flag parameters.
 
 /// All possible types of a flag.
-pub enum FlagType {
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Flag {
     /// Single letter such as `-a`.
-    /// Note: `-abc` is the same as `-a -b -c`.
     Letter(char),
     /// Word flags such as `--banana`.
     Word(String),
 }
 
-/// Represents a flag.
-pub struct Flag {
-    /// The type of the flag.
-    pub ftype: FlagType,
-    /// The index of the flag in the initial cmdline.
-    pub index: usize,
-    /// The parameter of the flag, if present.
-    pub param: Option<String>,
-}
-
-/// Represent a not flag parameter.
-pub struct Param {
-    /// The index of the flag in the initial cmdline.
-    pub index: usize,
-    /// The actual value of the parameter.
-    pub value: String,
-}
-
 /// Represent an entire parsed cmdline.
+#[derive(Debug)]
 pub struct ParsedArgs {
-    /// Stores the cmdline, useful for the various indexes.
-    pub cmdline: Vec<String>,
-    /// Stores all flags found.
-    pub flags: Vec<Flag>,
-    /// Stores not flag parameters found.
-    pub params: Vec<Param>,
+    flags: Vec<Flag>,
+    params: Vec<String>,
+}
+
+impl ParsedArgs {
+    /// Get flags.
+    pub fn flags(&self) -> &[Flag] {
+        &self.flags
+    }
+
+    /// Get parameters.
+    pub fn params(&self) -> &[String] {
+        &self.params
+    }
+
+    /// Parse cmdline into Flags and parameters.
+    pub fn parse(args: &[&str]) -> Self {
+        let mut parsed = ParsedArgs {
+            flags: Default::default(),
+            params: vec![],
+        };
+
+        let mut index = 0;
+        for arg in args {
+            index += 1;
+            if *arg == "--" {
+                break;
+            }
+            if arg.starts_with("--") {
+                parsed.flags.push(Flag::Word(arg[2..].to_string()));
+            } else if arg.starts_with("-") {
+                let chars = arg[1..].chars().map(Flag::Letter).collect::<Vec<_>>();
+                parsed.flags.extend(chars);
+            } else {
+                parsed.params.push(arg.to_string());
+            }
+        }
+
+        while let Some(rem) = args.get(index) {
+            parsed.params.push(rem.to_string());
+            index += 1;
+        }
+
+        parsed
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse() {
+        let args = vec![
+            "program",
+            "--verbose",
+            "-abc",
+            "file.txt",
+            "---weird",
+            "--output",
+            "-x",
+            "data.json",
+            "--",
+            "--keep",
+        ];
+        let parsed = ParsedArgs::parse(&args[1..]);
+
+        // Test specific flags
+        assert_eq!(parsed.flags[0], Flag::Word("verbose".to_string()));
+        assert_eq!(parsed.flags[1], Flag::Letter('a'));
+        assert_eq!(parsed.flags[2], Flag::Letter('b'));
+        assert_eq!(parsed.flags[3], Flag::Letter('c'));
+        assert_eq!(parsed.flags[4], Flag::Word("-weird".to_string())); // ---weird becomes -weird
+        assert_eq!(parsed.flags[5], Flag::Word("output".to_string()));
+        assert_eq!(parsed.flags[6], Flag::Letter('x'));
+
+        // Test params count and values
+        assert_eq!(parsed.params.len(), 3);
+        assert_eq!(parsed.params[0], "file.txt");
+        assert_eq!(parsed.params[1], "data.json");
+        assert_eq!(parsed.params[2], "--keep");
+    }
 }
