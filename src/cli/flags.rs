@@ -40,10 +40,10 @@ impl ParsedArgs {
             if *arg == "--" {
                 break;
             }
-            if arg.starts_with("--") {
-                parsed.flags.push(Flag::Word(arg[2..].to_string()));
-            } else if arg.starts_with("-") {
-                let chars = arg[1..].chars().map(Flag::Letter).collect::<Vec<_>>();
+            if let Some(wflag) = arg.strip_prefix("--") {
+                parsed.flags.push(Flag::Word(wflag.to_string()));
+            } else if let Some(lflag) = arg.strip_prefix("-") {
+                let chars = lflag.chars().map(Flag::Letter).collect::<Vec<_>>();
                 parsed.flags.extend(chars);
             } else {
                 parsed.params.push(arg.to_string());

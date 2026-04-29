@@ -98,6 +98,10 @@ jobs:
         if: matrix.platform.use_cross
         run: cross test --release --target ${{ matrix.platform.target }}
 
+      - name: Strict checks before building for release
+        if: matrix.platform.use_cross && startsWith(github.ref, 'refs/tags/v')
+        run: cross clippy --target ${{ matrix.platform.target }} -- -D warnings
+
       - name: Build with cross
         if: matrix.platform.use_cross
         run: cross build --release --target ${{ matrix.platform.target }}
@@ -109,6 +113,10 @@ jobs:
       - name: Test natively (release)
         if: ${{ !matrix.platform.use_cross }}
         run: cargo test --release --target ${{ matrix.platform.target }}
+
+      - name: Strict checks before building for release
+        if: ${{ !matrix.platform.use_cross && startsWith(github.ref, 'refs/tags/v') }}
+        run: cargo clippy --target ${{ matrix.platform.target }} -- -D warnings
 
       - name: Build natively
         if: ${{ !matrix.platform.use_cross }}

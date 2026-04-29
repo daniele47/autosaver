@@ -61,7 +61,7 @@ where
 }
 
 /// Simple generic implementation of LineWrite that writes to a vector of strings.
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct AnyLineWriter {
     lines: Vec<String>,
 }
@@ -92,9 +92,7 @@ impl<I> LineReader for AnyLineReader<I> where I: Iterator<Item = Result<String>>
 impl AnyLineWriter {
     /// Create new AnyLineReader that stores an iterator.
     pub fn new() -> Self {
-        Self {
-            lines: Default::default(),
-        }
+        Default::default()
     }
 }
 
@@ -103,7 +101,8 @@ impl LineWriter for AnyLineWriter {
     where
         S: AsRef<str>,
     {
-        Ok(self.lines.push(line.as_ref().to_string()))
+        self.lines.push(line.as_ref().to_string());
+        Ok(())
     }
 
     fn flush(&mut self) -> Result<()> {
@@ -314,10 +313,10 @@ impl AbsPath {
         true
     }
     fn filter_files(path: &AbsPath) -> bool {
-        path.metadata().map_or(false, |m| m.is_file())
+        path.metadata().is_ok_and(|m| m.is_file())
     }
     fn filter_directories(path: &AbsPath) -> bool {
-        path.metadata().map_or(false, |m| m.is_dir())
+        path.metadata().is_ok_and(|m| m.is_dir())
     }
 
     /// List all files recursively inside a directory.

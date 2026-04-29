@@ -3,10 +3,7 @@ use std::env;
 use autosaver::core::{
     error::Result,
     fs::{AbsPath, LineWriter},
-    profile::{
-        Profile, ProfileType,
-        composite::{Composite, HashMapProfileLoader},
-    },
+    profile::{Profile, ProfileType, composite::HashMapProfileLoader},
 };
 
 fn purge_path_even_on_panic(tmpdir: &AbsPath) -> impl Drop {

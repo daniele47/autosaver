@@ -4,7 +4,8 @@ Use SemVer!
 
 ## how to release a new version
 
-This will be done mostly manually. There are 2 relevant processes involved in updating the version:
+This will be done mostly manually. There are 4 relevant processes involved in updating the version:
+- Solve all clippy warnings, otherwise release will fail!
 - Update `Cargo.toml` version, this way rust binary will be able to correct detect the current version
 - Trigger github `.github/workflows/release.yml` action to actually have binaries compiled and a release made:
     - Create a `v1.5.6` for a stable release
