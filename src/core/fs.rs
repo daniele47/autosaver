@@ -38,10 +38,7 @@ pub trait LineWriter {
     /// Make sure what was written is actually on file.
     fn flush(&mut self) -> Result<()>;
 
-    /// Write an entire iterator to file.
-    ///
-    /// Note: just like `write_line` this method too doesn't make guarantees about instantly writing
-    /// to file! Call `flush` to make sure the file is actually written to.
+    /// Write an entire iterator to file and flushes.
     fn write_all_lines<I, S>(&mut self, lines: I) -> Result<()>
     where
         I: IntoIterator<Item = S>,
@@ -50,7 +47,7 @@ pub trait LineWriter {
         for line in lines {
             self.write_line(line.as_ref())?
         }
-        Ok(())
+        self.flush()
     }
 }
 
@@ -59,7 +56,12 @@ pub struct AnyLineReader<I>
 where
     I: Iterator<Item = Result<String>>,
 {
-    iter: I,
+    lines: I,
+}
+
+/// Simple generic implementation of LineWrite that writes to a vector of strings.
+pub struct AnyLineWriter {
+    lines: Vec<String>,
 }
 
 impl<I> AnyLineReader<I>
@@ -68,7 +70,7 @@ where
 {
     /// Create new AnyLineReader that stores an iterator.
     pub fn new(iter: I) -> Self {
-        Self { iter }
+        Self { lines: iter }
     }
 }
 
@@ -79,11 +81,33 @@ where
     type Item = Result<String>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.iter.next()
+        self.lines.next()
     }
 }
 
 impl<I> LineReader for AnyLineReader<I> where I: Iterator<Item = Result<String>> {}
+
+impl AnyLineWriter {
+    /// Create new AnyLineReader that stores an iterator.
+    pub fn new() -> Self {
+        Self {
+            lines: Default::default(),
+        }
+    }
+}
+
+impl LineWriter for AnyLineWriter {
+    fn write_line<S>(&mut self, line: S) -> Result<()>
+    where
+        S: AsRef<str>,
+    {
+        Ok(self.lines.push(line.as_ref().to_string()))
+    }
+
+    fn flush(&mut self) -> Result<()> {
+        Ok(())
+    }
+}
 
 impl AbsPath {
     pub const FILTER_ALL: fn(&AbsPath) -> bool = Self::filter_all;
@@ -696,7 +720,6 @@ mod tests {
         // Write lines
         let mut writer = test_file.line_writer()?;
         writer.write_all_lines(lines_in.iter())?;
-        writer.flush()?;
 
         // Read lines back
         let reader = test_file.line_reader()?;
