@@ -65,9 +65,7 @@ Copy-based dotfiles tracking cli, written in rust
     - `save` to apply save action on specified profile
     - `restore` to apply restore action on specified profile
     - `cleanup` action which acts like untracked FOR ALL MODULES + all possible cleanups,
-    - `help` action to print an entire manual with all things to know about the script
-        - (?) `help docs` action to print an entire manual with all things to know about the script
-        - (?) each command should get its own help
+    - `help` action to print commands, flags and small description of program functionality.
     - `version`, but no versioning system. NO backward compatibility! version will just be useful for checks on the binary!
 - [ ] bash wrapper script to take care of downloading the rust binary and all        
     - (?) keep a timestamp of latest update check? so that i can actually propose to update if current binary is old once in a while
