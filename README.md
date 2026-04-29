@@ -52,6 +52,7 @@ Copy-based dotfiles tracking cli, written in rust
 - [x] go back to using tuple variants in error type
 - [x] properly split parsers, such that they are all submodules of parsers module, BUT ALL HIDDEN!
 - [x] `find_all` file filter does not work (aka it gets applied istantly, and dirs are never even traversed!)
+- [ ] add a default implementation for all my traits
 
 ## blockers
 
