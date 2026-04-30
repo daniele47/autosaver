@@ -47,7 +47,7 @@ Copy-based dotfiles tracking cli, written in rust
 - [x] use `ok_or_else` always, to avoid useless clone operations
 - [x] implement a simple flag parser just parsing flags, nothing else!
 - [x] add `cargo clippy` check before release. If any warning, kill the release!
-- [x] `Color` trait, with blue, red, ..., bold, underlined, ..., set_error, visualize, ... methods, so that this can be implement with stdout OR ANYTHING
+- [ ] `Renderer` trait that takes care of taking input and rendering it correctly
 
 ## blockers
 
