@@ -10,7 +10,10 @@ use crate::{
     },
     core::{
         fs::{AbsPath, RelPath},
-        profile::{Profile, composite::ProfileLoader},
+        profile::{
+            Profile,
+            composite::{HashMapProfileLoader, ProfileLoader},
+        },
     },
 };
 
@@ -56,12 +59,16 @@ where
 
     fn profile_loader() -> Result<impl ProfileLoader<Error = Error>> {
         struct ProfileLoaderImpl {
+            cached: HashMapProfileLoader,
             config_dir: AbsPath,
         }
 
         impl ProfileLoaderImpl {
             fn new(config_dir: AbsPath) -> Self {
-                Self { config_dir }
+                Self {
+                    cached: Default::default(),
+                    config_dir,
+                }
             }
         }
 
@@ -72,6 +79,11 @@ where
                 &mut self,
                 name: &str,
             ) -> std::result::Result<crate::core::profile::Profile, Self::Error> {
+                let cached_profiles = self.cached.profiles();
+                let cached = cached_profiles.get(name);
+                if let Some(cached_prof) = cached {
+                    return Ok(cached_prof.clone());
+                }
                 let profile_filename = format!("{name}.conf");
                 let prof_file = self.config_dir.join(&RelPath::from(profile_filename));
                 if !prof_file.metadata().is_ok_and(|m| m.is_file()) {
@@ -80,7 +92,9 @@ where
                         "configuration file is missing".into(),
                     ))?;
                 }
-                Ok(Profile::parse(name.into(), prof_file.line_reader()?)?)
+                let loaded = Profile::parse(name.into(), prof_file.line_reader()?)?;
+                cached_profiles.insert(name.into(), loaded.clone());
+                Ok(loaded)
             }
         }
 
