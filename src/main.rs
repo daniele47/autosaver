@@ -1,10 +1,13 @@
 use std::env;
 
-use autosaver::{cli::style::{Styler, TermStyler}, core::{
-    error::Result,
-    fs::{AbsPath, LineWriter},
-    profile::{Profile, ProfileType, composite::HashMapProfileLoader},
-}};
+use autosaver::{
+    cli::style::{Styler, TermStyler},
+    core::{
+        error::Result,
+        fs::{AbsPath, LineWriter},
+        profile::{Profile, ProfileType, composite::HashMapProfileLoader},
+    },
+};
 
 fn purge_path_even_on_panic(tmpdir: &AbsPath) -> impl Drop {
     struct Guard(AbsPath);
