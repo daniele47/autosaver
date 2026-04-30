@@ -48,7 +48,7 @@ pub enum Style {
 /// Options for the `Renderer`.
 #[derive(Debug, Clone, Default)]
 pub struct RendererOptions {
-    has_colors: bool,
+    pub has_colors: bool,
 }
 
 /// Struct that implements `Renderer` to write to the terminal.
@@ -63,7 +63,7 @@ pub trait Renderer {
     type Error: std::error::Error;
 
     /// Allow setting options for the `Renderer`.
-    fn set_options(&mut self, options: RendererOptions);
+    fn options(&mut self) -> &mut RendererOptions;
 
     /// Write a nicely formatted string to the frontend.
     fn write(
@@ -78,7 +78,8 @@ pub trait Renderer {
         str: impl Into<String>,
         styles: &[Style],
     ) -> std::result::Result<(), Self::Error> {
-        self.write(str.into() + "\n", styles)
+        self.write(str.into(), styles)?;
+        self.write("\n", &[])
     }
 }
 
@@ -99,8 +100,8 @@ impl TermRenderer {
 impl Renderer for TermRenderer {
     type Error = Error;
 
-    fn set_options(&mut self, options: RendererOptions) {
-        (*self).options = options;
+    fn options(&mut self) -> &mut RendererOptions {
+        &mut self.options
     }
 
     fn write(

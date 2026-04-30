@@ -1,11 +1,18 @@
-use crate::cli::{actions::Runner, error::Result};
+use crate::cli::{
+    actions::Runner,
+    error::{Error, Result},
+    output::Renderer,
+};
 
 const CARGO_VERSION: &str = env!("CARGO_PKG_VERSION");
 const BIN_NAME: &str = env!("CARGO_PKG_NAME");
 
-impl Runner {
+impl<I> Runner<I>
+where
+    I: Renderer<Error = Error>,
+{
     pub fn version(&mut self) -> Result<()> {
-        println!("{BIN_NAME} {CARGO_VERSION}"); // TODO: replace with proper output interface
-        Ok(())
+        let fmt = format!("{BIN_NAME} {CARGO_VERSION}");
+        self.renderer.writeln(fmt, &[])
     }
 }
