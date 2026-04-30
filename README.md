@@ -49,6 +49,7 @@ Copy-based dotfiles tracking cli, written in rust
 - [x] add `cargo clippy` check before release. If any warning, kill the release!
 - [x] `Renderer` trait that takes care of taking input and rendering it correctly
 - [x] make profile loader for my actions cached (to avoid needing to reparse the file every single time)
+- [ ] `ProfileLoader` does not require generic error type
 
 ## blockers
 
@@ -56,7 +57,7 @@ Copy-based dotfiles tracking cli, written in rust
 
 - [ ] full integration tests, not just individual module tests, to test some scenarios
 - [ ] complete set of working cli functionality, including `help` command
-    - `<list|save|restore> <profile> <--all/-a|--notdiff|--track> <--diff/-d>` backup action
+    - `<list|save|restore> <profile> <--all/-a> <--diff/-d>` backup action
     - `<--help|-h>` to show help relative to the subcommand
     - `--version` to simply print the binary current version
     - `--nocolor` flag to fully disable all coloring in the output

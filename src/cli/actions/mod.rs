@@ -57,7 +57,7 @@ where
         }
     }
 
-    fn profile_loader() -> Result<impl ProfileLoader<Error = Error>> {
+    fn profile_loader() -> Result<impl ProfileLoader<Error = crate::core::error::Error>> {
         struct ProfileLoaderImpl {
             cached: HashMapProfileLoader,
             config_dir: AbsPath,
@@ -73,7 +73,7 @@ where
         }
 
         impl ProfileLoader for ProfileLoaderImpl {
-            type Error = Error;
+            type Error = crate::core::error::Error;
 
             fn load(
                 &mut self,
@@ -89,7 +89,10 @@ where
                 if !prof_file.metadata().is_ok_and(|m| m.is_file()) {
                     Err(crate::core::error::Error::ProfileLoadingFailure(
                         name.into(),
-                        "configuration file is missing".into(),
+                        format!(
+                            "configuration file is missing: {}",
+                            prof_file.to_str_lossy()
+                        ),
                     ))?;
                 }
                 let loaded = Profile::parse(name.into(), prof_file.line_reader()?)?;

@@ -5,7 +5,7 @@ use crate::{
         flags::Flag,
         output::Renderer,
     },
-    core::profile::composite::ProfileLoader,
+    core::profile::{ProfileType, composite::ProfileLoader},
 };
 
 impl<I> Runner<I>
@@ -28,12 +28,34 @@ where
         let wflag_all = self.args.flags().contains(&Flag::Word("all".into()));
         let lflag_all = self.args.flags().contains(&Flag::Letter('a'));
         let flag_all = wflag_all || lflag_all;
-        let flag_notdiff = self.args.flags().contains(&Flag::Word("notdiff".into()));
-        let flag_track = self.args.flags().contains(&Flag::Word("track".into()));
 
         let mut profile_loader = Self::profile_loader()?;
         let profile = profile_loader.load("test")?;
 
-        todo!()
+        // load all modules into a vector
+        let mut modules = vec![];
+        match profile.ptype() {
+            ProfileType::Composite(composite) => {
+                let resolved = composite.resolve(arg_profile, &mut profile_loader)?;
+                for entry in resolved.entries() {
+                    let p = profile_loader.load(entry)?;
+                    match p.ptype() {
+                        ProfileType::Composite(_) => {
+                            unreachable!("Profile should be already solved")
+                        }
+                        ProfileType::Module(module) => {
+                            modules.push(module.clone());
+                        }
+                    }
+                }
+            }
+            ProfileType::Module(module) => {
+                modules.push(module.clone());
+            }
+        }
+
+        println!("{arg_command} {flag_y} {flag_n} {flag_diff} {flag_all}");
+
+        todo!("Do operations on 1 module at a time")
     }
 }
