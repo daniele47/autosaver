@@ -74,6 +74,12 @@ where
             ) -> std::result::Result<crate::core::profile::Profile, Self::Error> {
                 let profile_filename = format!("{name}.conf");
                 let prof_file = self.config_dir.join(&RelPath::from(profile_filename));
+                if !prof_file.metadata().is_ok_and(|m| m.is_file()) {
+                    Err(crate::core::error::Error::ProfileLoadingFailure(
+                        name.into(),
+                        "configuration file is missing".into(),
+                    ))?;
+                }
                 Ok(Profile::parse(name.into(), prof_file.line_reader()?)?)
             }
         }
@@ -89,6 +95,7 @@ where
         let flag_version = flags.contains(&Flag::Word("version".into()));
         let flag_nocolor = flags.contains(&Flag::Word("nocolor".into()));
 
+        // handle global flags
         if flag_nocolor {
             self.renderer.options().has_colors = false;
         }
@@ -99,6 +106,7 @@ where
             return self.help();
         }
 
+        // handle commands
         let command = self.args.params().first().map(|s| s.as_str()).unwrap_or("");
         match command {
             "list" | "save" | "restore" => self.backup(),

@@ -29,7 +29,7 @@ impl Display for Error {
         match self {
             Error::CoreError(error) => write!(f, "{error}"),
             Error::EarlyExit(reason) => write!(f, "{reason}"),
-            Error::FailureLoadingPath(path) => write!(f, "Could not load path '{path}'"),
+            Error::FailureLoadingPath(path) => write!(f, "Could not load path: {path}"),
         }
     }
 }

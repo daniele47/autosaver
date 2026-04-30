@@ -13,7 +13,6 @@ where
     I: Renderer<Error = Error>,
 {
     pub fn backup(&mut self) -> Result<()> {
-        let mut profile_loader = Self::profile_loader()?;
         let mut iter = self.args.params().iter();
         let arg_command = iter.next().map(String::as_str).unwrap_or_default();
         let arg_profile = iter.next().map(String::as_str).unwrap_or_default();
@@ -32,11 +31,8 @@ where
         let flag_notdiff = self.args.flags().contains(&Flag::Word("notdiff".into()));
         let flag_track = self.args.flags().contains(&Flag::Word("track".into()));
 
-        println!(
-            "{arg_command} {arg_profile} {flag_y} {flag_n} {flag_diff} {flag_all} {flag_notdiff} {flag_track} {:?}",
-            Self::paths("home")
-        );
-        let _ = profile_loader.load("test")?;
+        let mut profile_loader = Self::profile_loader()?;
+        let profile = profile_loader.load("test")?;
 
         todo!()
     }
