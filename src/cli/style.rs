@@ -37,6 +37,7 @@ pub trait Styler {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TermStyler {
     text: String,
+    color: bool,
     term_color: &'static str,
     term_decor: &'static str,
     text_type: TextType,
@@ -61,14 +62,25 @@ const UNDERLINE: &str = "\x1b[4m";
 const RESET: &str = "\x1b[m";
 
 impl TermStyler {
-    /// Create new TermStyle
+    /// Create new TermStyle.
     pub fn new(text: String) -> Self {
+        Self::new_with(text, true)
+    }
+
+    /// Create new TermStyle with options.
+    pub fn new_with(text: String, color: bool) -> Self {
         Self {
             text,
+            color,
             term_color: "",
             term_decor: "",
             text_type: TextType::Normal,
         }
+    }
+
+    /// Toggle colors.
+    pub fn set_colors(&mut self, color: bool) {
+        self.color = color;
     }
 }
 
