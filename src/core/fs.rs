@@ -23,7 +23,9 @@ pub struct RelPath {
 }
 
 /// Trait to get a simple way to read line by line from a buffered file.
-pub trait LineReader: Iterator<Item = Result<String>> {}
+pub trait LineReader: Iterator<Item = std::result::Result<String, Self::Error>> {
+    type Error: std::error::Error;
+}
 
 /// Trait to get a simple way to write line by line into a buffered file.
 pub trait LineWriter {
@@ -87,7 +89,12 @@ where
     }
 }
 
-impl<I> LineReader for AnyLineReader<I> where I: Iterator<Item = Result<String>> {}
+impl<I> LineReader for AnyLineReader<I>
+where
+    I: Iterator<Item = Result<String>>,
+{
+    type Error = Error;
+}
 
 impl AnyLineWriter {
     /// Create new AnyLineReader that stores an iterator.
@@ -360,7 +367,7 @@ impl AbsPath {
     ///
     /// Note: since this uses a buffered reader, read could costantly fail. It is thus necessary
     /// to handle the potential error on every each line read! The error is of type std::io::Error!
-    pub fn line_reader(&self) -> Result<impl LineReader> {
+    pub fn line_reader(&self) -> Result<impl LineReader<Error = Error>> {
         // implement line reader
         struct LineReaderImpl {
             path: AbsPath,
@@ -375,7 +382,9 @@ impl AbsPath {
                     .map(|line| line.map_err(|e| Error::IoError(e, self.path.clone().into())))
             }
         }
-        impl LineReader for LineReaderImpl {}
+        impl LineReader for LineReaderImpl {
+            type Error = Error;
+        }
 
         // open file are get a line reader from such file
         let file = File::open(&self.path).map_err(|e| Error::IoError(e, self.path.clone()))?;

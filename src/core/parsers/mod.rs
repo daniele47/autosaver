@@ -32,7 +32,7 @@ struct RawParser {}
 
 impl Profile {
     /// Parse config file line by line into proper struct.
-    pub fn parse(profile: String, reader: impl LineReader) -> Result<Self> {
+    pub fn parse(profile: String, reader: impl LineReader<Error = Error>) -> Result<Self> {
         let mut raw = RawParser::parse(reader);
         if let Some(first) = raw.next() {
             let first = first?;
@@ -89,7 +89,7 @@ impl RawParser {
         }))
     }
 
-    fn parse(reader: impl LineReader) -> impl Iterator<Item = Result<RawItem>> {
+    fn parse(reader: impl LineReader<Error = Error>) -> impl Iterator<Item = Result<RawItem>> {
         reader
             .into_iter()
             .enumerate()
