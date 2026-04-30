@@ -49,7 +49,6 @@ Copy-based dotfiles tracking cli, written in rust
 - [x] add `cargo clippy` check before release. If any warning, kill the release!
 - [x] `Renderer` trait that takes care of taking input and rendering it correctly
 - [x] make profile loader for my actions cached (to avoid needing to reparse the file every single time)
-- [ ] `ProfileLoader` does not require generic error type
 
 ## blockers
 
