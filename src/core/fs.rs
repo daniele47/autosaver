@@ -130,7 +130,7 @@ impl AbsPath {
 
     /// Creates new AbsPath from an absolute path.
     pub fn new(path: PathBuf) -> Self {
-        assert!(path.is_absolute());
+        assert!(path.is_absolute(), "Path is not absolute");
         Self { path }
     }
 
@@ -453,7 +453,7 @@ impl AbsPath {
 impl RelPath {
     /// Creates new RelPath from relative path.
     pub fn new(path: PathBuf) -> Self {
-        assert!(path.is_relative());
+        assert!(path.is_relative(), "Path is not relative");
         Self { path }
     }
 

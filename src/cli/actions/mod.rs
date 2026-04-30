@@ -54,7 +54,10 @@ where
                 let root_dir_var = env::var("AUTOSAVER_ROOT");
                 if let Ok(path) = root_dir_var {
                     let p = AbsPath::from(path);
-                    assert!(p.metadata().is_ok_and(|m| m.is_dir()));
+                    assert!(
+                        p.metadata().is_ok_and(|m| m.is_dir()),
+                        "AUTOSAVER_ROOT does not contain a valid path"
+                    );
                     return Ok(p);
                 }
                 Ok(Self::paths("exe")?.file_parent()?)
