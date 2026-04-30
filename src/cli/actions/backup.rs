@@ -1,6 +1,6 @@
 use crate::{
     cli::{actions::Runner, error::Result, flags::Flag, render::Renderer},
-    core::profile::{ProfileType, composite::ProfileLoader},
+    core::profile::composite::ProfileLoader,
 };
 
 impl<I: Renderer> Runner<I> {
@@ -23,33 +23,11 @@ impl<I: Renderer> Runner<I> {
         let flag_all = wflag_all || lflag_all;
 
         let mut profile_loader = Self::profile_loader()?;
-        let profile = profile_loader.load("test")?;
+        let root_profile = profile_loader.load("test")?;
 
-        // load all modules into a vector
-        let mut modules = vec![];
-        match profile.ptype() {
-            ProfileType::Composite(composite) => {
-                let resolved = composite.resolve(arg_profile, &mut profile_loader)?;
-                for entry in resolved.entries() {
-                    let p = profile_loader.load(entry)?;
-                    match p.ptype() {
-                        ProfileType::Composite(_) => {
-                            unreachable!("Profile should be already solved")
-                        }
-                        ProfileType::Module(module) => {
-                            modules.push(module.clone());
-                        }
-                    }
-                }
-            }
-            ProfileType::Module(module) => {
-                modules.push(module.clone());
-            }
-        }
-
-        // apply command on each module
-
-        println!("{arg_command} {flag_y} {flag_n} {flag_diff} {flag_all}");
+        println!(
+            "{arg_command} {flag_y} {flag_n} {flag_diff} {flag_all} {root_profile:?} {arg_profile}"
+        );
 
         todo!("Do operations on 1 module at a time")
     }
