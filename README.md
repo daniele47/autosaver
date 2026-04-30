@@ -55,13 +55,11 @@ Copy-based dotfiles tracking cli, written in rust
 
 - [ ] full integration tests, not just individual module tests, to test some scenarios
 - [ ] complete set of working cli functionality, including `help` command
-    - backup action:
-        - `list` to just list changed files
-        - `save` to apply save action on specified profile
-        - `restore` to apply restore action on specified profile
-    - `--help` to show help relative to the subcommand
+    - `<list|save|restore> <profile> <--all/-a|--notdiff|--track> <--diff/-d>` backup action
+    - `<--help|-h>` to show help relative to the subcommand
     - `--version` to simply print the binary current version
     - `--nocolor` flag to fully disable all coloring in the output
+    - `<--assumeyes/-y|--assumeno/-n>` to skip all confermations
 - [ ] bash wrapper script to take care of downloading the rust binary and all        
     - (?) keep a timestamp of latest update check? so that i can actually propose to update if current binary is old once in a while
         
