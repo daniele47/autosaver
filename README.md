@@ -54,6 +54,7 @@ Copy-based dotfiles tracking cli, written in rust
 - [x] `Renderer` has no need for an error return. either fail silently or panic entirely
 - [x] remove `where` clausoles where not necessary (aka single simple generic)
 - [x] remove generic error types from all pub traits. too much complexity!
+- [x] implement files different checker
 
 ## blockers
 

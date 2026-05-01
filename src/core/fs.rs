@@ -292,6 +292,37 @@ impl AbsPath {
         Ok(())
     }
 
+    /// Check if two files content is equal.
+    pub fn content_eq(&self, other: &AbsPath) -> bool {
+        if let Ok(sm) = self.metadata()
+            && let Ok(om) = other.metadata()
+        {
+            // check both paths are files
+            if !sm.is_file() || !om.is_file() {
+                return false;
+            }
+
+            // check file len for faster checks
+            if sm.len() != om.len() {
+                return false;
+            }
+
+            // check line by line equality
+            if let Ok(mut sr) = self.line_reader()
+                && let Ok(mut or) = other.line_reader()
+            {
+                loop {
+                    match (sr.next(), or.next()) {
+                        (Some(Ok(a)), Some(Ok(b))) if a == b => continue,
+                        (None, None) => return true,
+                        _ => return false,
+                    }
+                }
+            }
+        }
+        false
+    }
+
     /// List all files in a directory.
     ///
     /// Notes: this will get ALL files, even directories, symlinks, all rust can get.

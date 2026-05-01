@@ -1,5 +1,10 @@
 use crate::{
-    cli::{actions::Runner, error::Result, flags::Flag, render::Renderer},
+    cli::{
+        actions::Runner,
+        error::Result,
+        flags::Flag,
+        render::{Renderer, Style},
+    },
     core::profile::{ProfileType, composite::ProfileLoader, module::ModulePolicy},
 };
 
@@ -39,6 +44,9 @@ impl<I: Renderer> Runner<I> {
                 ProfileType::Module(module) => {
                     let backup_dir = &backup_dir.joins(&[profile.name()]);
                     let module = module.merge_bases(&home_dir, &backup_dir)?;
+
+                    let profile_str = format!("*** {} ***\n", profile.name());
+                    self.renderer.writeln(profile_str, &[Style::Purple]);
 
                     // iterate all entries of a module
                     for entry in module.entries() {
