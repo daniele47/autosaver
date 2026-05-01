@@ -4,14 +4,13 @@ set -e
 
 ### CUSTOMIZABLE ###
 export AUTOSAVER_ROOT="" # set the root directory for the autosaver binary
-GITHUB_REPO=""    # set the github repo to use as the upstream to download binaries from
 
 ### DO NOT EDIT ###
 # setup defaults for all environment variables
 [[ -z "$AUTOSAVER_ROOT" ]] && AUTOSAVER_ROOT="$(dirname "$(realpath "${BASH_SOURCE[0]}")")" # use this script directory as the autosaver root directory
-[[ -z "$GITHUB_REPO" ]] && GITHUB_REPO="daniele47/autosaver"
 
 # other useful variables
+GITHUB_REPO="daniele47/autosaver"
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/autosaver"
 PLATFORM="$(uname -s)"
 ARCHITECTURE="$(uname -m)"

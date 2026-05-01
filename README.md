@@ -80,3 +80,16 @@ This profile will:
 - ignore `.config/nvim/lazy-lock.json` file that was included with the first line (`ignore` policy)
 
 ## How to use
+
+- just copy `init/autosaver` bash script in the directory you want to use to save dotfiles in
+
+The first time the script is run, it will download the rust autocompiled binary by and hosted on `github`, and it will
+store it in the `cache` directory, properly following `xdg-base` specifications. 
+
+NOTE: there is no automatic update system in place. Thus:
+- to update the binary, it's enough to delete `$XDG_CACHE_HOME/autosaver` directory, and run the script again
+- updating the bash script needs to be done manually (but it will rarely ever change!)
+
+NOTE: for documentation:
+- you can configurate a few parameters in the bash script, it is all documented in the bash script itself.
+- to get a full list of commands for the cli itself, just run the script with `--help`
