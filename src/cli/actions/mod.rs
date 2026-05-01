@@ -36,28 +36,29 @@ impl<I: Renderer> Runner<I> {
     const CARGO_VERSION: &str = env!("CARGO_PKG_VERSION");
     const BIN_NAME: &str = env!("CARGO_PKG_NAME");
 
-    fn paths(path: &str) -> Result<AbsPath> {
+    fn paths(path: &str) -> AbsPath {
         match path {
-            "home" => env::var("HOME")
-                .map_err(|_| Error::FailureLoadingPath(path.to_string()))
-                .map(AbsPath::from),
-            "exe" => env::current_exe()
-                .map(AbsPath::from)
-                .map_err(|_| Error::FailureLoadingPath(path.to_string())),
-            "root" => {
-                let root_dir_var = env::var("AUTOSAVER_ROOT");
-                if let Ok(path) = root_dir_var {
-                    let p = AbsPath::from(path);
-                    assert!(
-                        p.metadata().is_ok_and(|m| m.is_dir()),
-                        "AUTOSAVER_ROOT does not contain a valid path"
-                    );
-                    return Ok(p);
-                }
-                Ok(Self::paths("exe")?.file_parent()?)
+            "home" => {
+                let home = env::var("HOME").expect("Missing HOME environment variable");
+                let home = AbsPath::from(home);
+                assert!(
+                    home.metadata().is_ok_and(|m| m.is_dir()),
+                    "HOME does not contain a valid directory path"
+                );
+                home
             }
-            "backup" => Ok(Self::paths("root")?.joins(&["backup"])),
-            "config" => Ok(Self::paths("root")?.joins(&["config"])),
+            "root" => {
+                let root = env::var("AUTOSAVER_ROOT");
+                let root = root.expect("Missing AUTOSAVER_ROOT environment variable");
+                let root = AbsPath::from(root);
+                assert!(
+                    root.metadata().is_ok_and(|m| m.is_dir()),
+                    "AUTOSAVER_ROOT does not contain a valid directory path"
+                );
+                root
+            }
+            "backup" => Self::paths("root").joins(&["backup"]),
+            "config" => Self::paths("root").joins(&["config"]),
             _ => unreachable!("Invalid path"),
         }
     }
@@ -101,7 +102,7 @@ impl<I: Renderer> Runner<I> {
             }
         }
 
-        Ok(ProfileLoaderImpl::new(Self::paths("config")?))
+        Ok(ProfileLoaderImpl::new(Self::paths("config")))
     }
 
     /// Run the cli application.
