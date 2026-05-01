@@ -38,6 +38,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
 
     steps:
+      # verify tag and cargo.toml version match when trying to make a new release
       - name: Checkout code
         uses: actions/checkout@v6
 
@@ -124,6 +125,7 @@ jobs:
           #   use_cross: false
 
     steps:
+      # checkout code and download required to compile
       - name: Checkout code
         uses: actions/checkout@v6
 
@@ -136,6 +138,7 @@ jobs:
         if: matrix.platform.use_cross
         run: cargo install cross --git https://github.com/cross-rs/cross
 
+      # test, assert there are no clippy warnings and finally cross compile
       - name: Test with cross (build)
         if: matrix.platform.use_cross
         run: cross test --target ${{ matrix.platform.target }}
@@ -150,8 +153,9 @@ jobs:
 
       - name: Build with cross
         if: matrix.platform.use_cross
-        run: cross build --release --target ${{ matrix.platform.target }}
+        run: cross build --release --frozen --target ${{ matrix.platform.target }}
 
+      # test, assert there are no clippy warnings and finally build natively
       - name: Test natively (debug)
         if: ${{ !matrix.platform.use_cross }}
         run: cargo test --target ${{ matrix.platform.target }}
@@ -166,8 +170,9 @@ jobs:
 
       - name: Build natively
         if: ${{ !matrix.platform.use_cross }}
-        run: cargo build --release --target ${{ matrix.platform.target }}
+        run: cargo build --release --frozen --target ${{ matrix.platform.target }}
 
+      # package binaries
       - name: Get binary name
         id: binary_name
         shell: bash
@@ -191,6 +196,7 @@ jobs:
             tar -czf "dist/${ARCHIVE_NAME}.tar.gz" -C "${TARGET_DIRNAME}/${{ matrix.platform.target }}/release" "${BINARY_NAME}${{ matrix.platform.binary_ext }}"
           fi
 
+      # upload artifacts
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
@@ -205,6 +211,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     
     steps:
+      # download artifacts and make a release
       - name: Download all artifacts
         uses: actions/download-artifact@v7
         with:
