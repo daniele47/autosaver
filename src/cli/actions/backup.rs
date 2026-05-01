@@ -69,6 +69,17 @@ impl<I: InOut> Runner<I> {
                                 }
                                 self.inout.write("- ", &[]);
                                 self.inout.writeln(format!("{path}"), &[Style::Yellow]);
+                                if act_save {
+                                    self.inout.write("Do you want to update it? [y/n] ", &[]);
+                                    if flag_y || self.inout.read_line() == "y" {
+                                        home_file.copy_file(&backup_file, false)?;
+                                    }
+                                } else if act_restore {
+                                    self.inout.write("Do you want to update it? [y/n] ", &[]);
+                                    if flag_y || self.inout.read_line() == "y" {
+                                        backup_file.copy_file(&home_file, false)?;
+                                    }
+                                }
                             }
                             // home => backup
                             (true, false) => {
@@ -77,6 +88,12 @@ impl<I: InOut> Runner<I> {
                                 }
                                 self.inout.write("- ", &[]);
                                 self.inout.writeln(format!("{path}"), &[Style::Red]);
+                                if act_save {
+                                    self.inout.write("Do you want to save it? [y/n] ", &[]);
+                                    if flag_y || self.inout.read_line() == "y" {
+                                        home_file.copy_file(&backup_file, false)?;
+                                    }
+                                }
                             }
                             // backup => home
                             (false, true) => {
@@ -85,6 +102,12 @@ impl<I: InOut> Runner<I> {
                                 }
                                 self.inout.write("- ", &[]);
                                 self.inout.writeln(format!("{path}"), &[Style::Red]);
+                                if act_restore {
+                                    self.inout.write("Do you want to restore it? [y/n] ", &[]);
+                                    if flag_y || self.inout.read_line() == "y" {
+                                        backup_file.copy_file(&home_file, false)?;
+                                    }
+                                }
                             }
                             (false, false) => unreachable!("At least one file should exist"),
                             _ => {}

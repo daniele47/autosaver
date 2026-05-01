@@ -5,8 +5,6 @@ use std::{
     io::{Write, stdout},
 };
 
-use crate::cli::error::Result;
-
 // colors
 const RESET: &str = "\x1b[0m";
 const RED: &str = "\x1b[31m";
@@ -76,7 +74,7 @@ pub trait InOut {
     fn warning(&mut self, str: impl Display);
 
     /// Read a line from the frontend.
-    fn read_line(&mut self) -> String;
+    fn read_line(&self) -> String;
 }
 
 impl IoOutOptions {
@@ -134,7 +132,7 @@ impl InOut for TermInOut {
         };
     }
 
-    fn read_line(&mut self) -> String {
+    fn read_line(&self) -> String {
         let mut input = String::new();
 
         // flush stdout
