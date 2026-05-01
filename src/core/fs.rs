@@ -22,6 +22,13 @@ pub struct RelPath {
     path: PathBuf,
 }
 
+/// Simple enum to check what type of path a string is.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub enum PathType {
+    Relative,
+    Absolute,
+}
+
 /// Trait to get a simple way to read line by line from a buffered file.
 pub trait LineReader: Iterator<Item = Result<String>> {}
 
@@ -93,6 +100,25 @@ impl LineWriter for AnyLineWriter {
 
     fn flush(&mut self) -> Result<()> {
         Ok(())
+    }
+}
+
+impl From<&str> for PathType {
+    fn from(path: &str) -> Self {
+        let pathbuf = PathBuf::from(path);
+        if pathbuf.is_absolute() {
+            PathType::Absolute
+        } else if pathbuf.is_relative() {
+            PathType::Relative
+        } else {
+            unreachable!("File MUST be either absolute or relative")
+        }
+    }
+}
+
+impl From<String> for PathType {
+    fn from(path: String) -> Self {
+        path.as_str().into()
     }
 }
 

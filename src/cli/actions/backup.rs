@@ -29,8 +29,8 @@ impl<I: InOut> Runner<I> {
         let flag_all = wflag_all || lflag_all;
 
         // paths
-        let home_dir = Self::paths("home");
-        let backup_dir = Self::paths("backup");
+        let home_dir = Self::paths("home")?;
+        let backup_dir = Self::paths("backup")?;
 
         // resolve profile into all leafs
         let mut profile_loader = Self::profile_loader()?;

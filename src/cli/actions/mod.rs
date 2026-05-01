@@ -4,12 +4,12 @@ use std::env;
 
 use crate::{
     cli::{
-        error::Result,
+        error::{Error, Result},
         flags::{Flag, ParsedArgs},
         inout::InOut,
     },
     core::{
-        fs::{AbsPath, RelPath},
+        fs::{AbsPath, PathType, RelPath},
         profile::{
             Profile,
             composite::{HashMapProfileLoader, ProfileLoader},
@@ -36,29 +36,43 @@ impl<I: InOut> Runner<I> {
     const CARGO_VERSION: &str = env!("CARGO_PKG_VERSION");
     const BIN_NAME: &str = env!("CARGO_PKG_NAME");
 
-    fn paths(path: &str) -> AbsPath {
+    fn paths(path: &str) -> Result<AbsPath> {
         match path {
             "home" => {
-                let home = env::var("HOME").expect("Missing HOME environment variable");
-                let home = AbsPath::from(home);
-                assert!(
-                    home.metadata().is_ok_and(|m| m.is_dir()),
-                    "HOME does not contain a valid directory path"
-                );
-                home
+                let var = env::var("HOME")
+                    .map_err(|_| Error::GenericError("Missing HOME environment variable".into()))?;
+                if PathType::from(var.as_str()) != PathType::Absolute {
+                    return Err(Error::GenericError(
+                        "HOME variable is not an absolute path".into(),
+                    ));
+                }
+                let var = AbsPath::from(var);
+                if !var.metadata().is_ok_and(|m| m.is_dir()) {
+                    return Err(Error::GenericError(
+                        "HOME variable doesn't contain a valid directory path".into(),
+                    ));
+                }
+                Ok(var)
             }
             "root" => {
-                let root = env::var("AUTOSAVER_ROOT");
-                let root = root.expect("Missing AUTOSAVER_ROOT environment variable");
-                let root = AbsPath::from(root);
-                assert!(
-                    root.metadata().is_ok_and(|m| m.is_dir()),
-                    "AUTOSAVER_ROOT does not contain a valid directory path"
-                );
-                root
+                let var = env::var("AUTOSAVER_ROOT").map_err(|_| {
+                    Error::GenericError("Missing AUTOSAVER_ROOT environment variable".into())
+                })?;
+                if PathType::from(var.as_str()) != PathType::Absolute {
+                    return Err(Error::GenericError(
+                        "AUTOSAVER_ROOT variable is not an absolute path".into(),
+                    ));
+                }
+                let var = AbsPath::from(var);
+                if !var.metadata().is_ok_and(|m| m.is_dir()) {
+                    return Err(Error::GenericError(
+                        "AUTOSAVER_ROOT variable doesn't contain a valid directory path".into(),
+                    ));
+                }
+                Ok(var)
             }
-            "backup" => Self::paths("root").joins(&["backup"]),
-            "config" => Self::paths("root").joins(&["config"]),
+            "backup" => Self::paths("root").map(|p| p.joins(&["backup"])),
+            "config" => Self::paths("root").map(|p| p.joins(&["config"])),
             _ => unreachable!("Invalid path"),
         }
     }
@@ -102,7 +116,7 @@ impl<I: InOut> Runner<I> {
             }
         }
 
-        Ok(ProfileLoaderImpl::new(Self::paths("config")))
+        Ok(ProfileLoaderImpl::new(Self::paths("config")?))
     }
 
     /// Run the cli application.

@@ -10,6 +10,9 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub enum Error {
     /// Error coming from core module.
     CoreError(crate::core::error::Error),
+
+    /// Generic error
+    GenericError(String),
 }
 
 impl From<crate::core::error::Error> for Error {
@@ -22,6 +25,7 @@ impl Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Error::CoreError(error) => write!(f, "{error}"),
+            Error::GenericError(error) => write!(f, "{error}"),
         }
     }
 }
