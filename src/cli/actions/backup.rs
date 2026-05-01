@@ -48,8 +48,8 @@ impl<I: Renderer> Runner<I> {
                     let backup_dir = &backup_dir.joins(&[profile.name()]);
                     let module = module.merge_bases(&home_dir, &backup_dir)?;
 
-                    let str = format!("*** {} ***\n", profile.name());
-                    self.renderer.writeln(str, &[Style::Purple, Style::Bold]);
+                    let str = format!("*** {} ***", profile.name());
+                    self.renderer.writeln(str, &[Style::Blue]);
 
                     // iterate all entries of a module
                     for entry in module.entries() {
@@ -57,7 +57,7 @@ impl<I: Renderer> Runner<I> {
                             continue;
                         }
                         let home_file = home_dir.join(entry.path());
-                        let backup_file = home_dir.join(entry.path());
+                        let backup_file = backup_dir.join(entry.path());
                         let is_home_file = home_file.metadata().is_ok_and(|m| m.is_file());
                         let is_backup_file = backup_file.metadata().is_ok_and(|m| m.is_file());
                         let path = home_file.to_str_lossy();
