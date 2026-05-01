@@ -39,17 +39,17 @@ impl<I: InOut> Runner<I> {
     fn paths(path: &str) -> Result<AbsPath> {
         match path {
             "home" => {
-                let var = env::var("HOME")
-                    .map_err(|_| Error::GenericError("Missing HOME environment variable".into()))?;
+                let var = env::var("AUTOSAVER_HOME")
+                    .map_err(|_| Error::GenericError("Missing AUTOSAVER_HOME environment variable".into()))?;
                 if PathType::from(var.as_str()) != PathType::Absolute {
                     return Err(Error::GenericError(
-                        "HOME variable is not an absolute path".into(),
+                        "AUTOSAVER_HOME variable is not an absolute path".into(),
                     ));
                 }
                 let var = AbsPath::from(var);
                 if !var.metadata().is_ok_and(|m| m.is_dir()) {
                     return Err(Error::GenericError(
-                        "HOME variable doesn't contain a valid directory path".into(),
+                        "AUTOSAVER_HOME variable doesn't contain a valid directory path".into(),
                     ));
                 }
                 Ok(var)
