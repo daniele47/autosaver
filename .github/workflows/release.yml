@@ -4,7 +4,7 @@
 #
 # Steps to update:
 # - fix all cargo clippy warnings, as those will block a new release
-# - update Cargo.toml version
+# - update Cargo.toml version, and then `cargo build` to make sure Cargo.lock is correct
 # - create a new git tag starting with v and then EXACTLY the same version as specified in Cargo.toml
 # - potentially edit the github release to add docs and all
 #
