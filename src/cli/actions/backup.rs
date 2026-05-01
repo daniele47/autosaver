@@ -14,6 +14,7 @@ impl<I: Renderer> Runner<I> {
         // get args
         let mut iter = self.args.params().iter();
         let arg_command = iter.next().map(String::as_str).unwrap_or_default();
+        let act_list = arg_command == "list";
         let act_save = arg_command == "save";
         let act_restore = arg_command == "restore";
         let arg_profile = iter.next().map(String::as_str).unwrap_or_default();
@@ -47,8 +48,8 @@ impl<I: Renderer> Runner<I> {
                     let backup_dir = &backup_dir.joins(&[profile.name()]);
                     let module = module.merge_bases(&home_dir, &backup_dir)?;
 
-                    let profile_str = format!("*** {} ***\n", profile.name());
-                    self.renderer.writeln(profile_str, &[Style::Purple]);
+                    let str = format!("*** {} ***\n", profile.name());
+                    self.renderer.writeln(str, &[Style::Purple, Style::Bold]);
 
                     // iterate all entries of a module
                     for entry in module.entries() {
@@ -61,16 +62,29 @@ impl<I: Renderer> Runner<I> {
                         let is_backup_file = backup_file.metadata().is_ok_and(|m| m.is_file());
                         let path = home_file.to_str_lossy();
                         match (is_home_file, is_backup_file) {
+                            // files differ
                             (true, true) if !home_file.content_eq(&backup_file) => {
+                                if entry.policy() == ModulePolicy::NotDiff && !flag_all {
+                                    continue;
+                                }
                                 self.renderer.write("- ", &[]);
                                 self.renderer.writeln(format!("{path}"), &[Style::Yellow]);
-                                todo!();
                             }
+                            // home => backup
                             (true, false) => {
-                                todo!()
+                                if !act_list && !act_save {
+                                    continue;
+                                }
+                                self.renderer.write("- ", &[]);
+                                self.renderer.writeln(format!("{path}"), &[Style::Red]);
                             }
+                            // backup => home
                             (false, true) => {
-                                todo!()
+                                if !act_list && !act_restore {
+                                    continue;
+                                }
+                                self.renderer.write("- ", &[]);
+                                self.renderer.writeln(format!("{path}"), &[Style::Red]);
                             }
                             (false, false) => unreachable!("At least one file should exist"),
                             _ => {}
