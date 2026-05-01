@@ -55,6 +55,7 @@ Copy-based dotfiles tracking cli, written in rust
 - [x] remove `where` clausoles where not necessary (aka single simple generic)
 - [x] remove generic error types from all pub traits. too much complexity!
 - [x] implement files different checker
+- [ ] add an `Input` interface to prompt for user input or add a method to `Renderer`
 
 ## blockers
 

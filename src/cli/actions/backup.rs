@@ -14,6 +14,8 @@ impl<I: Renderer> Runner<I> {
         // get args
         let mut iter = self.args.params().iter();
         let arg_command = iter.next().map(String::as_str).unwrap_or_default();
+        let act_save = arg_command == "save";
+        let act_restore = arg_command == "restore";
         let arg_profile = iter.next().map(String::as_str).unwrap_or_default();
         let wflag_y = self.args.flags().contains(&Flag::Word("assumeyes".into()));
         let lflag_y = self.args.flags().contains(&Flag::Letter('y'));
@@ -57,8 +59,11 @@ impl<I: Renderer> Runner<I> {
                         let backup_file = home_dir.join(entry.path());
                         let is_home_file = home_file.metadata().is_ok_and(|m| m.is_file());
                         let is_backup_file = backup_file.metadata().is_ok_and(|m| m.is_file());
+                        let path = home_file.to_str_lossy();
                         match (is_home_file, is_backup_file) {
-                            (true, true) => {
+                            (true, true) if !home_file.content_eq(&backup_file) => {
+                                self.renderer.write("- ", &[]);
+                                self.renderer.writeln(format!("{path}"), &[Style::Yellow]);
                                 todo!();
                             }
                             (true, false) => {
@@ -68,6 +73,7 @@ impl<I: Renderer> Runner<I> {
                                 todo!()
                             }
                             (false, false) => unreachable!("At least one file should exist"),
+                            _ => {}
                         }
                     }
                 }
