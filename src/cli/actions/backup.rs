@@ -1,6 +1,6 @@
 use crate::{
     cli::{actions::Runner, error::Result, flags::Flag, render::Renderer},
-    core::profile::composite::ProfileLoader,
+    core::profile::{ProfileType, composite::ProfileLoader},
 };
 
 impl<I: Renderer> Runner<I> {
@@ -22,12 +22,26 @@ impl<I: Renderer> Runner<I> {
         let lflag_all = self.args.flags().contains(&Flag::Letter('a'));
         let flag_all = wflag_all || lflag_all;
 
+        let home_dir = Self::paths("home");
+        let backup_dir = Self::paths("backup");
+
         let mut profile_loader = Self::profile_loader()?;
         let root_profile = profile_loader.load("test")?;
-        let modules = root_profile.resolve(&mut profile_loader)?;
+        let profiles = root_profile.resolve(&mut profile_loader)?;
 
-        println!("{modules:?} {arg_command} {flag_y} {flag_n}");
-        println!("{flag_diff} {flag_all} {root_profile:?} {arg_profile}");
+        for profile in profiles {
+            match profile.ptype() {
+                ProfileType::Composite(_) => unreachable!("Composite profile impossible here"),
+                ProfileType::Module(module) => {
+                    let backup_dir = &backup_dir.joins(&[profile.name()]);
+                    let module = module.merge_bases(&home_dir, &backup_dir)?;
+
+                    // TODO: actions on all files
+                    println!("{module:?} {arg_command} {flag_y} {flag_n}");
+                    println!("{flag_diff} {flag_all} {root_profile:?} {arg_profile}");
+                }
+            }
+        }
 
         todo!("Do operations on 1 module at a time")
     }
