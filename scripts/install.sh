@@ -55,4 +55,4 @@ tar -xzf "$LOCAL_TMP_DIR/archive.tar.gz" -C "$LOCAL_BIN_PATH_DIR"
 echo "(3/$TASKS) Cleaning up temporary files..."
 rm -rf "$LOCAL_TMP_DIR"
 
-echo "Autosaver Installed / updated!"
+echo "Autosaver Installed/updated!"
