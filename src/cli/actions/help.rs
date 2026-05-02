@@ -10,11 +10,59 @@ impl<I: InOut> Runner<I> {
         let col = Self::HELP_COLOR;
         let io = &mut self.inout;
         match first {
-            "list" => {}
-            "save" => {}
-            "restore" => {}
-            "rmhome" => {}
-            "rmbackup" => {}
+            "list" => {
+                io.writeln("Commands:", col);
+                io.write("  list [PROFILE]  ", col);
+                io.writeln("Show differences between home and backup files", &[]);
+            }
+            "save" => {
+                io.writeln("Commands:", col);
+                io.write("  save [PROFILE]  ", col);
+                io.writeln("Save changes from the home directory to the backup", &[]);
+                io.writeln("", &[]);
+                io.writeln("Flags:", col);
+                io.write("  --assumeyes -y  ", col);
+                io.writeln("Automatically answer yes to all prompts", &[]);
+                io.write("  --assumeno -n   ", col);
+                io.writeln("Automatically answer no to all prompts", &[]);
+                io.write("  --all -a        ", col);
+                io.writeln("Show files which are ignored by default", &[]);
+            }
+            "restore" => {
+                io.writeln("Commands:", col);
+                io.write("  restore [PROFILE]   ", col);
+                io.writeln("Restore changes from the backup to the home directory", &[]);
+                io.writeln("", &[]);
+                io.writeln("Flags:", col);
+                io.write("  --assumeyes -y      ", col);
+                io.writeln("Automatically answer yes to all prompts", &[]);
+                io.write("  --assumeno -n       ", col);
+                io.writeln("Automatically answer no to all prompts", &[]);
+                io.write("  --all -a            ", col);
+                io.writeln("Show files which are ignored by default", &[]);
+            }
+            "rmhome" => {
+                io.writeln("Commands:", col);
+                io.write("  rmhome [PROFILE]    ", col);
+                io.writeln("Delete files from home directory [DANGEROUS]", &[]);
+                io.writeln("", &[]);
+                io.writeln("Flags:", col);
+                io.write("  --assumeyes -y      ", col);
+                io.writeln("Automatically answer yes to all prompts", &[]);
+                io.write("  --assumeno -n       ", col);
+                io.writeln("Automatically answer no to all prompts", &[]);
+            }
+            "rmbackup" => {
+                io.writeln("Commands:", col);
+                io.write("  rmbackup [PROFILE]  ", col);
+                io.writeln("Delete files from backup directory [DANGEROUS]", &[]);
+                io.writeln("", &[]);
+                io.writeln("Flags:", col);
+                io.write("  --assumeyes -y      ", col);
+                io.writeln("Automatically answer yes to all prompts", &[]);
+                io.write("  --assumeno -n       ", col);
+                io.writeln("Automatically answer no to all prompts", &[]);
+            }
             _ => {
                 io.writeln("Commands:", col);
                 io.write("  list        ", col);
