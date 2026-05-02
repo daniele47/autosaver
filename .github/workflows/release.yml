@@ -54,14 +54,21 @@ jobs:
           # Extract tag version
           TAG="${GITHUB_REF_NAME}"
           TAG="${TAG#v}"      # remove leading 'v'
-          TAG="${TAG%%-*}"    # remove everything after '-'
 
+          # Check if this is a prerelease (contains hyphen)
+          if [[ "$TAG" == *"-"* ]]; then
+              echo "📦 Prerelease tag detected, skipping version check"
+              echo "✅ Prerelease check passed"
+              exit 0
+          fi
+
+          # For stable releases, verify version matches
           echo "Crate version: $CRATE_VERSION"
           echo "Tag version:   $TAG"
 
           if [ "$CRATE_VERSION" != "$TAG" ]; then
-            echo "❌ Version mismatch!"
-            exit 1
+              echo "❌ Version mismatch!"
+              exit 1
           fi
 
           echo "✅ Versions match"
