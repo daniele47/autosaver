@@ -5,8 +5,8 @@ impl<I: InOut> Runner<I> {
     pub fn help(&mut self) -> Result<()> {
         self.check_flags(&["--help", "--nocolor"])?;
         let first = self.args.params().first().map(String::as_ref).unwrap_or("");
-        let second = self.args.params().get(1).map(String::as_ref).unwrap_or("");
-        let third = self.args.params().get(2).map(String::as_ref).unwrap_or("");
+        let _ = self.args.params().get(1).map(String::as_ref).unwrap_or("");
+        let _ = self.args.params().get(2).map(String::as_ref).unwrap_or("");
         let col = Self::HELP_COLOR;
         match first {
             _ => {
