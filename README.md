@@ -85,10 +85,9 @@ This profile will:
 The first time the script is run, it will download the rust autocompiled binary by and hosted on `github`, and it will
 store it in the `cache` directory, properly following `xdg-base` specifications. 
 
-NOTE: there is no automatic update system in place. Thus:
-- to update the binary, it's enough to delete `$XDG_CACHE_HOME/autosaver` directory, and run the script again
-- updating the bash script needs to be done manually (but it will rarely ever change!)
+NOTE:
+- run the bash script to install the rust binary and completions if missing
+- run the bash script with `UPDATE= ./autosaver` to force an update of binary and completions
+- run the bash script with `REMOVE= ./autosaver` to remove all things installed by the program 
 
-NOTE: for documentation:
-- you can configurate a few parameters in the bash script, it is all documented in the bash script itself.
-- to get a full list of commands for the cli itself, just run the script with `--help`
+NOTE: Just run `./autosaver --help` to get list of commands, flags and environment variables
