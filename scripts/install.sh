@@ -57,4 +57,5 @@ mv "$LOCAL_TMP_DIR/autosaver/"* "$LOCAL_BIN_PATH_DIR"
 echo "(3/$TASKS) Cleaning up temporary files..."
 rm -rf "$LOCAL_TMP_DIR"
 
-echo "Autosaver installed/updated!"
+echo -e "Autosaver installed/updated: "
+"$LOCAL_BIN_PATH_DIR/autosaver" --version

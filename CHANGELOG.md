@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v0.3.4
+
+### Patches
+
+- install script now shows downloaded version
+
 ## v0.3.3
 
 ### Patches
