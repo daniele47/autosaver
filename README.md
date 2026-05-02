@@ -89,5 +89,6 @@ NOTE:
 - run the bash script to install the rust binary and completions if missing
 - run the bash script with `INSTALL= ./autosaver` to force an update of binary and completions
 - run the bash script with `UNINSTALL= ./autosaver` to remove all things installed by the program 
+- run the bash script with `UNINSTALL= INSTALL= ./autosaver` to update everything
 
 NOTE: Just run `./autosaver --help` to get list of commands, flags and environment variables
