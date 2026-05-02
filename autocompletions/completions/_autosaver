@@ -1,0 +1,221 @@
+#compdef autosaver
+
+autoload -U is-at-least
+
+_autosaver() {
+    typeset -A opt_args
+    typeset -a _arguments_options
+    local ret=1
+
+    if is-at-least 5.2; then
+        _arguments_options=(-s -S -C)
+    else
+        _arguments_options=(-s -C)
+    fi
+
+    local context curcontext="$curcontext" state line
+    _arguments "${_arguments_options[@]}" : \
+'--nocolor=[]: :_default' \
+'-h[Print help]' \
+'--help[Print help]' \
+'-V[Print version]' \
+'--version[Print version]' \
+":: :_autosaver_commands" \
+"*::: :->autosaver" \
+&& ret=0
+    case $state in
+    (autosaver)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:autosaver-command-$line[1]:"
+        case $line[1] in
+            (list)
+_arguments "${_arguments_options[@]}" : \
+'--nocolor=[]: :_default' \
+'-h[Print help]' \
+'--help[Print help]' \
+'::profile:_default' \
+&& ret=0
+;;
+(save)
+_arguments "${_arguments_options[@]}" : \
+'-y+[]: :_default' \
+'--assumeyes=[]: :_default' \
+'-n+[]: :_default' \
+'--assumeno=[]: :_default' \
+'-a+[]: :_default' \
+'--all=[]: :_default' \
+'--nocolor=[]: :_default' \
+'-h[Print help]' \
+'--help[Print help]' \
+'::profile:_default' \
+&& ret=0
+;;
+(restore)
+_arguments "${_arguments_options[@]}" : \
+'-y+[]: :_default' \
+'--assumeyes=[]: :_default' \
+'-n+[]: :_default' \
+'--assumeno=[]: :_default' \
+'-a+[]: :_default' \
+'--all=[]: :_default' \
+'--nocolor=[]: :_default' \
+'-h[Print help]' \
+'--help[Print help]' \
+'::profile:_default' \
+&& ret=0
+;;
+(rmhome)
+_arguments "${_arguments_options[@]}" : \
+'-y+[]: :_default' \
+'--assumeyes=[]: :_default' \
+'-n+[]: :_default' \
+'--assumeno=[]: :_default' \
+'--nocolor=[]: :_default' \
+'-h[Print help]' \
+'--help[Print help]' \
+'::profile:_default' \
+&& ret=0
+;;
+(rmbackup)
+_arguments "${_arguments_options[@]}" : \
+'-y+[]: :_default' \
+'--assumeyes=[]: :_default' \
+'-n+[]: :_default' \
+'--assumeno=[]: :_default' \
+'--nocolor=[]: :_default' \
+'-h[Print help]' \
+'--help[Print help]' \
+'::profile:_default' \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+":: :_autosaver__subcmd__help_commands" \
+"*::: :->help" \
+&& ret=0
+
+    case $state in
+    (help)
+        words=($line[1] "${words[@]}")
+        (( CURRENT += 1 ))
+        curcontext="${curcontext%:*:*}:autosaver-help-command-$line[1]:"
+        case $line[1] in
+            (list)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(save)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(restore)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(rmhome)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(rmbackup)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+(help)
+_arguments "${_arguments_options[@]}" : \
+&& ret=0
+;;
+        esac
+    ;;
+esac
+;;
+        esac
+    ;;
+esac
+}
+
+(( $+functions[_autosaver_commands] )) ||
+_autosaver_commands() {
+    local commands; commands=(
+'list:Show differences' \
+'save:Save to backup' \
+'restore:Restore from backup' \
+'rmhome:Delete from home' \
+'rmbackup:Delete from backup' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'autosaver commands' commands "$@"
+}
+(( $+functions[_autosaver__subcmd__help_commands] )) ||
+_autosaver__subcmd__help_commands() {
+    local commands; commands=(
+'list:Show differences' \
+'save:Save to backup' \
+'restore:Restore from backup' \
+'rmhome:Delete from home' \
+'rmbackup:Delete from backup' \
+'help:Print this message or the help of the given subcommand(s)' \
+    )
+    _describe -t commands 'autosaver help commands' commands "$@"
+}
+(( $+functions[_autosaver__subcmd__help__subcmd__help_commands] )) ||
+_autosaver__subcmd__help__subcmd__help_commands() {
+    local commands; commands=()
+    _describe -t commands 'autosaver help help commands' commands "$@"
+}
+(( $+functions[_autosaver__subcmd__help__subcmd__list_commands] )) ||
+_autosaver__subcmd__help__subcmd__list_commands() {
+    local commands; commands=()
+    _describe -t commands 'autosaver help list commands' commands "$@"
+}
+(( $+functions[_autosaver__subcmd__help__subcmd__restore_commands] )) ||
+_autosaver__subcmd__help__subcmd__restore_commands() {
+    local commands; commands=()
+    _describe -t commands 'autosaver help restore commands' commands "$@"
+}
+(( $+functions[_autosaver__subcmd__help__subcmd__rmbackup_commands] )) ||
+_autosaver__subcmd__help__subcmd__rmbackup_commands() {
+    local commands; commands=()
+    _describe -t commands 'autosaver help rmbackup commands' commands "$@"
+}
+(( $+functions[_autosaver__subcmd__help__subcmd__rmhome_commands] )) ||
+_autosaver__subcmd__help__subcmd__rmhome_commands() {
+    local commands; commands=()
+    _describe -t commands 'autosaver help rmhome commands' commands "$@"
+}
+(( $+functions[_autosaver__subcmd__help__subcmd__save_commands] )) ||
+_autosaver__subcmd__help__subcmd__save_commands() {
+    local commands; commands=()
+    _describe -t commands 'autosaver help save commands' commands "$@"
+}
+(( $+functions[_autosaver__subcmd__list_commands] )) ||
+_autosaver__subcmd__list_commands() {
+    local commands; commands=()
+    _describe -t commands 'autosaver list commands' commands "$@"
+}
+(( $+functions[_autosaver__subcmd__restore_commands] )) ||
+_autosaver__subcmd__restore_commands() {
+    local commands; commands=()
+    _describe -t commands 'autosaver restore commands' commands "$@"
+}
+(( $+functions[_autosaver__subcmd__rmbackup_commands] )) ||
+_autosaver__subcmd__rmbackup_commands() {
+    local commands; commands=()
+    _describe -t commands 'autosaver rmbackup commands' commands "$@"
+}
+(( $+functions[_autosaver__subcmd__rmhome_commands] )) ||
+_autosaver__subcmd__rmhome_commands() {
+    local commands; commands=()
+    _describe -t commands 'autosaver rmhome commands' commands "$@"
+}
+(( $+functions[_autosaver__subcmd__save_commands] )) ||
+_autosaver__subcmd__save_commands() {
+    local commands; commands=()
+    _describe -t commands 'autosaver save commands' commands "$@"
+}
+
+if [ "$funcstack[1]" = "_autosaver" ]; then
+    _autosaver "$@"
+else
+    compdef _autosaver autosaver
+fi
