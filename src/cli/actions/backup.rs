@@ -93,6 +93,8 @@ impl<I: InOut> Runner<I> {
 
                         // rmhome
                         if act_rmhome && is_home_file {
+                            self.inout.write("- ", &[]);
+                            self.inout.writeln(path.to_string(), &[Style::Red]);
                             self.inout
                                 .write("Do you want to delete the home file? [y/n] ", &[]);
                             if !flag_n && (flag_y || self.inout.read_line() == "y") {
@@ -105,6 +107,8 @@ impl<I: InOut> Runner<I> {
 
                         // rmbackup
                         if act_rmbackup && is_backup_file {
+                            self.inout.write("- ", &[]);
+                            self.inout.writeln(path.to_string(), &[Style::Red]);
                             self.inout
                                 .write("Do you want to delete the backup file? [y/n] ", &[]);
                             if !flag_n && (flag_y || self.inout.read_line() == "y") {
@@ -120,6 +124,9 @@ impl<I: InOut> Runner<I> {
                             // files differ
                             (true, true) if !home_file.content_eq(&backup_file) => {
                                 if entry.policy() == ModulePolicy::NotDiff && !flag_all {
+                                    continue;
+                                }
+                                if !act_list && !act_save && !act_restore {
                                     continue;
                                 }
                                 self.inout.write("- ", &[]);
