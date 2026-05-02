@@ -5,6 +5,7 @@ All notable changes to this project will be documented here
 ## dev
 
 - [ ] changing bash script to have almost no logic, and leave all the logic in update/uninstall scripts in the repo itself
+- [x] update help msg to list environment variables
 
 ## v0.3.2
 

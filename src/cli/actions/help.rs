@@ -69,23 +69,31 @@ impl<I: InOut> Runner<I> {
             }
             _ => {
                 io.writeln("Commands:", col);
-                io.write("  list        ", col);
+                io.write("  AUTOSAVER_ROOT      ", col);
+                io.writeln("Set the root directory for the program", &[]);
+                io.write("  AUTOSAVER_HOME      ", col);
+                io.writeln("Set the backup directory for the program", &[]);
+                io.write("  AUTOSAVER_PROFILE   ", col);
+                io.writeln("Set the profile to use if none are passed", &[]);
+                io.writeln("", &[]);
+                io.writeln("Commands:", col);
+                io.write("  list                ", col);
                 io.writeln("Show differences between home and backup files", &[]);
-                io.write("  save        ", col);
+                io.write("  save                ", col);
                 io.writeln("Save changes from the home directory to the backup", &[]);
-                io.write("  restore     ", col);
+                io.write("  restore             ", col);
                 io.writeln("Restore changes from the backup to the home directory", &[]);
-                io.write("  rmhome      ", col);
+                io.write("  rmhome              ", col);
                 io.writeln("Delete files from home directory [DANGEROUS]", &[]);
-                io.write("  rmbackup    ", col);
+                io.write("  rmbackup            ", col);
                 io.writeln("Delete files from backup directory [DANGEROUS]", &[]);
                 io.writeln("", &[]);
                 io.writeln("Flags:", col);
-                io.write("  --help -h   ", col);
+                io.write("  --help -h           ", col);
                 io.writeln("Print the help message for commands and subcommands", &[]);
-                io.write("  --version   ", col);
+                io.write("  --version           ", col);
                 io.writeln("Print the binary version", &[]);
-                io.write("  --nocolor   ", col);
+                io.write("  --nocolor           ", col);
                 io.writeln("Avoid all colors in the output", &[]);
             }
         }
