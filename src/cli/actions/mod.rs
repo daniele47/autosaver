@@ -40,9 +40,7 @@ impl<I: InOut> Runner<I> {
     fn paths(path: &str) -> Result<AbsPath> {
         match path {
             "home" => {
-                let var = env::var("AUTOSAVER_HOME").map_err(|_| {
-                    Error::GenericError("Missing AUTOSAVER_HOME environment variable".into())
-                })?;
+                let var = Self::env("home")?;
                 if PathType::from(var.as_str()) != PathType::Absolute {
                     return Err(Error::GenericError(
                         "AUTOSAVER_HOME variable is not an absolute path".into(),
@@ -57,9 +55,7 @@ impl<I: InOut> Runner<I> {
                 Ok(var)
             }
             "root" => {
-                let var = env::var("AUTOSAVER_ROOT").map_err(|_| {
-                    Error::GenericError("Missing AUTOSAVER_ROOT environment variable".into())
-                })?;
+                let var = Self::env("root")?;
                 if PathType::from(var.as_str()) != PathType::Absolute {
                     return Err(Error::GenericError(
                         "AUTOSAVER_ROOT variable is not an absolute path".into(),
@@ -90,6 +86,20 @@ impl<I: InOut> Runner<I> {
             }
         }
         Ok(())
+    }
+
+    fn load_env(env: &str) -> Result<String> {
+        env::var(env)
+            .map_err(|_| Error::GenericError(format!("{env} variable is empty or not defined")))
+    }
+
+    fn env(env: &str) -> Result<String> {
+        match env {
+            "profile" => Self::load_env("AUTOSAVER_PROFILE"),
+            "root" => Self::load_env("AUTOSAVER_ROOT"),
+            "home" => Self::load_env("AUTOSAVER_HOME"),
+            _ => unreachable!("Invalid env"),
+        }
     }
 
     fn profile_loader() -> Result<impl ProfileLoader> {
