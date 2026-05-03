@@ -4,6 +4,8 @@ All notable changes to this project will be documented here
 
 ## WIP
 
+- [ ] fix content_eq function which is unable to compare binary files atm
+
 ### Patches
 
 - flags with no commands now are treated as errors too.
