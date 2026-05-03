@@ -6,7 +6,7 @@ All notable changes to this project will be documented here
 
 ### Features
 
-- [WIP] implemented Myers algorithm to diff files
+- implemented Myers algorithm to diff files, and used in new `-d|--diff` flag in `save|restore`
 
 ### Patches
 

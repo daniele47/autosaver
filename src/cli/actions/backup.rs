@@ -14,7 +14,7 @@ impl<I: InOut> Runner<I> {
         // check flags
         match self.args.params().first().map(String::as_str).unwrap_or("") {
             "list" => {
-                self.check_flags(&["--nocolor", "--all", "-a"])?;
+                self.check_flags(&["--nocolor", "--all", "-a", "--diff", "-d"])?;
             }
             "save" | "restore" => {
                 self.check_flags(&[
@@ -24,6 +24,8 @@ impl<I: InOut> Runner<I> {
                     "-n",
                     "--all",
                     "-a",
+                    "--diff",
+                    "-d",
                     "--nocolor",
                 ])?;
             }

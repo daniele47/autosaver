@@ -3,7 +3,7 @@ use crate::cli::{actions::Runner, error::Result, inout::InOut};
 impl<I: InOut> Runner<I> {
     /// Help action to render help message.
     pub fn help(&mut self) -> Result<()> {
-        self.check_flags(&["--help", "--nocolor"])?;
+        self.check_flags(&["--help", "--nocolor", "-h"])?;
         let first = self.args.params().first().map(String::as_ref).unwrap_or("");
         let _ = self.args.params().get(1).map(String::as_ref).unwrap_or("");
         let _ = self.args.params().get(2).map(String::as_ref).unwrap_or("");
@@ -18,6 +18,8 @@ impl<I: InOut> Runner<I> {
                 io.writeln("Flags:", col);
                 io.write("  --all -a        ", col);
                 io.writeln("Show files which are ignored by default", &[]);
+                io.write("  --diff -d       ", col);
+                io.writeln("Show entire diff between files", &[]);
             }
             "save" => {
                 io.writeln("Commands:", col);
@@ -31,6 +33,8 @@ impl<I: InOut> Runner<I> {
                 io.writeln("Automatically answer no to all prompts", &[]);
                 io.write("  --all -a        ", col);
                 io.writeln("Show files which are ignored by default", &[]);
+                io.write("  --diff -d       ", col);
+                io.writeln("Show some lines of diff between files", &[]);
             }
             "restore" => {
                 io.writeln("Commands:", col);
@@ -44,6 +48,8 @@ impl<I: InOut> Runner<I> {
                 io.writeln("Automatically answer no to all prompts", &[]);
                 io.write("  --all -a            ", col);
                 io.writeln("Show files which are ignored by default", &[]);
+                io.write("  --diff -d       ", col);
+                io.writeln("Show some lines of diff between files", &[]);
             }
             "rmhome" => {
                 io.writeln("Commands:", col);
