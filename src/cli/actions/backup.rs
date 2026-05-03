@@ -54,6 +54,9 @@ impl<I: InOut> Runner<I> {
         let wflag_all = self.args.flags().contains(&Flag::Word("all".into()));
         let lflag_all = self.args.flags().contains(&Flag::Letter('a'));
         let flag_all = wflag_all || lflag_all;
+        let wflag_diff = self.args.flags().contains(&Flag::Word("diff".into()));
+        let lflag_diff = self.args.flags().contains(&Flag::Letter('d'));
+        let flag_diff = wflag_diff || lflag_diff;
 
         if arg_profile.is_empty() {
             if env_profile.is_empty() {
@@ -133,6 +136,13 @@ impl<I: InOut> Runner<I> {
                                 }
                                 self.inout.write("- ", &[]);
                                 self.inout.writeln(path.to_string(), Self::DIFF_COLOR);
+                                if flag_diff {
+                                    if act_restore {
+                                        self.render_diff(&home_file, &backup_file)?;
+                                    } else {
+                                        self.render_diff(&backup_file, &home_file)?;
+                                    }
+                                }
                                 if act_save {
                                     self.inout.write("Do you want to update it? [y/n] ", &[]);
                                     if !flag_n && (flag_y || self.inout.read_line() == "y") {
