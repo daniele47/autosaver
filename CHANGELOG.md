@@ -4,11 +4,11 @@ All notable changes to this project will be documented here
 
 ## WIP
 
-- [ ] --assumeyes and --assumeno flags (and their letter flag versions) stopped working entirely
 
 ### Patches
 
 - updated bash script to shorten its runtime, and get a faster running cli
+- fixed `--assumeyes|-y` and `--assumeno|-y` flags, now properly skipping prompt
 
 ## v0.4.1
 

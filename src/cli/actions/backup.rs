@@ -101,35 +101,17 @@ impl<I: InOut> Runner<I> {
                         // rmhome
                         if act_rmhome && is_home_file {
                             self.inout.writeln(path.to_string(), Self::MISS_COLOR);
-                            self.inout
-                                .write("Do you want to delete the home file? [y/n/q] ", &[]);
-                            let input = self.inout.read_line();
-                            if input == "q" {
-                                exit(0);
-                            }
-                            if !flag_n && (flag_y || input == "y") {
-                                home_file.purge_path(false)?;
-                            }
-                            if flag_n || flag_y {
-                                self.inout.writeln("", &[]);
-                            }
+                            self.prompt("Do you want to delete the home file?", || {
+                                Ok(home_file.purge_path(false)?)
+                            })?;
                         }
 
                         // rmbackup
                         if act_rmbackup && is_backup_file {
                             self.inout.writeln(path.to_string(), Self::MISS_COLOR);
-                            self.inout
-                                .write("Do you want to delete the backup file? [y/n/q] ", &[]);
-                            let input = self.inout.read_line();
-                            if input == "q" {
-                                exit(0);
-                            }
-                            if !flag_n && (flag_y || input == "y") {
-                                backup_file.purge_path(false)?;
-                            }
-                            if flag_n || flag_y {
-                                self.inout.writeln("", &[]);
-                            }
+                            self.prompt("Do you want to delete the backup file?", || {
+                                Ok(backup_file.purge_path(false)?)
+                            })?;
                         }
 
                         // list|save|restore
@@ -151,21 +133,13 @@ impl<I: InOut> Runner<I> {
                                     }
                                 }
                                 if act_save || act_restore {
-                                    self.inout.write("Do you want to update it? [y/n/q] ", &[]);
-                                    let input = self.inout.read_line();
-                                    if input == "q" {
-                                        exit(0);
-                                    }
-                                    if flag_y || input == "y" {
+                                    self.prompt("Do you want to update it?", || {
                                         if act_restore {
-                                            backup_file.copy_file(&home_file, false)?;
+                                            Ok(backup_file.copy_file(&home_file, false)?)
                                         } else {
-                                            home_file.copy_file(&backup_file, false)?;
+                                            Ok(home_file.copy_file(&backup_file, false)?)
                                         }
-                                    }
-                                    if flag_n || flag_y {
-                                        self.inout.writeln("", &[]);
-                                    }
+                                    })?;
                                 }
                             }
                             // home => backup
@@ -175,17 +149,9 @@ impl<I: InOut> Runner<I> {
                                 }
                                 self.inout.writeln(path.to_string(), Self::MISS_COLOR);
                                 if act_save {
-                                    self.inout.write("Do you want to save it? [y/n/q] ", &[]);
-                                    let input = self.inout.read_line();
-                                    if input == "q" {
-                                        exit(0);
-                                    }
-                                    if !flag_n && (flag_y || input == "y") {
-                                        home_file.copy_file(&backup_file, false)?;
-                                    }
-                                    if flag_n || flag_y {
-                                        self.inout.writeln("", &[]);
-                                    }
+                                    self.prompt("Do you want to save it?", || {
+                                        Ok(home_file.copy_file(&backup_file, false)?)
+                                    })?;
                                 }
                             }
                             // backup => home
@@ -195,17 +161,9 @@ impl<I: InOut> Runner<I> {
                                 }
                                 self.inout.writeln(path.to_string(), Self::MISS_COLOR);
                                 if act_restore {
-                                    self.inout.write("Do you want to restore it? [y/n/q] ", &[]);
-                                    let input = self.inout.read_line();
-                                    if input == "q" {
-                                        exit(0);
-                                    }
-                                    if flag_y || input == "y" {
-                                        backup_file.copy_file(&home_file, false)?;
-                                    }
-                                    if flag_n || flag_y {
-                                        self.inout.writeln("", &[]);
-                                    }
+                                    self.prompt("Do you want to restore it?", || {
+                                        Ok(backup_file.copy_file(&home_file, false)?)
+                                    })?;
                                 }
                             }
                             (false, false) => unreachable!("At least one file should exist"),

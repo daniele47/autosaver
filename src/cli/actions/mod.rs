@@ -1,6 +1,6 @@
 //! Module to run cli.
 
-use std::{env, io::ErrorKind};
+use std::{env, io::ErrorKind, process::exit};
 
 use crate::{
     cli::{
@@ -131,6 +131,32 @@ impl<I: InOut> Runner<I> {
                     self.inout.writeln(line, &[]);
                 }
             }
+        }
+        Ok(())
+    }
+
+    fn prompt<T: Fn() -> Result<()>>(&mut self, msg: &str, run: T) -> Result<()> {
+        let wflag_y = self.args.flags().contains(&Flag::Word("assumeyes".into()));
+        let lflag_y = self.args.flags().contains(&Flag::Letter('y'));
+        let flag_y = wflag_y || lflag_y;
+        let wflag_n = self.args.flags().contains(&Flag::Word("assumeno".into()));
+        let lflag_n = self.args.flags().contains(&Flag::Letter('n'));
+        let flag_n = wflag_n || lflag_n;
+
+        self.inout.write(format!("{msg} [y/n/q] "), &[]);
+        if flag_y {
+            run()?;
+            return Ok(());
+        }
+        let input = self.inout.read_line();
+        if input == "q" {
+            exit(0);
+        }
+        if input == "y" {
+            run()?;
+        }
+        if flag_n || flag_y {
+            self.inout.writeln("", &[]);
         }
         Ok(())
     }
