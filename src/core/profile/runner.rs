@@ -1,6 +1,6 @@
 //! This module implements structs and modules to handle Runner profile.
 
-use crate::core::fs::RelPath;
+use crate::core::fs::{AbsPath, RelPath};
 
 /// Policy for runner entries.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
@@ -71,5 +71,14 @@ impl Runner {
     /// Add a new entry.
     pub fn add_entry(&mut self, entry: RunnerEntry) {
         self.entries.push(entry);
+    }
+
+    /// Resolve a raw runner profile into one with a list of all files.
+    ///
+    /// Note: this is guaranteed to be orderer in the following way:
+    /// - in the exact same way files appeared in the config file
+    /// - directories are resolved to all files inside, orderered alphabetically
+    pub fn resolve(&self, run_dir: &AbsPath) -> Self {
+        todo!()
     }
 }
