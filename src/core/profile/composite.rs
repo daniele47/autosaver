@@ -71,7 +71,7 @@ impl Composite {
         for child in self.entries() {
             let child_profile = loader.load(child);
             if let Ok(cp) = child_profile {
-                if !matches!(cp.ptype, ProfileType::Module(_)) {
+                if matches!(cp.ptype, ProfileType::Composite(_)) {
                     return false;
                 }
             } else {
@@ -118,7 +118,7 @@ impl Composite {
 
             // check if leaf profile
             let item_profile = loader.load(&item_name)?;
-            if matches!(item_profile.ptype, ProfileType::Module(_)) {
+            if !matches!(item_profile.ptype, ProfileType::Composite(_)) {
                 entries.push(item_name.clone());
                 visited.insert(item_name);
                 continue;
