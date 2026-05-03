@@ -98,7 +98,6 @@ impl<I: InOut> Runner<I> {
 
                         // rmhome
                         if act_rmhome && is_home_file {
-                            self.inout.write("- ", &[]);
                             self.inout.writeln(path.to_string(), Self::MISS_COLOR);
                             self.inout
                                 .write("Do you want to delete the home file? [y/n] ", &[]);
@@ -112,7 +111,6 @@ impl<I: InOut> Runner<I> {
 
                         // rmbackup
                         if act_rmbackup && is_backup_file {
-                            self.inout.write("- ", &[]);
                             self.inout.writeln(path.to_string(), Self::MISS_COLOR);
                             self.inout
                                 .write("Do you want to delete the backup file? [y/n] ", &[]);
@@ -134,7 +132,6 @@ impl<I: InOut> Runner<I> {
                                 if !act_list && !act_save && !act_restore {
                                     continue;
                                 }
-                                self.inout.write("- ", &[]);
                                 self.inout.writeln(path.to_string(), Self::DIFF_COLOR);
                                 if flag_diff {
                                     if act_restore {
@@ -166,7 +163,6 @@ impl<I: InOut> Runner<I> {
                                 if !act_list && !act_save {
                                     continue;
                                 }
-                                self.inout.write("- ", &[]);
                                 self.inout.writeln(path.to_string(), Self::MISS_COLOR);
                                 if act_save {
                                     self.inout.write("Do you want to save it? [y/n] ", &[]);
@@ -183,7 +179,6 @@ impl<I: InOut> Runner<I> {
                                 if !act_list && !act_restore {
                                     continue;
                                 }
-                                self.inout.write("- ", &[]);
                                 self.inout.writeln(path.to_string(), Self::MISS_COLOR);
                                 if act_restore {
                                     self.inout.write("Do you want to restore it? [y/n] ", &[]);

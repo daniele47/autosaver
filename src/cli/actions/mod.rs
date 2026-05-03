@@ -108,12 +108,17 @@ impl<I: InOut> Runner<I> {
     }
 
     fn render_diff(&mut self, file1: &AbsPath, file2: &AbsPath) -> Result<()> {
-        // self.inout.writeln("-".repeat(80), &[]);
         for line in file1.calc_diff(file2)? {
             match line {
                 LineDiff::Equal(_) => {}
-                LineDiff::Insert(line) => self.inout.writeln(line, Self::ADD_COLOR),
-                LineDiff::Delete(line) => self.inout.writeln(line, Self::RM_COLOR),
+                LineDiff::Insert(line) => {
+                    self.inout.write("+ ", Self::ADD_COLOR);
+                    self.inout.writeln(line, &[]);
+                }
+                LineDiff::Delete(line) => {
+                    self.inout.write("- ", Self::RM_COLOR);
+                    self.inout.writeln(line, &[]);
+                }
             }
         }
         Ok(())
