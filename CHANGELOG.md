@@ -6,6 +6,10 @@ All notable changes to this project will be documented here
 
 - [ ] --assumeyes and --assumeno flags (and their letter flag versions) stopped working entirely
 
+### Patches
+
+- updated bash script to shorten its runtime, and get a faster running cli
+
 ## v0.4.1
 
 ### Patches
