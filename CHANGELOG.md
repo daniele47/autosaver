@@ -4,6 +4,10 @@ All notable changes to this project will be documented here
 
 ## WIP
 
+### Features
+
+- [WIP] implemented Myers algorithm to diff files
+
 ### Patches
 
 - improved cli colors

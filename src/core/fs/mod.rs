@@ -10,6 +10,9 @@ use std::{
 
 use crate::core::error::{Error, Result};
 
+mod myers;
+pub use myers::Op;
+
 /// Struct storing an absolute path.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct AbsPath {
