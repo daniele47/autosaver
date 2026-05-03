@@ -5,6 +5,7 @@ use crate::core::{
     profile::{
         composite::{Composite, ProfileLoader},
         module::Module,
+        runner::Runner,
     },
 };
 
@@ -17,8 +18,10 @@ pub mod runner;
 pub enum ProfileType {
     /// Profile storing list of profiles.
     Composite(Composite),
-    /// Special leaf profile with no children.
+    /// Profile to list dotfiles.
     Module(Module),
+    /// Profile to list run scripts.
+    Runner(Runner),
 }
 
 /// Represents a autosaver profile.

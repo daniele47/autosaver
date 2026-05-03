@@ -72,6 +72,7 @@ impl<I: InOut> Runner<I> {
         for profile in profiles {
             match profile.ptype() {
                 ProfileType::Composite(_) => unreachable!("Composite profile impossible here"),
+                ProfileType::Runner(_) => {},
                 ProfileType::Module(module) => {
                     let backup_dir = &backup_dir.joins(&[profile.name()]);
                     let module = module.merge_bases(&home_dir, backup_dir)?;

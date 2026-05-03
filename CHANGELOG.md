@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented here
 
+## WIP
+
+### Features
+
+- added new runner profile
+
+### Patches
+
+- removed valid name checker for composite profiles
+
 ## v0.4.2
 
 ### Patches

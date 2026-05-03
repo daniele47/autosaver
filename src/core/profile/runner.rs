@@ -3,7 +3,7 @@
 use crate::core::fs::RelPath;
 
 /// Policy for runner entries.
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub enum RunnerPolicy {
     /// Run files with this policy.
     #[default]
@@ -13,14 +13,14 @@ pub enum RunnerPolicy {
 }
 
 /// Represent a single entry of a runner profile.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RunnerEntry {
     path: RelPath,
     policy: RunnerPolicy,
 }
 
 /// Represents the runner profile.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Runner {
     entries: Vec<RunnerEntry>,
 }

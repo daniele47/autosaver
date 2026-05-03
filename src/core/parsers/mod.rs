@@ -7,12 +7,13 @@
 use crate::core::{
     error::{Error, Result},
     fs::LineReader,
-    parsers::{composite::CompositeParser, module::ModuleParser},
+    parsers::{composite::CompositeParser, module::ModuleParser, runner::RunnerParser},
     profile::Profile,
 };
 
 mod composite;
 mod module;
+mod runner;
 
 #[derive(Debug)]
 enum RawKind {
@@ -47,6 +48,7 @@ impl Profile {
             match content.as_str() {
                 "type composite" => CompositeParser::parse(profile, raw),
                 "type module" => ModuleParser::parse(profile, raw),
+                "type runner" => RunnerParser::parse(profile, raw),
                 _ => Err(Error::InvalidOptionLine(profile, first.line, content)),
             }
         } else {
