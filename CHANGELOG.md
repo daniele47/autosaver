@@ -7,6 +7,7 @@ All notable changes to this project will be documented here
 ### Features
 
 - implemented Myers algorithm to diff files, and used in new `-d|--diff` flag in `save|restore`
+- added q into prompt to instantly quit
 
 ### Patches
 

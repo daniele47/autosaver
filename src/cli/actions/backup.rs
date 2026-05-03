@@ -1,3 +1,5 @@
+use std::process::exit;
+
 use crate::{
     cli::{
         actions::Runner,
@@ -100,8 +102,12 @@ impl<I: InOut> Runner<I> {
                         if act_rmhome && is_home_file {
                             self.inout.writeln(path.to_string(), Self::MISS_COLOR);
                             self.inout
-                                .write("Do you want to delete the home file? [y/n] ", &[]);
-                            if !flag_n && (flag_y || self.inout.read_line() == "y") {
+                                .write("Do you want to delete the home file? [y/n/q] ", &[]);
+                            let input = self.inout.read_line();
+                            if input == "q" {
+                                exit(0);
+                            }
+                            if !flag_n && (flag_y || input == "y") {
                                 home_file.purge_path(false)?;
                             }
                             if flag_n || flag_y {
@@ -113,8 +119,12 @@ impl<I: InOut> Runner<I> {
                         if act_rmbackup && is_backup_file {
                             self.inout.writeln(path.to_string(), Self::MISS_COLOR);
                             self.inout
-                                .write("Do you want to delete the backup file? [y/n] ", &[]);
-                            if !flag_n && (flag_y || self.inout.read_line() == "y") {
+                                .write("Do you want to delete the backup file? [y/n/q] ", &[]);
+                            let input = self.inout.read_line();
+                            if input == "q" {
+                                exit(0);
+                            }
+                            if !flag_n && (flag_y || input == "y") {
                                 backup_file.purge_path(false)?;
                             }
                             if flag_n || flag_y {
@@ -140,18 +150,18 @@ impl<I: InOut> Runner<I> {
                                         self.render_diff(&backup_file, &home_file)?;
                                     }
                                 }
-                                if act_save {
-                                    self.inout.write("Do you want to update it? [y/n] ", &[]);
-                                    if !flag_n && (flag_y || self.inout.read_line() == "y") {
-                                        home_file.copy_file(&backup_file, false)?;
+                                if act_save || act_restore {
+                                    self.inout.write("Do you want to update it? [y/n/q] ", &[]);
+                                    let input = self.inout.read_line();
+                                    if input == "q" {
+                                        exit(0);
                                     }
-                                    if flag_n || flag_y {
-                                        self.inout.writeln("", &[]);
-                                    }
-                                } else if act_restore {
-                                    self.inout.write("Do you want to update it? [y/n] ", &[]);
-                                    if flag_y || self.inout.read_line() == "y" {
-                                        backup_file.copy_file(&home_file, false)?;
+                                    if flag_y || input == "y" {
+                                        if act_restore {
+                                            backup_file.copy_file(&home_file, false)?;
+                                        } else {
+                                            home_file.copy_file(&backup_file, false)?;
+                                        }
                                     }
                                     if flag_n || flag_y {
                                         self.inout.writeln("", &[]);
@@ -165,8 +175,12 @@ impl<I: InOut> Runner<I> {
                                 }
                                 self.inout.writeln(path.to_string(), Self::MISS_COLOR);
                                 if act_save {
-                                    self.inout.write("Do you want to save it? [y/n] ", &[]);
-                                    if !flag_n && (flag_y || self.inout.read_line() == "y") {
+                                    self.inout.write("Do you want to save it? [y/n/q] ", &[]);
+                                    let input = self.inout.read_line();
+                                    if input == "q" {
+                                        exit(0);
+                                    }
+                                    if !flag_n && (flag_y || input == "y") {
                                         home_file.copy_file(&backup_file, false)?;
                                     }
                                     if flag_n || flag_y {
@@ -181,8 +195,12 @@ impl<I: InOut> Runner<I> {
                                 }
                                 self.inout.writeln(path.to_string(), Self::MISS_COLOR);
                                 if act_restore {
-                                    self.inout.write("Do you want to restore it? [y/n] ", &[]);
-                                    if flag_y || self.inout.read_line() == "y" {
+                                    self.inout.write("Do you want to restore it? [y/n/q] ", &[]);
+                                    let input = self.inout.read_line();
+                                    if input == "q" {
+                                        exit(0);
+                                    }
+                                    if flag_y || input == "y" {
                                         backup_file.copy_file(&home_file, false)?;
                                     }
                                     if flag_n || flag_y {
