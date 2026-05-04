@@ -1,6 +1,6 @@
-use crate::cli::{actions::Runner, error::Result, inout::InOut};
+use crate::cli::{actions::Runner, error::Result};
 
-impl<I: InOut> Runner<I> {
+impl Runner {
     /// Version action to render the binary version.
     pub fn version(&mut self) -> Result<()> {
         let fmt = format!("{} {}", Self::BIN_NAME, Self::CARGO_VERSION);

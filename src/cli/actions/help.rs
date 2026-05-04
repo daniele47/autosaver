@@ -1,6 +1,6 @@
-use crate::cli::{actions::Runner, error::Result, inout::InOut};
+use crate::cli::{actions::Runner, error::Result};
 
-impl<I: InOut> Runner<I> {
+impl Runner {
     /// Help action to render help message.
     pub fn help(&mut self) -> Result<()> {
         self.check_flags("--help", &["--help", "--nocolor", "-h"])?;

@@ -6,7 +6,7 @@ use crate::{
     cli::{
         error::{Error, Result},
         flags::{Flag, ParsedArgs},
-        inout::{InOut, Style},
+        inout::{Style, TermInOut},
     },
     core::{
         fs::{AbsPath, LineDiff, PathType, RelPath},
@@ -24,14 +24,14 @@ mod version;
 
 /// Struct with data and methods to run cli.
 #[derive(Debug, Clone)]
-pub struct Runner<I: InOut> {
+pub struct Runner {
     args: ParsedArgs,
-    inout: I,
+    inout: TermInOut,
 }
 
-impl<I: InOut> Runner<I> {
+impl Runner {
     /// Create new runner.
-    pub fn new(args: ParsedArgs, inout: I) -> Self {
+    pub fn new(args: ParsedArgs, inout: TermInOut) -> Self {
         Self { args, inout }
     }
 

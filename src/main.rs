@@ -3,7 +3,7 @@ use std::{env, process::exit};
 use autosaver::cli::{
     actions::Runner,
     flags::ParsedArgs,
-    inout::{InOut, IoOutOptions, TermInOut},
+    inout::{IoOutOptions, TermInOut},
 };
 
 fn main() {

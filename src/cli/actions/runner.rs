@@ -8,7 +8,6 @@ use crate::{
         actions::Runner,
         error::{Error, Result},
         flags::Flag,
-        inout::InOut,
     },
     core::{
         fs::RelPath,
@@ -16,7 +15,7 @@ use crate::{
     },
 };
 
-impl<I: InOut> Runner<I> {
+impl Runner {
     /// Backup action to list/save/restore files.
     pub fn runner(&mut self) -> Result<()> {
         // check flags

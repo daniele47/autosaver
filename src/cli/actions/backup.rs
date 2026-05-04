@@ -1,9 +1,9 @@
 use crate::{
-    cli::{actions::Runner, error::Result, flags::Flag, inout::InOut},
+    cli::{actions::Runner, error::Result, flags::Flag},
     core::profile::{ProfileType, composite::ProfileLoader, module::ModulePolicy},
 };
 
-impl<I: InOut> Runner<I> {
+impl Runner {
     /// Backup action to list/save/restore files.
     pub fn backup(&mut self) -> Result<()> {
         // check flags

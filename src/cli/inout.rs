@@ -53,30 +53,6 @@ pub struct TermInOut {
     options: IoOutOptions,
 }
 
-/// Render strings nicely to a frontend, be it a terminal or whatever.
-pub trait InOut: Clone {
-    /// Allow setting options for the `InOut`.
-    fn options(&mut self) -> &mut IoOutOptions;
-
-    /// Write a nicely formatted string to the frontend.
-    fn write(&mut self, str: impl Display, styles: &[Style]);
-
-    /// Write with an ending newline.
-    fn writeln(&mut self, str: impl Into<String>, styles: &[Style]) {
-        self.write(str.into(), styles);
-        self.write("\n", &[]);
-    }
-
-    /// Write an error to the frontend.
-    fn error(&mut self, str: impl Display);
-
-    /// Write a warning to the frontend.
-    fn warning(&mut self, str: impl Display);
-
-    /// Read a line from the frontend.
-    fn read_line(&self) -> String;
-}
-
 impl IoOutOptions {
     /// Create new option struct.
     pub fn new(has_colors: bool) -> Self {
@@ -91,12 +67,12 @@ impl TermInOut {
     }
 }
 
-impl InOut for TermInOut {
-    fn options(&mut self) -> &mut IoOutOptions {
+impl TermInOut {
+    pub fn options(&mut self) -> &mut IoOutOptions {
         &mut self.options
     }
 
-    fn write(&mut self, str: impl Display, styles: &[Style]) {
+    pub fn write(&mut self, str: impl Display, styles: &[Style]) {
         let colors = styles
             .iter()
             .map(|f| match f {
@@ -118,21 +94,26 @@ impl InOut for TermInOut {
         };
     }
 
-    fn error(&mut self, str: impl Display) {
+    pub fn writeln(&mut self, str: impl Display, styles: &[Style]) {
+        self.write(str, styles);
+        self.write("\n", &[]);
+    }
+
+    pub fn error(&mut self, str: impl Display) {
         match self.options.has_colors {
             true => eprintln!("{RED}{BOLD}ERROR: {str}{RESET}"),
             false => eprintln!("ERROR: {str}"),
         };
     }
 
-    fn warning(&mut self, str: impl Display) {
+    pub fn warning(&mut self, str: impl Display) {
         match self.options.has_colors {
             true => eprintln!("{YELLOW}{BOLD}WARNING: {str}{RESET}"),
             false => eprintln!("WARNING: {str}"),
         };
     }
 
-    fn read_line(&self) -> String {
+    pub fn read_line(&self) -> String {
         let mut input = String::new();
 
         // flush stdout
