@@ -1,4 +1,8 @@
-use std::process::{Command, Stdio};
+use std::{
+    io::{BufRead, BufReader},
+    process::{Command, Stdio},
+    thread,
+};
 
 use crate::{
     cli::{
@@ -100,13 +104,47 @@ impl<I: InOut> Runner<I> {
                                         abs_path.clone().into(),
                                         "Unable to capture stdout".into(),
                                     )
-                                });
+                                })?;
                                 let stderr = child.stderr.take().ok_or_else(|| {
                                     Error::ScriptFailure(
                                         abs_path.clone().into(),
                                         "Unable to capture stderr".into(),
                                     )
+                                })?;
+
+                                // spawn threads to handle stdout/stderr
+                                let stdout_handle = thread::spawn(move || {
+                                    let reader = BufReader::new(stdout);
+                                    for line in reader.lines() {
+                                        match line {
+                                            Ok(line) => println!("> {}", line),
+                                            Err(e) => eprintln!("Error reading stdout: {}", e),
+                                        }
+                                    }
                                 });
+                                let stderr_handle = thread::spawn(move || {
+                                    let reader = BufReader::new(stderr);
+                                    for line in reader.lines() {
+                                        match line {
+                                            Ok(line) => eprintln!("> {}", line),
+                                            Err(e) => eprintln!("Error reading stderr: {}", e),
+                                        }
+                                    }
+                                });
+
+                                // close stdin/stdout/stderr
+                                stdout_handle.join().map_err(|e| {
+                                    Error::ScriptFailure(
+                                        abs_path.clone().into(),
+                                        format!("Failed to close stdout: {e:?}"),
+                                    )
+                                })?;
+                                stderr_handle.join().map_err(|e| {
+                                    Error::ScriptFailure(
+                                        abs_path.clone().into(),
+                                        format!("Failed to close stdout: {e:?}"),
+                                    )
+                                })?;
 
                                 // wait for script to end execution
                                 child
