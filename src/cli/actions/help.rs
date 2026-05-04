@@ -3,7 +3,7 @@ use crate::cli::{actions::Runner, error::Result, inout::InOut};
 impl<I: InOut> Runner<I> {
     /// Help action to render help message.
     pub fn help(&mut self) -> Result<()> {
-        self.check_flags(&["--help", "--nocolor", "-h"])?;
+        self.check_flags("--help", &["--help", "--nocolor", "-h"])?;
         let first = self.args.params().first().map(String::as_ref).unwrap_or("");
         let _ = self.args.params().get(1).map(String::as_ref).unwrap_or("");
         let _ = self.args.params().get(2).map(String::as_ref).unwrap_or("");

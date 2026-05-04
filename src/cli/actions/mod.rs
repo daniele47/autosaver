@@ -49,14 +49,16 @@ impl<I: InOut> Runner<I> {
             "home" => {
                 let var = Self::env("home")?;
                 if PathType::from(var.as_str()) != PathType::Absolute {
-                    return Err(Error::GenericError(
-                        "AUTOSAVER_HOME variable is not an absolute path".into(),
+                    return Err(Error::InvalidEnv(
+                        "AUTOSAVER_HOME".into(),
+                        "Not an absolute path".into(),
                     ));
                 }
                 let var = AbsPath::from(var);
                 if !var.metadata().is_ok_and(|m| m.is_dir()) {
-                    return Err(Error::GenericError(
-                        "AUTOSAVER_HOME variable doesn't contain a valid directory path".into(),
+                    return Err(Error::InvalidEnv(
+                        "AUTOSAVER_HOME".into(),
+                        "Not a path to a directory".into(),
                     ));
                 }
                 Ok(var)
@@ -64,14 +66,16 @@ impl<I: InOut> Runner<I> {
             "root" => {
                 let var = Self::env("root")?;
                 if PathType::from(var.as_str()) != PathType::Absolute {
-                    return Err(Error::GenericError(
-                        "AUTOSAVER_ROOT variable is not an absolute path".into(),
+                    return Err(Error::InvalidEnv(
+                        "AUTOSAVER_ROOT".into(),
+                        "Not an absolute path".into(),
                     ));
                 }
                 let var = AbsPath::from(var);
                 if !var.metadata().is_ok_and(|m| m.is_dir()) {
-                    return Err(Error::GenericError(
-                        "AUTOSAVER_ROOT variable doesn't contain a valid directory path".into(),
+                    return Err(Error::InvalidEnv(
+                        "AUTOSAVER_ROOT".into(),
+                        "Not a path to a directory".into(),
                     ));
                 }
                 Ok(var)
@@ -83,22 +87,21 @@ impl<I: InOut> Runner<I> {
         }
     }
 
-    fn check_flags(&self, flag_set: &[&str]) -> Result<()> {
+    fn check_flags(&self, cmd: &str, flag_set: &[&str]) -> Result<()> {
         for flag in self.args.flags() {
             let flag_str = match flag {
                 Flag::Letter(lflag) => format!("-{lflag}"),
                 Flag::Word(wflag) => format!("--{wflag}"),
             };
             if !flag_set.contains(&flag_str.as_str()) {
-                return Err(Error::GenericError(format!("Invalid flag: {flag_str}")));
+                return Err(Error::InvalidFlag(flag.clone(), cmd.to_string()));
             }
         }
         Ok(())
     }
 
     fn load_env(env: &str) -> Result<String> {
-        env::var(env)
-            .map_err(|_| Error::GenericError(format!("{env} variable is empty or not defined")))
+        env::var(env).map_err(|_| Error::UndefinedEnv(env.to_string()))
     }
 
     fn env(env: &str) -> Result<String> {
@@ -244,7 +247,7 @@ impl<I: InOut> Runner<I> {
         match command {
             "list" | "save" | "restore" | "rmhome" | "rmbackup" => self.backup(),
             "run" => self.runner(),
-            _ => self.check_flags(&[]),
+            _ => self.check_flags("", &[]),
         }
     }
 }

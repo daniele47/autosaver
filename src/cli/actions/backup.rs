@@ -7,25 +7,29 @@ impl<I: InOut> Runner<I> {
     /// Backup action to list/save/restore files.
     pub fn backup(&mut self) -> Result<()> {
         // check flags
-        match self.args.params().first().map(String::as_str).unwrap_or("") {
+        let cmd = self.args.params().first().map(String::as_str).unwrap_or("");
+        match cmd {
             "list" => {
-                self.check_flags(&["--nocolor", "--all", "-a", "--diff", "-d"])?;
+                self.check_flags(cmd, &["--nocolor", "--all", "-a", "--diff", "-d"])?;
             }
             "save" | "restore" => {
-                self.check_flags(&[
-                    "--assumeyes",
-                    "-y",
-                    "--assumeno",
-                    "-n",
-                    "--all",
-                    "-a",
-                    "--diff",
-                    "-d",
-                    "--nocolor",
-                ])?;
+                self.check_flags(
+                    cmd,
+                    &[
+                        "--assumeyes",
+                        "-y",
+                        "--assumeno",
+                        "-n",
+                        "--all",
+                        "-a",
+                        "--diff",
+                        "-d",
+                        "--nocolor",
+                    ],
+                )?;
             }
             "rmhome" | "rmbackup" => {
-                self.check_flags(&["--assumeyes", "-y", "--assumeno", "-n", "--nocolor"])?;
+                self.check_flags(cmd, &["--assumeyes", "-y", "--assumeno", "-n", "--nocolor"])?;
             }
             _ => unreachable!("Invalid command"),
         }

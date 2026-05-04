@@ -1,5 +1,7 @@
 //! Module to parse cmdline flags and splits flags from not flag parameters.
 
+use std::fmt::Display;
+
 /// All possible types of a flag.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Flag {
@@ -56,6 +58,15 @@ impl ParsedArgs {
         }
 
         parsed
+    }
+}
+
+impl Display for Flag {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Flag::Letter(l) => write!(f, "-{l}"),
+            Flag::Word(w) => write!(f, "--{w}"),
+        }
     }
 }
 
