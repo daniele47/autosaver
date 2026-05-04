@@ -41,8 +41,11 @@ impl<I: InOut> Runner<I> {
     const MISS_COLOR: &[Style] = &[Style::Red, Style::Bold, Style::Underline];
     const SCRIPT_COLOR: &[Style] = &[Style::White, Style::Bold, Style::Underline];
     const DIFF_COLOR: &[Style] = &[Style::Yellow, Style::Bold, Style::Underline];
-    const RM_COLOR: &[Style] = &[Style::Red];
-    const ADD_COLOR: &[Style] = &[Style::Green];
+    const SIGN_RM_COLOR: &[Style] = &[Style::Red];
+    const SIGN_ADD_COLOR: &[Style] = &[Style::Green];
+    const SIGN_SCRIPT_COLOR: &[Style] = &[Style::White];
+    const SIGN_STDOUT_COLOR: &[Style] = &[Style::Green];
+    const SIGN_STDERR_COLOR: &[Style] = &[Style::Red];
 
     fn paths(path: &str) -> Result<AbsPath> {
         match path {
@@ -137,11 +140,11 @@ impl<I: InOut> Runner<I> {
             match line {
                 LineDiff::Equal(_) => {}
                 LineDiff::Insert(line) => {
-                    self.inout.write("+ ", Self::ADD_COLOR);
+                    self.inout.write("+ ", Self::SIGN_ADD_COLOR);
                     self.inout.writeln(line, &[]);
                 }
                 LineDiff::Delete(line) => {
-                    self.inout.write("- ", Self::RM_COLOR);
+                    self.inout.write("- ", Self::SIGN_RM_COLOR);
                     self.inout.writeln(line, &[]);
                 }
             }

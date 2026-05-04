@@ -66,8 +66,8 @@ impl<I: InOut> Runner<I> {
                             for line in abs_path.line_reader()? {
                                 match line {
                                     Ok(l) => {
-                                        let msg = format!("* {l}");
-                                        self.inout.writeln(msg, &[]);
+                                        self.inout.write("* ", Self::SIGN_SCRIPT_COLOR);
+                                        self.inout.writeln(l, &[]);
                                     }
                                     Err(_) => {
                                         self.inout.warning("Could not show the entire script file");
