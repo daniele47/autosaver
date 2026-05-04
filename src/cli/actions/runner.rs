@@ -20,27 +20,17 @@ impl<I: InOut> Runner<I> {
         self.check_flags(&["--show", "-s", "--dryrun"])?;
 
         // get args
-        let default_profile = String::new();
-        let mut arg_profile = self.args.params().get(2).unwrap_or(&default_profile);
-        let env_profile = Self::env("profile").unwrap_or_default();
         let wflag_show = self.args.flags().contains(&Flag::Word("show".into()));
         let lflag_show = self.args.flags().contains(&Flag::Letter('s'));
         let flag_show = wflag_show || lflag_show;
         let flag_dryrun = self.args.flags().contains(&Flag::Word("dryrun".into()));
-
-        if arg_profile.is_empty() {
-            if env_profile.is_empty() {
-                return Err(Error::GenericError("No profile specified".into()));
-            }
-            arg_profile = &env_profile;
-        }
 
         // paths
         let run_dir = Self::paths("run")?;
 
         // resolve profile into all leafs
         let mut profile_loader = Self::profile_loader()?;
-        let root_profile = profile_loader.load(arg_profile)?;
+        let root_profile = profile_loader.load(&self.load_profile(1)?)?;
         let profiles = root_profile.resolve(&mut profile_loader)?;
 
         // iterate over all leaf profiles
@@ -67,8 +57,7 @@ impl<I: InOut> Runner<I> {
                             for line in abs_path.line_reader()? {
                                 match line {
                                     Ok(l) => {
-                                        let msg = format!("  {l}");
-                                        self.inout.writeln(msg, &[]);
+                                        self.inout.writeln(l, &[]);
                                     }
                                     Err(_) => {
                                         self.inout
