@@ -1,7 +1,6 @@
 use std::{
     io::{BufRead, BufReader},
     process::{Command, Stdio},
-    thread,
 };
 
 use crate::{
@@ -86,7 +85,7 @@ impl<I: InOut> Runner<I> {
 
                         // run script if no dryrun flag is passed
                         if !flag_dryrun {
-                            self.prompt("Do you want to run it?", || {
+                            self.prompt("Do you want to run it?", |s| {
                                 // execute the script
                                 let mut child = Command::new(abs_path.to_str_lossy())
                                     .stdin(Stdio::null())
@@ -113,38 +112,38 @@ impl<I: InOut> Runner<I> {
                                 })?;
 
                                 // spawn threads to handle stdout/stderr
-                                let stdout_handle = thread::spawn(move || {
-                                    let reader = BufReader::new(stdout);
-                                    for line in reader.lines() {
-                                        match line {
-                                            Ok(line) => println!("> {}", line),
-                                            Err(e) => eprintln!("Error reading stdout: {}", e),
+                                let stdout_handle = BufReader::new(stdout);
+                                for line in stdout_handle.lines() {
+                                    match line {
+                                        Ok(line) => {
+                                            s.inout.write("> ", Self::SIGN_STDOUT_COLOR);
+                                            s.inout.writeln(line, &[]);
+                                        }
+                                        Err(e) => {
+                                            return Err(Error::ScriptFailure(
+                                                abs_path.clone().into(),
+                                                format!("Failure in reading stdout line: {e}"),
+                                            ));
                                         }
                                     }
-                                });
-                                let stderr_handle = thread::spawn(move || {
-                                    let reader = BufReader::new(stderr);
-                                    for line in reader.lines() {
-                                        match line {
-                                            Ok(line) => eprintln!("> {}", line),
-                                            Err(e) => eprintln!("Error reading stderr: {}", e),
-                                        }
-                                    }
-                                });
+                                }
 
-                                // close stdin/stdout/stderr
-                                stdout_handle.join().map_err(|e| {
-                                    Error::ScriptFailure(
-                                        abs_path.clone().into(),
-                                        format!("Failed to close stdout: {e:?}"),
-                                    )
-                                })?;
-                                stderr_handle.join().map_err(|e| {
-                                    Error::ScriptFailure(
-                                        abs_path.clone().into(),
-                                        format!("Failed to close stdout: {e:?}"),
-                                    )
-                                })?;
+                                // Then, AFTER stdout finishes, read ALL stderr
+                                let stderr_handle = BufReader::new(stderr);
+                                for line in stderr_handle.lines() {
+                                    match line {
+                                        Ok(line) => {
+                                            s.inout.write("> ", Self::SIGN_STDERR_COLOR);
+                                            s.inout.writeln(line, &[]);
+                                        }
+                                        Err(e) => {
+                                            return Err(Error::ScriptFailure(
+                                                abs_path.clone().into(),
+                                                format!("Failure in reading stdout line: {e}"),
+                                            ));
+                                        }
+                                    }
+                                }
 
                                 // wait for script to end execution
                                 child

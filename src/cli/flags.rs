@@ -12,7 +12,7 @@ pub enum Flag {
 }
 
 /// Represent an entire parsed cmdline.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ParsedArgs {
     flags: Vec<Flag>,
     params: Vec<String>,

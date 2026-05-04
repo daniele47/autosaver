@@ -23,6 +23,7 @@ mod runner;
 mod version;
 
 /// Struct with data and methods to run cli.
+#[derive(Debug, Clone)]
 pub struct Runner<I: InOut> {
     args: ParsedArgs,
     inout: I,
@@ -152,7 +153,7 @@ impl<I: InOut> Runner<I> {
         Ok(())
     }
 
-    fn prompt<T: Fn() -> Result<()>>(&mut self, msg: &str, run: T) -> Result<()> {
+    fn prompt<T: Fn(&mut Self) -> Result<()>>(&mut self, msg: &str, run: T) -> Result<()> {
         let wflag_y = self.args.flags().contains(&Flag::Word("assumeyes".into()));
         let lflag_y = self.args.flags().contains(&Flag::Letter('y'));
         let flag_y = wflag_y || lflag_y;
@@ -167,7 +168,7 @@ impl<I: InOut> Runner<I> {
         }
         if flag_y {
             self.inout.writeln("y", &[]);
-            run()?;
+            run(self)?;
             return Ok(());
         }
         let input = self.inout.read_line();
@@ -175,7 +176,7 @@ impl<I: InOut> Runner<I> {
             exit(0);
         }
         if input == "y" {
-            run()?;
+            run(self)?;
         }
         Ok(())
     }
