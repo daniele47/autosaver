@@ -1,3 +1,5 @@
+use std::process::Command;
+
 use crate::{
     cli::{
         actions::Runner,
@@ -5,14 +7,17 @@ use crate::{
         flags::Flag,
         inout::InOut,
     },
-    core::profile::{ProfileType, composite::ProfileLoader},
+    core::{
+        fs::RelPath,
+        profile::{ProfileType, composite::ProfileLoader, runner::RunnerPolicy},
+    },
 };
 
 impl<I: InOut> Runner<I> {
     /// Backup action to list/save/restore files.
     pub fn runner(&mut self) -> Result<()> {
         // check flags
-        self.check_flags(&["--show", "-s", "--list", "-l"])?;
+        self.check_flags(&["--show", "-s", "--dryrun"])?;
 
         // get args
         let default_profile = String::new();
@@ -21,9 +26,7 @@ impl<I: InOut> Runner<I> {
         let wflag_show = self.args.flags().contains(&Flag::Word("show".into()));
         let lflag_show = self.args.flags().contains(&Flag::Letter('s'));
         let flag_show = wflag_show || lflag_show;
-        let wflag_list = self.args.flags().contains(&Flag::Word("list".into()));
-        let lflag_list = self.args.flags().contains(&Flag::Letter('l'));
-        let flag_list = wflag_list || lflag_list;
+        let flag_dryrun = self.args.flags().contains(&Flag::Word("dryrun".into()));
 
         if arg_profile.is_empty() {
             if env_profile.is_empty() {
@@ -45,7 +48,45 @@ impl<I: InOut> Runner<I> {
             match profile.ptype() {
                 ProfileType::Composite(_) => unreachable!("Composite profile impossible here"),
                 ProfileType::Module(_) => {}
-                ProfileType::Runner(runner) => {}
+                ProfileType::Runner(runner) => {
+                    let runner = runner.resolve(&run_dir)?;
+                    self.output_profile(profile.name());
+
+                    for entry in runner.entries() {
+                        if entry.policy() == &RunnerPolicy::Skip {
+                            continue;
+                        }
+
+                        // output script path
+                        let path = entry.path().to_str_lossy();
+                        self.inout.writeln(&path, Self::SCRIPT_COLOR);
+                        let abs_path = run_dir.join(&RelPath::from(path));
+
+                        // show script if show flag is passed
+                        if flag_show {
+                            for line in abs_path.line_reader()? {
+                                match line {
+                                    Ok(l) => {
+                                        let msg = format!("  {l}");
+                                        self.inout.writeln(msg, &[]);
+                                    }
+                                    Err(_) => {
+                                        self.inout
+                                            .warning("Could not finish showing the script file");
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        // run script if no dryrun flag is passed
+                        if !flag_dryrun {
+                            Command::new(abs_path.to_str_lossy())
+                                .status()
+                                .map_err(|_| Error::GenericError("Unable to run script".into()))?;
+                        }
+                    }
+                }
             }
         }
         Ok(())

@@ -39,6 +39,7 @@ impl<I: InOut> Runner<I> {
     const HELP_COLOR: &[Style] = &[Style::Blue, Style::Bold];
     const PROFILE_COLOR: &[Style] = &[Style::Blue, Style::Bold];
     const MISS_COLOR: &[Style] = &[Style::Red, Style::Bold, Style::Underline];
+    const SCRIPT_COLOR: &[Style] = &[Style::White, Style::Bold, Style::Underline];
     const DIFF_COLOR: &[Style] = &[Style::Yellow, Style::Bold, Style::Underline];
     const RM_COLOR: &[Style] = &[Style::Red];
     const ADD_COLOR: &[Style] = &[Style::Green];
