@@ -127,3 +127,87 @@ impl Runner {
         Ok(Self::new(entries))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::core::fs::{AbsPath, RelPath};
+
+    fn purge_path_even_on_panic(tmpdir: &AbsPath) -> impl Drop {
+        struct Guard(AbsPath);
+        impl Drop for Guard {
+            fn drop(&mut self) {
+                let _ = self.0.purge_path(true);
+            }
+        }
+        Guard(tmpdir.clone())
+    }
+
+    #[test]
+    fn test_resolve_runner() -> Result<()> {
+        // Create temp directory
+        let tmp = AbsPath::new_tmp("test_resolve_runner");
+        tmp.create_dir()?;
+        let _guard = purge_path_even_on_panic(&tmp);
+
+        // Create test structure
+        let dir1 = tmp.joins(&["dir1"]);
+        let dir2 = tmp.joins(&["dir2"]);
+        let file1 = tmp.joins(&["file1.txt"]);
+        let file2 = dir1.joins(&["file2.txt"]);
+        let file3 = dir1.joins(&["file3.txt"]);
+        let subdir = dir1.joins(&["subdir"]);
+        let file4 = subdir.joins(&["file4.txt"]);
+        let file5 = subdir.joins(&["file5.txt"]);
+
+        dir1.create_dir()?;
+        dir2.create_dir()?;
+        subdir.create_dir()?;
+        file1.create_file(false)?;
+        file2.create_file(false)?;
+        file3.create_file(false)?;
+        file4.create_file(false)?;
+        file5.create_file(false)?;
+
+        // Create runner with overlapping entries
+        let runner = Runner::new(vec![
+            RunnerEntry::new(RelPath::from("dir1//"), RunnerPolicy::Run),
+            RunnerEntry::new(RelPath::from("dir1"), RunnerPolicy::Skip),
+            RunnerEntry::new(
+                RelPath::from("dir1").joins(&["file3.txt"]),
+                RunnerPolicy::Run,
+            ),
+            RunnerEntry::new(RelPath::from("dir1").joins(&["subdir"]), RunnerPolicy::Run),
+            RunnerEntry::new(RelPath::from("file1.txt"), RunnerPolicy::Run),
+        ]);
+
+        // Resolve
+        let resolved = runner.resolve(&tmp)?;
+
+        assert_eq!(resolved.entries().len(), 5);
+
+        // Verify each entry
+        for entry in resolved.entries() {
+            match entry.path() {
+                path if path == &RelPath::from("file1.txt") => {
+                    assert_eq!(*entry.policy(), RunnerPolicy::Run);
+                }
+                path if path == &RelPath::from("dir1").joins(&["file2.txt"]) => {
+                    assert_eq!(*entry.policy(), RunnerPolicy::Skip);
+                }
+                path if path == &RelPath::from("dir1").joins(&["file3.txt"]) => {
+                    assert_eq!(*entry.policy(), RunnerPolicy::Skip);
+                }
+                path if path == &RelPath::from("dir1").joins(&["subdir", "file4.txt"]) => {
+                    assert_eq!(*entry.policy(), RunnerPolicy::Skip);
+                }
+                path if path == &RelPath::from("dir1").joins(&["subdir", "file5.txt"]) => {
+                    assert_eq!(*entry.policy(), RunnerPolicy::Skip);
+                }
+                _ => panic!("Unexpected file: {}", entry.path().to_str_lossy()),
+            }
+        }
+
+        Ok(())
+    }
+}
