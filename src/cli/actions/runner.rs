@@ -81,9 +81,12 @@ impl<I: InOut> Runner<I> {
 
                         // run script if no dryrun flag is passed
                         if !flag_dryrun {
-                            Command::new(abs_path.to_str_lossy())
-                                .status()
-                                .map_err(|_| Error::GenericError("Unable to run script".into()))?;
+                            self.prompt("Do you want to run it?", || {
+                                Command::new(abs_path.to_str_lossy())
+                                    .status()
+                                    .map(|_| {})
+                                    .map_err(|_| Error::GenericError("Unable to run script".into()))
+                            })?;
                         }
                     }
                 }

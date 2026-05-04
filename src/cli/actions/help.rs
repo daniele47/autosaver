@@ -73,6 +73,17 @@ impl<I: InOut> Runner<I> {
                 io.write("  --assumeno -n       ", col);
                 io.writeln("Automatically answer no to all prompts", &[]);
             }
+            "run" => {
+                io.writeln("Commands:", col);
+                io.write("  run [PROFILE]   ", col);
+                io.writeln("Run scripts from the run directory", &[]);
+                io.writeln("", &[]);
+                io.writeln("Flags:", col);
+                io.write("  --show -s       ", col);
+                io.writeln("Show the scripts before running them", &[]);
+                io.write("  --dryrun        ", col);
+                io.writeln("Only list scripts, do not run them", &[]);
+            }
             _ => {
                 io.writeln("Commands:", col);
                 io.write("  AUTOSAVER_ROOT      ", col);
@@ -93,6 +104,8 @@ impl<I: InOut> Runner<I> {
                 io.writeln("Delete files from home directory [DANGEROUS]", &[]);
                 io.write("  rmbackup            ", col);
                 io.writeln("Delete files from backup directory [DANGEROUS]", &[]);
+                io.write("  run                 ", col);
+                io.writeln("Run scripts from the run directory", &[]);
                 io.writeln("", &[]);
                 io.writeln("Flags:", col);
                 io.write("  --help -h           ", col);

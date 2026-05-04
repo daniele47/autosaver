@@ -7,6 +7,7 @@ All notable changes to this project will be documented here
 ### Features
 
 - added new runner profile
+- added new run command
 
 ### Patches
 
