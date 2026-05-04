@@ -54,7 +54,7 @@ pub struct TermInOut {
 }
 
 /// Render strings nicely to a frontend, be it a terminal or whatever.
-pub trait InOut {
+pub trait InOut: Clone {
     /// Allow setting options for the `InOut`.
     fn options(&mut self) -> &mut IoOutOptions;
 
