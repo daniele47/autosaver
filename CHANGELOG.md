@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented here
 
+## WIP
+
+### Patches
+
+- fixed error printing one extra whiteline
+- better err msg for when no profile is specified
+
 ## v0.5.0
 
 ### Features

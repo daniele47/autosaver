@@ -13,17 +13,20 @@ pub enum Error {
     /// Error coming from core module.
     CoreError(crate::core::error::Error),
 
-    /// Environment variable is not defined or is empty
+    /// Environment variable is not defined or is empty.
     UndefinedEnv(String),
 
-    /// Environment variable contains an invalid value
+    /// Environment variable contains an invalid value.
     InvalidEnv(String, String),
 
-    /// Script failed to run
+    /// Script failed to run.
     ScriptFailure(PathBuf, String),
 
-    /// Invalid flag passed
+    /// Invalid flag passed.
     InvalidFlag(Flag, String),
+
+    /// No profile specified to work on.
+    MissingProfile,
 }
 
 impl From<crate::core::error::Error> for Error {
@@ -37,7 +40,7 @@ impl Display for Error {
         match self {
             Error::CoreError(error) => write!(f, "{error}"),
             Error::UndefinedEnv(env) => {
-                writeln!(f, "Undefined or empty environment variable '{env}'")
+                write!(f, "Undefined or empty environment variable '{env}'")
             }
             Error::InvalidEnv(env, reason) => {
                 write!(f, "Invalid environment variable '{env}': {reason}")
@@ -46,6 +49,7 @@ impl Display for Error {
                 write!(f, "Script '{}' failed: {reason}", p.display())
             }
             Error::InvalidFlag(flag, cmd) => write!(f, "Invalid flag '{flag}' for command '{cmd}'"),
+            Error::MissingProfile => write!(f, "No profile was specified"),
         }
     }
 }

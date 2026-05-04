@@ -118,6 +118,7 @@ impl<I: InOut> Runner<I> {
             Some(p) => Ok(p.clone()),
             None => Self::env("profile"),
         }
+        .map_err(|_| Error::MissingProfile)
     }
 
     fn render_diff(&mut self, file1: &AbsPath, file2: &AbsPath) -> Result<()> {
