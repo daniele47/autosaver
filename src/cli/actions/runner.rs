@@ -70,8 +70,7 @@ impl<I: InOut> Runner<I> {
                                         self.inout.writeln(msg, &[]);
                                     }
                                     Err(_) => {
-                                        self.inout
-                                            .warning("Could not finish showing the script file");
+                                        self.inout.warning("Could not show the entire script file");
                                         break;
                                     }
                                 }
@@ -83,8 +82,14 @@ impl<I: InOut> Runner<I> {
                             self.prompt("Do you want to run it?", || {
                                 Command::new(abs_path.to_str_lossy())
                                     .status()
-                                    .map(|_| {})
                                     .map_err(|_| Error::GenericError("Unable to run script".into()))
+                                    .and_then(|status_code| {
+                                        if status_code.success() {
+                                            Ok(())
+                                        } else {
+                                            Err(Error::GenericError("Failed".into()))
+                                        }
+                                    })
                             })?;
                         }
                     }
