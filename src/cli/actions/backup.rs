@@ -1,10 +1,5 @@
 use crate::{
-    cli::{
-        actions::Runner,
-        error::{Error, Result},
-        flags::Flag,
-        inout::InOut,
-    },
+    cli::{actions::Runner, error::Result, flags::Flag, inout::InOut},
     core::profile::{ProfileType, composite::ProfileLoader, module::ModulePolicy},
 };
 
