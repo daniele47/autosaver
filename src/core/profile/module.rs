@@ -92,8 +92,7 @@ impl Module {
             let path_str = String::try_from(path.0.canonicalize()?)?;
             match values.entry(path_str) {
                 Entry::Occupied(mut entry) => {
-                    let old = entry.get();
-                    if path.2.priority() < old.2.priority() {
+                    if path.2.priority() < entry.get().2.priority() {
                         entry.insert(path);
                     }
                 }

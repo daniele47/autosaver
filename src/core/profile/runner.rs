@@ -1,6 +1,11 @@
 //! This module implements structs and modules to handle Runner profile.
 
-use crate::core::fs::{AbsPath, RelPath};
+use std::collections::{HashMap, hash_map::Entry};
+
+use crate::core::{
+    error::Result,
+    fs::{AbsPath, RelPath},
+};
 
 /// Policy for runner entries.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
@@ -78,7 +83,47 @@ impl Runner {
     /// Note: this is guaranteed to be orderer in the following way:
     /// - in the exact same way files appeared in the config file
     /// - directories are resolved to all files inside, orderered alphabetically
-    pub fn resolve(&self, run_dir: &AbsPath) -> Self {
-        todo!()
+    pub fn resolve(&self, run_dir: &AbsPath) -> Result<Self> {
+        let mut found_canon_paths = HashMap::<AbsPath, RunnerPolicy>::new();
+        let mut found_ord_paths = Vec::<(RelPath, RunnerPolicy)>::new();
+
+        for entry in self.entries() {
+            // accumulate all files from each entry
+            let entry_path = run_dir.join(entry.path());
+            let mut files = vec![];
+            if entry_path.metadata().is_ok_and(|f| f.is_file()) {
+                files.push(entry_path);
+            } else if entry_path.metadata().is_ok_and(|f| f.is_dir()) {
+                // BTreeSet are always sorted automagically
+                files.extend(entry_path.all_files(AbsPath::FILTER_FILES)?);
+            }
+
+            // operate on every single file individually
+            for file in files {
+                let canon = file.canonicalize()?;
+                match found_canon_paths.entry(canon) {
+                    Entry::Occupied(mut e) => {
+                        if entry.policy.priority() < e.get().priority() {
+                            e.insert(entry.policy);
+                            found_ord_paths.push((file.to_relative(run_dir)?, entry.policy));
+                        }
+                    }
+                    Entry::Vacant(e) => {
+                        e.insert(entry.policy);
+                        found_ord_paths.push((file.to_relative(run_dir)?, entry.policy));
+                    }
+                }
+            }
+        }
+
+        // remove duplicates with wrong policy
+        let mut entries = vec![];
+        for found_ord_path in found_ord_paths {
+            let canon = run_dir.join(&found_ord_path.0).canonicalize()?;
+            if found_canon_paths.get(&canon) == Some(&found_ord_path.1) {
+                entries.push(RunnerEntry::new(found_ord_path.0, found_ord_path.1));
+            }
+        }
+        Ok(Self::new(entries))
     }
 }
