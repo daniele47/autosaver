@@ -109,6 +109,11 @@ This profile will:
 - run all the files found in `kde-init/` path
 - will skip all scripts in `kde-init/data` path
 
+NOTES: 
+- scripts DO NOT ALLOW STDIN! This is intentional, as interactive init scripts are a bad idea!
+- an hacky workaround is to allow environment variables to customize init behaviour, or in cases, such 
+    as getting root permissions, just do it with a wrapper bash script that keeps it cached!
+
 ## How to use
 
 - just copy `init/autosaver` bash script in the directory you want to use to save dotfiles in
