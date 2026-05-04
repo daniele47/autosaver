@@ -13,6 +13,7 @@ All notable changes to this project will be documented here
 
 - removed valid name checker for composite profiles
 - fixed `-n|--assumeno` not actually properly working
+- fixed `-n|--assumeno` and `-y|--assumeyes` output, now they print y|n properly
 
 ## v0.4.2
 

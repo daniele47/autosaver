@@ -155,9 +155,11 @@ impl<I: InOut> Runner<I> {
 
         self.inout.write(format!("{msg} [y/n/q] "), &[]);
         if flag_n {
+            self.inout.writeln("n", &[]);
             return Ok(());
         }
         if flag_y {
+            self.inout.writeln("y", &[]);
             run()?;
             return Ok(());
         }
@@ -167,9 +169,6 @@ impl<I: InOut> Runner<I> {
         }
         if input == "y" {
             run()?;
-        }
-        if flag_n || flag_y {
-            self.inout.writeln("", &[]);
         }
         Ok(())
     }
