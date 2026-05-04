@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here
 
+## WIP
+
+- updated help msg to explain global flag better
+
 ## v0.5.1
 
 ### Patches

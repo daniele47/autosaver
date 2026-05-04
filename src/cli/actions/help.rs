@@ -87,7 +87,7 @@ impl Runner {
                 io.write("  run                 ", col);
                 io.writeln("Run scripts from the run directory", &[]);
                 io.writeln("", &[]);
-                io.writeln("Flags:", col);
+                io.writeln("Global Flags (can be used widely across commands):", col);
                 io.write("  --help -h           ", col);
                 io.writeln("Print the help message for commands and subcommands", &[]);
                 io.write("  --version           ", col);
