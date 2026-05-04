@@ -27,10 +27,6 @@ impl<I: InOut> Runner<I> {
                 io.writeln("Save changes from the home directory to the backup", &[]);
                 io.writeln("", &[]);
                 io.writeln("Flags:", col);
-                io.write("  --assumeyes -y  ", col);
-                io.writeln("Automatically answer yes to all prompts", &[]);
-                io.write("  --assumeno -n   ", col);
-                io.writeln("Automatically answer no to all prompts", &[]);
                 io.write("  --all -a        ", col);
                 io.writeln("Show files which are ignored by default", &[]);
                 io.write("  --diff -d       ", col);
@@ -42,10 +38,6 @@ impl<I: InOut> Runner<I> {
                 io.writeln("Restore changes from the backup to the home directory", &[]);
                 io.writeln("", &[]);
                 io.writeln("Flags:", col);
-                io.write("  --assumeyes -y      ", col);
-                io.writeln("Automatically answer yes to all prompts", &[]);
-                io.write("  --assumeno -n       ", col);
-                io.writeln("Automatically answer no to all prompts", &[]);
                 io.write("  --all -a            ", col);
                 io.writeln("Show files which are ignored by default", &[]);
                 io.write("  --diff -d       ", col);
@@ -55,23 +47,11 @@ impl<I: InOut> Runner<I> {
                 io.writeln("Commands:", col);
                 io.write("  rmhome [PROFILE]    ", col);
                 io.writeln("Delete files from home directory [DANGEROUS]", &[]);
-                io.writeln("", &[]);
-                io.writeln("Flags:", col);
-                io.write("  --assumeyes -y      ", col);
-                io.writeln("Automatically answer yes to all prompts", &[]);
-                io.write("  --assumeno -n       ", col);
-                io.writeln("Automatically answer no to all prompts", &[]);
             }
             "rmbackup" => {
                 io.writeln("Commands:", col);
                 io.write("  rmbackup [PROFILE]  ", col);
                 io.writeln("Delete files from backup directory [DANGEROUS]", &[]);
-                io.writeln("", &[]);
-                io.writeln("Flags:", col);
-                io.write("  --assumeyes -y      ", col);
-                io.writeln("Automatically answer yes to all prompts", &[]);
-                io.write("  --assumeno -n       ", col);
-                io.writeln("Automatically answer no to all prompts", &[]);
             }
             "run" => {
                 io.writeln("Commands:", col);
@@ -114,6 +94,10 @@ impl<I: InOut> Runner<I> {
                 io.writeln("Print the binary version", &[]);
                 io.write("  --nocolor           ", col);
                 io.writeln("Avoid all colors in the output", &[]);
+                io.write("  --assumeyes -y      ", col);
+                io.writeln("Automatically answer yes to all prompts", &[]);
+                io.write("  --assumeno -n       ", col);
+                io.writeln("Automatically answer no to all prompts", &[]);
             }
         }
         Ok(())

@@ -17,7 +17,16 @@ impl<I: InOut> Runner<I> {
     /// Backup action to list/save/restore files.
     pub fn runner(&mut self) -> Result<()> {
         // check flags
-        self.check_flags(&["--show", "-s", "--dryrun"])?;
+        self.check_flags(&[
+            "--show",
+            "-s",
+            "--dryrun",
+            "--assumeyes",
+            "-y",
+            "--assumeno",
+            "-n",
+            "--nocolor",
+        ])?;
 
         // get args
         let wflag_show = self.args.flags().contains(&Flag::Word("show".into()));
