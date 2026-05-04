@@ -161,6 +161,11 @@ impl<I: InOut> Runner<I> {
         Ok(())
     }
 
+    fn output_profile(&mut self, profile: &str) {
+        let msg = format!("*** {profile} ***");
+        self.inout.writeln(msg, Self::PROFILE_COLOR)
+    }
+
     fn profile_loader() -> Result<impl ProfileLoader> {
         struct ProfileLoaderImpl {
             cached: HashMapProfileLoader,
