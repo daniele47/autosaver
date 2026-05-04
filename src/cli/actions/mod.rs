@@ -109,6 +109,13 @@ impl<I: InOut> Runner<I> {
         }
     }
 
+    fn load_profile(&mut self, param_index: usize) -> Result<String> {
+        match self.args.params().get(param_index) {
+            Some(p) => Ok(p.clone()),
+            None => Self::env("profile"),
+        }
+    }
+
     fn render_diff(&mut self, file1: &AbsPath, file2: &AbsPath) -> Result<()> {
         let diff = file1.calc_diff(file2);
         if let Err(err) = &diff

@@ -43,8 +43,6 @@ impl<I: InOut> Runner<I> {
         let act_restore = arg_command == "restore";
         let act_rmhome = arg_command == "rmhome";
         let act_rmbackup = arg_command == "rmbackup";
-        let env_profile = Self::env("profile").unwrap_or_default();
-        let mut arg_profile = iter.next().map(String::as_str).unwrap_or_default();
         let wflag_all = self.args.flags().contains(&Flag::Word("all".into()));
         let lflag_all = self.args.flags().contains(&Flag::Letter('a'));
         let flag_all = wflag_all || lflag_all;
@@ -52,20 +50,13 @@ impl<I: InOut> Runner<I> {
         let lflag_diff = self.args.flags().contains(&Flag::Letter('d'));
         let flag_diff = wflag_diff || lflag_diff;
 
-        if arg_profile.is_empty() {
-            if env_profile.is_empty() {
-                return Err(Error::GenericError("No profile specified".into()));
-            }
-            arg_profile = &env_profile;
-        }
-
         // paths
         let home_dir = Self::paths("home")?;
         let backup_dir = Self::paths("backup")?;
 
         // resolve profile into all leafs
         let mut profile_loader = Self::profile_loader()?;
-        let root_profile = profile_loader.load(arg_profile)?;
+        let root_profile = profile_loader.load(&self.load_profile(1)?)?;
         let profiles = root_profile.resolve(&mut profile_loader)?;
 
         // iterate over all leaf profiles
