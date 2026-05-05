@@ -110,7 +110,7 @@ impl Runner {
     }
 
     fn invalid_cmd_err(&self) -> Result<()> {
-        return Err(Error::InvalidCommand(self.args.params().join(" ")));
+        Err(Error::InvalidCommand(self.args.params().join(" ")))
     }
 
     fn load_env(env: &str) -> Result<String> {
