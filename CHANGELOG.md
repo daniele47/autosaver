@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v0.7.0
+
+### Features
+
+- bash `autosaver` script allows specifying the precise version to download
+
 ## v0.6.4
 
 - run command now isolates scripts based on the profile
