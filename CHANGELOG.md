@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented here
 
+## v0.6.1
+
+### Patches
+
+- add `.default` file to help msg
+- fixed global help msg invalid line
+
 ## v0.6.0
 
 ### Features

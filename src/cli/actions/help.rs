@@ -65,13 +65,17 @@ impl Runner {
                 io.writeln("Only list scripts, do not run them", &[]);
             }
             _ => {
-                io.writeln("Commands:", col);
+                io.writeln("Environment variables:", col);
                 io.write("  AUTOSAVER_ROOT      ", col);
                 io.writeln("Set the root directory for the program", &[]);
                 io.write("  AUTOSAVER_HOME      ", col);
                 io.writeln("Set the backup directory for the program", &[]);
                 io.write("  AUTOSAVER_PROFILE   ", col);
                 io.writeln("Set the profile to use if none are passed", &[]);
+                io.writeln("", &[]);
+                io.writeln("Config files:", col);
+                io.write("  .default            ", col);
+                io.writeln("Specify default profile, when none are provided", &[]);
                 io.writeln("", &[]);
                 io.writeln("Commands:", col);
                 io.write("  list                ", col);
