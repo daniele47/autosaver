@@ -7,12 +7,13 @@ Copy-based dotfiles tracking cli, written in rust
 ```
 $AUTOSAVER_ROOT/
 ├── .default
+├── config/
+│   ├── profile1.conf
+│   └── profile2.conf
 ├── backup/
 │   └── profile1/
-├── config/
-│   └── profile1.conf
 └── run/
-    └── init_script.sh
+    └── profile2/
 ```
 
 It is a rust based cli program to easily handle dotfiles on a system.
@@ -122,7 +123,7 @@ NOTES:
 
 ## How to use
 
-- just copy `init/autosaver` bash script in the directory you want to use to save dotfiles in
+- just copy `autosaver` bash script in the directory you want to use to save dotfiles in
 
 The first time the script is run, it will download the rust autocompiled binary by and hosted on `github`, and it will
 store it in the `cache` directory, properly following `xdg-base` specifications. 
