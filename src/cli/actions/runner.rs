@@ -1,5 +1,8 @@
 use std::{
+    fs,
     io::{BufRead, BufReader},
+    os::unix::fs::PermissionsExt,
+    path::PathBuf,
     process::{Command, Stdio},
     thread,
 };
@@ -86,6 +89,18 @@ impl Runner {
                         // run script if no dryrun flag is passed
                         if !flag_dryrun {
                             self.prompt("Do you want to run it?", |s| {
+                                // make file executable
+                                fs::set_permissions(
+                                    PathBuf::from(abs_path.clone()),
+                                    fs::Permissions::from_mode(0o755),
+                                )
+                                .map_err(|e| {
+                                    Error::ScriptFailure(
+                                        abs_path.clone().into(),
+                                        format!("Could not make executable: {e}"),
+                                    )
+                                })?;
+
                                 // execute the script
                                 let mut child = Command::new(abs_path.to_str_lossy())
                                     .stdin(Stdio::null())

@@ -5,6 +5,7 @@ All notable changes to this project will be documented here
 ## WIP
 
 - updated help msg to explain global flag better
+- make scripts automatically executable before running them
 
 ## v0.5.1
 
