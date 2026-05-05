@@ -2,7 +2,9 @@
 
 All notable changes to this project will be documented here
 
-## WIP
+## v0.6.2
+
+### Patches
 
 - script output now isn't parsed, and kept as is
 - script output now it's ended by a clear line separator
