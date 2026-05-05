@@ -42,6 +42,7 @@ impl Runner {
     // colors
     const NO_COL: &[Style] = &[];
     const WARN_COL: &[Style] = &[Style::Yellow];
+    const MAIN_PROF_COL: &[Style] = &[Style::Purple, Style::Bold];
     const DECORATION_COL: &[Style] = &[Style::Blue, Style::Bold];
     const PATH_MISS_COL: &[Style] = &[Style::Red, Style::Bold, Style::Underline];
     const PATH_DIFF_COL: &[Style] = &[Style::Yellow, Style::Bold, Style::Underline];
@@ -120,7 +121,7 @@ impl Runner {
         }
     }
 
-    fn load_profile(&mut self, param_index: usize) -> Result<String> {
+    fn load_profile(&self, param_index: usize) -> Result<String> {
         || -> Result<String> {
             match self.args.params().get(param_index) {
                 Some(p) => Ok(p.clone()) as Result<String>,
@@ -201,6 +202,11 @@ impl Runner {
     fn output_profile(&mut self, profile: &str) {
         let msg = format!("*** {profile} ***");
         self.inout.writeln(msg, Self::DECORATION_COL)
+    }
+
+    fn output_main_profile(&mut self, profile: &str) {
+        let msg = format!("****** {profile} ******");
+        self.inout.writeln(msg, Self::MAIN_PROF_COL)
     }
 
     fn profile_loader() -> Result<impl ProfileLoader> {

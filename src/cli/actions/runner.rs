@@ -45,11 +45,13 @@ impl Runner {
         let run_dir = Self::paths("run")?;
 
         // resolve profile into all leafs
+        let profile = self.load_profile(1)?;
         let mut profile_loader = Self::profile_loader()?;
-        let root_profile = profile_loader.load(&self.load_profile(1)?)?;
+        let root_profile = profile_loader.load(&profile)?;
         let profiles = root_profile.resolve(&mut profile_loader)?;
 
         // iterate over all leaf profiles
+        self.output_main_profile(&profile);
         for profile in profiles {
             match profile.ptype() {
                 ProfileType::Composite(_) => unreachable!("Composite profile impossible here"),

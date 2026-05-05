@@ -6,6 +6,7 @@ All notable changes to this project will be documented here
 
 - script output now isn't parsed, and kept as is
 - script output now it's ended by a clear line separator
+- added output showing the main profile before all else
 
 ## v0.6.1
 
