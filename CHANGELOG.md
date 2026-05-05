@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v0.7.1
+
+### Fixes
+
+- proper color for line separator between scripts
+
 ## v0.7.0
 
 ### Features
