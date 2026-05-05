@@ -35,18 +35,21 @@ impl Runner {
         Self { args, inout }
     }
 
+    // crate metadata
     const CARGO_VERSION: &str = env!("CARGO_PKG_VERSION");
     const BIN_NAME: &str = env!("CARGO_PKG_NAME");
-    const HELP_COLOR: &[Style] = &[Style::Blue, Style::Bold];
-    const PROFILE_COLOR: &[Style] = &[Style::Blue, Style::Bold];
-    const MISS_COLOR: &[Style] = &[Style::Red, Style::Bold, Style::Underline];
-    const SCRIPT_COLOR: &[Style] = &[Style::White, Style::Bold, Style::Underline];
-    const DIFF_COLOR: &[Style] = &[Style::Yellow, Style::Bold, Style::Underline];
-    const SIGN_RM_COLOR: &[Style] = &[Style::Red];
-    const SIGN_ADD_COLOR: &[Style] = &[Style::Green];
-    const SIGN_SCRIPT_COLOR: &[Style] = &[Style::White];
-    const SIGN_STDOUT_COLOR: &[Style] = &[Style::Green];
-    const SIGN_STDERR_COLOR: &[Style] = &[Style::Red];
+
+    // colors
+    const NO_COL: &[Style] = &[];
+    const WARN_COL: &[Style] = &[Style::Yellow];
+    const HELP_COL: &[Style] = &[Style::Blue, Style::Bold];
+    const PROFILE_COL: &[Style] = &[Style::Blue, Style::Bold];
+    const PATH_MISS_COL: &[Style] = &[Style::Red, Style::Bold, Style::Underline];
+    const PATH_DIFF_COL: &[Style] = &[Style::Yellow, Style::Bold, Style::Underline];
+    const PATH_SCRIPT_COL: &[Style] = &[Style::White, Style::Bold, Style::Underline];
+    const SIGN_RM_COL: &[Style] = &[Style::Red];
+    const SIGN_ADD_COL: &[Style] = &[Style::Green];
+    const SIGN_SCRIPT_COL: &[Style] = &[Style::White];
 
     fn paths(path: &str) -> Result<AbsPath> {
         match path {
@@ -148,7 +151,7 @@ impl Runner {
         {
             self.inout.writeln(
                 "* binary files differ but cannot be compared",
-                &[Style::Yellow],
+                Self::WARN_COL,
             );
             return Ok(());
         }
@@ -156,19 +159,19 @@ impl Runner {
             match line {
                 LineDiff::Equal(_) => {}
                 LineDiff::Insert(line) => {
-                    self.inout.write("+ ", Self::SIGN_ADD_COLOR);
-                    self.inout.writeln(line, &[]);
+                    self.inout.write("+ ", Self::SIGN_ADD_COL);
+                    self.inout.writeln(line, Self::NO_COL);
                 }
                 LineDiff::Delete(line) => {
-                    self.inout.write("- ", Self::SIGN_RM_COLOR);
-                    self.inout.writeln(line, &[]);
+                    self.inout.write("- ", Self::SIGN_RM_COL);
+                    self.inout.writeln(line, Self::NO_COL);
                 }
             }
         }
         Ok(())
     }
 
-    fn prompt<T: Fn(&mut Self) -> Result<()>>(&mut self, msg: &str, run: T) -> Result<()> {
+    fn prompt<T: Fn() -> Result<()>>(&mut self, msg: &str, run: T) -> Result<()> {
         let wflag_y = self.args.flags().contains(&Flag::Word("assumeyes".into()));
         let lflag_y = self.args.flags().contains(&Flag::Letter('y'));
         let flag_y = wflag_y || lflag_y;
@@ -176,14 +179,14 @@ impl Runner {
         let lflag_n = self.args.flags().contains(&Flag::Letter('n'));
         let flag_n = wflag_n || lflag_n;
 
-        self.inout.write(format!("{msg} [y/n/q] "), &[]);
+        self.inout.write(format!("{msg} [y/n/q] "), Self::NO_COL);
         if flag_n {
-            self.inout.writeln("n", &[]);
+            self.inout.writeln("n", Self::NO_COL);
             return Ok(());
         }
         if flag_y {
-            self.inout.writeln("y", &[]);
-            run(self)?;
+            self.inout.writeln("y", Self::NO_COL);
+            run()?;
             return Ok(());
         }
         let input = self.inout.read_line();
@@ -191,14 +194,14 @@ impl Runner {
             exit(0);
         }
         if input == "y" {
-            run(self)?;
+            run()?;
         }
         Ok(())
     }
 
     fn output_profile(&mut self, profile: &str) {
         let msg = format!("*** {profile} ***");
-        self.inout.writeln(msg, Self::PROFILE_COLOR)
+        self.inout.writeln(msg, Self::PROFILE_COL)
     }
 
     fn profile_loader() -> Result<impl ProfileLoader> {

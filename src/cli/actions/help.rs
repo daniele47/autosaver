@@ -7,101 +7,108 @@ impl Runner {
         let first = self.args.params().first().map(String::as_ref).unwrap_or("");
         let _ = self.args.params().get(1).map(String::as_ref).unwrap_or("");
         let _ = self.args.params().get(2).map(String::as_ref).unwrap_or("");
-        let col = Self::HELP_COLOR;
+        let col = Self::HELP_COL;
+        let nocol = Self::NO_COL;
         let io = &mut self.inout;
         match first {
             "list" => {
                 io.writeln("Commands:", col);
                 io.write("  list [PROFILE]  ", col);
-                io.writeln("Show differences between home and backup files", &[]);
-                io.writeln("", &[]);
+                io.writeln("Show differences between home and backup files", nocol);
+                io.writeln("", nocol);
                 io.writeln("Flags:", col);
                 io.write("  --all -a        ", col);
-                io.writeln("Show files which are ignored by default", &[]);
+                io.writeln("Show files which are ignored by default", nocol);
                 io.write("  --diff -d       ", col);
-                io.writeln("Show entire diff between files", &[]);
+                io.writeln("Show entire diff between files", nocol);
             }
             "save" => {
                 io.writeln("Commands:", col);
                 io.write("  save [PROFILE]  ", col);
-                io.writeln("Save changes from the home directory to the backup", &[]);
-                io.writeln("", &[]);
+                io.writeln("Save changes from the home directory to the backup", nocol);
+                io.writeln("", nocol);
                 io.writeln("Flags:", col);
                 io.write("  --all -a        ", col);
-                io.writeln("Show files which are ignored by default", &[]);
+                io.writeln("Show files which are ignored by default", nocol);
                 io.write("  --diff -d       ", col);
-                io.writeln("Show some lines of diff between files", &[]);
+                io.writeln("Show some lines of diff between files", nocol);
             }
             "restore" => {
                 io.writeln("Commands:", col);
                 io.write("  restore [PROFILE]   ", col);
-                io.writeln("Restore changes from the backup to the home directory", &[]);
-                io.writeln("", &[]);
+                io.writeln(
+                    "Restore changes from the backup to the home directory",
+                    nocol,
+                );
+                io.writeln("", nocol);
                 io.writeln("Flags:", col);
                 io.write("  --all -a            ", col);
-                io.writeln("Show files which are ignored by default", &[]);
+                io.writeln("Show files which are ignored by default", nocol);
                 io.write("  --diff -d       ", col);
-                io.writeln("Show some lines of diff between files", &[]);
+                io.writeln("Show some lines of diff between files", nocol);
             }
             "rmhome" => {
                 io.writeln("Commands:", col);
                 io.write("  rmhome [PROFILE]    ", col);
-                io.writeln("Delete files from home directory [DANGEROUS]", &[]);
+                io.writeln("Delete files from home directory [DANGEROUS]", nocol);
             }
             "rmbackup" => {
                 io.writeln("Commands:", col);
                 io.write("  rmbackup [PROFILE]  ", col);
-                io.writeln("Delete files from backup directory [DANGEROUS]", &[]);
+                io.writeln("Delete files from backup directory [DANGEROUS]", nocol);
             }
             "run" => {
                 io.writeln("Commands:", col);
                 io.write("  run [PROFILE]   ", col);
-                io.writeln("Run scripts from the run directory", &[]);
-                io.writeln("", &[]);
+                io.writeln("Run scripts from the run directory", nocol);
+                io.writeln("", nocol);
                 io.writeln("Flags:", col);
                 io.write("  --show -s       ", col);
-                io.writeln("Show the scripts before running them", &[]);
+                io.writeln("Show the scripts before running them", nocol);
                 io.write("  --dryrun        ", col);
-                io.writeln("Only list scripts, do not run them", &[]);
+                io.writeln("Only list scripts, do not run them", nocol);
             }
             _ => {
                 io.writeln("Environment variables:", col);
                 io.write("  AUTOSAVER_ROOT      ", col);
-                io.writeln("Set the root directory for the program", &[]);
+                io.writeln("Set the root directory for the program", nocol);
                 io.write("  AUTOSAVER_HOME      ", col);
-                io.writeln("Set the backup directory for the program", &[]);
+                io.writeln("Set the backup directory for the program", nocol);
                 io.write("  AUTOSAVER_PROFILE   ", col);
-                io.writeln("Set the profile to use if none are passed", &[]);
-                io.writeln("", &[]);
+                io.writeln("Set the profile to use if none are passed", nocol);
+                io.writeln("", nocol);
                 io.writeln("Config files:", col);
                 io.write("  .default            ", col);
-                io.writeln("Specify default profile, when none are provided", &[]);
-                io.writeln("", &[]);
+                io.writeln("Specify default profile, when none are provided", nocol);
+                io.writeln("", nocol);
                 io.writeln("Commands:", col);
                 io.write("  list                ", col);
-                io.writeln("Show differences between home and backup files", &[]);
+                io.writeln("Show differences between home and backup files", nocol);
                 io.write("  save                ", col);
-                io.writeln("Save changes from the home directory to the backup", &[]);
+                io.writeln("Save changes from the home directory to the backup", nocol);
                 io.write("  restore             ", col);
-                io.writeln("Restore changes from the backup to the home directory", &[]);
+                io.writeln(
+                    "Restore changes from the backup to the home directory",
+                    nocol,
+                );
                 io.write("  rmhome              ", col);
-                io.writeln("Delete files from home directory [DANGEROUS]", &[]);
+                io.writeln("Delete files from home directory [DANGEROUS]", nocol);
                 io.write("  rmbackup            ", col);
-                io.writeln("Delete files from backup directory [DANGEROUS]", &[]);
+                io.writeln("Delete files from backup directory [DANGEROUS]", nocol);
                 io.write("  run                 ", col);
-                io.writeln("Run scripts from the run directory", &[]);
-                io.writeln("", &[]);
+                io.writeln("Run scripts from the run directory", nocol);
+                io.writeln("", nocol);
                 io.writeln("Global Flags (can be used widely across commands):", col);
                 io.write("  --help -h           ", col);
-                io.writeln("Print the help message for commands and subcommands", &[]);
+                io.writeln("Print the help message for commands and subcommands", nocol);
                 io.write("  --version           ", col);
-                io.writeln("Print the binary version", &[]);
+                io.writeln("Print the binary version", nocol);
                 io.write("  --nocolor           ", col);
-                io.writeln("Avoid all colors in the output", &[]);
+                io.writeln("Avoid all colors in the output", nocol);
                 io.write("  --assumeyes -y      ", col);
-                io.writeln("Automatically answer yes to all prompts", &[]);
+                io.writeln("Automatically answer yes to all prompts", nocol);
                 io.write("  --assumeno -n       ", col);
-                io.writeln("Automatically answer no to all prompts", &[]);
+                io.writeln("Automatically answer no to all prompts", nocol);
             }
         }
         Ok(())

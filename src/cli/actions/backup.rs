@@ -82,16 +82,16 @@ impl Runner {
 
                         // rmhome
                         if act_rmhome && is_home_file {
-                            self.inout.writeln(path.to_string(), Self::MISS_COLOR);
-                            self.prompt("Do you want to delete the home file?", |_| {
+                            self.inout.writeln(path.to_string(), Self::PATH_MISS_COL);
+                            self.prompt("Do you want to delete the home file?", || {
                                 Ok(home_file.purge_path(false)?)
                             })?;
                         }
 
                         // rmbackup
                         if act_rmbackup && is_backup_file {
-                            self.inout.writeln(path.to_string(), Self::MISS_COLOR);
-                            self.prompt("Do you want to delete the backup file?", |_| {
+                            self.inout.writeln(path.to_string(), Self::PATH_MISS_COL);
+                            self.prompt("Do you want to delete the backup file?", || {
                                 Ok(backup_file.purge_path(false)?)
                             })?;
                         }
@@ -106,7 +106,7 @@ impl Runner {
                                 if !act_list && !act_save && !act_restore {
                                     continue;
                                 }
-                                self.inout.writeln(path.to_string(), Self::DIFF_COLOR);
+                                self.inout.writeln(path.to_string(), Self::PATH_DIFF_COL);
                                 if flag_diff {
                                     if act_restore {
                                         self.render_diff(&home_file, &backup_file)?;
@@ -115,7 +115,7 @@ impl Runner {
                                     }
                                 }
                                 if act_save || act_restore {
-                                    self.prompt("Do you want to update it?", |_| {
+                                    self.prompt("Do you want to update it?", || {
                                         if act_restore {
                                             Ok(backup_file.copy_file(&home_file, false)?)
                                         } else {
@@ -129,9 +129,9 @@ impl Runner {
                                 if !act_list && !act_save {
                                     continue;
                                 }
-                                self.inout.writeln(path.to_string(), Self::MISS_COLOR);
+                                self.inout.writeln(path.to_string(), Self::PATH_MISS_COL);
                                 if act_save {
-                                    self.prompt("Do you want to save it?", |_| {
+                                    self.prompt("Do you want to save it?", || {
                                         Ok(home_file.copy_file(&backup_file, false)?)
                                     })?;
                                 }
@@ -141,9 +141,9 @@ impl Runner {
                                 if !act_list && !act_restore {
                                     continue;
                                 }
-                                self.inout.writeln(path.to_string(), Self::MISS_COLOR);
+                                self.inout.writeln(path.to_string(), Self::PATH_MISS_COL);
                                 if act_restore {
-                                    self.prompt("Do you want to restore it?", |_| {
+                                    self.prompt("Do you want to restore it?", || {
                                         Ok(backup_file.copy_file(&home_file, false)?)
                                     })?;
                                 }

@@ -1,10 +1,8 @@
 use std::{
     fs,
-    io::{BufRead, BufReader},
     os::unix::fs::PermissionsExt,
     path::PathBuf,
     process::{Command, Stdio},
-    thread,
 };
 
 use crate::{
@@ -67,7 +65,7 @@ impl Runner {
 
                         // output script path
                         let path = entry.path().to_str_lossy();
-                        self.inout.writeln(&path, Self::SCRIPT_COLOR);
+                        self.inout.writeln(&path, Self::PATH_SCRIPT_COL);
                         let abs_path = run_dir.join(&RelPath::from(path));
 
                         // show script if show flag is passed
@@ -75,8 +73,8 @@ impl Runner {
                             for line in abs_path.line_reader()? {
                                 match line {
                                     Ok(l) => {
-                                        self.inout.write("* ", Self::SIGN_SCRIPT_COLOR);
-                                        self.inout.writeln(l, &[]);
+                                        self.inout.write("* ", Self::SIGN_SCRIPT_COL);
+                                        self.inout.writeln(l, Self::NO_COL);
                                     }
                                     Err(_) => {
                                         self.inout.warning("Could not show the entire script file");
@@ -88,7 +86,7 @@ impl Runner {
 
                         // run script if no dryrun flag is passed
                         if !flag_dryrun {
-                            self.prompt("Do you want to run it?", |s| {
+                            self.prompt("Do you want to run it?", || {
                                 // make file executable
                                 fs::set_permissions(
                                     PathBuf::from(abs_path.clone()),
@@ -102,89 +100,9 @@ impl Runner {
                                 })?;
 
                                 // execute the script
-                                let mut child = Command::new(abs_path.to_str_lossy())
+                                Command::new(abs_path.to_str_lossy())
                                     .stdin(Stdio::null())
-                                    .stdout(Stdio::piped())
-                                    .stderr(Stdio::piped())
-                                    .spawn()
-                                    .map_err(|e| {
-                                        let p = abs_path.clone().into();
-                                        Error::ScriptFailure(p, e.to_string())
-                                    })?;
-
-                                // take handles to stdout/stderr as needed
-                                let stdout = child.stdout.take().ok_or_else(|| {
-                                    Error::ScriptFailure(
-                                        abs_path.clone().into(),
-                                        "Unable to capture stdout".into(),
-                                    )
-                                })?;
-                                let stderr = child.stderr.take().ok_or_else(|| {
-                                    Error::ScriptFailure(
-                                        abs_path.clone().into(),
-                                        "Unable to capture stderr".into(),
-                                    )
-                                })?;
-
-                                // spawn threads to handle stdout/stderr
-                                let mut inout = s.inout.clone();
-                                let abs_path_clone = abs_path.clone();
-                                let stdout_handle = thread::spawn(move || -> Result<()> {
-                                    let reader = BufReader::new(stdout);
-                                    for line in reader.lines() {
-                                        match line {
-                                            Ok(line) => {
-                                                inout.write("> ", Self::SIGN_STDOUT_COLOR);
-                                                inout.writeln(line, &[]);
-                                            }
-                                            Err(e) => {
-                                                return Err(Error::ScriptFailure(
-                                                    abs_path_clone.into(),
-                                                    format!("Failure in reading stdout line: {e}"),
-                                                ));
-                                            }
-                                        }
-                                    }
-                                    Ok(())
-                                });
-                                let mut inout = s.inout.clone();
-                                let abs_path_clone = abs_path.clone();
-                                let stderr_handle = thread::spawn(move || -> Result<()> {
-                                    let reader = BufReader::new(stderr);
-                                    for line in reader.lines() {
-                                        match line {
-                                            Ok(line) => {
-                                                inout.write("> ", Self::SIGN_STDERR_COLOR);
-                                                inout.writeln(line, &[]);
-                                            }
-                                            Err(e) => {
-                                                return Err(Error::ScriptFailure(
-                                                    abs_path_clone.into(),
-                                                    format!("Failure in reading stderr line: {e}"),
-                                                ));
-                                            }
-                                        }
-                                    }
-                                    Ok(())
-                                });
-
-                                // close stdout/stderr handles
-                                stdout_handle.join().map_err(|e| {
-                                    Error::ScriptFailure(
-                                        abs_path.clone().into(),
-                                        format!("Failure handling stdout: {e:?}"),
-                                    )
-                                })??;
-                                stderr_handle.join().map_err(|e| {
-                                    Error::ScriptFailure(
-                                        abs_path.clone().into(),
-                                        format!("Failure handling stderr: {e:?}"),
-                                    )
-                                })??;
-
-                                // wait for script to end execution
-                                child
-                                    .wait()
+                                    .status()
                                     .map_err(|e| {
                                         let p = abs_path.clone().into();
                                         Error::ScriptFailure(p, e.to_string())

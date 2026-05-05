@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here
 
+## WIP
+
+- script output now isn't parsed, and kept as is
+
 ## v0.6.1
 
 ### Patches
