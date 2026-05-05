@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here
 
+## v0.6.4
+
+- run command now isolates scripts based on the profile
+
 ## v0.6.3
 
 ### Changes

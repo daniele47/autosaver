@@ -60,6 +60,7 @@ impl Runner {
                 ProfileType::Composite(_) => unreachable!("Composite profile impossible here"),
                 ProfileType::Module(_) => {}
                 ProfileType::Runner(runner) => {
+                    let run_dir = run_dir.joins(&[profile.name()]);
                     let runner = runner.resolve(&run_dir)?;
                     self.output_profile(profile.name());
 
