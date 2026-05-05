@@ -86,7 +86,7 @@ impl Runner {
 
                         // run script if no dryrun flag is passed
                         if !flag_dryrun {
-                            self.prompt("Do you want to run it?", || {
+                            self.prompt("Do you want to run it?", |s| {
                                 // make file executable
                                 fs::set_permissions(
                                     PathBuf::from(abs_path.clone()),
@@ -100,22 +100,27 @@ impl Runner {
                                 })?;
 
                                 // execute the script
-                                Command::new(abs_path.to_str_lossy())
-                                    .stdin(Stdio::null())
-                                    .status()
-                                    .map_err(|e| {
-                                        let p = abs_path.clone().into();
-                                        Error::ScriptFailure(p, e.to_string())
-                                    })
-                                    .and_then(|code| {
-                                        if !code.success() {
-                                            return Err(Error::ScriptFailure(
-                                                abs_path.clone().into(),
-                                                format!("Exited with code {code}"),
-                                            ));
-                                        }
-                                        Ok(())
-                                    })
+                                let script_res = || -> Result<()> {
+                                    Command::new(abs_path.to_str_lossy())
+                                        .stdin(Stdio::null())
+                                        .status()
+                                        .map_err(|e| {
+                                            let p = abs_path.clone().into();
+                                            Error::ScriptFailure(p, e.to_string())
+                                        })
+                                        .and_then(|code| {
+                                            if !code.success() {
+                                                return Err(Error::ScriptFailure(
+                                                    abs_path.clone().into(),
+                                                    format!("Exited with code {code}"),
+                                                ));
+                                            }
+                                            Ok(())
+                                        })
+                                }();
+                                s.inout.writeln("", Self::NO_COL);
+                                s.inout.writeln("-".repeat(80), Self::DECORATION_COL);
+                                script_res
                             })?;
                         }
                     }

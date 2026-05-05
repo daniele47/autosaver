@@ -7,7 +7,7 @@ impl Runner {
         let first = self.args.params().first().map(String::as_ref).unwrap_or("");
         let _ = self.args.params().get(1).map(String::as_ref).unwrap_or("");
         let _ = self.args.params().get(2).map(String::as_ref).unwrap_or("");
-        let col = Self::HELP_COL;
+        let col = Self::DECORATION_COL;
         let nocol = Self::NO_COL;
         let io = &mut self.inout;
         match first {

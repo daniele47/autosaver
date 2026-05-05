@@ -42,7 +42,7 @@ impl Runner {
     // colors
     const NO_COL: &[Style] = &[];
     const WARN_COL: &[Style] = &[Style::Yellow];
-    const HELP_COL: &[Style] = &[Style::Blue, Style::Bold];
+    const DECORATION_COL: &[Style] = &[Style::Blue, Style::Bold];
     const PROFILE_COL: &[Style] = &[Style::Blue, Style::Bold];
     const PATH_MISS_COL: &[Style] = &[Style::Red, Style::Bold, Style::Underline];
     const PATH_DIFF_COL: &[Style] = &[Style::Yellow, Style::Bold, Style::Underline];
@@ -171,7 +171,7 @@ impl Runner {
         Ok(())
     }
 
-    fn prompt<T: Fn() -> Result<()>>(&mut self, msg: &str, run: T) -> Result<()> {
+    fn prompt<T: Fn(&mut Self) -> Result<()>>(&mut self, msg: &str, run: T) -> Result<()> {
         let wflag_y = self.args.flags().contains(&Flag::Word("assumeyes".into()));
         let lflag_y = self.args.flags().contains(&Flag::Letter('y'));
         let flag_y = wflag_y || lflag_y;
@@ -186,7 +186,7 @@ impl Runner {
         }
         if flag_y {
             self.inout.writeln("y", Self::NO_COL);
-            run()?;
+            run(self)?;
             return Ok(());
         }
         let input = self.inout.read_line();
@@ -194,7 +194,7 @@ impl Runner {
             exit(0);
         }
         if input == "y" {
-            run()?;
+            run(self)?;
         }
         Ok(())
     }
