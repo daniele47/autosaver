@@ -131,6 +131,7 @@ store it in the `cache` directory, properly following `xdg-base` specifications.
 NOTE:
 - run the bash script to install the rust binary and completions if missing
 - run the bash script with `INSTALL= ./autosaver` to force an update of binary and completions
+- run the bash script with `INSTALL=[VERSION] ./autosaver` to force an installation of a precise version
 - run the bash script with `UNINSTALL= ./autosaver` to remove all things installed by the program 
 
 NOTE: Just run `./autosaver --help` to get list of commands, flags and environment variables
