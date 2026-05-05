@@ -2,17 +2,12 @@
 
 All notable changes to this project will be documented here
 
-## v0.7.3
-
-### Changes
-
-- actually parse stdout and format it nicely
-
 ## v0.7.2
 
 ### Patches
 
 - fixed `autosaver` script deleting old version even if newer fails to install
+- actually parse stdout and format it nicely
 
 ## v0.7.1
 
