@@ -25,6 +25,9 @@ pub enum Error {
     /// Invalid flag passed.
     InvalidFlag(Flag, String),
 
+    /// Invalid command passed.
+    InvalidCommand(String),
+
     /// No profile specified to work on.
     MissingProfile,
 }
@@ -49,6 +52,7 @@ impl Display for Error {
                 write!(f, "Script '{}' failed: {reason}", p.display())
             }
             Error::InvalidFlag(flag, cmd) => write!(f, "Invalid flag '{flag}' for command '{cmd}'"),
+            Error::InvalidCommand(cmd) => write!(f, "Invalid command: {cmd}"),
             Error::MissingProfile => write!(f, "No profile was specified"),
         }
     }

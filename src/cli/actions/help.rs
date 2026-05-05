@@ -4,13 +4,11 @@ impl Runner {
     /// Help action to render help message.
     pub fn help(&mut self) -> Result<()> {
         self.check_flags("--help", &["--help", "--nocolor", "-h"])?;
-        let first = self.args.params().first().map(String::as_ref).unwrap_or("");
-        let _ = self.args.params().get(1).map(String::as_ref).unwrap_or("");
-        let _ = self.args.params().get(2).map(String::as_ref).unwrap_or("");
+        let command = self.args.params().join(" ");
         let col = Self::DECORATION_COL;
         let nocol = Self::NO_COL;
         let io = &mut self.inout;
-        match first {
+        match command.as_str() {
             "list" => {
                 io.writeln("Commands:", col);
                 io.write("  list [PROFILE]  ", col);
@@ -68,7 +66,7 @@ impl Runner {
                 io.write("  --list -l       ", col);
                 io.writeln("Only list scripts, do not run them", nocol);
             }
-            _ => {
+            "" => {
                 io.writeln("Environment variables:", col);
                 io.write("  AUTOSAVER_ROOT      ", col);
                 io.writeln("Set the root directory for the program", nocol);
@@ -110,6 +108,7 @@ impl Runner {
                 io.write("  --assumeno -n       ", col);
                 io.writeln("Automatically answer no to all prompts", nocol);
             }
+            _ => self.invalid_cmd_err()?,
         }
         Ok(())
     }

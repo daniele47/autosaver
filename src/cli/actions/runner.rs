@@ -21,7 +21,10 @@ use crate::{
 impl Runner {
     /// Backup action to list/save/restore files.
     pub fn runner(&mut self) -> Result<()> {
-        // check flags
+        // check command and flags
+        if self.args.params().len() > 2 {
+            return self.invalid_cmd_err();
+        }
         self.check_flags(
             "run",
             &[

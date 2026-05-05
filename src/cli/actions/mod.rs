@@ -109,6 +109,10 @@ impl Runner {
         Ok(())
     }
 
+    fn invalid_cmd_err(&self) -> Result<()> {
+        return Err(Error::InvalidCommand(self.args.params().join(" ")));
+    }
+
     fn load_env(env: &str) -> Result<String> {
         env::var(env).map_err(|_| Error::UndefinedEnv(env.to_string()))
     }
@@ -276,7 +280,8 @@ impl Runner {
         match command {
             "list" | "save" | "restore" | "rmhome" | "rmbackup" => self.backup(),
             "run" => self.runner(),
-            _ => self.check_flags("", &[]),
+            "" => self.check_flags("", &[]),
+            _ => self.invalid_cmd_err(),
         }
     }
 }

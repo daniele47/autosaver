@@ -6,7 +6,10 @@ use crate::{
 impl Runner {
     /// Backup action to list/save/restore files.
     pub fn backup(&mut self) -> Result<()> {
-        // check flags
+        // check command and flags
+        if self.args.params().len() > 2 {
+            return self.invalid_cmd_err();
+        }
         let cmd = self.args.params().first().map(String::as_str).unwrap_or("");
         match cmd {
             "list" => {

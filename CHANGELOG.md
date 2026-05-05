@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here
 
+## v0.7.3
+
+- added strict command checks
+
 ## v0.7.2
 
 ### Patches
