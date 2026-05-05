@@ -65,7 +65,7 @@ impl Runner {
                 io.writeln("Flags:", col);
                 io.write("  --show -s       ", col);
                 io.writeln("Show the scripts before running them", nocol);
-                io.write("  --dryrun        ", col);
+                io.write("  --list -l       ", col);
                 io.writeln("Only list scripts, do not run them", nocol);
             }
             _ => {

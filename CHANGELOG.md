@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## WIP
+
+### Changes
+
+- `--dryrun` flag turned into `-l|--list` flags in `run` command
+
 ## v0.6.2
 
 ### Patches

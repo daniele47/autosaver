@@ -26,7 +26,8 @@ impl Runner {
             &[
                 "--show",
                 "-s",
-                "--dryrun",
+                "--list",
+                "-l",
                 "--assumeyes",
                 "-y",
                 "--assumeno",
@@ -39,7 +40,9 @@ impl Runner {
         let wflag_show = self.args.flags().contains(&Flag::Word("show".into()));
         let lflag_show = self.args.flags().contains(&Flag::Letter('s'));
         let flag_show = wflag_show || lflag_show;
-        let flag_dryrun = self.args.flags().contains(&Flag::Word("dryrun".into()));
+        let wflag_list = self.args.flags().contains(&Flag::Word("list".into()));
+        let lflag_list = self.args.flags().contains(&Flag::Letter('l'));
+        let flag_list = wflag_list || lflag_list;
 
         // paths
         let run_dir = Self::paths("run")?;
@@ -87,7 +90,7 @@ impl Runner {
                         }
 
                         // run script if no dryrun flag is passed
-                        if !flag_dryrun {
+                        if !flag_list {
                             self.prompt("Do you want to run it?", |s| {
                                 // make file executable
                                 fs::set_permissions(
@@ -103,21 +106,21 @@ impl Runner {
 
                                 // execute the script
                                 let script_res = Command::new(abs_path.to_str_lossy())
-                                        .stdin(Stdio::null())
-                                        .status()
-                                        .map_err(|e| {
-                                            let p = abs_path.clone().into();
-                                            Error::ScriptFailure(p, e.to_string())
-                                        })
-                                        .and_then(|code| {
-                                            if !code.success() {
-                                                return Err(Error::ScriptFailure(
-                                                    abs_path.clone().into(),
-                                                    format!("Exited with code {code}"),
-                                                ));
-                                            }
-                                            Ok(())
-                                        });
+                                    .stdin(Stdio::null())
+                                    .status()
+                                    .map_err(|e| {
+                                        let p = abs_path.clone().into();
+                                        Error::ScriptFailure(p, e.to_string())
+                                    })
+                                    .and_then(|code| {
+                                        if !code.success() {
+                                            return Err(Error::ScriptFailure(
+                                                abs_path.clone().into(),
+                                                format!("Exited with code {code}"),
+                                            ));
+                                        }
+                                        Ok(())
+                                    });
                                 s.inout.writeln("-".repeat(80), Self::DECORATION_COL);
                                 script_res
                             })?;
