@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v0.7.3
+
+### Changes
+
+- actually parse stdout and format it nicely
+
 ## v0.7.2
 
 ### Patches

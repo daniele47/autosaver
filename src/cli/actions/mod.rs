@@ -49,6 +49,7 @@ impl Runner {
     const PATH_SCRIPT_COL: &[Style] = &[Style::White, Style::Bold, Style::Underline];
     const SIGN_RM_COL: &[Style] = &[Style::Red];
     const SIGN_ADD_COL: &[Style] = &[Style::Green];
+    const SIGN_STDOUT_COL: &[Style] = &[Style::White];
     const SIGN_SCRIPT_COL: &[Style] = &[Style::White];
 
     fn paths(path: &str) -> Result<AbsPath> {

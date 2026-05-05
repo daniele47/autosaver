@@ -1,5 +1,6 @@
 use std::{
     fs,
+    io::{BufRead, BufReader},
     os::unix::fs::PermissionsExt,
     path::PathBuf,
     process::{Command, Stdio},
@@ -105,25 +106,62 @@ impl Runner {
                                     )
                                 })?;
 
-                                // execute the script
-                                let script_res = Command::new(abs_path.to_str_lossy())
-                                    .stdin(Stdio::null())
-                                    .status()
-                                    .map_err(|e| {
-                                        let p = abs_path.clone().into();
-                                        Error::ScriptFailure(p, e.to_string())
-                                    })
-                                    .and_then(|code| {
-                                        if !code.success() {
-                                            return Err(Error::ScriptFailure(
-                                                abs_path.clone().into(),
-                                                format!("Exited with code {code}"),
-                                            ));
+                                let cmd_res = || -> Result<()> {
+                                    // execute the script
+                                    let mut child = Command::new("sh")
+                                        .arg("-c")
+                                        .arg(format!("{} 2>&1", abs_path.to_str_lossy()))
+                                        .stdin(Stdio::null())
+                                        .stdout(Stdio::piped())
+                                        .stderr(Stdio::null())
+                                        .spawn()
+                                        .map_err(|e| {
+                                            let p = abs_path.clone().into();
+                                            Error::ScriptFailure(p, e.to_string())
+                                        })?;
+
+                                    // parse stdout and rewrite it nicely formatted
+                                    if let Some(child_stdout) = child.stdout.take() {
+                                        let reader = BufReader::new(child_stdout);
+                                        for line in reader.lines() {
+                                            match line {
+                                                Ok(l) => {
+                                                    s.inout.write("> ", Self::SIGN_STDOUT_COL);
+                                                    s.inout.writeln(l, Self::NO_COL);
+                                                }
+                                                Err(e) => {
+                                                    return Err(Error::ScriptFailure(
+                                                        abs_path.clone().into(),
+                                                        format!("Failure parsing stdout {e}"),
+                                                    ));
+                                                }
+                                            }
                                         }
-                                        Ok(())
-                                    });
+                                    } else {
+                                        unreachable!("Stdout was set to be piped")
+                                    }
+
+                                    // wait for script to end
+                                    child
+                                        .wait()
+                                        .map_err(|e| {
+                                            let p = abs_path.clone().into();
+                                            Error::ScriptFailure(p, e.to_string())
+                                        })
+                                        .and_then(|code| {
+                                            if !code.success() {
+                                                return Err(Error::ScriptFailure(
+                                                    abs_path.clone().into(),
+                                                    format!("Exited with code {code}"),
+                                                ));
+                                            }
+                                            Ok(())
+                                        })
+                                }();
+
+                                // write line separator no matter what
                                 s.inout.writeln("-".repeat(80), Self::NO_COL);
-                                script_res
+                                cmd_res
                             })?;
                         }
                     }
