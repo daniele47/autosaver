@@ -18,6 +18,8 @@ REMOTE_RELEASE_URL_BIN=""
 
 # update/uninstall
 if [[ ! -f "$LOCAL_BIN_PATH" && ! -v UNINSTALL || -v INSTALL ]]; then
+    OLD_VERSION="$($LOCAL_BIN_PATH --version 2>/dev/null | tr -d '\n ')"
+    OLD_VERSION="${OLD_VERSION:-missing}"
     # get platform / os dependent variables populated
     PLATFORM="$(uname -s)"
     ARCHITECTURE="$(uname -m)"
@@ -58,7 +60,7 @@ if [[ ! -f "$LOCAL_BIN_PATH" && ! -v UNINSTALL || -v INSTALL ]]; then
     rm "$output"
 
     echo -n "Autosaver installed/updated: "
-    "$LOCAL_BIN_PATH" --version
+    echo -en "\e[1;31m$OLD_VERSION\e[m ---> " && "$LOCAL_BIN_PATH" --version
 
     echo -e "--------------------------------------------------------------------------------\n"
 elif [[ -v UNINSTALL ]]; then
