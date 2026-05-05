@@ -118,7 +118,6 @@ impl Runner {
                                             Ok(())
                                         })
                                 }();
-                                s.inout.writeln("", Self::NO_COL);
                                 s.inout.writeln("-".repeat(80), Self::DECORATION_COL);
                                 script_res
                             })?;
