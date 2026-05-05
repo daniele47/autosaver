@@ -102,8 +102,7 @@ impl Runner {
                                 })?;
 
                                 // execute the script
-                                let script_res = || -> Result<()> {
-                                    Command::new(abs_path.to_str_lossy())
+                                let script_res = Command::new(abs_path.to_str_lossy())
                                         .stdin(Stdio::null())
                                         .status()
                                         .map_err(|e| {
@@ -118,8 +117,7 @@ impl Runner {
                                                 ));
                                             }
                                             Ok(())
-                                        })
-                                }();
+                                        });
                                 s.inout.writeln("-".repeat(80), Self::DECORATION_COL);
                                 script_res
                             })?;
