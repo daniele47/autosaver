@@ -55,6 +55,9 @@ profile2
 This profile will contain the profile1 and profile2, and when any action is run on it, it will
 actually run on `profile1` and `profile2`
 
+Note: profiles can be nested! putting a profile `config/dir/profile.txt` will properly function!
+Also: now config directories if specified as profiles, will include all profiles inside the directory!
+
 ### Module
 
 This is a profile to track dotfiles. It can list file paths relative to the $AUTOSAVER_HOME directory, and it is 

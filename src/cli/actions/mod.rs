@@ -1,6 +1,6 @@
 //! Module to run cli.
 
-use std::{env, io::ErrorKind, process::exit};
+use std::{collections::BTreeSet, env, io::ErrorKind, process::exit};
 
 use crate::{
     cli::{
@@ -11,8 +11,8 @@ use crate::{
     core::{
         fs::{AbsPath, LineDiff, PathType, RelPath},
         profile::{
-            Profile,
-            composite::{HashMapProfileLoader, ProfileLoader},
+            Profile, ProfileType,
+            composite::{Composite, HashMapProfileLoader, ProfileLoader},
         },
     },
 };
@@ -236,20 +236,40 @@ impl Runner {
                 if let Some(cached_prof) = cached {
                     return Ok(cached_prof.clone());
                 }
-                let profile_filename = format!("{name}.conf");
-                let prof_file = self.config_dir.join(&RelPath::from(profile_filename));
-                if !prof_file.metadata().is_ok_and(|m| m.is_file()) {
+                let prof_file = self.config_dir.join(&RelPath::from(format!("{name}.conf")));
+                let prof_dir = self.config_dir.join(&RelPath::from(name));
+
+                // if <profile>.conf file exist, consider <profile> the profile name
+                if prof_file.metadata().is_ok_and(|m| m.is_file()) {
+                    let loaded = Profile::parse(name.into(), prof_file.line_reader()?)?;
+                    cached_profiles.insert(name.into(), loaded.clone());
+                    Ok(loaded)
+                }
+                // if <profile>/ directory exist, consider <profile> the profile name
+                // and create a fake composite type, treating this dir as if it included all files
+                else if prof_dir.metadata().is_ok_and(|m| m.is_dir()) {
+                    let mut entries = BTreeSet::new();
+                    for child in prof_dir.list_files(AbsPath::FILTER_ALL)? {
+                        let rel_child_str = child.to_relative(&self.config_dir)?.to_str_lossy();
+                        if child.metadata().is_ok_and(|m| m.is_file()) {
+                            if let Some(profile_name) = rel_child_str.strip_suffix(".conf") {
+                                entries.insert(profile_name.to_string());
+                            }
+                        } else if child.metadata().is_ok_and(|m| m.is_dir()) {
+                            entries.insert(rel_child_str.to_string());
+                        }
+                    }
+                    let ptype =
+                        ProfileType::Composite(Composite::new(entries.into_iter().collect()));
+                    Ok(Profile::new(name.into(), ptype))
+                }
+                // <profile> does not exist
+                else {
                     Err(crate::core::error::Error::ProfileLoadingFailure(
                         name.into(),
-                        format!(
-                            "configuration file is missing: {}",
-                            prof_file.to_str_lossy()
-                        ),
-                    ))?;
+                        "configuration file or directory is missing".into(),
+                    ))
                 }
-                let loaded = Profile::parse(name.into(), prof_file.line_reader()?)?;
-                cached_profiles.insert(name.into(), loaded.clone());
-                Ok(loaded)
             }
         }
 

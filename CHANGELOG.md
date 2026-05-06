@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v0.8.0
+
+### Features
+
+- config directories are now treated exactly as if they were composite profiles loading the files within
+
 ## v0.7.4
 
 ### Changes
