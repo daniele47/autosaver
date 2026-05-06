@@ -12,7 +12,7 @@ impl Runner {
         }
         let cmd = self.args.params().first().map(String::as_str).unwrap_or("");
         match cmd {
-            "list" => {
+            "list" | "ls" => {
                 self.check_flags(cmd, &["--nocolor", "--all", "-a", "--diff", "-d"])?;
             }
             "save" | "restore" => {
@@ -40,7 +40,7 @@ impl Runner {
         // get args
         let mut iter = self.args.params().iter();
         let arg_command = iter.next().map(String::as_str).unwrap_or_default();
-        let act_list = arg_command == "list";
+        let act_list = arg_command == "list" || arg_command == "ls";
         let act_save = arg_command == "save";
         let act_restore = arg_command == "restore";
         let act_rmhome = arg_command == "rmhome";

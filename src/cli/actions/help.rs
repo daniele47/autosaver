@@ -9,7 +9,7 @@ impl Runner {
         let nocol = Self::NO_COL;
         let io = &mut self.inout;
         match command.as_str() {
-            "list" => {
+            "ls" | "list" => {
                 io.writeln("Commands:", col);
                 io.write("  list [PROFILE]  ", col);
                 io.writeln("Show differences between home and backup files", nocol);

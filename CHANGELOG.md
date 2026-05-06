@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## WIP
+
+### Changes
+
+- added `ls` alias for `list`
+
 ## v0.7.3
 
 - added strict command checks
