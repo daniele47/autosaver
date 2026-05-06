@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented here
 
-## WIP
+## v0.7.4
 
 ### Changes
 
