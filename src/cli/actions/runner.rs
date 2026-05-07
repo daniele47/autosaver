@@ -96,13 +96,11 @@ impl Runner {
                         // show script if show flag is passed
                         if flag_show {
                             let show = if flag_full { usize::MAX } else { 10 };
-                            let mut count = 0;
-                            for line in abs_path.line_reader()? {
+                            for (count, line) in abs_path.line_reader()?.enumerate() {
                                 if count >= show {
                                     self.inout.writeln("... ".to_string(), Self::NO_COL);
                                     break;
                                 }
-                                count += 1;
                                 match line {
                                     Ok(l) => {
                                         self.inout.write("* ", Self::SIGN_SCRIPT_COL);
