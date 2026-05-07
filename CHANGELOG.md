@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## WIP
+
+### Added
+
+- `--full|-f` flag to show entire diff
+
 ## v0.8.5
 
 ### Changes
