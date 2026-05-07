@@ -214,7 +214,7 @@ impl Runner {
         let lflag_n = self.args.flags().contains(&Flag::Letter('n'));
         let flag_n = wflag_n || lflag_n;
 
-        self.inout.write(format!("{msg} [y/n/q] "), Self::NO_COL);
+        self.inout.write(format!("$ {msg} [y/n/q] "), Self::NO_COL);
         if flag_n {
             self.inout.writeln("n", Self::NO_COL);
             return Ok(());

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v0.8.2
+
+### Change
+
+- added `$` to start of prompt lines
+
 ## v0.8.1
 
 ### Patches
