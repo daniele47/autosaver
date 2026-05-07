@@ -1,6 +1,6 @@
 use crate::core::{
     error::{Error, Result},
-    fs::RelPath,
+    fs::{self, RelPath},
     parsers::{RawItem, RawKind},
     profile::{
         Profile, ProfileType,
@@ -25,11 +25,26 @@ impl RunnerParser {
                 RawKind::Option => match line.content.as_str() {
                     "policy run" => policy = RunnerPolicy::Run,
                     "policy skip" => policy = RunnerPolicy::Skip,
-                    _ => return Err(Error::InvalidOptionLine(profile, line.line, line.content)),
+                    _ => {
+                        return Err(Error::InvalidOptionLine(
+                            profile,
+                            line.line,
+                            line.content,
+                            "".into(),
+                        ));
+                    }
                 },
 
                 // data lines, aka relative file paths here
                 RawKind::Data => {
+                    if fs::check_has_parent_dirs(&line.content) {
+                        return Err(Error::InvalidDataLine(
+                            profile,
+                            line.line,
+                            line.content,
+                            "runner paths cannot contain parent directories".into(),
+                        ));
+                    }
                     let path = RelPath::from(line.content.as_str());
                     let entry = RunnerEntry::new(path, policy);
                     entries.push(entry);

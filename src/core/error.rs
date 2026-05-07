@@ -27,10 +27,10 @@ pub enum Error {
     MissingProfileType(String),
 
     /// Invalid option line in config file.
-    InvalidOptionLine(String, usize, String),
+    InvalidOptionLine(String, usize, String, String),
 
     /// Invalid data line in config file.
-    InvalidDataLine(String, usize, String),
+    InvalidDataLine(String, usize, String, String),
 }
 
 /// Result type for the entire crate, using `Error` error type.
@@ -66,11 +66,13 @@ impl Display for Error {
             Error::MissingProfileType(name) => {
                 write!(f, "Profile '{name}' lacks the profile type option line")
             }
-            Error::InvalidOptionLine(name, n, line) => {
-                write!(f, "Invalid option line {n} in profile '{name}' : {line}")
+            Error::InvalidOptionLine(name, n, l, r) => {
+                let r = if r.is_empty() { r } else { &format!(" ({r})") };
+                write!(f, "Invalid option line {n} in profile '{name}' : {l}{r}")
             }
-            Error::InvalidDataLine(name, n, line) => {
-                write!(f, "Invalid data line {n} in profile '{name}' : {line}")
+            Error::InvalidDataLine(name, n, l, r) => {
+                let r = if r.is_empty() { r } else { &format!(" ({r})") };
+                write!(f, "Invalid data line {n} in profile '{name}' : {l}{r}")
             }
         }
     }

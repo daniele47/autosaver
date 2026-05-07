@@ -41,7 +41,12 @@ impl Profile {
 
             // profile line MUST be the very first
             if first.line != 1 {
-                return Err(Error::InvalidOptionLine(profile, first.line, content));
+                return Err(Error::InvalidOptionLine(
+                    profile,
+                    first.line,
+                    content,
+                    "".into(),
+                ));
             }
 
             // pick correct parser based on the profile type parsed from the first line
@@ -49,7 +54,12 @@ impl Profile {
                 "type composite" => CompositeParser::parse(profile, raw),
                 "type module" => ModuleParser::parse(profile, raw),
                 "type runner" => RunnerParser::parse(profile, raw),
-                _ => Err(Error::InvalidOptionLine(profile, first.line, content)),
+                _ => Err(Error::InvalidOptionLine(
+                    profile,
+                    first.line,
+                    content,
+                    "".into(),
+                )),
             }
         } else {
             Err(Error::MissingProfileType(profile))
