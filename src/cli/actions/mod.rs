@@ -53,33 +53,36 @@ impl Runner {
     const SIGN_SCRIPT_COL: &[Style] = &[Style::White];
 
     // check there are no symlinks to the outside
-    fn assert_no_escaping_symlinks(&mut self) {
+    fn assert_no_escaping_symlinks(&mut self) -> Result<()> {
         let mut err = false;
-        if let Ok(root_dir) = Self::paths("root")
-            && let Ok(conf_dir) = Self::paths("config")
-            && let Ok(backup_dir) = Self::paths("backup")
-            && let Ok(run_dir) = Self::paths("run")
-        {
-            for symlink in root_dir.all_files(AbsPath::FILTER_ALL).unwrap_or_default() {
-                if !symlink.check_inside(&conf_dir)
-                    && !symlink.check_inside(&backup_dir)
-                    && !symlink.check_inside(&run_dir)
-                {
-                    let norm_path = symlink.to_str_lossy();
-                    let canon_path = symlink
-                        .canonicalize()
-                        .expect("path should have been canonicalizable")
-                        .to_str_lossy();
-                    self.inout.error(format!(
-                        "symlink path points outside accepted directories: {norm_path} -> {canon_path}"
-                    ));
-                    err = true;
-                }
+        let root_dir = Self::paths("root")?;
+        let config_dir = Self::paths("config")?;
+        let backup_dir = Self::paths("backup")?;
+        let run_dir = Self::paths("run")?;
+
+        for symlink in root_dir.all_files(AbsPath::FILTER_ALL)? {
+            if !symlink.check_inside(&config_dir)
+                && !symlink.check_inside(&backup_dir)
+                && !symlink.check_inside(&run_dir)
+            {
+                let norm_path = symlink.to_str_lossy();
+                let canon_path = symlink
+                    .canonicalize()
+                    .expect("path should have been canonicalizable")
+                    .to_str_lossy();
+                self.inout.error(format!(
+                    "symlink path points outside accepted directories: {norm_path} -> {canon_path}"
+                ));
+                err = true;
             }
         }
+
+        // early exit if there were errors
         if err {
             exit(1);
         }
+
+        Ok(())
     }
 
     // get paths
@@ -316,7 +319,7 @@ impl Runner {
     /// Run the cli application.
     pub fn run(&mut self) -> Result<()> {
         // run symlink checks
-        self.assert_no_escaping_symlinks();
+        self.assert_no_escaping_symlinks()?;
 
         // get flags
         let flags = self.args.flags();

@@ -8,7 +8,7 @@ All notable changes to this project will be documented here
 
 - updated colors for rmhome and rmbackup paths
 - parser does not allow .. paths anymore
-- [WIP] binary now checks no symlink that links to outside the repo exist before running 
+- binary now checks no symlink that links to outside the repo exist before running 
 
 ## v0.8.0
 
