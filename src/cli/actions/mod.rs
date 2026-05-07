@@ -52,6 +52,7 @@ impl Runner {
     const SIGN_STDOUT_COL: &[Style] = &[Style::White];
     const SIGN_SCRIPT_COL: &[Style] = &[Style::White];
 
+    // get paths
     fn paths(path: &str) -> Result<AbsPath> {
         match path {
             "home" => {
@@ -96,6 +97,7 @@ impl Runner {
         }
     }
 
+    // easily check flags
     fn check_flags(&self, cmd: &str, flag_set: &[&str]) -> Result<()> {
         for flag in self.args.flags() {
             let flag_str = match flag {
@@ -109,14 +111,15 @@ impl Runner {
         Ok(())
     }
 
+    // utility to avoid rewriting the same code multiple times
     fn invalid_cmd_err(&self) -> Result<()> {
         Err(Error::InvalidCommand(self.args.params().join(" ")))
     }
 
+    // deal with environment variables
     fn load_env(env: &str) -> Result<String> {
         env::var(env).map_err(|_| Error::UndefinedEnv(env.to_string()))
     }
-
     fn env(env: &str) -> Result<String> {
         match env {
             "profile" => Self::load_env("AUTOSAVER_PROFILE"),
@@ -126,6 +129,7 @@ impl Runner {
         }
     }
 
+    // load the profile, with the proper fallbacks
     fn load_profile(&self, param_index: usize) -> Result<String> {
         || -> Result<String> {
             match self.args.params().get(param_index) {
@@ -148,6 +152,7 @@ impl Runner {
         .map_err(|_| Error::MissingProfile)
     }
 
+    // render diff between two files
     fn render_diff(&mut self, file1: &AbsPath, file2: &AbsPath) -> Result<()> {
         let diff = file1.calc_diff(file2);
         if let Err(err) = &diff
@@ -176,6 +181,7 @@ impl Runner {
         Ok(())
     }
 
+    // prompt user before running an action
     fn prompt<T: Fn(&mut Self) -> Result<()>>(&mut self, msg: &str, run: T) -> Result<()> {
         let wflag_y = self.args.flags().contains(&Flag::Word("assumeyes".into()));
         let lflag_y = self.args.flags().contains(&Flag::Letter('y'));
@@ -204,16 +210,17 @@ impl Runner {
         Ok(())
     }
 
+    // nice profile output
     fn output_profile(&mut self, profile: &str) {
         let msg = format!("*** {profile} ***");
         self.inout.writeln(msg, Self::DECORATION_COL)
     }
-
     fn output_main_profile(&mut self, profile: &str) {
         let msg = format!("****** {profile} ******");
         self.inout.writeln(msg, Self::MAIN_PROF_COL)
     }
 
+    // get a struct that implements profile loader
     fn profile_loader() -> Result<impl ProfileLoader> {
         struct ProfileLoaderImpl {
             cached: HashMapProfileLoader,
