@@ -8,6 +8,11 @@ All notable changes to this project will be documented here
 
 - added `--ask-profile` global flag to allow getting prompted for profile
 
+### Changes
+
+- allow missing `run`, `backup`, `config` directories
+- [WIP] made flags consistent, by actually splitting words with a `-` 
+
 ## v0.8.3
 
 ### Patches
@@ -16,7 +21,7 @@ All notable changes to this project will be documented here
 
 ## v0.8.2
 
-### Change
+### Changes
 
 - added `$` to start of prompt lines
 

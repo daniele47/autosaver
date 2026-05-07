@@ -60,6 +60,9 @@ impl Runner {
             Self::paths("backup")?,
             Self::paths("run")?,
         ] {
+            if !dir.exists() {
+                continue;
+            }
             for symlink in dir.all_files(AbsPath::FILTER_ALL)? {
                 {
                     if !symlink.check_inside(&dir) {
