@@ -181,7 +181,7 @@ impl Runner {
     }
 
     // render diff between two files
-    fn render_diff(&mut self, file1: &AbsPath, file2: &AbsPath) -> Result<()> {
+    fn render_diff(&mut self, file1: &AbsPath, file2: &AbsPath, cut: bool) -> Result<()> {
         let diff = file1.calc_diff(file2);
         if let Err(err) = &diff
             && let crate::core::error::Error::IoError(err, _) = err
@@ -193,16 +193,32 @@ impl Runner {
             );
             return Ok(());
         }
+        let show = if cut { 9 } else { usize::MAX };
+        let mut count = 0;
+        let cut_line = |i: String| {
+            if cut {
+                let res: String = i.chars().take(76).collect();
+                res + if i.len() > 76 { " ..." } else { "" }
+            } else {
+                i
+            }
+        };
         for line in diff? {
+            if count >= show {
+                self.inout.writeln("... ".to_string(), Self::NO_COL);
+                break;
+            }
             match line {
                 LineDiff::Equal(_) => {}
                 LineDiff::Insert(line) => {
                     self.inout.write("+ ", Self::SIGN_ADD_COL);
-                    self.inout.writeln(line, Self::NO_COL);
+                    self.inout.writeln(cut_line(line), Self::NO_COL);
+                    count += 1;
                 }
                 LineDiff::Delete(line) => {
                     self.inout.write("- ", Self::SIGN_RM_COL);
-                    self.inout.writeln(line, Self::NO_COL);
+                    self.inout.writeln(cut_line(line), Self::NO_COL);
+                    count += 1;
                 }
             }
         }

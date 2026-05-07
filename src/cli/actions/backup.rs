@@ -24,6 +24,8 @@ impl Runner {
                         "-a",
                         "--diff",
                         "-d",
+                        "--full",
+                        "-f",
                         "--list",
                         "-l",
                         "--no-color",
@@ -66,6 +68,9 @@ impl Runner {
         let wflag_list = self.args.flags().contains(&Flag::Word("list".into()));
         let lflag_list = self.args.flags().contains(&Flag::Letter('l'));
         let flag_list = wflag_list || lflag_list;
+        let wflag_full = self.args.flags().contains(&Flag::Word("full".into()));
+        let lflag_full = self.args.flags().contains(&Flag::Letter('f'));
+        let flag_full = wflag_full || lflag_full;
 
         // paths
         let home_dir = Self::paths("home")?;
@@ -131,9 +136,9 @@ impl Runner {
                                 self.inout.writeln(path.to_string(), Self::PATH_DIFF_COL);
                                 if flag_diff {
                                     if act_restore {
-                                        self.render_diff(&home_file, &backup_file)?;
+                                        self.render_diff(&home_file, &backup_file, !flag_full)?;
                                     } else {
-                                        self.render_diff(&backup_file, &home_file)?;
+                                        self.render_diff(&backup_file, &home_file, !flag_full)?;
                                     }
                                 }
                                 if !flag_list {

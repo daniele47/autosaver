@@ -21,6 +21,8 @@ impl Runner {
                 io.writeln("Show some lines of diff between files", nocol);
                 io.write("  --list -l       ", col);
                 io.writeln("Only list files, do not prompt to save them", nocol);
+                io.write("  --full -f       ", col);
+                io.writeln("Show the entire diff between the files", nocol);
             }
             "restore" => {
                 io.writeln("Commands:", col);
@@ -34,6 +36,8 @@ impl Runner {
                 io.writeln("Show some lines of diff between files", nocol);
                 io.write("  --list -l       ", col);
                 io.writeln("Only list files, do not prompt to restore them", nocol);
+                io.write("  --full -f       ", col);
+                io.writeln("Show the entire diff between the files", nocol);
             }
             "rmhome" => {
                 io.writeln("Commands:", col);
