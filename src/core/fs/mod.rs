@@ -136,6 +136,7 @@ impl AbsPath {
     pub const FILTER_ALL: fn(&AbsPath) -> bool = Self::filter_all;
     pub const FILTER_FILES: fn(&AbsPath) -> bool = Self::filter_files;
     pub const FILTER_DIRS: fn(&AbsPath) -> bool = Self::filter_directories;
+    pub const FILTER_SYMLINKS: fn(&AbsPath) -> bool = Self::filter_symlinks;
 
     /// Creates new AbsPath from an absolute path.
     pub fn new(path: PathBuf) -> Self {
@@ -398,6 +399,21 @@ impl AbsPath {
     fn filter_directories(path: &AbsPath) -> bool {
         path.metadata().is_ok_and(|m| m.is_dir())
     }
+    fn filter_symlinks(path: &AbsPath) -> bool {
+        println!("{:?}", path.path.symlink_metadata());
+        path.path.symlink_metadata().is_ok_and(|m| m.is_symlink())
+    }
+
+    /// Check path canonicalized is inside an other dir.
+    pub fn check_inside(&self, dir: &AbsPath) -> bool {
+        if let Ok(self_canon) = self.canonicalize()
+            && let Ok(dir_canon) = dir.canonicalize()
+        {
+            self_canon.path.starts_with(&dir_canon.path)
+        } else {
+            false
+        }
+    }
 
     /// List all files recursively inside a directory.
     ///
@@ -522,6 +538,11 @@ impl RelPath {
         suffixes
             .iter()
             .fold(self.clone(), |p, s| p.join(&RelPath::from(*s)))
+    }
+
+    /// Check if relative path appended to `dir` is actually still inside `dir`.
+    pub fn check_inside(&self, dir: &AbsPath) -> bool {
+        self.to_absolute(dir).check_inside(dir)
     }
 }
 

@@ -129,7 +129,6 @@ mod tests {
 
         let items: Vec<RawItem> = RawParser::parse(reader).collect::<Result<Vec<_>>>()?;
 
-        print!("{items:#?}");
         assert_eq!(items.len(), 4);
 
         // First: option line
