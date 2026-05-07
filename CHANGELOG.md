@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v0.8.3
+
+### Patches
+
+- symlinks check doesn't run on help/version actions
+
 ## v0.8.2
 
 ### Change

@@ -309,9 +309,6 @@ impl Runner {
 
     /// Run the cli application.
     pub fn run(&mut self) -> Result<()> {
-        // run symlink checks
-        self.assert_no_escaping_symlinks()?;
-
         // get flags
         let flags = self.args.flags();
         let wflag_help = flags.contains(&Flag::Word("help".into()));
@@ -329,6 +326,9 @@ impl Runner {
         if lflag_help || wflag_help {
             return self.help();
         }
+
+        // run symlink checks
+        self.assert_no_escaping_symlinks()?;
 
         // handle commands
         let command = self.args.params().first().map(|s| s.as_str()).unwrap_or("");
