@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v0.9.0
+
+### Features
+
+- added `--ask-profile` global flag to allow getting prompted for profile
+
 ## v0.8.3
 
 ### Patches

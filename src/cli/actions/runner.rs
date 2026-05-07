@@ -37,6 +37,7 @@ impl Runner {
                 "--assumeno",
                 "-n",
                 "--nocolor",
+                "--ask-profile",
             ],
         )?;
 

@@ -13,7 +13,10 @@ impl Runner {
         let cmd = self.args.params().first().map(String::as_str).unwrap_or("");
         match cmd {
             "list" | "ls" => {
-                self.check_flags(cmd, &["--nocolor", "--all", "-a", "--diff", "-d"])?;
+                self.check_flags(
+                    cmd,
+                    &["--nocolor", "--all", "-a", "--diff", "-d", "--ask-profile"],
+                )?;
             }
             "save" | "restore" => {
                 self.check_flags(
@@ -28,11 +31,24 @@ impl Runner {
                         "--diff",
                         "-d",
                         "--nocolor",
+                        "--ask-profile",
                     ],
                 )?;
             }
             "rmhome" | "rmbackup" => {
-                self.check_flags(cmd, &["--assumeyes", "-y", "--assumeno", "-n", "--nocolor"])?;
+                self.check_flags(
+                    cmd,
+                    &[
+                        "--assumeyes",
+                        "-y",
+                        "--assumeno",
+                        "-n",
+                        "--all",
+                        "-a",
+                        "--nocolor",
+                        "--ask-profile",
+                    ],
+                )?;
             }
             _ => unreachable!("Invalid command"),
         }

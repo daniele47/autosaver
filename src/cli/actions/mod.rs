@@ -51,6 +51,7 @@ impl Runner {
     const SIGN_ADD_COL: &[Style] = &[Style::Green];
     const SIGN_STDOUT_COL: &[Style] = &[Style::White];
     const SIGN_SCRIPT_COL: &[Style] = &[Style::White];
+    const SIGN_INPUT_COL: &[Style] = &[Style::White];
 
     // check there are no symlinks to the outside
     fn assert_no_escaping_symlinks(&mut self) -> Result<()> {
@@ -154,7 +155,12 @@ impl Runner {
     }
 
     // load the profile, with the proper fallbacks
-    fn load_profile(&self, param_index: usize) -> Result<String> {
+    fn load_profile(&mut self, param_index: usize) -> Result<String> {
+        let flag = Flag::Word("ask-profile".into());
+        if self.args.flags().contains(&flag) {
+            self.generic_prompt("What profile do you want to use? ");
+            return Ok(self.inout.read_line());
+        }
         || -> Result<String> {
             match self.args.params().get(param_index) {
                 Some(p) => Ok(p.clone()) as Result<String>,
@@ -205,6 +211,12 @@ impl Runner {
         Ok(())
     }
 
+    // generic prompt
+    fn generic_prompt(&mut self, prompt: &str) {
+        self.inout.write("$ ", Self::SIGN_INPUT_COL);
+        self.inout.write(prompt, Self::NO_COL);
+    }
+
     // prompt user before running an action
     fn prompt<T: Fn(&mut Self) -> Result<()>>(&mut self, msg: &str, run: T) -> Result<()> {
         let wflag_y = self.args.flags().contains(&Flag::Word("assumeyes".into()));
@@ -214,7 +226,7 @@ impl Runner {
         let lflag_n = self.args.flags().contains(&Flag::Letter('n'));
         let flag_n = wflag_n || lflag_n;
 
-        self.inout.write(format!("$ {msg} [y/n/q] "), Self::NO_COL);
+        self.generic_prompt(format!("{msg} [y/n/q] ").as_str());
         if flag_n {
             self.inout.writeln("n", Self::NO_COL);
             return Ok(());
