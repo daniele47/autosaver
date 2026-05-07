@@ -152,7 +152,7 @@ impl Runner {
                                             match line {
                                                 Ok(l) => {
                                                     s.inout.write("> ", Self::SIGN_STDOUT_COL);
-                                                    s.inout.writeln(l, Self::NO_COL);
+                                                    s.inout.writeln(cut_line(l), Self::NO_COL);
                                                 }
                                                 Err(e) => {
                                                     return Err(Error::ScriptFailure(

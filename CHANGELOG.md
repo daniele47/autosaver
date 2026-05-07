@@ -2,11 +2,11 @@
 
 All notable changes to this project will be documented here
 
-## WIP
+## v0.9.0
 
-### Added
+### Features
 
-- `--full|-f` flag to show entire diff
+- `--full|-f` flag to show entire diff, script and script output
 
 ## v0.8.5
 
