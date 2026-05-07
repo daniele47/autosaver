@@ -12,9 +12,6 @@ impl Runner {
         }
         let cmd = self.args.params().first().map(String::as_str).unwrap_or("");
         match cmd {
-            "list" | "ls" => {
-                self.check_flags(cmd, &["--no-color", "--all", "-a", "--diff", "-d"])?;
-            }
             "save" | "restore" => {
                 self.check_flags(
                     cmd,
@@ -27,6 +24,8 @@ impl Runner {
                         "-a",
                         "--diff",
                         "-d",
+                        "--list",
+                        "-l",
                         "--no-color",
                     ],
                 )?;
@@ -41,6 +40,8 @@ impl Runner {
                         "-n",
                         "--all",
                         "-a",
+                        "--list",
+                        "-l",
                         "--no-color",
                     ],
                 )?;
@@ -51,7 +52,6 @@ impl Runner {
         // get args
         let mut iter = self.args.params().iter();
         let arg_command = iter.next().map(String::as_str).unwrap_or_default();
-        let act_list = arg_command == "list" || arg_command == "ls";
         let act_save = arg_command == "save";
         let act_restore = arg_command == "restore";
         let act_rmhome = arg_command == "rmhome";
@@ -63,6 +63,9 @@ impl Runner {
         let wflag_diff = self.args.flags().contains(&Flag::Word("diff".into()));
         let lflag_diff = self.args.flags().contains(&Flag::Letter('d'));
         let flag_diff = wflag_diff || lflag_diff;
+        let wflag_list = self.args.flags().contains(&Flag::Word("list".into()));
+        let lflag_list = self.args.flags().contains(&Flag::Letter('l'));
+        let flag_list = wflag_list || lflag_list;
 
         // paths
         let home_dir = Self::paths("home")?;
@@ -99,17 +102,23 @@ impl Runner {
                         // rmhome
                         if act_rmhome && is_home_file {
                             self.inout.writeln(path.to_string(), Self::PATH_COL);
-                            self.prompt("Do you want to delete the home file?", |_| {
-                                Ok(home_file.purge_path(false)?)
-                            })?;
+                            if !flag_list {
+                                self.prompt("Do you want to delete the home file?", |_| {
+                                    Ok(home_file.purge_path(false)?)
+                                })?;
+                            }
+                            continue;
                         }
 
                         // rmbackup
                         if act_rmbackup && is_backup_file {
                             self.inout.writeln(path.to_string(), Self::PATH_COL);
-                            self.prompt("Do you want to delete the backup file?", |_| {
-                                Ok(backup_file.purge_path(false)?)
-                            })?;
+                            if !flag_list {
+                                self.prompt("Do you want to delete the backup file?", |_| {
+                                    Ok(backup_file.purge_path(false)?)
+                                })?;
+                            }
+                            continue;
                         }
 
                         // list|save|restore
@@ -117,9 +126,6 @@ impl Runner {
                             // files differ
                             (true, true) if !home_file.content_eq(&backup_file) => {
                                 if entry.policy() == ModulePolicy::NotDiff && !flag_all {
-                                    continue;
-                                }
-                                if !act_list && !act_save && !act_restore {
                                     continue;
                                 }
                                 self.inout.writeln(path.to_string(), Self::PATH_DIFF_COL);
@@ -130,7 +136,7 @@ impl Runner {
                                         self.render_diff(&backup_file, &home_file)?;
                                     }
                                 }
-                                if act_save || act_restore {
+                                if !flag_list {
                                     self.prompt("Do you want to update it?", |_| {
                                         if act_restore {
                                             Ok(backup_file.copy_file(&home_file, false)?)
@@ -142,11 +148,11 @@ impl Runner {
                             }
                             // home => backup
                             (true, false) => {
-                                if !act_list && !act_save {
+                                if !act_save {
                                     continue;
                                 }
                                 self.inout.writeln(path.to_string(), Self::PATH_MISS_COL);
-                                if act_save {
+                                if !flag_list {
                                     self.prompt("Do you want to save it?", |_| {
                                         Ok(home_file.copy_file(&backup_file, false)?)
                                     })?;
@@ -154,11 +160,11 @@ impl Runner {
                             }
                             // backup => home
                             (false, true) => {
-                                if !act_list && !act_restore {
+                                if !act_restore {
                                     continue;
                                 }
                                 self.inout.writeln(path.to_string(), Self::PATH_MISS_COL);
-                                if act_restore {
+                                if !flag_list {
                                     self.prompt("Do you want to restore it?", |_| {
                                         Ok(backup_file.copy_file(&home_file, false)?)
                                     })?;

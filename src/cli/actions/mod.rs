@@ -345,7 +345,7 @@ impl Runner {
         // handle commands
         let command = self.args.params().first().map(|s| s.as_str()).unwrap_or("");
         match command {
-            "ls" | "list" | "save" | "restore" | "rmhome" | "rmbackup" => self.backup(),
+            "save" | "restore" | "rmhome" | "rmbackup" => self.backup(),
             "run" => self.runner(),
             "" => self.check_flags("", &[]),
             _ => self.invalid_cmd_err(),

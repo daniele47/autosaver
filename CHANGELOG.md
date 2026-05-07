@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v0.8.5
+
+### Changes
+
+- changed `list` command with `--list|-l` flag
+
 ## v0.8.4
 
 ### Changes

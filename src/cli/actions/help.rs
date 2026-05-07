@@ -9,17 +9,6 @@ impl Runner {
         let nocol = Self::NO_COL;
         let io = &mut self.inout;
         match command.as_str() {
-            "ls" | "list" => {
-                io.writeln("Commands:", col);
-                io.write("  list [PROFILE]  ", col);
-                io.writeln("Show differences between home and backup files", nocol);
-                io.writeln("", nocol);
-                io.writeln("Flags:", col);
-                io.write("  --all -a        ", col);
-                io.writeln("Show files which are ignored by default", nocol);
-                io.write("  --diff -d       ", col);
-                io.writeln("Show entire diff between files", nocol);
-            }
             "save" => {
                 io.writeln("Commands:", col);
                 io.write("  save [PROFILE]  ", col);
@@ -30,30 +19,39 @@ impl Runner {
                 io.writeln("Show files which are ignored by default", nocol);
                 io.write("  --diff -d       ", col);
                 io.writeln("Show some lines of diff between files", nocol);
+                io.write("  --list -l       ", col);
+                io.writeln("Only list files, do not prompt to save them", nocol);
             }
             "restore" => {
                 io.writeln("Commands:", col);
                 io.write("  restore [PROFILE]   ", col);
-                io.writeln(
-                    "Restore changes from the backup to the home directory",
-                    nocol,
-                );
+                io.writeln("Restore changes from the backup to the home dir", nocol);
                 io.writeln("", nocol);
                 io.writeln("Flags:", col);
                 io.write("  --all -a            ", col);
                 io.writeln("Show files which are ignored by default", nocol);
                 io.write("  --diff -d       ", col);
                 io.writeln("Show some lines of diff between files", nocol);
+                io.write("  --list -l       ", col);
+                io.writeln("Only list files, do not prompt to restore them", nocol);
             }
             "rmhome" => {
                 io.writeln("Commands:", col);
                 io.write("  rmhome [PROFILE]    ", col);
                 io.writeln("Delete files from home directory [DANGEROUS]", nocol);
+                io.writeln("", nocol);
+                io.writeln("Flags:", col);
+                io.write("  --list -l       ", col);
+                io.writeln("Only list files, do not prompt to delete them", nocol);
             }
             "rmbackup" => {
                 io.writeln("Commands:", col);
                 io.write("  rmbackup [PROFILE]  ", col);
                 io.writeln("Delete files from backup directory [DANGEROUS]", nocol);
+                io.writeln("", nocol);
+                io.writeln("Flags:", col);
+                io.write("  --list -l       ", col);
+                io.writeln("Only list files, do not prompt to delete them", nocol);
             }
             "run" => {
                 io.writeln("Commands:", col);
@@ -64,7 +62,7 @@ impl Runner {
                 io.write("  --show -s       ", col);
                 io.writeln("Show the scripts before running them", nocol);
                 io.write("  --list -l       ", col);
-                io.writeln("Only list scripts, do not run them", nocol);
+                io.writeln("Only list scripts, do not prompt to run them", nocol);
             }
             "" => {
                 io.writeln("Environment variables:", col);
@@ -80,8 +78,6 @@ impl Runner {
                 io.writeln("Specify default profile, when none are provided", nocol);
                 io.writeln("", nocol);
                 io.writeln("Commands:", col);
-                io.write("  list                ", col);
-                io.writeln("Show differences between home and backup files", nocol);
                 io.write("  save                ", col);
                 io.writeln("Save changes from the home directory to the backup", nocol);
                 io.write("  restore             ", col);
