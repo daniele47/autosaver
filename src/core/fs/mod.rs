@@ -400,7 +400,6 @@ impl AbsPath {
         path.metadata().is_ok_and(|m| m.is_dir())
     }
     fn filter_symlinks(path: &AbsPath) -> bool {
-        println!("{:?}", path.path.symlink_metadata());
         path.path.symlink_metadata().is_ok_and(|m| m.is_symlink())
     }
 
