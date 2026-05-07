@@ -30,6 +30,9 @@ pub enum Error {
 
     /// No profile specified to work on.
     MissingProfile,
+
+    /// A symlink where it is not allowed to.
+    OutOfBoundSymlink(String, String),
 }
 
 impl From<crate::core::error::Error> for Error {
@@ -54,6 +57,10 @@ impl Display for Error {
             Error::InvalidFlag(flag, cmd) => write!(f, "Invalid flag '{flag}' for command '{cmd}'"),
             Error::InvalidCommand(cmd) => write!(f, "Invalid command: {cmd}"),
             Error::MissingProfile => write!(f, "No profile was specified"),
+            Error::OutOfBoundSymlink(file, target) => write!(
+                f,
+                "Symlink point where it is not allowed to: {file} -> {target}"
+            ),
         }
     }
 }

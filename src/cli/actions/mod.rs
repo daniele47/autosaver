@@ -54,32 +54,23 @@ impl Runner {
 
     // check there are no symlinks to the outside
     fn assert_no_escaping_symlinks(&mut self) -> Result<()> {
-        let mut err = false;
-        let root_dir = Self::paths("root")?;
-        let config_dir = Self::paths("config")?;
-        let backup_dir = Self::paths("backup")?;
-        let run_dir = Self::paths("run")?;
-
-        for symlink in root_dir.all_files(AbsPath::FILTER_ALL)? {
-            if !symlink.check_inside(&config_dir)
-                && !symlink.check_inside(&backup_dir)
-                && !symlink.check_inside(&run_dir)
-            {
-                let norm_path = symlink.to_str_lossy();
-                let canon_path = symlink
-                    .canonicalize()
-                    .expect("path should have been canonicalizable")
-                    .to_str_lossy();
-                self.inout.error(format!(
-                    "symlink path points outside accepted directories: {norm_path} -> {canon_path}"
-                ));
-                err = true;
+        for dir in [
+            Self::paths("config")?,
+            Self::paths("backup")?,
+            Self::paths("run")?,
+        ] {
+            for symlink in dir.all_files(AbsPath::FILTER_ALL)? {
+                {
+                    if !symlink.check_inside(&dir) {
+                        let norm_path = symlink.to_str_lossy();
+                        let canon_path = symlink
+                            .canonicalize()
+                            .expect("path should have been canonicalizable")
+                            .to_str_lossy();
+                        return Err(Error::OutOfBoundSymlink(norm_path, canon_path));
+                    }
+                }
             }
-        }
-
-        // early exit if there were errors
-        if err {
-            exit(1);
         }
 
         Ok(())
