@@ -75,7 +75,7 @@ impl Runner {
 
                         // output script path
                         let path = entry.path().to_str_lossy();
-                        self.inout.writeln(&path, Self::PATH_SCRIPT_COL);
+                        self.inout.writeln(&path, Self::PATH_COL);
                         let abs_path = run_dir.join(&RelPath::from(path));
 
                         // show script if show flag is passed

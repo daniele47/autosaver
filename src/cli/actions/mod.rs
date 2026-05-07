@@ -46,7 +46,7 @@ impl Runner {
     const DECORATION_COL: &[Style] = &[Style::Blue, Style::Bold];
     const PATH_MISS_COL: &[Style] = &[Style::Red, Style::Bold, Style::Underline];
     const PATH_DIFF_COL: &[Style] = &[Style::Yellow, Style::Bold, Style::Underline];
-    const PATH_SCRIPT_COL: &[Style] = &[Style::White, Style::Bold, Style::Underline];
+    const PATH_COL: &[Style] = &[Style::White, Style::Bold, Style::Underline];
     const SIGN_RM_COL: &[Style] = &[Style::Red];
     const SIGN_ADD_COL: &[Style] = &[Style::Green];
     const SIGN_STDOUT_COL: &[Style] = &[Style::White];

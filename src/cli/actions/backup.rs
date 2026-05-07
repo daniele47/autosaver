@@ -87,7 +87,7 @@ impl Runner {
 
                         // rmhome
                         if act_rmhome && is_home_file {
-                            self.inout.writeln(path.to_string(), Self::PATH_MISS_COL);
+                            self.inout.writeln(path.to_string(), Self::PATH_COL);
                             self.prompt("Do you want to delete the home file?", |_| {
                                 Ok(home_file.purge_path(false)?)
                             })?;
@@ -95,7 +95,7 @@ impl Runner {
 
                         // rmbackup
                         if act_rmbackup && is_backup_file {
-                            self.inout.writeln(path.to_string(), Self::PATH_MISS_COL);
+                            self.inout.writeln(path.to_string(), Self::PATH_COL);
                             self.prompt("Do you want to delete the backup file?", |_| {
                                 Ok(backup_file.purge_path(false)?)
                             })?;
