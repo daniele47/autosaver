@@ -13,10 +13,7 @@ impl Runner {
         let cmd = self.args.params().first().map(String::as_str).unwrap_or("");
         match cmd {
             "list" | "ls" => {
-                self.check_flags(
-                    cmd,
-                    &["--no-color", "--all", "-a", "--diff", "-d"],
-                )?;
+                self.check_flags(cmd, &["--no-color", "--all", "-a", "--diff", "-d"])?;
             }
             "save" | "restore" => {
                 self.check_flags(
