@@ -328,7 +328,9 @@ impl Runner {
         }
 
         // run symlink checks
-        self.assert_no_escaping_symlinks()?;
+        if !self.args.params().is_empty() {
+            self.assert_no_escaping_symlinks()?;
+        }
 
         // handle commands
         let command = self.args.params().first().map(|s| s.as_str()).unwrap_or("");
