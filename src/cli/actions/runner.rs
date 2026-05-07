@@ -37,7 +37,6 @@ impl Runner {
                 "--assume-no",
                 "-n",
                 "--no-color",
-                "--ask-profile",
             ],
         )?;
 

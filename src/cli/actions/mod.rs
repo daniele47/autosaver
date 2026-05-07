@@ -159,11 +159,6 @@ impl Runner {
 
     // load the profile, with the proper fallbacks
     fn load_profile(&mut self, param_index: usize) -> Result<String> {
-        let flag = Flag::Word("ask-profile".into());
-        if self.args.flags().contains(&flag) {
-            self.generic_prompt("What profile do you want to use? ");
-            return Ok(self.inout.read_line());
-        }
         || -> Result<String> {
             match self.args.params().get(param_index) {
                 Some(p) => Ok(p.clone()) as Result<String>,

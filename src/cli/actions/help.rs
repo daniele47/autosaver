@@ -107,8 +107,6 @@ impl Runner {
                 io.writeln("Automatically answer yes to all prompts", nocol);
                 io.write("  --assume-no -n       ", col);
                 io.writeln("Automatically answer no to all prompts", nocol);
-                io.write("  --ask-profile       ", col);
-                io.writeln("Ask for the profile interactively", nocol);
             }
             _ => self.invalid_cmd_err()?,
         }

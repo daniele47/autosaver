@@ -15,7 +15,7 @@ impl Runner {
             "list" | "ls" => {
                 self.check_flags(
                     cmd,
-                    &["--no-color", "--all", "-a", "--diff", "-d", "--ask-profile"],
+                    &["--no-color", "--all", "-a", "--diff", "-d"],
                 )?;
             }
             "save" | "restore" => {
@@ -31,7 +31,6 @@ impl Runner {
                         "--diff",
                         "-d",
                         "--no-color",
-                        "--ask-profile",
                     ],
                 )?;
             }
@@ -46,7 +45,6 @@ impl Runner {
                         "--all",
                         "-a",
                         "--no-color",
-                        "--ask-profile",
                     ],
                 )?;
             }
