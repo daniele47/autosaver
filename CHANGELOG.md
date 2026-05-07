@@ -11,7 +11,7 @@ All notable changes to this project will be documented here
 ### Changes
 
 - allow missing `run`, `backup`, `config` directories
-- [WIP] made flags consistent, by actually splitting words with a `-` 
+- made flags consistent, by actually splitting words with a `-` 
 
 ## v0.8.3
 

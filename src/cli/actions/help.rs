@@ -101,11 +101,11 @@ impl Runner {
                 io.writeln("Print the help message for commands and subcommands", nocol);
                 io.write("  --version           ", col);
                 io.writeln("Print the binary version", nocol);
-                io.write("  --nocolor           ", col);
+                io.write("  --no-color           ", col);
                 io.writeln("Avoid all colors in the output", nocol);
-                io.write("  --assumeyes -y      ", col);
+                io.write("  --assume-yes -y      ", col);
                 io.writeln("Automatically answer yes to all prompts", nocol);
-                io.write("  --assumeno -n       ", col);
+                io.write("  --assume-no -n       ", col);
                 io.writeln("Automatically answer no to all prompts", nocol);
                 io.write("  --ask-profile       ", col);
                 io.writeln("Ask for the profile interactively", nocol);

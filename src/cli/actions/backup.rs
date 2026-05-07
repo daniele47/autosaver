@@ -15,22 +15,22 @@ impl Runner {
             "list" | "ls" => {
                 self.check_flags(
                     cmd,
-                    &["--nocolor", "--all", "-a", "--diff", "-d", "--ask-profile"],
+                    &["--no-color", "--all", "-a", "--diff", "-d", "--ask-profile"],
                 )?;
             }
             "save" | "restore" => {
                 self.check_flags(
                     cmd,
                     &[
-                        "--assumeyes",
+                        "--assume-yes",
                         "-y",
-                        "--assumeno",
+                        "--assume-no",
                         "-n",
                         "--all",
                         "-a",
                         "--diff",
                         "-d",
-                        "--nocolor",
+                        "--no-color",
                         "--ask-profile",
                     ],
                 )?;
@@ -39,13 +39,13 @@ impl Runner {
                 self.check_flags(
                     cmd,
                     &[
-                        "--assumeyes",
+                        "--assume-yes",
                         "-y",
-                        "--assumeno",
+                        "--assume-no",
                         "-n",
                         "--all",
                         "-a",
-                        "--nocolor",
+                        "--no-color",
                         "--ask-profile",
                     ],
                 )?;

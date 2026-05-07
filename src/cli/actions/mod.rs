@@ -222,10 +222,10 @@ impl Runner {
 
     // prompt user before running an action
     fn prompt<T: Fn(&mut Self) -> Result<()>>(&mut self, msg: &str, run: T) -> Result<()> {
-        let wflag_y = self.args.flags().contains(&Flag::Word("assumeyes".into()));
+        let wflag_y = self.args.flags().contains(&Flag::Word("assume-yes".into()));
         let lflag_y = self.args.flags().contains(&Flag::Letter('y'));
         let flag_y = wflag_y || lflag_y;
-        let wflag_n = self.args.flags().contains(&Flag::Word("assumeno".into()));
+        let wflag_n = self.args.flags().contains(&Flag::Word("assume-no".into()));
         let lflag_n = self.args.flags().contains(&Flag::Letter('n'));
         let flag_n = wflag_n || lflag_n;
 
@@ -329,7 +329,7 @@ impl Runner {
         let wflag_help = flags.contains(&Flag::Word("help".into()));
         let lflag_help = flags.contains(&Flag::Letter('h'));
         let flag_version = flags.contains(&Flag::Word("version".into()));
-        let flag_nocolor = flags.contains(&Flag::Word("nocolor".into()));
+        let flag_nocolor = flags.contains(&Flag::Word("no-color".into()));
 
         // handle global flags
         if flag_nocolor {
