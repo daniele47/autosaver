@@ -53,6 +53,9 @@ impl Runner {
     const SIGN_SCRIPT_COL: &[Style] = &[Style::White];
     const SIGN_INPUT_COL: &[Style] = &[Style::White];
 
+    // conf variables
+    const LINE_LEN: usize = 80;
+
     // check there are no symlinks to the outside
     fn assert_no_escaping_symlinks(&mut self) -> Result<()> {
         for dir in [
@@ -197,8 +200,9 @@ impl Runner {
         let mut count = 0;
         let cut_line = |i: String| {
             if cut {
-                let res: String = i.chars().take(76).collect();
-                res + if i.len() > 76 { " ..." } else { "" }
+                let len = Self::LINE_LEN - 2;
+                let res: String = i.chars().take(len).collect();
+                res + if i.len() > len { " ..." } else { "" }
             } else {
                 i
             }

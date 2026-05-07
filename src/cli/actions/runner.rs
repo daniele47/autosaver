@@ -56,8 +56,9 @@ impl Runner {
         // closure to shrink output
         let cut_line = |i: String| {
             if !flag_full {
-                let res: String = i.chars().take(76).collect();
-                res + if i.len() > 76 { " ..." } else { "" }
+                let len = Self::LINE_LEN - 2;
+                let res: String = i.chars().take(len).collect();
+                res + if i.len() > len { " ..." } else { "" }
             } else {
                 i
             }
@@ -183,7 +184,7 @@ impl Runner {
                                 }();
 
                                 // write line separator no matter what
-                                s.inout.writeln("-".repeat(80), Self::NO_COL);
+                                s.inout.writeln("-".repeat(Self::LINE_LEN), Self::NO_COL);
                                 cmd_res
                             })?;
                         }

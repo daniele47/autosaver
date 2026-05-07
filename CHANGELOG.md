@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v0.9.1
+
+### Fixes
+
+- use 80 as line len everywhere
+
 ## v0.9.0
 
 ### Features
