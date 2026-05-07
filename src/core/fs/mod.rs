@@ -5,7 +5,7 @@ use std::{
     env,
     fs::{self, File, Metadata},
     io::{BufRead, BufReader, BufWriter, Lines, Read, Write},
-    path::PathBuf,
+    path::{Component, Path, PathBuf},
 };
 
 use crate::core::error::{Error, Result};
@@ -69,6 +69,13 @@ pub struct AnyLineReader<I: Iterator<Item = Result<String>>> {
 #[derive(Debug, Default)]
 pub struct AnyLineWriter {
     lines: Vec<String>,
+}
+
+/// Check if a path has parent directory symbols.
+pub fn check_has_parent_dirs(path: &str) -> bool {
+    Path::new(path)
+        .components()
+        .any(|c| c == Component::ParentDir)
 }
 
 impl<I: Iterator<Item = Result<String>>> AnyLineReader<I> {
