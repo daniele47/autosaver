@@ -67,6 +67,8 @@ impl Runner {
                 io.writeln("Show the scripts before running them", nocol);
                 io.write("  --list -l       ", col);
                 io.writeln("Only list scripts, do not prompt to run them", nocol);
+                io.write("  --full -f       ", col);
+                io.writeln("Show the entire script and output", nocol);
             }
             "" => {
                 io.writeln("Environment variables:", col);

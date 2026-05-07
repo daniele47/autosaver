@@ -36,6 +36,8 @@ impl Runner {
                 "-y",
                 "--assume-no",
                 "-n",
+                "--full",
+                "-f",
                 "--no-color",
             ],
         )?;
@@ -47,6 +49,19 @@ impl Runner {
         let wflag_list = self.args.flags().contains(&Flag::Word("list".into()));
         let lflag_list = self.args.flags().contains(&Flag::Letter('l'));
         let flag_list = wflag_list || lflag_list;
+        let wflag_full = self.args.flags().contains(&Flag::Word("full".into()));
+        let lflag_full = self.args.flags().contains(&Flag::Letter('f'));
+        let flag_full = wflag_full || lflag_full;
+
+        // closure to shrink output
+        let cut_line = |i: String| {
+            if !flag_full {
+                let res: String = i.chars().take(76).collect();
+                res + if i.len() > 76 { " ..." } else { "" }
+            } else {
+                i
+            }
+        };
 
         // paths
         let run_dir = Self::paths("run")?;
@@ -80,11 +95,18 @@ impl Runner {
 
                         // show script if show flag is passed
                         if flag_show {
+                            let show = if flag_full { usize::MAX } else { 10 };
+                            let mut count = 0;
                             for line in abs_path.line_reader()? {
+                                if count >= show {
+                                    self.inout.writeln("... ".to_string(), Self::NO_COL);
+                                    break;
+                                }
+                                count += 1;
                                 match line {
                                     Ok(l) => {
                                         self.inout.write("* ", Self::SIGN_SCRIPT_COL);
-                                        self.inout.writeln(l, Self::NO_COL);
+                                        self.inout.writeln(cut_line(l), Self::NO_COL);
                                     }
                                     Err(_) => {
                                         self.inout.warning("Could not show the entire script file");
