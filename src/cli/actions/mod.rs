@@ -18,6 +18,7 @@ use crate::{
 };
 
 mod backup;
+mod clear;
 mod help;
 mod runner;
 mod version;
@@ -367,6 +368,7 @@ impl Runner {
         match command {
             "list" | "save" | "restore" | "rmhome" | "rmbackup" => self.backup(),
             "run" => self.runner(),
+            "clear" => self.clear(),
             "" => self.check_flags("", &[]),
             _ => self.invalid_cmd_err(),
         }
