@@ -1,6 +1,11 @@
+use std::collections::HashSet;
+
 use crate::{
     cli::{actions::Runner, error::Result, flags::Flag},
-    core::profile::{ProfileType, composite::ProfileLoader},
+    core::{
+        fs::AbsPath,
+        profile::{ProfileType, composite::ProfileLoader},
+    },
 };
 
 impl Runner {
@@ -38,19 +43,34 @@ impl Runner {
         let root_profile = profile_loader.load(&profile)?;
         let profiles = root_profile.resolve(&mut profile_loader)?;
 
-        // iterate over all leaf profiles
+        // get all tracked paths
+        let mut tracked_paths = HashSet::<AbsPath>::new();
         self.output_main_profile(&profile);
         for profile in profiles {
             match profile.ptype() {
                 ProfileType::Composite(_) => unreachable!("Composite profile impossible here"),
-                ProfileType::Module(_) => {}
-                ProfileType::Runner(_) => {
-                    dbg!(&flag_list);
-                    dbg!(&backup_dir);
-                    dbg!(&run_dir);
+                ProfileType::Module(module) => {
+                    let backup_dir = backup_dir.joins(&[profile.name()]);
+                    let module = module.resolve(&backup_dir)?;
+                    for entry in module.entries() {
+                        let abs_path = backup_dir.join(entry.path());
+                        tracked_paths.insert(abs_path);
+                    }
+                }
+                ProfileType::Runner(runner) => {
+                    let run_dir = run_dir.joins(&[profile.name()]);
+                    let runner = runner.resolve(&run_dir)?;
+                    for entry in runner.entries() {
+                        let abs_path = backup_dir.join(entry.path());
+                        tracked_paths.insert(abs_path);
+                    }
                 }
             }
         }
+
+        // TODO: all_files - tracked files
+        println!("{flag_list:#?} {tracked_paths:#?}");
+
         Ok(())
     }
 }
