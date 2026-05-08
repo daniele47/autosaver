@@ -107,16 +107,15 @@ impl Runner {
                 io.write("  save                ", col);
                 io.writeln("Save changes from the home directory to the backup", nocol);
                 io.write("  restore             ", col);
-                io.writeln(
-                    "Restore changes from the backup to the home directory",
-                    nocol,
-                );
+                io.writeln("Restore changes from the backup to the home dir", nocol);
                 io.write("  rmhome              ", col);
                 io.writeln("Delete files from home directory [DANGEROUS]", nocol);
                 io.write("  rmbackup            ", col);
                 io.writeln("Delete files from backup directory [DANGEROUS]", nocol);
                 io.write("  run                 ", col);
                 io.writeln("Run scripts from the run directory", nocol);
+                io.write("  clear               ", col);
+                io.writeln("List and prompt to delete untracked files", nocol);
                 io.writeln("", nocol);
                 io.writeln("Global Flags (can be used widely across commands):", col);
                 io.write("  --help -h           ", col);
