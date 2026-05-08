@@ -2,7 +2,11 @@
 
 All notable changes to this project will be documented here
 
-## v0.9.2
+## v0.10.0
+
+### Features
+
+- added `clear` command to remove all untracked files from `run` and `backup` dirs
 
 ### Changes
 
