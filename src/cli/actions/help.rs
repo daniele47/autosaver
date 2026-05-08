@@ -9,6 +9,15 @@ impl Runner {
         let nocol = Self::NO_COL;
         let io = &mut self.inout;
         match command.as_str() {
+            "list" => {
+                io.writeln("Commands:", col);
+                io.write("  list [PROFILE]  ", col);
+                io.writeln("list changes from the home directory to the backup", nocol);
+                io.writeln("", nocol);
+                io.writeln("Flags:", col);
+                io.write("  --all -a        ", col);
+                io.writeln("Show files which are ignored by default", nocol);
+            }
             "save" => {
                 io.writeln("Commands:", col);
                 io.write("  save [PROFILE]  ", col);

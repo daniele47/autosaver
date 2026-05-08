@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v0.9.2
+
+### Changes
+
+- added back `list` as semplified alias for `save -l`
+
 ## v0.9.1
 
 ### Fixes

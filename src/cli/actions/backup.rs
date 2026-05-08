@@ -12,48 +12,46 @@ impl Runner {
         }
         let cmd = self.args.params().first().map(String::as_str).unwrap_or("");
         match cmd {
-            "save" | "restore" => {
-                self.check_flags(
-                    cmd,
-                    &[
-                        "--assume-yes",
-                        "-y",
-                        "--assume-no",
-                        "-n",
-                        "--all",
-                        "-a",
-                        "--diff",
-                        "-d",
-                        "--full",
-                        "-f",
-                        "--list",
-                        "-l",
-                        "--no-color",
-                    ],
-                )?;
-            }
-            "rmhome" | "rmbackup" => {
-                self.check_flags(
-                    cmd,
-                    &[
-                        "--assume-yes",
-                        "-y",
-                        "--assume-no",
-                        "-n",
-                        "--all",
-                        "-a",
-                        "--list",
-                        "-l",
-                        "--no-color",
-                    ],
-                )?;
-            }
+            "list" => self.check_flags(cmd, &["--all", "-a", "--no-color"])?,
+            "save" | "restore" => self.check_flags(
+                cmd,
+                &[
+                    "--assume-yes",
+                    "-y",
+                    "--assume-no",
+                    "-n",
+                    "--all",
+                    "-a",
+                    "--diff",
+                    "-d",
+                    "--full",
+                    "-f",
+                    "--list",
+                    "-l",
+                    "--no-color",
+                ],
+            )?,
+            "rmhome" | "rmbackup" => self.check_flags(
+                cmd,
+                &[
+                    "--assume-yes",
+                    "-y",
+                    "--assume-no",
+                    "-n",
+                    "--all",
+                    "-a",
+                    "--list",
+                    "-l",
+                    "--no-color",
+                ],
+            )?,
             _ => unreachable!("Invalid command"),
         }
 
         // get args
         let mut iter = self.args.params().iter();
         let arg_command = iter.next().map(String::as_str).unwrap_or_default();
+        let act_list = arg_command == "list";
         let act_save = arg_command == "save";
         let act_restore = arg_command == "restore";
         let act_rmhome = arg_command == "rmhome";
@@ -137,17 +135,18 @@ impl Runner {
                                 if flag_diff {
                                     if act_restore {
                                         self.render_diff(&home_file, &backup_file, !flag_full)?;
-                                    } else {
+                                    } else if act_save {
                                         self.render_diff(&backup_file, &home_file, !flag_full)?;
                                     }
                                 }
-                                if !flag_list {
+                                if !flag_list && !act_list {
                                     self.prompt("Do you want to update it?", |_| {
                                         if act_restore {
-                                            Ok(backup_file.copy_file(&home_file, false)?)
-                                        } else {
-                                            Ok(home_file.copy_file(&backup_file, false)?)
+                                            backup_file.copy_file(&home_file, false)?;
+                                        } else if act_save {
+                                            home_file.copy_file(&backup_file, false)?;
                                         }
+                                        Ok(())
                                     })?;
                                 }
                             }
