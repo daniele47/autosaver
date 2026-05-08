@@ -54,15 +54,15 @@ impl Runner {
                     let module = module.resolve(&backup_dir)?;
                     for entry in module.entries() {
                         let abs_path = backup_dir.join(entry.path());
-                        tracked_paths.insert(abs_path);
+                        tracked_paths.insert(abs_path.canonicalize()?);
                     }
                 }
                 ProfileType::Runner(runner) => {
                     let run_dir = run_dir.joins(&[profile.name()]);
                     let runner = runner.resolve(&run_dir)?;
                     for entry in runner.entries() {
-                        let abs_path = backup_dir.join(entry.path());
-                        tracked_paths.insert(abs_path);
+                        let abs_path = run_dir.join(entry.path());
+                        tracked_paths.insert(abs_path.canonicalize()?);
                     }
                 }
             }
