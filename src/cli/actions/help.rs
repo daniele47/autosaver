@@ -12,7 +12,7 @@ impl Runner {
             "list" => {
                 io.writeln("Commands:", col);
                 io.write("  list [PROFILE]  ", col);
-                io.writeln("list changes from the home directory to the backup", nocol);
+                io.writeln("List changes from the home directory to the backup", nocol);
                 io.writeln("", nocol);
                 io.writeln("Flags:", col);
                 io.write("  --all -a        ", col);
@@ -79,6 +79,15 @@ impl Runner {
                 io.write("  --full -f       ", col);
                 io.writeln("Show the entire script and output", nocol);
             }
+            "clear" => {
+                io.writeln("Commands:", col);
+                io.write("  clear [PROFILE] ", col);
+                io.writeln("Clear all untracked files", nocol);
+                io.writeln("", nocol);
+                io.writeln("Flags:", col);
+                io.write("  --list -l       ", col);
+                io.writeln("Only list files, do not prompt to delete them", nocol);
+            }
             "" => {
                 io.writeln("Environment variables:", col);
                 io.write("  AUTOSAVER_ROOT      ", col);
@@ -93,6 +102,8 @@ impl Runner {
                 io.writeln("Specify default profile, when none are provided", nocol);
                 io.writeln("", nocol);
                 io.writeln("Commands:", col);
+                io.write("  list                ", col);
+                io.writeln("List changes from the home directory to the backup", nocol);
                 io.write("  save                ", col);
                 io.writeln("Save changes from the home directory to the backup", nocol);
                 io.write("  restore             ", col);
@@ -112,11 +123,11 @@ impl Runner {
                 io.writeln("Print the help message for commands and subcommands", nocol);
                 io.write("  --version           ", col);
                 io.writeln("Print the binary version", nocol);
-                io.write("  --no-color           ", col);
+                io.write("  --no-color          ", col);
                 io.writeln("Avoid all colors in the output", nocol);
-                io.write("  --assume-yes -y      ", col);
+                io.write("  --assume-yes -y     ", col);
                 io.writeln("Automatically answer yes to all prompts", nocol);
-                io.write("  --assume-no -n       ", col);
+                io.write("  --assume-no -n      ", col);
                 io.writeln("Automatically answer no to all prompts", nocol);
             }
             _ => self.invalid_cmd_err()?,
