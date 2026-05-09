@@ -1,9 +1,12 @@
 use std::{env, process::exit};
 
-use autosaver::cli::{
-    actions::Runner,
-    flags::ParsedArgs,
-    inout::{IoOutOptions, TermInOut},
+use autosaver::{
+    cli::{
+        actions::Runner,
+        flags::ParsedArgs,
+        inout::{IoOutOptions, TermInOut},
+    },
+    debug,
 };
 
 fn main() {
@@ -11,7 +14,7 @@ fn main() {
     let parsed_args = ParsedArgs::parse(env::args().skip(1).collect());
 
     // get a frontend renderer
-    let mut inout = TermInOut::new(IoOutOptions::new(true));
+    let mut inout = TermInOut::new(IoOutOptions::new(true, false));
 
     // get cli runner
     let mut runner = Runner::new(parsed_args, inout.clone());
@@ -19,6 +22,7 @@ fn main() {
     // run cli
     if let Err(e) = runner.run() {
         inout.error(&e);
+        debug!(inout, "\n{}", e.backtrace());
         exit(1);
     }
 }

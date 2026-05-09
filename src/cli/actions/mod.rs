@@ -336,7 +336,8 @@ impl Runner {
                     Err(crate::core::error::ErrorType::ProfileLoadingFailure(
                         name.into(),
                         "configuration file or directory is missing".into(),
-                    ).into())
+                    )
+                    .into())
                 }
             }
         }

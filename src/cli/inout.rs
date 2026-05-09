@@ -5,6 +5,15 @@ use std::{
     io::{Write, stdout},
 };
 
+#[macro_export]
+macro_rules! debug {
+    ($ctx:expr, $($arg:tt)*) => {
+        if $ctx.options().show_debug {
+            $ctx.debug(format!("DEBUG [{}:{}]: {}", file!(), line!(), format_args!($($arg)*)));
+        }
+    };
+}
+
 // colors
 const RESET: &str = "\x1b[0m";
 const RED: &str = "\x1b[31m";
@@ -45,6 +54,7 @@ pub enum Style {
 #[derive(Debug, Clone, Default)]
 pub struct IoOutOptions {
     pub has_colors: bool,
+    pub show_debug: bool,
 }
 
 /// Struct that implements `InOut` to write to the terminal.
@@ -55,8 +65,11 @@ pub struct TermInOut {
 
 impl IoOutOptions {
     /// Create new option struct.
-    pub fn new(has_colors: bool) -> Self {
-        Self { has_colors }
+    pub fn new(has_colors: bool, show_debug: bool) -> Self {
+        Self {
+            has_colors,
+            show_debug,
+        }
     }
 }
 
@@ -97,6 +110,10 @@ impl TermInOut {
     pub fn writeln(&mut self, str: impl Display, styles: &[Style]) {
         self.write(str, styles);
         self.write("\n", &[]);
+    }
+
+    pub fn debug(&mut self, str: impl Display) {
+        eprintln!("{str}")
     }
 
     pub fn error(&mut self, str: impl Display) {

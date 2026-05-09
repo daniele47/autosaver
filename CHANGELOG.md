@@ -7,6 +7,7 @@ All notable changes to this project will be documented here
 ### Features
 
 - added `backtrace` for errors
+- adding debug options to `inout`
 
 ## v0.11.0
 
