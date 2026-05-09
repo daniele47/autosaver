@@ -1,5 +1,5 @@
 use crate::core::{
-    error::{Error, Result},
+    error::{ErrorType, Result},
     fs,
     parsers::{RawItem, RawKind},
     profile::{Profile, ProfileType, composite::Composite},
@@ -20,23 +20,25 @@ impl CompositeParser {
             match line.kind {
                 // composite profile has NO options lines
                 RawKind::Option => {
-                    return Err(Error::InvalidOptionLine(
+                    return Err(ErrorType::InvalidOptionLine(
                         profile,
                         line.line,
                         line.content,
                         "".into(),
-                    ));
+                    )
+                    .into());
                 }
 
                 // normal data lines, aka profile names here
                 RawKind::Data => {
                     if fs::check_has_parent_dirs(&line.content) {
-                        return Err(Error::InvalidDataLine(
+                        return Err(ErrorType::InvalidDataLine(
                             profile,
                             line.line,
                             line.content,
                             "profile name cannot be paths with parent directories".into(),
-                        ));
+                        )
+                        .into());
                     }
                     entries.push(line.content);
                 }

@@ -1,5 +1,5 @@
 use crate::core::{
-    error::{Error, Result},
+    error::{ErrorType, Result},
     fs::{self, RelPath},
     parsers::{RawItem, RawKind},
     profile::{
@@ -28,24 +28,26 @@ impl ModuleParser {
                     "policy notdiff" => policy = ModulePolicy::NotDiff,
                     "policy ignore" => policy = ModulePolicy::Ignore,
                     _ => {
-                        return Err(Error::InvalidOptionLine(
+                        return Err(ErrorType::InvalidOptionLine(
                             profile,
                             line.line,
                             line.content,
                             "".into(),
-                        ));
+                        )
+                        .into());
                     }
                 },
 
                 // data lines, aka relative file paths here
                 RawKind::Data => {
                     if fs::check_has_parent_dirs(&line.content) {
-                        return Err(Error::InvalidDataLine(
+                        return Err(ErrorType::InvalidDataLine(
                             profile,
                             line.line,
                             line.content,
                             "module paths cannot contain parent directories".into(),
-                        ));
+                        )
+                        .into());
                     }
                     let path = RelPath::from(line.content.as_str());
                     let entry = ModuleEntry::new(path, policy);

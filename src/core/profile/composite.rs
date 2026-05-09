@@ -3,7 +3,7 @@
 use std::collections::{HashMap, HashSet};
 
 use crate::core::{
-    error::{Error, Result},
+    error::{ErrorType, Result},
     profile::{Profile, ProfileType},
 };
 
@@ -40,7 +40,8 @@ impl HashMapProfileLoader {
 impl ProfileLoader for HashMapProfileLoader {
     fn load(&mut self, name: &str) -> Result<Profile> {
         self.profiles.get(name).cloned().ok_or_else(|| {
-            Error::ProfileLoadingFailure(name.into(), "Profile was not in the hashmap".into())
+            ErrorType::ProfileLoadingFailure(name.into(), "Profile was not in the hashmap".into())
+                .into()
         })
     }
 }
@@ -107,7 +108,7 @@ impl Composite {
             // check if current item is already in path, aka if this is a cycle
             if let Some(pos) = path.iter().position(|x| x == &item_name) {
                 let cycle = path[pos..].to_vec();
-                return Err(Error::ProfileCycle(profile.to_string(), cycle));
+                return Err(ErrorType::ProfileCycle(profile.to_string(), cycle).into());
             }
 
             // avoid revisiting already explored items, if graphs are complex and the same node is
@@ -241,8 +242,8 @@ mod tests {
         let actual = profile.resolve(profile_name, &mut loader);
         match actual {
             Ok(_) => {}
-            Err(err) => match err {
-                Error::ProfileCycle(name, cycle) => {
+            Err(err) => match err.error_type() {
+                ErrorType::ProfileCycle(name, cycle) => {
                     assert_eq!(name.as_str(), "root");
                     assert_eq!(cycle.join(" "), "composite1 composite2");
                 }

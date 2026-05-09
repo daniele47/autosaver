@@ -194,7 +194,7 @@ impl Runner {
     fn render_diff(&mut self, file1: &AbsPath, file2: &AbsPath, cut: bool) -> Result<()> {
         let diff = file1.calc_diff(file2);
         if let Err(err) = &diff
-            && let crate::core::error::Error::IoError(err, _) = err
+            && let crate::core::error::ErrorType::IoError(err, _) = err.error_type()
             && err.kind() == ErrorKind::InvalidData
         {
             self.inout.writeln(
@@ -333,10 +333,10 @@ impl Runner {
                 }
                 // <profile> does not exist
                 else {
-                    Err(crate::core::error::Error::ProfileLoadingFailure(
+                    Err(crate::core::error::ErrorType::ProfileLoadingFailure(
                         name.into(),
                         "configuration file or directory is missing".into(),
-                    ))
+                    ).into())
                 }
             }
         }

@@ -8,7 +8,7 @@ use std::{
     path::{Component, Path, PathBuf},
 };
 
-use crate::core::error::{Error, Result};
+use crate::core::error::{ErrorType, Result};
 
 mod myers;
 pub use myers::LineDiff;
@@ -177,7 +177,7 @@ impl AbsPath {
         Ok(self
             .path
             .canonicalize()
-            .map_err(|e| Error::IoError(e, self.path.clone()))?
+            .map_err(|e| ErrorType::IoError(e, self.path.clone()))?
             .into())
     }
 
@@ -186,7 +186,9 @@ impl AbsPath {
         self.path
             .strip_prefix(&prefix.path)
             .map(|p| p.to_path_buf().into())
-            .map_err(|_| Error::InvalidPathPrefix(self.path.clone(), prefix.path.clone()))
+            .map_err(|_| {
+                ErrorType::InvalidPathPrefix(self.path.clone(), prefix.path.clone()).into()
+            })
     }
 
     /// Get path as a lossy string
@@ -210,7 +212,7 @@ impl AbsPath {
     pub fn metadata(&self) -> Result<Metadata> {
         self.path
             .metadata()
-            .map_err(|e| Error::IoError(e, self.path.clone()))
+            .map_err(|e| ErrorType::IoError(e, self.path.clone()).into())
     }
 
     /// Check if path exists.
@@ -221,7 +223,7 @@ impl AbsPath {
     /// Get parent directory. Note: this is safe ONLY if the path is a file.
     pub fn file_parent(&self) -> Result<AbsPath> {
         if !self.metadata()?.is_file() {
-            return Err(Error::NotAFile(self.path.clone()));
+            return Err(ErrorType::NotAFile(self.path.clone()).into());
         }
         Ok(self
             .path
@@ -240,7 +242,7 @@ impl AbsPath {
         }
 
         // create directory
-        fs::create_dir_all(&self.path).map_err(|e| Error::IoError(e, self.path.clone()))
+        fs::create_dir_all(&self.path).map_err(|e| ErrorType::IoError(e, self.path.clone()).into())
     }
 
     /// Create file, with all missing parents.
@@ -260,11 +262,11 @@ impl AbsPath {
         // note: this parent call is not fully safe, as path could not be normalized beforehand
         // not much i can do differently though ¯\_(ツ)_/¯
         if let Some(parent) = self.path.parent() {
-            fs::create_dir_all(parent).map_err(|e| Error::IoError(e, self.path.clone()))?;
+            fs::create_dir_all(parent).map_err(|e| ErrorType::IoError(e, self.path.clone()))?;
         }
 
         // create file
-        File::create(&self.path).map_err(|e| Error::IoError(e, self.path.clone()))?;
+        File::create(&self.path).map_err(|e| ErrorType::IoError(e, self.path.clone()))?;
         Ok(())
     }
 
@@ -304,12 +306,13 @@ impl AbsPath {
         let metadata = self.metadata()?;
         if metadata.is_dir() {
             if allow_recursive_deletion {
-                fs::remove_dir_all(&self.path).map_err(|e| Error::IoError(e, self.path.clone()))?;
+                fs::remove_dir_all(&self.path)
+                    .map_err(|e| ErrorType::IoError(e, self.path.clone()))?;
             } else {
-                fs::remove_dir(&self.path).map_err(|e| Error::IoError(e, self.path.clone()))?;
+                fs::remove_dir(&self.path).map_err(|e| ErrorType::IoError(e, self.path.clone()))?;
             }
         } else {
-            fs::remove_file(&self.path).map_err(|e| Error::IoError(e, self.path.clone()))?;
+            fs::remove_file(&self.path).map_err(|e| ErrorType::IoError(e, self.path.clone()))?;
         }
 
         // clear empty parent dirs
@@ -324,7 +327,7 @@ impl AbsPath {
     /// Deletes only broken symlinks.
     pub fn delete_broken_symlink(&self) -> Result<()> {
         if !self.exists() && Self::FILTER_SYMLINKS(self) {
-            fs::remove_file(&self.path).map_err(|e| Error::IoError(e, self.path.clone()))?;
+            fs::remove_file(&self.path).map_err(|e| ErrorType::IoError(e, self.path.clone()))?;
         }
         Ok(())
     }
@@ -334,7 +337,7 @@ impl AbsPath {
     /// Note: `allow_recursive_deletion` purges even not empty dirs if in dst path
     pub fn copy_file(&self, dst: &AbsPath, allow_recursive_deletion: bool) -> Result<()> {
         dst.create_file(allow_recursive_deletion)?;
-        fs::copy(&self.path, &dst.path).map_err(|e| Error::IoError(e, self.path.clone()))?;
+        fs::copy(&self.path, &dst.path).map_err(|e| ErrorType::IoError(e, self.path.clone()))?;
         Ok(())
     }
 
@@ -392,7 +395,7 @@ impl AbsPath {
     /// Notes: this will get ALL files, even directories, symlinks, all rust can get.
     pub fn list_files<F: Fn(&AbsPath) -> bool>(&self, filter: F) -> Result<BTreeSet<AbsPath>> {
         Ok(fs::read_dir(&self.path)
-            .map_err(|e| Error::IoError(e, self.path.clone()))?
+            .map_err(|e| ErrorType::IoError(e, self.path.clone()))?
             .filter_map(|entry| entry.ok())
             .map(|entry| AbsPath::new(entry.path()))
             .filter(filter)
@@ -484,15 +487,15 @@ impl AbsPath {
             type Item = Result<String>;
 
             fn next(&mut self) -> Option<Self::Item> {
-                self.inner
-                    .next()
-                    .map(|line| line.map_err(|e| Error::IoError(e, self.path.clone().into())))
+                self.inner.next().map(|line| {
+                    line.map_err(|e| ErrorType::IoError(e, self.path.clone().into()).into())
+                })
             }
         }
         impl LineReader for LineReaderImpl {}
 
         // open file are get a line reader from such file
-        let file = File::open(&self.path).map_err(|e| Error::IoError(e, self.path.clone()))?;
+        let file = File::open(&self.path).map_err(|e| ErrorType::IoError(e, self.path.clone()))?;
         Ok(LineReaderImpl {
             inner: BufReader::new(file).lines(),
             path: self.path.clone().into(),
@@ -512,19 +515,20 @@ impl AbsPath {
         impl<W: Write> LineWriter for LineWriterImpl<W> {
             fn write_line<S: AsRef<str>>(&mut self, line: S) -> Result<()> {
                 writeln!(self.inner, "{}", line.as_ref())
-                    .map_err(|e| Error::IoError(e, self.path.clone().into()))?;
+                    .map_err(|e| ErrorType::IoError(e, self.path.clone().into()))?;
                 Ok(())
             }
             fn flush(&mut self) -> Result<()> {
                 self.inner
                     .flush()
-                    .map_err(|e| Error::IoError(e, self.path.clone().into()))?;
+                    .map_err(|e| ErrorType::IoError(e, self.path.clone().into()))?;
                 Ok(())
             }
         }
 
         // open file and get a line writer for such file
-        let file = File::create(&self.path).map_err(|e| Error::IoError(e, self.path.clone()))?;
+        let file =
+            File::create(&self.path).map_err(|e| ErrorType::IoError(e, self.path.clone()))?;
         Ok(LineWriterImpl {
             inner: BufWriter::new(file),
             path: self.path.clone().into(),
@@ -616,25 +620,25 @@ impl From<String> for RelPath {
 }
 
 impl TryFrom<AbsPath> for String {
-    type Error = Error;
+    type Error = ErrorType;
 
     fn try_from(value: AbsPath) -> std::result::Result<Self, Self::Error> {
         value
             .path
             .to_str()
-            .ok_or_else(|| Error::InvalidPathString(value.path.clone()))
+            .ok_or_else(|| ErrorType::InvalidPathString(value.path.clone()))
             .map(String::from)
     }
 }
 
 impl TryFrom<RelPath> for String {
-    type Error = Error;
+    type Error = ErrorType;
 
     fn try_from(value: RelPath) -> std::result::Result<Self, Self::Error> {
         value
             .path
             .to_str()
-            .ok_or_else(|| Error::InvalidPathString(value.path.clone()))
+            .ok_or_else(|| ErrorType::InvalidPathString(value.path.clone()))
             .map(String::from)
     }
 }

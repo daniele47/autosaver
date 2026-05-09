@@ -5,7 +5,7 @@
 //! - parsing into the actual config
 
 use crate::core::{
-    error::{Error, Result},
+    error::{ErrorType, Result},
     fs::LineReader,
     parsers::{composite::CompositeParser, module::ModuleParser, runner::RunnerParser},
     profile::Profile,
@@ -41,12 +41,9 @@ impl Profile {
 
             // profile line MUST be the very first
             if first.line != 1 {
-                return Err(Error::InvalidOptionLine(
-                    profile,
-                    first.line,
-                    content,
-                    "".into(),
-                ));
+                return Err(
+                    ErrorType::InvalidOptionLine(profile, first.line, content, "".into()).into(),
+                );
             }
 
             // pick correct parser based on the profile type parsed from the first line
@@ -54,15 +51,12 @@ impl Profile {
                 "type composite" => CompositeParser::parse(profile, raw),
                 "type module" => ModuleParser::parse(profile, raw),
                 "type runner" => RunnerParser::parse(profile, raw),
-                _ => Err(Error::InvalidOptionLine(
-                    profile,
-                    first.line,
-                    content,
-                    "".into(),
-                )),
+                _ => Err(
+                    ErrorType::InvalidOptionLine(profile, first.line, content, "".into()).into(),
+                ),
             }
         } else {
-            Err(Error::MissingProfileType(profile))
+            Err(ErrorType::MissingProfileType(profile).into())
         }
     }
 }
