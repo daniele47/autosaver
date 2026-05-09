@@ -26,8 +26,8 @@ mod version;
 /// Struct with data and methods to run cli.
 #[derive(Debug, Clone)]
 pub struct Runner {
-    args: ParsedArgs,
-    inout: TermInOut,
+    pub args: ParsedArgs,
+    pub inout: TermInOut,
 }
 
 impl Runner {
@@ -356,8 +356,8 @@ impl Runner {
         let flag_debug = flags.contains(&Flag::Word("debug".into()));
 
         // handle global flags
-        (*self.inout.options()).has_colors = !flag_nocolor;
-        (*self.inout.options()).show_debug = flag_debug;
+        self.inout.options().has_colors = !flag_nocolor;
+        self.inout.options().show_debug = flag_debug;
         if flag_version {
             return self.version();
         }

@@ -14,15 +14,15 @@ fn main() {
     let parsed_args = ParsedArgs::parse(env::args().skip(1).collect());
 
     // get a frontend renderer
-    let mut inout = TermInOut::new(IoOutOptions::new(true, false));
+    let inout = TermInOut::new(IoOutOptions::new(true, false));
 
     // get cli runner
-    let mut runner = Runner::new(parsed_args, inout.clone());
+    let mut runner = Runner::new(parsed_args, inout);
 
     // run cli
     if let Err(e) = runner.run() {
-        inout.error(&e);
-        debug!(inout, "\n{}", e.backtrace());
+        runner.inout.error(&e);
+        debug!(runner.inout, "\n{}", e.backtrace());
         exit(1);
     }
 }
