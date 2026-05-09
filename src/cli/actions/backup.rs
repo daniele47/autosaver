@@ -12,7 +12,9 @@ impl Runner {
         }
         let cmd = self.args.params().first().map(String::as_str).unwrap_or("");
         match cmd {
-            "list" => self.check_flags(cmd, &["--all", "-a", "--no-color"])?,
+            "list" => {
+                self.check_flags(cmd, &["--all", "-a", "--unmodified", "-u", "--no-color"])?
+            }
             "save" | "restore" => self.check_flags(
                 cmd,
                 &[
@@ -69,6 +71,9 @@ impl Runner {
         let wflag_full = self.args.flags().contains(&Flag::Word("full".into()));
         let lflag_full = self.args.flags().contains(&Flag::Letter('f'));
         let flag_full = wflag_full || lflag_full;
+        let wflag_unmodified = self.args.flags().contains(&Flag::Word("unmodified".into()));
+        let lflag_unmodified = self.args.flags().contains(&Flag::Letter('u'));
+        let flag_unmodified = wflag_unmodified || lflag_unmodified;
 
         // paths
         let home_dir = Self::paths("home")?;
@@ -150,6 +155,12 @@ impl Runner {
                                     })?;
                                 }
                             }
+                            // files are equal
+                            (true, true) => {
+                                if act_list && flag_unmodified {
+                                    self.inout.writeln(path.to_string(), Self::PATH_EQ_COL);
+                                }
+                            }
                             // home => backup
                             (true, false) => {
                                 if !act_save && !act_list {
@@ -175,7 +186,6 @@ impl Runner {
                                 }
                             }
                             (false, false) => unreachable!("At least one file should exist"),
-                            _ => {}
                         }
                     }
                 }

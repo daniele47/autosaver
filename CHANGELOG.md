@@ -7,6 +7,7 @@ All notable changes to this project will be documented here
 ### Features
 
 - `--symlinks|-s` in `clear` to handle broken symlinks too
+- `--unmodified|-u` flag in `list` command to show also tracked but not modified files
 
 ### Patches
 

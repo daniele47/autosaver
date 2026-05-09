@@ -17,6 +17,8 @@ impl Runner {
                 io.writeln("Flags:", col);
                 io.write("  --all -a        ", col);
                 io.writeln("Show files which are ignored by default", nocol);
+                io.write("  --unmodified -u ", col);
+                io.writeln("Show tracked and unmodified files too", nocol);
             }
             "save" => {
                 io.writeln("Commands:", col);
