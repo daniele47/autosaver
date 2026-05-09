@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v0.10.2
+
+### Patches
+
+- fixed broken symlinks causing an error. Now they are handled properly
+
 ## v0.10.1
 
 ### Changes

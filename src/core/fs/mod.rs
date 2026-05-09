@@ -134,6 +134,7 @@ impl From<String> for PathType {
 
 impl AbsPath {
     pub const FILTER_ALL: fn(&AbsPath) -> bool = Self::filter_all;
+    pub const FILTER_EXIST: fn(&AbsPath) -> bool = Self::filter_exist;
     pub const FILTER_FILES: fn(&AbsPath) -> bool = Self::filter_files;
     pub const FILTER_DIRS: fn(&AbsPath) -> bool = Self::filter_directories;
     pub const FILTER_SYMLINKS: fn(&AbsPath) -> bool = Self::filter_symlinks;
@@ -393,6 +394,9 @@ impl AbsPath {
     fn filter_all(_: &AbsPath) -> bool {
         true
     }
+    fn filter_exist(path: &AbsPath) -> bool {
+        path.metadata().is_ok()
+    }
     fn filter_files(path: &AbsPath) -> bool {
         path.metadata().is_ok_and(|m| m.is_file())
     }
@@ -433,6 +437,16 @@ impl AbsPath {
         // avoid endless recursion if there are symlinks creating endless loops
         while let Some(item) = stack.pop() {
             for dir_file in item.list_files(AbsPath::FILTER_ALL)? {
+                // fully ignore broken symlinks
+                if dir_file
+                    .path
+                    .symlink_metadata()
+                    .is_ok_and(|m| m.is_symlink())
+                    && !dir_file.exists()
+                {
+                    assert!(files.insert(dir_file));
+                    continue;
+                }
                 let canon = dir_file.canonicalize()?;
                 if norm_files.contains(&canon) {
                     continue;
@@ -727,7 +741,7 @@ mod tests {
         let root = setup_test_directory()?;
         let _guard = purge_path_even_on_panic(&root);
 
-        let files = root.list_files(AbsPath::FILTER_ALL)?;
+        let files = root.list_files(AbsPath::FILTER_EXIST)?;
         let file_names: HashSet<_> = files
             .iter()
             .filter_map(|f| f.path.file_name().and_then(|name| name.to_str()))
@@ -755,7 +769,7 @@ mod tests {
         let root = setup_test_directory()?;
         let _guard = purge_path_even_on_panic(&root);
 
-        let all_paths = root.all_files(AbsPath::FILTER_ALL)?;
+        let all_paths = root.all_files(AbsPath::FILTER_EXIST)?;
         let path_names: HashSet<_> = all_paths
             .iter()
             .filter_map(|f| f.path.file_name().and_then(|name| name.to_str()))

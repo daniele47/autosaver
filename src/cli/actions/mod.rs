@@ -68,7 +68,7 @@ impl Runner {
             if !dir.exists() {
                 continue;
             }
-            for symlink in dir.all_files(AbsPath::FILTER_ALL)? {
+            for symlink in dir.all_files(AbsPath::FILTER_EXIST)? {
                 {
                     if !symlink.check_inside(&dir) {
                         let norm_path = symlink.to_str_lossy();
@@ -312,7 +312,7 @@ impl Runner {
                 // and create a fake composite type, treating this dir as if it included all files
                 else if prof_dir.metadata().is_ok_and(|m| m.is_dir()) {
                     let mut entries = BTreeSet::new();
-                    for child in prof_dir.list_files(AbsPath::FILTER_ALL)? {
+                    for child in prof_dir.list_files(AbsPath::FILTER_EXIST)? {
                         let rel_child_str = child.to_relative(&self.config_dir)?.to_str_lossy();
                         if child.metadata().is_ok_and(|m| m.is_file()) {
                             if let Some(profile_name) = rel_child_str.strip_suffix(".conf") {
