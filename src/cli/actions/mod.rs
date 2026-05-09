@@ -53,6 +53,7 @@ impl Runner {
     const PATH_COL: &[Style] = &[Style::White, Style::Bold, Style::Underline];
     const SIGN_RM_COL: &[Style] = &[Style::Red];
     const SIGN_ADD_COL: &[Style] = &[Style::Green];
+    const SIGN_SEP_COL: &[Style] = &[Style::Blue];
     const SIGN_STDOUT_COL: &[Style] = &[Style::White];
     const SIGN_SCRIPT_COL: &[Style] = &[Style::White];
     const SIGN_INPUT_COL: &[Style] = &[Style::White];
@@ -214,6 +215,7 @@ impl Runner {
         }
         let show = if cut { 9 } else { usize::MAX };
         let mut count = 0;
+        let mut last_eq = false;
         let cut_line = |i: String| {
             if cut {
                 let len = Self::LINE_LEN - 2;
@@ -229,15 +231,22 @@ impl Runner {
                 break;
             }
             match line {
-                LineDiff::Equal(_) => {}
+                LineDiff::Equal(_) => {
+                    if !last_eq && !cut {
+                        self.inout.writeln("@", Self::SIGN_SEP_COL);
+                    }
+                    last_eq = true;
+                }
                 LineDiff::Insert(line) => {
                     self.inout.write("+ ", Self::SIGN_ADD_COL);
                     self.inout.writeln(cut_line(line), Self::NO_COL);
+                    last_eq = false;
                     count += 1;
                 }
                 LineDiff::Delete(line) => {
                     self.inout.write("- ", Self::SIGN_RM_COL);
                     self.inout.writeln(cut_line(line), Self::NO_COL);
+                    last_eq = false;
                     count += 1;
                 }
             }

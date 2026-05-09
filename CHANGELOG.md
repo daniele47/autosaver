@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v0.12.1
+
+### Changes
+
+- file diffs now separate different diff blocks with a nice `@` sign
+
 ## v0.12.0
 
 ### Features
