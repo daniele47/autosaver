@@ -4,6 +4,10 @@ All notable changes to this project will be documented here
 
 ## v0.10.2
 
+### Features
+
+- `--symlinks|-s` in `clear` to handle broken symlinks too
+
 ### Patches
 
 - fixed broken symlinks causing an error. Now they are handled properly

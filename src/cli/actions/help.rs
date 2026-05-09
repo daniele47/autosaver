@@ -87,6 +87,8 @@ impl Runner {
                 io.writeln("Flags:", col);
                 io.write("  --list -l       ", col);
                 io.writeln("Only list files, do not prompt to delete them", nocol);
+                io.write("  --symlinks -s   ", col);
+                io.writeln("Allow clearing symlinks too", nocol);
             }
             "" => {
                 io.writeln("Environment variables:", col);

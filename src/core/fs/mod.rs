@@ -321,6 +321,14 @@ impl AbsPath {
         Ok(())
     }
 
+    /// Deletes only broken symlinks.
+    pub fn delete_broken_symlink(&self) -> Result<()> {
+        if !self.exists() && Self::FILTER_SYMLINKS(self) {
+            fs::remove_file(&self.path).map_err(|e| Error::IoError(e, self.path.clone()))?;
+        }
+        Ok(())
+    }
+
     /// Copy file into destination.
     ///
     /// Note: `allow_recursive_deletion` purges even not empty dirs if in dst path

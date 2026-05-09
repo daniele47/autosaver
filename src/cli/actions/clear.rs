@@ -24,6 +24,8 @@ impl Runner {
                 "-y",
                 "--assume-no",
                 "-n",
+                "--symlinks",
+                "-s",
                 "--no-color",
             ],
         )?;
@@ -32,6 +34,9 @@ impl Runner {
         let wflag_list = self.args.flags().contains(&Flag::Word("list".into()));
         let lflag_list = self.args.flags().contains(&Flag::Letter('l'));
         let flag_list = wflag_list || lflag_list;
+        let wflag_symlinks = self.args.flags().contains(&Flag::Word("symlinks".into()));
+        let lflag_symlinks = self.args.flags().contains(&Flag::Letter('s'));
+        let flag_symlinks = wflag_symlinks || lflag_symlinks;
 
         // resolve profile into all leafs
         let profile = self.load_profile(1)?;
@@ -72,18 +77,30 @@ impl Runner {
         let backup_dir = Self::paths("backup")?.joins(&[&profile]);
         let run_dir = Self::paths("run")?.joins(&[&profile]);
         let mut all_paths = backup_dir
-            .all_files(AbsPath::FILTER_FILES)
+            .all_files(AbsPath::FILTER_ALL)
             .unwrap_or_default();
-        all_paths.extend(run_dir.all_files(AbsPath::FILTER_FILES).unwrap_or_default());
+        all_paths.extend(run_dir.all_files(AbsPath::FILTER_ALL).unwrap_or_default());
         for file in all_paths {
-            let canon_path = file.canonicalize()?;
-            let rel_path = canon_path.to_relative(&Self::paths("root")?)?;
-            let rel_path_str = rel_path.to_str_lossy();
-            if !tracked_paths.contains(&canon_path) {
+            if AbsPath::FILTER_FILES(&file) {
+                let canon_path = file.canonicalize()?;
+                let rel_path = canon_path.to_relative(&Self::paths("root")?)?;
+                let rel_path_str = rel_path.to_str_lossy();
+                if !tracked_paths.contains(&canon_path) {
+                    self.inout.writeln(rel_path_str, Self::PATH_UNTRACKED_COL);
+                    if !flag_list {
+                        self.prompt("Do you want to delete the untracked file?", |_| {
+                            Ok(file.purge_path(false)?)
+                        })?;
+                    }
+                }
+            }
+            if !file.exists() && AbsPath::FILTER_SYMLINKS(&file) && flag_symlinks {
+                let rel_path = file.to_relative(&Self::paths("root")?)?;
+                let rel_path_str = rel_path.to_str_lossy();
                 self.inout.writeln(rel_path_str, Self::PATH_UNTRACKED_COL);
                 if !flag_list {
-                    self.prompt("Do you want to delete the untracked file?", |_| {
-                        Ok(file.purge_path(false)?)
+                    self.prompt("Do you want to delete the broken symlink?", |_| {
+                        Ok(file.delete_broken_symlink()?)
                     })?;
                 }
             }
