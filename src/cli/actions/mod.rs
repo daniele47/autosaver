@@ -353,11 +353,11 @@ impl Runner {
         let lflag_help = flags.contains(&Flag::Letter('h'));
         let flag_version = flags.contains(&Flag::Word("version".into()));
         let flag_nocolor = flags.contains(&Flag::Word("no-color".into()));
+        let flag_debug = flags.contains(&Flag::Word("debug".into()));
 
         // handle global flags
-        if flag_nocolor {
-            self.inout.options().has_colors = false;
-        }
+        (*self.inout.options()).has_colors = !flag_nocolor;
+        (*self.inout.options()).show_debug = flag_debug;
         if flag_version {
             return self.version();
         }
