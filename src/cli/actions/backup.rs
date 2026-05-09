@@ -83,7 +83,7 @@ impl Runner {
         let backup_dir = self.paths("backup")?;
 
         // resolve profile into all leafs
-        let mut profile_loader = Self::profile_loader(self.paths("config")?)?;
+        let mut profile_loader = self.profile_loader()?;
         let root_profile = profile_loader.load(&profile)?;
         let profiles = root_profile.resolve(&mut profile_loader)?;
 

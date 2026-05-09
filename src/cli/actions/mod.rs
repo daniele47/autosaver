@@ -284,7 +284,7 @@ impl Runner {
     }
 
     // get a struct that implements profile loader
-    fn profile_loader(config_dir: AbsPath) -> Result<impl ProfileLoader> {
+    fn profile_loader(&self) -> Result<impl ProfileLoader + 'static> {
         struct ProfileLoaderImpl {
             cached: HashMapProfileLoader,
             config_dir: AbsPath,
@@ -343,7 +343,7 @@ impl Runner {
                 }
             }
         }
-
+        let config_dir = self.paths("config")?;
         Ok(ProfileLoaderImpl::new(config_dir))
     }
 
