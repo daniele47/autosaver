@@ -43,6 +43,11 @@ pub enum ErrorType {
 }
 
 impl Error {
+    /// Get Error type.
+    pub fn error_type(&self) -> &ErrorType {
+        &self.etype
+    }
+
     /// Get Error backtrace.
     pub fn backtrace(&self) -> &Backtrace {
         &self.backtrace
