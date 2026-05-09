@@ -1,11 +1,14 @@
 use crate::{
     cli::{actions::Runner, error::Result, flags::Flag},
     core::profile::{ProfileType, composite::ProfileLoader, module::ModulePolicy},
+    debug,
 };
 
 impl Runner {
     /// Backup action to list/save/restore files.
     pub fn backup(&mut self) -> Result<()> {
+        debug!(self.inout, "Running backup action...");
+
         // check command and flags
         if self.args.params().len() > 2 {
             return self.invalid_cmd_err();

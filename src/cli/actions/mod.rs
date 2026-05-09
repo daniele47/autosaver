@@ -288,13 +288,16 @@ impl Runner {
         struct ProfileLoaderImpl {
             cached: HashMapProfileLoader,
             config_dir: AbsPath,
+            inout: TermInOut,
         }
 
         impl ProfileLoaderImpl {
-            fn new(config_dir: AbsPath) -> Self {
+            fn new(config_dir: AbsPath, inout: TermInOut) -> Self {
+                debug!(inout, "Creating profile loader...");
                 Self {
                     cached: Default::default(),
                     config_dir,
+                    inout,
                 }
             }
         }
@@ -304,6 +307,7 @@ impl Runner {
                 let cached_profiles = self.cached.profiles();
                 let cached = cached_profiles.get(name);
                 if let Some(cached_prof) = cached {
+                    debug!(self.inout, "Loading already cached profile: {name}");
                     return Ok(cached_prof.clone());
                 }
                 let prof_file = self.config_dir.join(&RelPath::from(format!("{name}.conf")));
@@ -311,6 +315,7 @@ impl Runner {
 
                 // if <profile>.conf file exist, consider <profile> the profile name
                 if prof_file.metadata().is_ok_and(|m| m.is_file()) {
+                    debug!(self.inout, "Loading conf file profile: {name}");
                     let loaded = Profile::parse(name.into(), prof_file.line_reader()?)?;
                     cached_profiles.insert(name.into(), loaded.clone());
                     Ok(loaded)
@@ -318,6 +323,7 @@ impl Runner {
                 // if <profile>/ directory exist, consider <profile> the profile name
                 // and create a fake composite type, treating this dir as if it included all files
                 else if prof_dir.metadata().is_ok_and(|m| m.is_dir()) {
+                    debug!(self.inout, "Loading virtual dir profile: {name}");
                     let mut entries = BTreeSet::new();
                     for child in prof_dir.list_files(AbsPath::FILTER_EXIST)? {
                         let rel_child_str = child.to_relative(&self.config_dir)?.to_str_lossy();
@@ -329,9 +335,10 @@ impl Runner {
                             entries.insert(rel_child_str.to_string());
                         }
                     }
-                    let ptype =
-                        ProfileType::Composite(Composite::new(entries.into_iter().collect()));
-                    Ok(Profile::new(name.into(), ptype))
+                    let composite = Composite::new(entries.into_iter().collect());
+                    let loaded = Profile::new(name.into(), ProfileType::Composite(composite));
+                    cached_profiles.insert(name.into(), loaded.clone());
+                    Ok(loaded)
                 }
                 // <profile> does not exist
                 else {
@@ -344,7 +351,7 @@ impl Runner {
             }
         }
         let config_dir = self.paths("config")?;
-        Ok(ProfileLoaderImpl::new(config_dir))
+        Ok(ProfileLoaderImpl::new(config_dir, self.inout.clone()))
     }
 
     /// Run the cli application.
