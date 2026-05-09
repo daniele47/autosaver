@@ -79,11 +79,11 @@ impl Runner {
         let flag_unmodified = wflag_unmodified || lflag_unmodified;
 
         // paths
-        let home_dir = Self::paths("home")?;
-        let backup_dir = Self::paths("backup")?;
+        let home_dir = self.paths("home")?;
+        let backup_dir = self.paths("backup")?;
 
         // resolve profile into all leafs
-        let mut profile_loader = Self::profile_loader()?;
+        let mut profile_loader = Self::profile_loader(self.paths("config")?)?;
         let root_profile = profile_loader.load(&profile)?;
         let profiles = root_profile.resolve(&mut profile_loader)?;
 

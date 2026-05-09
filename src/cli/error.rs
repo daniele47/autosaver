@@ -65,7 +65,7 @@ impl From<ErrorType> for Error {
 
 impl From<crate::core::error::Error> for Error {
     fn from(value: crate::core::error::Error) -> Self {
-        let original_backtrace = value.backtrace().clone();
+        let original_backtrace = value.backtrace();
         Self {
             etype: ErrorType::CoreError(value),
             backtrace: original_backtrace,

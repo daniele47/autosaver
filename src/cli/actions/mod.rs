@@ -15,6 +15,7 @@ use crate::{
             composite::{Composite, HashMapProfileLoader, ProfileLoader},
         },
     },
+    debug,
 };
 
 mod backup;
@@ -61,10 +62,11 @@ impl Runner {
 
     // check there are no symlinks to the outside
     fn assert_no_escaping_symlinks(&mut self) -> Result<()> {
+        debug!(self.inout, "Checking there are no escaping symlinks...");
         for dir in [
-            Self::paths("config")?,
-            Self::paths("backup")?,
-            Self::paths("run")?,
+            self.paths("config")?,
+            self.paths("backup")?,
+            self.paths("run")?,
         ] {
             if !dir.exists() {
                 continue;
@@ -87,7 +89,7 @@ impl Runner {
     }
 
     // get paths
-    fn paths(path: &str) -> Result<AbsPath> {
+    fn paths(&self, path: &str) -> Result<AbsPath> {
         match path {
             "home" => {
                 let var = Self::env("home")?;
@@ -127,10 +129,10 @@ impl Runner {
                 }
                 Ok(var)
             }
-            "backup" => Self::paths("root").map(|p| p.joins(&["backup"])),
-            "config" => Self::paths("root").map(|p| p.joins(&["config"])),
-            "run" => Self::paths("root").map(|p| p.joins(&["run"])),
-            "default" => Self::paths("root").map(|p| p.joins(&[".default"])),
+            "backup" => self.paths("root").map(|p| p.joins(&["backup"])),
+            "config" => self.paths("root").map(|p| p.joins(&["config"])),
+            "run" => self.paths("root").map(|p| p.joins(&["run"])),
+            "default" => self.paths("root").map(|p| p.joins(&[".default"])),
             _ => unreachable!("Invalid path"),
         }
     }
@@ -168,14 +170,14 @@ impl Runner {
     }
 
     // load the profile, with the proper fallbacks
-    fn load_profile(&mut self, param_index: usize) -> Result<String> {
+    fn load_profile(&self, param_index: usize) -> Result<String> {
         || -> Result<String> {
             match self.args.params().get(param_index) {
                 Some(p) => Ok(p.clone()) as Result<String>,
                 None => match Self::env("profile") {
                     Ok(env_prof) => Ok(env_prof),
                     Err(_) => {
-                        let prof_file = Self::paths("default")?;
+                        let prof_file = self.paths("default")?;
                         if let Some(first_line) = prof_file.line_reader()?.next() {
                             let first_line = first_line?;
                             if !first_line.is_empty() {
@@ -191,7 +193,7 @@ impl Runner {
     }
 
     // render diff between two files
-    fn render_diff(&mut self, file1: &AbsPath, file2: &AbsPath, cut: bool) -> Result<()> {
+    fn render_diff(&self, file1: &AbsPath, file2: &AbsPath, cut: bool) -> Result<()> {
         let diff = file1.calc_diff(file2);
         if let Err(err) = &diff
             && let crate::core::error::ErrorType::IoError(err, _) = err.error_type()
@@ -237,13 +239,13 @@ impl Runner {
     }
 
     // generic prompt
-    fn generic_prompt(&mut self, prompt: &str) {
+    fn generic_prompt(&self, prompt: &str) {
         self.inout.write("$ ", Self::SIGN_INPUT_COL);
         self.inout.write(prompt, Self::NO_COL);
     }
 
     // prompt user before running an action
-    fn prompt<T: Fn(&mut Self) -> Result<()>>(&mut self, msg: &str, run: T) -> Result<()> {
+    fn prompt<T: Fn(&Self) -> Result<()>>(&mut self, msg: &str, run: T) -> Result<()> {
         let wflag_y = self.args.flags().contains(&Flag::Word("assume-yes".into()));
         let lflag_y = self.args.flags().contains(&Flag::Letter('y'));
         let flag_y = wflag_y || lflag_y;
@@ -282,7 +284,7 @@ impl Runner {
     }
 
     // get a struct that implements profile loader
-    fn profile_loader() -> Result<impl ProfileLoader> {
+    fn profile_loader(config_dir: AbsPath) -> Result<impl ProfileLoader> {
         struct ProfileLoaderImpl {
             cached: HashMapProfileLoader,
             config_dir: AbsPath,
@@ -342,7 +344,7 @@ impl Runner {
             }
         }
 
-        Ok(ProfileLoaderImpl::new(Self::paths("config")?))
+        Ok(ProfileLoaderImpl::new(config_dir))
     }
 
     /// Run the cli application.
@@ -358,6 +360,11 @@ impl Runner {
         // handle global flags
         self.inout.options().has_colors = !flag_nocolor;
         self.inout.options().show_debug = flag_debug;
+
+        // print some initial debug
+        debug!(self.inout, "inout: {:?}", &self.inout);
+        debug!(self.inout, "args: {:?}", &self.args);
+
         if flag_version {
             return self.version();
         }

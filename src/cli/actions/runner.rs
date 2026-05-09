@@ -16,11 +16,14 @@ use crate::{
         fs::RelPath,
         profile::{ProfileType, composite::ProfileLoader, runner::RunnerPolicy},
     },
+    debug,
 };
 
 impl Runner {
     /// Backup action to list/save/restore files.
     pub fn runner(&mut self) -> Result<()> {
+        debug!(self.inout, "Running runner action...");
+
         // check command and flags
         if self.args.params().len() > 2 {
             return self.invalid_cmd_err();
@@ -66,11 +69,11 @@ impl Runner {
         };
 
         // paths
-        let run_dir = Self::paths("run")?;
+        let run_dir = self.paths("run")?;
 
         // resolve profile into all leafs
         let profile = self.load_profile(1)?;
-        let mut profile_loader = Self::profile_loader()?;
+        let mut profile_loader = Self::profile_loader(self.paths("config")?)?;
         let root_profile = profile_loader.load(&profile)?;
         let profiles = root_profile.resolve(&mut profile_loader)?;
 

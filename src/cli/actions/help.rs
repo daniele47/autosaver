@@ -1,8 +1,13 @@
-use crate::cli::{actions::Runner, error::Result};
+use crate::{
+    cli::{actions::Runner, error::Result},
+    debug,
+};
 
 impl Runner {
     /// Help action to render help message.
     pub fn help(&mut self) -> Result<()> {
+        debug!(self.inout, "Running help action...");
+
         self.check_flags("--help", &["--help", "--no-color", "-h"])?;
         let command = self.args.params().join(" ");
         let col = Self::DECORATION_COL;

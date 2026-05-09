@@ -83,7 +83,7 @@ impl TermInOut {
         &mut self.options
     }
 
-    pub fn write(&mut self, str: impl Display, styles: &[Style]) {
+    pub fn write(&self, str: impl Display, styles: &[Style]) {
         let colors = styles
             .iter()
             .map(|f| match f {
@@ -105,25 +105,25 @@ impl TermInOut {
         };
     }
 
-    pub fn writeln(&mut self, str: impl Display, styles: &[Style]) {
+    pub fn writeln(&self, str: impl Display, styles: &[Style]) {
         self.write(str, styles);
         self.write("\n", &[]);
     }
 
-    pub fn debug(&mut self, str: impl Display) {
+    pub fn debug(&self, str: impl Display) {
         if self.options.show_debug {
             eprintln!("{str}");
         }
     }
 
-    pub fn error(&mut self, str: impl Display) {
+    pub fn error(&self, str: impl Display) {
         match self.options.has_colors {
             true => eprintln!("{RED}{BOLD}ERROR: {str}{RESET}"),
             false => eprintln!("ERROR: {str}"),
         };
     }
 
-    pub fn warning(&mut self, str: impl Display) {
+    pub fn warning(&self, str: impl Display) {
         match self.options.has_colors {
             true => eprintln!("{YELLOW}{BOLD}WARNING: {str}{RESET}"),
             false => eprintln!("WARNING: {str}"),

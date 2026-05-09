@@ -41,13 +41,13 @@ impl Runner {
 
         // resolve profile into all leafs
         let profile = self.load_profile(1)?;
-        let mut profile_loader = Self::profile_loader()?;
+        let mut profile_loader = Self::profile_loader(self.paths("config")?)?;
         let root_profile = profile_loader.load(&profile)?;
         let profiles = root_profile.resolve(&mut profile_loader)?;
 
         // paths
-        let backup_dir = Self::paths("backup")?;
-        let run_dir = Self::paths("run")?;
+        let backup_dir = self.paths("backup")?;
+        let run_dir = self.paths("run")?;
 
         // get all tracked paths
         let mut tracked_paths = HashSet::<AbsPath>::new();
@@ -75,8 +75,8 @@ impl Runner {
         }
 
         // clear all paths in backup and run dir
-        let backup_dir = Self::paths("backup")?.joins(&[&profile]);
-        let run_dir = Self::paths("run")?.joins(&[&profile]);
+        let backup_dir = self.paths("backup")?.joins(&[&profile]);
+        let run_dir = self.paths("run")?.joins(&[&profile]);
         let mut all_paths = backup_dir
             .all_files(AbsPath::FILTER_ALL)
             .unwrap_or_default();
@@ -84,7 +84,7 @@ impl Runner {
         for file in all_paths {
             if AbsPath::FILTER_FILES(&file) {
                 let canon_path = file.canonicalize()?;
-                let rel_path = canon_path.to_relative(&Self::paths("root")?)?;
+                let rel_path = canon_path.to_relative(&self.paths("root")?)?;
                 let rel_path_str = rel_path.to_str_lossy();
                 if !tracked_paths.contains(&canon_path) {
                     self.inout.writeln(rel_path_str, Self::PATH_UNTRACKED_COL);
@@ -96,7 +96,7 @@ impl Runner {
                 }
             }
             if !file.exists() && AbsPath::FILTER_SYMLINKS(&file) && flag_symlinks {
-                let rel_path = file.to_relative(&Self::paths("root")?)?;
+                let rel_path = file.to_relative(&self.paths("root")?)?;
                 let rel_path_str = rel_path.to_str_lossy();
                 self.inout.writeln(rel_path_str, Self::PATH_UNTRACKED_COL);
                 if !flag_list {

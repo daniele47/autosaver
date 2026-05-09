@@ -9,6 +9,7 @@ All notable changes to this project will be documented here
 - added `backtrace` for errors
 - adding debug options to `inout`
 - added `--debug` flag to show debug output
+- added more logs for `--debug`
 
 ## v0.11.0
 
