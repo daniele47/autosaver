@@ -152,11 +152,11 @@ impl Runner {
                             }
                             // home => backup
                             (true, false) => {
-                                if !act_save {
+                                if !act_save && !act_list {
                                     continue;
                                 }
                                 self.inout.writeln(path.to_string(), Self::PATH_MISS_COL);
-                                if !flag_list {
+                                if !flag_list && act_save {
                                     self.prompt("Do you want to save it?", |_| {
                                         Ok(home_file.copy_file(&backup_file, false)?)
                                     })?;
@@ -164,11 +164,11 @@ impl Runner {
                             }
                             // backup => home
                             (false, true) => {
-                                if !act_restore {
+                                if !act_restore && !act_list {
                                     continue;
                                 }
                                 self.inout.writeln(path.to_string(), Self::PATH_MISS_COL);
-                                if !flag_list {
+                                if !flag_list && act_restore {
                                     self.prompt("Do you want to restore it?", |_| {
                                         Ok(backup_file.copy_file(&home_file, false)?)
                                     })?;

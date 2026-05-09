@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented here
 
-## v0.10.2
+## v0.11.0
 
 ### Features
 
@@ -11,6 +11,7 @@ All notable changes to this project will be documented here
 ### Patches
 
 - fixed broken symlinks causing an error. Now they are handled properly
+- fixed `list` command not showing deleted files
 
 ## v0.10.1
 
