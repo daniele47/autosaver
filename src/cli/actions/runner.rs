@@ -87,6 +87,7 @@ impl Runner {
                     let run_dir = run_dir.joins(&[profile.name()]);
                     let runner = runner.resolve(&run_dir)?;
                     self.output_profile(profile.name());
+                    debug!(self.inout, "run_dir: {run_dir:?}");
 
                     for entry in runner.entries() {
                         if entry.policy() == &RunnerPolicy::Skip {

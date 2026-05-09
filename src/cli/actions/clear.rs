@@ -6,11 +6,14 @@ use crate::{
         fs::AbsPath,
         profile::{ProfileType, composite::ProfileLoader},
     },
+    debug,
 };
 
 impl Runner {
     /// Backup action to list/save/restore files.
     pub fn clear(&mut self) -> Result<()> {
+        debug!(self.inout, "Running clear action...");
+
         // check command and flags
         if self.args.params().len() > 2 {
             return self.invalid_cmd_err();

@@ -101,6 +101,8 @@ impl Runner {
                     let module = module.merge_bases(&home_dir, backup_dir)?;
 
                     self.output_profile(profile.name());
+                    debug!(self.inout, "home_dir: {home_dir:?}");
+                    debug!(self.inout, "backup_dir: {backup_dir:?}");
 
                     // iterate all entries of a module
                     for entry in module.entries() {

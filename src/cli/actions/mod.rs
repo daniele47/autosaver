@@ -92,7 +92,7 @@ impl Runner {
     fn paths(&self, path: &str) -> Result<AbsPath> {
         match path {
             "home" => {
-                let var = Self::env("home")?;
+                let var = self.env("home")?;
                 if PathType::from(var.as_str()) != PathType::Absolute {
                     return Err(ErrorType::InvalidEnv(
                         "AUTOSAVER_HOME".into(),
@@ -111,7 +111,7 @@ impl Runner {
                 Ok(var)
             }
             "root" => {
-                let var = Self::env("root")?;
+                let var = self.env("root")?;
                 if PathType::from(var.as_str()) != PathType::Absolute {
                     return Err(ErrorType::InvalidEnv(
                         "AUTOSAVER_ROOT".into(),
@@ -157,14 +157,14 @@ impl Runner {
     }
 
     // deal with environment variables
-    fn load_env(env: &str) -> Result<String> {
+    fn load_env(&self, env: &str) -> Result<String> {
         env::var(env).map_err(|_| ErrorType::UndefinedEnv(env.to_string()).into())
     }
-    fn env(env: &str) -> Result<String> {
+    fn env(&self, env: &str) -> Result<String> {
         match env {
-            "profile" => Self::load_env("AUTOSAVER_PROFILE"),
-            "root" => Self::load_env("AUTOSAVER_ROOT"),
-            "home" => Self::load_env("AUTOSAVER_HOME"),
+            "profile" => self.load_env("AUTOSAVER_PROFILE"),
+            "root" => self.load_env("AUTOSAVER_ROOT"),
+            "home" => self.load_env("AUTOSAVER_HOME"),
             _ => unreachable!("Invalid env"),
         }
     }
@@ -173,15 +173,22 @@ impl Runner {
     fn load_profile(&self, param_index: usize) -> Result<String> {
         || -> Result<String> {
             match self.args.params().get(param_index) {
-                Some(p) => Ok(p.clone()) as Result<String>,
-                None => match Self::env("profile") {
-                    Ok(env_prof) => Ok(env_prof),
+                Some(p) => {
+                    debug!(self.inout, "Requested profile is '{p}' (cmdline)");
+                    Ok(p.clone()) as Result<String>
+                }
+                None => match self.env("profile") {
+                    Ok(env) => {
+                        debug!(self.inout, "Requested profile '{env}' (AUTOSAVER_PROFILE)");
+                        Ok(env)
+                    }
                     Err(_) => {
                         let prof_file = self.paths("default")?;
                         if let Some(first_line) = prof_file.line_reader()?.next() {
-                            let first_line = first_line?;
-                            if !first_line.is_empty() {
-                                return Ok(first_line);
+                            let f = first_line?;
+                            if !f.is_empty() {
+                                debug!(self.inout, "Requested profile '{f}' (.default)");
+                                return Ok(f);
                             }
                         }
                         Err(ErrorType::MissingProfile.into())
@@ -307,7 +314,7 @@ impl Runner {
                 let cached_profiles = self.cached.profiles();
                 let cached = cached_profiles.get(name);
                 if let Some(cached_prof) = cached {
-                    debug!(self.inout, "Loading already cached profile: {name}");
+                    // debug!(self.inout, "Loading already cached profile: '{name}'");
                     return Ok(cached_prof.clone());
                 }
                 let prof_file = self.config_dir.join(&RelPath::from(format!("{name}.conf")));
@@ -315,7 +322,7 @@ impl Runner {
 
                 // if <profile>.conf file exist, consider <profile> the profile name
                 if prof_file.metadata().is_ok_and(|m| m.is_file()) {
-                    debug!(self.inout, "Loading conf file profile: {name}");
+                    debug!(self.inout, "Loading conf file profile: '{name}'");
                     let loaded = Profile::parse(name.into(), prof_file.line_reader()?)?;
                     cached_profiles.insert(name.into(), loaded.clone());
                     Ok(loaded)
@@ -323,7 +330,7 @@ impl Runner {
                 // if <profile>/ directory exist, consider <profile> the profile name
                 // and create a fake composite type, treating this dir as if it included all files
                 else if prof_dir.metadata().is_ok_and(|m| m.is_dir()) {
-                    debug!(self.inout, "Loading virtual dir profile: {name}");
+                    debug!(self.inout, "Loading virtual dir profile: '{name}'");
                     let mut entries = BTreeSet::new();
                     for child in prof_dir.list_files(AbsPath::FILTER_EXIST)? {
                         let rel_child_str = child.to_relative(&self.config_dir)?.to_str_lossy();
