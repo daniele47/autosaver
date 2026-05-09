@@ -9,7 +9,7 @@ use std::{
 use crate::{
     cli::{
         actions::Runner,
-        error::{Error, Result},
+        error::{Error, ErrorType, Result},
         flags::Flag,
     },
     core::{
@@ -124,10 +124,10 @@ impl Runner {
                                     fs::Permissions::from_mode(0o755),
                                 )
                                 .map_err(|e| {
-                                    Error::ScriptFailure(
+                                    Error::from(ErrorType::ScriptFailure(
                                         abs_path.clone().into(),
                                         format!("Could not make executable: {e}"),
-                                    )
+                                    ))
                                 })?;
 
                                 let cmd_res = || -> Result<()> {
@@ -141,7 +141,7 @@ impl Runner {
                                         .spawn()
                                         .map_err(|e| {
                                             let p = abs_path.clone().into();
-                                            Error::ScriptFailure(p, e.to_string())
+                                            Error::from(ErrorType::ScriptFailure(p, e.to_string()))
                                         })?;
 
                                     // parse stdout and rewrite it nicely formatted
@@ -154,10 +154,11 @@ impl Runner {
                                                     s.inout.writeln(cut_line(l), Self::NO_COL);
                                                 }
                                                 Err(e) => {
-                                                    return Err(Error::ScriptFailure(
+                                                    return Err(ErrorType::ScriptFailure(
                                                         abs_path.clone().into(),
                                                         format!("Failure parsing stdout {e}"),
-                                                    ));
+                                                    )
+                                                    .into());
                                                 }
                                             }
                                         }
@@ -170,14 +171,15 @@ impl Runner {
                                         .wait()
                                         .map_err(|e| {
                                             let p = abs_path.clone().into();
-                                            Error::ScriptFailure(p, e.to_string())
+                                            ErrorType::ScriptFailure(p, e.to_string()).into()
                                         })
                                         .and_then(|code| {
                                             if !code.success() {
-                                                return Err(Error::ScriptFailure(
+                                                return Err(ErrorType::ScriptFailure(
                                                     abs_path.clone().into(),
                                                     format!("Exited with code {code}"),
-                                                ));
+                                                )
+                                                .into());
                                             }
                                             Ok(())
                                         })

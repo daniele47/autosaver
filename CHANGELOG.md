@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v0.12.0
+
+### Features
+
+- added `backtrace` for errors
+
 ## v0.11.0
 
 ### Features

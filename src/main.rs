@@ -18,7 +18,7 @@ fn main() {
 
     // run cli
     if let Err(e) = runner.run() {
-        inout.error(e);
+        inout.error(&e);
         exit(1);
     }
 }

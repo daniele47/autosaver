@@ -4,7 +4,7 @@ use std::{collections::BTreeSet, env, io::ErrorKind, process::exit};
 
 use crate::{
     cli::{
-        error::{Error, Result},
+        error::{ErrorType, Result},
         flags::{Flag, ParsedArgs},
         inout::{Style, TermInOut},
     },
@@ -77,7 +77,7 @@ impl Runner {
                             .canonicalize()
                             .expect("path should have been canonicalizable")
                             .to_str_lossy();
-                        return Err(Error::OutOfBoundSymlink(norm_path, canon_path));
+                        return Err(ErrorType::OutOfBoundSymlink(norm_path, canon_path).into());
                     }
                 }
             }
@@ -92,34 +92,38 @@ impl Runner {
             "home" => {
                 let var = Self::env("home")?;
                 if PathType::from(var.as_str()) != PathType::Absolute {
-                    return Err(Error::InvalidEnv(
+                    return Err(ErrorType::InvalidEnv(
                         "AUTOSAVER_HOME".into(),
                         "Not an absolute path".into(),
-                    ));
+                    )
+                    .into());
                 }
                 let var = AbsPath::from(var);
                 if !var.metadata().is_ok_and(|m| m.is_dir()) {
-                    return Err(Error::InvalidEnv(
+                    return Err(ErrorType::InvalidEnv(
                         "AUTOSAVER_HOME".into(),
                         "Not a path to a directory".into(),
-                    ));
+                    )
+                    .into());
                 }
                 Ok(var)
             }
             "root" => {
                 let var = Self::env("root")?;
                 if PathType::from(var.as_str()) != PathType::Absolute {
-                    return Err(Error::InvalidEnv(
+                    return Err(ErrorType::InvalidEnv(
                         "AUTOSAVER_ROOT".into(),
                         "Not an absolute path".into(),
-                    ));
+                    )
+                    .into());
                 }
                 let var = AbsPath::from(var);
                 if !var.metadata().is_ok_and(|m| m.is_dir()) {
-                    return Err(Error::InvalidEnv(
+                    return Err(ErrorType::InvalidEnv(
                         "AUTOSAVER_ROOT".into(),
                         "Not a path to a directory".into(),
-                    ));
+                    )
+                    .into());
                 }
                 Ok(var)
             }
@@ -139,7 +143,7 @@ impl Runner {
                 Flag::Word(wflag) => format!("--{wflag}"),
             };
             if !flag_set.contains(&flag_str.as_str()) {
-                return Err(Error::InvalidFlag(flag.clone(), cmd.to_string()));
+                return Err(ErrorType::InvalidFlag(flag.clone(), cmd.to_string()).into());
             }
         }
         Ok(())
@@ -147,12 +151,12 @@ impl Runner {
 
     // utility to avoid rewriting the same code multiple times
     fn invalid_cmd_err(&self) -> Result<()> {
-        Err(Error::InvalidCommand(self.args.params().join(" ")))
+        Err(ErrorType::InvalidCommand(self.args.params().join(" ")).into())
     }
 
     // deal with environment variables
     fn load_env(env: &str) -> Result<String> {
-        env::var(env).map_err(|_| Error::UndefinedEnv(env.to_string()))
+        env::var(env).map_err(|_| ErrorType::UndefinedEnv(env.to_string()).into())
     }
     fn env(env: &str) -> Result<String> {
         match env {
@@ -178,12 +182,12 @@ impl Runner {
                                 return Ok(first_line);
                             }
                         }
-                        Err(Error::MissingProfile)
+                        Err(ErrorType::MissingProfile.into())
                     }
                 },
             }
         }()
-        .map_err(|_| Error::MissingProfile)
+        .map_err(|_| ErrorType::MissingProfile.into())
     }
 
     // render diff between two files
