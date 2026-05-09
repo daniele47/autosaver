@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v0.10.1
+
+### Changes
+
+- now `clear` command accepts a profile, and only clears relative to that profile
+
 ## v0.10.0
 
 ### Features
