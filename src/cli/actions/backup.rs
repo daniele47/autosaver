@@ -12,9 +12,10 @@ impl Runner {
         }
         let cmd = self.args.params().first().map(String::as_str).unwrap_or("");
         match cmd {
-            "list" => {
-                self.check_flags(cmd, &["--all", "-a", "--unmodified", "-u", "--no-color"])?
-            }
+            "list" => self.check_flags(
+                cmd,
+                &["--all", "-a", "--unmodified", "-u", "--no-color", "--debug"],
+            )?,
             "save" | "restore" => self.check_flags(
                 cmd,
                 &[
@@ -31,6 +32,7 @@ impl Runner {
                     "--list",
                     "-l",
                     "--no-color",
+                    "--debug",
                 ],
             )?,
             "rmhome" | "rmbackup" => self.check_flags(
@@ -45,6 +47,7 @@ impl Runner {
                     "--list",
                     "-l",
                     "--no-color",
+                    "--debug",
                 ],
             )?,
             _ => unreachable!("Invalid command"),

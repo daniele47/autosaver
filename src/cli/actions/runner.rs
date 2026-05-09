@@ -39,6 +39,7 @@ impl Runner {
                 "--full",
                 "-f",
                 "--no-color",
+                "--debug",
             ],
         )?;
 

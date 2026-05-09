@@ -8,9 +8,7 @@ use std::{
 #[macro_export]
 macro_rules! debug {
     ($ctx:expr, $($arg:tt)*) => {
-        if $ctx.options().show_debug {
-            $ctx.debug(format!("DEBUG [{}:{}]: {}", file!(), line!(), format_args!($($arg)*)));
-        }
+        $ctx.debug(format!("DEBUG [{}:{}]: {}", file!(), line!(), format_args!($($arg)*)));
     };
 }
 
@@ -113,7 +111,9 @@ impl TermInOut {
     }
 
     pub fn debug(&mut self, str: impl Display) {
-        eprintln!("{str}")
+        if self.options.show_debug {
+            eprintln!("{str}");
+        }
     }
 
     pub fn error(&mut self, str: impl Display) {

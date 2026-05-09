@@ -7,7 +7,7 @@ impl Runner {
         if !self.args.params().is_empty() {
             return self.invalid_cmd_err();
         }
-        self.check_flags("--version", &["--version", "--no-color"])?;
+        self.check_flags("--version", &["--version", "--no-color", "--debug"])?;
         self.inout.writeln(fmt, Self::DECORATION_COL);
         Ok(())
     }

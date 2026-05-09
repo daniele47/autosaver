@@ -128,6 +128,8 @@ impl Runner {
                 io.writeln("Print the binary version", nocol);
                 io.write("  --no-color          ", col);
                 io.writeln("Avoid all colors in the output", nocol);
+                io.write("  --debug             ", col);
+                io.writeln("Show extra output to debug issues", nocol);
                 io.write("  --assume-yes -y     ", col);
                 io.writeln("Automatically answer yes to all prompts", nocol);
                 io.write("  --assume-no -n      ", col);

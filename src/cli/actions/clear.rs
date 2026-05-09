@@ -27,6 +27,7 @@ impl Runner {
                 "--symlinks",
                 "-s",
                 "--no-color",
+                "--debug",
             ],
         )?;
 

@@ -2,3 +2,8 @@
 name = "autosaver"
 version = "0.11.0"
 edition = "2024"
+
+[profile.release]
+debug = true  # Retain debug symbols
+strip = false # Don't strip symbols
+opt-level = 3 # Keep optimizations but with symbols
