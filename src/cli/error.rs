@@ -1,6 +1,6 @@
 //! Error type for the cli module.
 
-use std::{backtrace::Backtrace, fmt::Display, path::PathBuf};
+use std::{backtrace::Backtrace, fmt::Display, path::PathBuf, sync::Arc};
 
 use crate::cli::flags::Flag;
 
@@ -11,7 +11,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 #[derive(Debug)]
 pub struct Error {
     etype: ErrorType,
-    backtrace: Box<Backtrace>,
+    backtrace: Arc<Backtrace>,
 }
 
 /// Error type for cli module.
@@ -49,8 +49,8 @@ impl Error {
     }
 
     /// Get Error backtrace.
-    pub fn backtrace(&self) -> &Backtrace {
-        &self.backtrace
+    pub fn backtrace(&self) -> Arc<Backtrace> {
+        self.backtrace.clone()
     }
 }
 
@@ -58,7 +58,7 @@ impl From<ErrorType> for Error {
     fn from(etype: ErrorType) -> Self {
         Self {
             etype,
-            backtrace: Box::new(Backtrace::force_capture()),
+            backtrace: Arc::new(Backtrace::force_capture()),
         }
     }
 }
