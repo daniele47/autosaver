@@ -48,11 +48,11 @@ impl Runner {
                 io.writeln("Flags:", col);
                 io.write("  --all -a            ", col);
                 io.writeln("Show files which are ignored by default", nocol);
-                io.write("  --diff -d       ", col);
+                io.write("  --diff -d           ", col);
                 io.writeln("Show some lines of diff between files", nocol);
-                io.write("  --list -l       ", col);
+                io.write("  --list -l           ", col);
                 io.writeln("Only list files, do not prompt to restore them", nocol);
-                io.write("  --full -f       ", col);
+                io.write("  --full -f           ", col);
                 io.writeln("Show the entire diff between the files", nocol);
             }
             "rmhome" => {
@@ -61,7 +61,7 @@ impl Runner {
                 io.writeln("Delete files from home directory [DANGEROUS]", nocol);
                 io.writeln("", nocol);
                 io.writeln("Flags:", col);
-                io.write("  --list -l       ", col);
+                io.write("  --list -l           ", col);
                 io.writeln("Only list files, do not prompt to delete them", nocol);
             }
             "rmbackup" => {
@@ -70,7 +70,7 @@ impl Runner {
                 io.writeln("Delete files from backup directory [DANGEROUS]", nocol);
                 io.writeln("", nocol);
                 io.writeln("Flags:", col);
-                io.write("  --list -l       ", col);
+                io.write("  --list -l           ", col);
                 io.writeln("Only list files, do not prompt to delete them", nocol);
             }
             "run" => {
@@ -103,7 +103,7 @@ impl Runner {
                 io.writeln("Draw a tree of how a profile resolves", nocol);
                 io.writeln("", nocol);
                 io.writeln("Flags:", col);
-                io.write("  --short-names   ", col);
+                io.write("  --short-names  ", col);
                 io.writeln("Show profile names as their basename", nocol);
             }
             "" => {
@@ -134,7 +134,7 @@ impl Runner {
                 io.writeln("Run scripts from the run directory", nocol);
                 io.write("  clear               ", col);
                 io.writeln("List and prompt to delete untracked files", nocol);
-                io.write("  tree [PROFILE] ", col);
+                io.write("  tree                ", col);
                 io.writeln("Draw a tree of how a profile resolves", nocol);
                 io.writeln("", nocol);
                 io.writeln("Global Flags:", col);
