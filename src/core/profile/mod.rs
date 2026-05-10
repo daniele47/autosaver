@@ -47,6 +47,19 @@ impl Profile {
         &self.ptype
     }
 
+    /// Descend and act upon all nodes found.
+    pub fn descend<T, S>(&self, profile: &str, loader: &mut T, mut on_elem: S) -> Result<()>
+    where
+        T: ProfileLoader,
+        S: FnMut(&Profile, &[String]) -> Result<()>,
+    {
+        if let ProfileType::Composite(c) = self.ptype() {
+            c.descend(profile, loader, on_elem)
+        } else {
+            on_elem(self, &[])
+        }
+    }
+
     /// Resolve composite profiles and get a list of all included profiles.
     pub fn resolve(&self, loader: &mut impl ProfileLoader) -> Result<Vec<Self>> {
         let mut res = vec![];
