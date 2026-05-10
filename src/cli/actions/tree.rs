@@ -36,6 +36,8 @@ impl Runner {
                 "-t",
                 "--ascii",
                 "-a",
+                "--unique",
+                "-u",
                 "--no-color",
                 "--debug",
             ],
@@ -54,6 +56,9 @@ impl Runner {
         let wflag_ascii = self.args.flags().contains(&Flag::Word("ascii".into()));
         let lflag_ascii = self.args.flags().contains(&Flag::Letter('a'));
         let flag_ascii = wflag_ascii || lflag_ascii;
+        let wflag_unique = self.args.flags().contains(&Flag::Word("unique".into()));
+        let lflag_unique = self.args.flags().contains(&Flag::Letter('u'));
+        let flag_unique = wflag_unique || lflag_unique;
 
         // load profile
         let profile = self.load_profile(1)?;
@@ -64,7 +69,7 @@ impl Runner {
         // descent into profiles
         let mut are_last = Vec::<bool>::new();
         let chars = if flag_ascii { TREE_ASCII } else { TREE };
-        root_profile.descend(true, &mut loader, |ctx| {
+        root_profile.descend(!flag_unique, &mut loader, |ctx| {
             let p = ctx.path;
             let is_last = ctx.stack.last().map(|(p, _)| p) == ctx.path.last();
             let len = ctx.path.len();

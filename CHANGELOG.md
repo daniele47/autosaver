@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v0.15.0
+
+### Features
+
+- added `--unique|-u` to `tree` command to skip already seen profiles
+
 ## v0.14.4
 
 ### Patches

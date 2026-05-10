@@ -109,6 +109,8 @@ impl Runner {
                 io.writeln("Show the type of each profile", nocol);
                 io.write("  --ascii -a          ", col);
                 io.writeln("Use only ascii characters", nocol);
+                io.write("  --unique -u         ", col);
+                io.writeln("Do not show duplicated entries", nocol);
             }
             "" => {
                 io.writeln("Environment variables:", col);
