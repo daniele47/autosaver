@@ -56,7 +56,7 @@ impl Profile {
         if let ProfileType::Composite(c) = self.ptype() {
             c.descend(profile, loader, on_elem)
         } else {
-            on_elem(DescendContext::new(self, &[]))
+            on_elem(DescendContext::new(self, &[], &[]))
         }
     }
 

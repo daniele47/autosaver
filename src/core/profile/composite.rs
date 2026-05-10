@@ -18,6 +18,7 @@ pub struct Composite {
 pub struct DescendContext<'a> {
     pub item: &'a Profile,
     pub path: &'a [String],
+    pub stack: &'a [(String, bool)],
 }
 
 /// Allow generic implementation of how profiles are loaded.
@@ -33,11 +34,8 @@ pub struct HashMapProfileLoader {
 }
 
 impl<'a> DescendContext<'a> {
-    pub fn new(item: &'a Profile, path: &'a [String]) -> Self {
-        Self {
-            item,
-            path,
-        }
+    pub fn new(item: &'a Profile, path: &'a [String], stack: &'a [(String, bool)]) -> Self {
+        Self { item, path, stack }
     }
 }
 
@@ -134,7 +132,7 @@ impl Composite {
 
             // check if leaf profile
             let item_profile = loader.load(&item_name)?;
-            on_elem(DescendContext::new(&item_profile, &path))?;
+            on_elem(DescendContext::new(&item_profile, &path, &stack))?;
             if !matches!(item_profile.ptype, ProfileType::Composite(_)) {
                 visited.insert(item_name);
                 continue;
