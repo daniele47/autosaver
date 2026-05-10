@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v0.15.1
+
+### Patches
+
+- deleting symlinks now delete all parent dirs too
+
 ## v0.15.0
 
 ### Features

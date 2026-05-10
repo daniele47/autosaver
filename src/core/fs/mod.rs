@@ -340,6 +340,9 @@ impl AbsPath {
         if !self.exists() && Self::FILTER_SYMLINKS(self) {
             fs::remove_file(&self.path).map_err(|e| ErrorType::IoError(e, self.path.clone()))?;
         }
+        // deleting empty parent dirs
+        self.create_dir()?;
+        self.delete_dirs()?;
         Ok(())
     }
 
