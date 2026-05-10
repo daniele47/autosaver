@@ -49,8 +49,8 @@ pub enum Style {
 }
 
 /// Options for the `InOut`.
-#[derive(Debug, Clone, Default)]
-pub struct IoOutOptions {
+#[derive(Debug, Clone)]
+pub struct InOutOptions {
     pub has_colors: bool,
     pub show_debug: bool,
 }
@@ -58,10 +58,10 @@ pub struct IoOutOptions {
 /// Struct that implements `InOut` to write to the terminal.
 #[derive(Debug, Clone, Default)]
 pub struct TermInOut {
-    options: IoOutOptions,
+    options: InOutOptions,
 }
 
-impl IoOutOptions {
+impl InOutOptions {
     /// Create new option struct.
     pub fn new(has_colors: bool, show_debug: bool) -> Self {
         Self {
@@ -73,13 +73,13 @@ impl IoOutOptions {
 
 impl TermInOut {
     /// Create new struct.
-    pub fn new(options: IoOutOptions) -> Self {
+    pub fn new(options: InOutOptions) -> Self {
         Self { options }
     }
 }
 
 impl TermInOut {
-    pub fn options(&mut self) -> &mut IoOutOptions {
+    pub fn options(&mut self) -> &mut InOutOptions {
         &mut self.options
     }
 
@@ -143,5 +143,14 @@ impl TermInOut {
 
         // trims
         input.lines().next().map(String::from).unwrap_or_default()
+    }
+}
+
+impl Default for InOutOptions {
+    fn default() -> Self {
+        Self {
+            has_colors: true,
+            show_debug: false,
+        }
     }
 }
