@@ -13,6 +13,13 @@ pub struct Composite {
     entries: Vec<String>,
 }
 
+/// Struct containing context relative to `descent` function closure.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DescendContext<'a> {
+    pub item: &'a Profile,
+    pub path: &'a [String],
+}
+
 /// Allow generic implementation of how profiles are loaded.
 pub trait ProfileLoader {
     /// Load profile from its name.
@@ -23,6 +30,15 @@ pub trait ProfileLoader {
 #[derive(Debug, Clone, Default)]
 pub struct HashMapProfileLoader {
     profiles: HashMap<String, Profile>,
+}
+
+impl<'a> DescendContext<'a> {
+    pub fn new(item: &'a Profile, path: &'a [String]) -> Self {
+        Self {
+            item,
+            path,
+        }
+    }
 }
 
 impl HashMapProfileLoader {
@@ -88,7 +104,7 @@ impl Composite {
     pub fn descend<T, S>(&self, profile: &str, loader: &mut T, mut on_elem: S) -> Result<()>
     where
         T: ProfileLoader,
-        S: FnMut(&Profile, &[String]) -> Result<()>,
+        S: FnMut(DescendContext) -> Result<()>,
     {
         let mut visited = HashSet::<String>::new();
         let mut path = Vec::<String>::new();
@@ -118,7 +134,7 @@ impl Composite {
 
             // check if leaf profile
             let item_profile = loader.load(&item_name)?;
-            on_elem(&item_profile, &path)?;
+            on_elem(DescendContext::new(&item_profile, &path))?;
             if !matches!(item_profile.ptype, ProfileType::Composite(_)) {
                 visited.insert(item_name);
                 continue;
@@ -147,9 +163,9 @@ impl Composite {
     pub fn resolve(&self, profile: &str, loader: &mut impl ProfileLoader) -> Result<Self> {
         let mut entries = Vec::<String>::new();
 
-        self.descend(profile, loader, |item, _| {
-            if !matches!(item.ptype, ProfileType::Composite(_)) {
-                entries.push(item.name.to_string());
+        self.descend(profile, loader, |ctx| {
+            if !matches!(ctx.item.ptype, ProfileType::Composite(_)) {
+                entries.push(ctx.item.name.to_string());
             }
             Ok(())
         })?;

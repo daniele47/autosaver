@@ -3,7 +3,7 @@
 use crate::core::{
     error::Result,
     profile::{
-        composite::{Composite, ProfileLoader},
+        composite::{Composite, DescendContext, ProfileLoader},
         module::Module,
         runner::Runner,
     },
@@ -51,12 +51,12 @@ impl Profile {
     pub fn descend<T, S>(&self, profile: &str, loader: &mut T, mut on_elem: S) -> Result<()>
     where
         T: ProfileLoader,
-        S: FnMut(&Profile, &[String]) -> Result<()>,
+        S: FnMut(DescendContext) -> Result<()>,
     {
         if let ProfileType::Composite(c) = self.ptype() {
             c.descend(profile, loader, on_elem)
         } else {
-            on_elem(self, &[])
+            on_elem(DescendContext::new(self, &[]))
         }
     }
 
