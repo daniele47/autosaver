@@ -49,7 +49,8 @@ impl Runner {
                 ProfileType::Module(_) => Self::TREE_MODULE_COL,
                 ProfileType::Runner(_) => Self::TREE_RUNNER_COL,
             };
-            self.inout.writeln(ctx.item.name(), item_col);
+            let item_name = ctx.item.name();
+            self.inout.writeln(item_name, item_col);
             Ok(())
         })?;
 

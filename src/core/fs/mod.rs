@@ -172,6 +172,17 @@ impl AbsPath {
         AbsPath::from(tmp_dir.join(tmp_name))
     }
 
+    /// Get base name.
+    pub fn basename(&self) -> Self {
+        Self::from(
+            self.path
+                .file_name()
+                .unwrap_or_default()
+                .to_string_lossy()
+                .to_string(),
+        )
+    }
+
     /// Get canonicalized path.
     pub fn canonicalize(&self) -> Result<Self> {
         Ok(self
@@ -541,6 +552,17 @@ impl RelPath {
     pub fn new(path: PathBuf) -> Self {
         assert!(path.is_relative(), "Path is not relative");
         Self { path }
+    }
+
+    /// Get base name.
+    pub fn basename(&self) -> Self {
+        Self::from(
+            self.path
+                .file_name()
+                .unwrap_or_default()
+                .to_string_lossy()
+                .to_string(),
+        )
     }
 
     /// Add a prefix to turn relative path into absolute path.
