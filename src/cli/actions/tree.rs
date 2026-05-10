@@ -7,7 +7,7 @@ use crate::{
     debug,
 };
 
-const TREE: [&str; 4] = ["│   ", "    ", "├──", "└──"];
+const TREE: [&str; 4] = ["│   ", "    ", "├── ", "└── "];
 
 fn insert_at(vec: &mut Vec<bool>, index: usize, value: bool) {
     if index < vec.len() {
