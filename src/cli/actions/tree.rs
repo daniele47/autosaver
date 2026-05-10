@@ -26,10 +26,12 @@ impl Runner {
         // descent into profiles
         root_profile.descend(&mut loader, |ctx| {
             let p = ctx.path;
+            let is_last = ctx.stack.last().map(|(p, _)| p) == ctx.path.last();
+            let line = if is_last { TREE[3] } else { TREE[2] };
             println!(
                 "{}{}{}",
                 TREE[0].repeat(p.len().saturating_sub(1)),
-                TREE[3].repeat(1.min(p.len())),
+                line.repeat(1.min(p.len())),
                 ctx.item.name()
             );
             Ok(())
