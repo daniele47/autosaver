@@ -82,15 +82,14 @@ impl Composite {
         true
     }
 
-    /// Profile Resolver function.
+    /// Generic function to explore in order the Profile DAG.
     ///
-    /// Profile has 2 implicit states:
-    /// - raw: loaded as is from a config files, with possible duplication, with not leaf children
-    /// - resolved: cleanup of duplicates, and with all leaf children resolved
-    ///
-    /// This function serves that role, in trasforming a raw profile into a resolved one.
-    pub fn resolve(&self, profile: &str, loader: &mut impl ProfileLoader) -> Result<Self> {
-        let mut entries = Vec::<String>::new();
+    /// `on_elem` will obtain all nodes visited in DFS order!
+    pub fn descend<T, S>(&self, profile: &str, loader: &mut T, mut on_elem: S) -> Result<()>
+    where
+        T: ProfileLoader,
+        S: FnMut(&Profile, &[String]) -> Result<()>,
+    {
         let mut visited = HashSet::<String>::new();
         let mut path = Vec::<String>::new();
         let mut stack = Vec::<(String, bool)>::new();
@@ -119,8 +118,8 @@ impl Composite {
 
             // check if leaf profile
             let item_profile = loader.load(&item_name)?;
+            on_elem(&item_profile, &path)?;
             if !matches!(item_profile.ptype, ProfileType::Composite(_)) {
-                entries.push(item_name.clone());
                 visited.insert(item_name);
                 continue;
             }
@@ -128,19 +127,36 @@ impl Composite {
             // add item and children to stack + add item to path
             path.push(item_name.clone());
             stack.push((item_name.clone(), true));
-            if let ProfileType::Composite(composite) = item_profile.ptype {
+            if let ProfileType::Composite(composite) = item_profile.ptype() {
                 for child in composite.entries().iter().rev() {
                     stack.push((child.clone(), false));
                 }
             }
         }
 
+        Ok(())
+    }
+
+    /// Profile Resolver function.
+    ///
+    /// Profile has 2 implicit states:
+    /// - raw: loaded as is from a config files, with possible duplication, with not leaf children
+    /// - resolved: cleanup of duplicates, and with all leaf children resolved
+    ///
+    /// This function serves that role, in trasforming a raw profile into a resolved one.
+    pub fn resolve(&self, profile: &str, loader: &mut impl ProfileLoader) -> Result<Self> {
+        let mut entries = Vec::<String>::new();
+
+        self.descend(profile, loader, |item, _| {
+            if !matches!(item.ptype, ProfileType::Composite(_)) {
+                entries.push(item.name.to_string());
+            }
+            Ok(())
+        })?;
+
         // assert resolved profile is indeed resolved
         let res = Self::new(entries);
-        assert!(
-            res.is_resolved(loader),
-            "Composite profile was not resolved"
-        );
+        assert!(res.is_resolved(loader));
         Ok(res)
     }
 }
