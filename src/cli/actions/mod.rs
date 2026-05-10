@@ -58,6 +58,9 @@ impl Runner {
     const SIGN_STDOUT_COL: &[Style] = &[Style::White];
     const SIGN_SCRIPT_COL: &[Style] = &[Style::White];
     const SIGN_INPUT_COL: &[Style] = &[Style::White];
+    const TREE_COMPOSITE_COL: &[Style] = &[Style::Blue, Style::Bold];
+    const TREE_MODULE_COL: &[Style] = &[Style::Yellow, Style::Bold];
+    const TREE_RUNNER_COL: &[Style] = &[Style::Green, Style::Bold];
 
     // conf variables
     const LINE_LEN: usize = 80;

@@ -1,6 +1,6 @@
 use crate::{
     cli::{actions::Runner, error::Result},
-    core::profile::composite::ProfileLoader,
+    core::profile::{ProfileType, composite::ProfileLoader},
     debug,
 };
 
@@ -44,7 +44,12 @@ impl Runner {
                 self.inout.write(line, Self::NO_COL);
             }
             self.inout.write(line.repeat(1.min(p.len())), Self::NO_COL);
-            self.inout.writeln(ctx.item.name(), Self::NO_COL);
+            let item_col = match ctx.item.ptype() {
+                ProfileType::Composite(_) => Self::TREE_COMPOSITE_COL,
+                ProfileType::Module(_) => Self::TREE_MODULE_COL,
+                ProfileType::Runner(_) => Self::TREE_RUNNER_COL,
+            };
+            self.inout.writeln(ctx.item.name(), item_col);
             Ok(())
         })?;
 
