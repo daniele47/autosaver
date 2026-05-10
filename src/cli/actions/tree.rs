@@ -26,13 +26,17 @@ impl Runner {
         if self.args.params().len() > 2 {
             return self.invalid_cmd_err();
         }
-        self.check_flags("tree", &["--short-names", "--no-color", "--debug"])?;
+        self.check_flags(
+            "tree",
+            &["--short-names", "--show-types", "--no-color", "--debug"],
+        )?;
 
         // flags
         let flag_short_names = self
             .args
             .flags()
             .contains(&Flag::Word("short-names".into()));
+        let flag_show_types = self.args.flags().contains(&Flag::Word("show-types".into()));
 
         // load profile
         let profile = self.load_profile(1)?;
@@ -61,6 +65,13 @@ impl Runner {
             let mut item_name = ctx.item.name().to_string();
             if flag_short_names {
                 item_name = RelPath::from(item_name).basename().to_str_lossy();
+            }
+            if flag_show_types {
+                match ctx.item.ptype() {
+                    ProfileType::Composite(_) => item_name.insert_str(0, "[C] "),
+                    ProfileType::Module(_) => item_name.insert_str(0, "[M] "),
+                    ProfileType::Runner(_) => item_name.insert_str(0, "[R] "),
+                };
             }
             self.inout.writeln(item_name, item_col);
             Ok(())

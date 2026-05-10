@@ -8,6 +8,7 @@ All notable changes to this project will be documented here
 
 - added `tree` command to display the resolution tree of profiles
 - added `--short-names` flag for `tree` command to show only basename of profiles
+- added `--show-types` flag for `tree` command to show the type of the profiles
 
 ### Patches
 

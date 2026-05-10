@@ -105,6 +105,8 @@ impl Runner {
                 io.writeln("Flags:", col);
                 io.write("  --short-names  ", col);
                 io.writeln("Show profile names as their basename", nocol);
+                io.write("  --show-types   ", col);
+                io.writeln("Show the type of each profile", nocol);
             }
             "" => {
                 io.writeln("Environment variables:", col);
