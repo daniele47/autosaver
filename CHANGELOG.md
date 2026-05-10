@@ -9,6 +9,10 @@ All notable changes to this project will be documented here
 - added single letter flag shortscuts to tree word flags
 - added `--ascii|-a` flag for `tree` command to use only ascii characters
 
+### Patches
+
+- added checks for profile used, to avoid parent dirs in it and to avoid it being an absolute path
+
 ## v0.13.0
 
 ### Features

@@ -38,6 +38,9 @@ pub enum ErrorType {
     /// No profile specified to work on.
     MissingProfile,
 
+    /// Invalid profile specified.
+    InvalidProfile(String, String),
+
     /// A symlink where it is not allowed to.
     OutOfBoundSymlink(String, String),
 }
@@ -103,6 +106,7 @@ impl Display for ErrorType {
                 f,
                 "Symlink point where it is not allowed to: {file} -> {target}"
             ),
+            ErrorType::InvalidProfile(p, r) => write!(f, "Invalid profile '{p}': {r}"),
         }
     }
 }

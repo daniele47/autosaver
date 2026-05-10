@@ -4,12 +4,12 @@ use std::{collections::BTreeSet, env, io::ErrorKind, process::exit};
 
 use crate::{
     cli::{
-        error::{ErrorType, Result},
+        error::{Error, ErrorType, Result},
         flags::{Flag, ParsedArgs},
         inout::{Style, TermInOut},
     },
     core::{
-        fs::{AbsPath, LineDiff, PathType, RelPath},
+        fs::{self, AbsPath, LineDiff, PathType, RelPath},
         profile::{
             Profile, ProfileType,
             composite::{Composite, HashMapProfileLoader, ProfileLoader},
@@ -201,7 +201,28 @@ impl Runner {
                 },
             }
         }()
-        .map_err(|_| ErrorType::MissingProfile.into())
+        .map_err(|_| Error::from(ErrorType::MissingProfile))
+        .map(|env| {
+            println!("{env}");
+            // invalid profile - abs path
+            if PathType::from(env.as_str()) == PathType::Absolute {
+                Err(Error::from(ErrorType::InvalidProfile(
+                    env,
+                    "Profile cannot be absolute path".into(),
+                )))
+            }
+            // invalid profile - abs path
+            else if fs::check_has_parent_dirs(&env) {
+                Err(Error::from(ErrorType::InvalidProfile(
+                    env,
+                    "Profile cannot contain parent dirs".into(),
+                )))
+            }
+            // valid profile
+            else {
+                Ok(env)
+            }
+        })?
     }
 
     // render diff between two files
