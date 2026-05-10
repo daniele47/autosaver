@@ -29,16 +29,31 @@ impl Runner {
         }
         self.check_flags(
             "tree",
-            &["--short-names", "-n", "--show-types", "-t", "--no-color", "--debug"],
+            &[
+                "--short-names",
+                "-n",
+                "--show-types",
+                "-t",
+                "--ascii",
+                "-a",
+                "--no-color",
+                "--debug",
+            ],
         )?;
 
         // flags
-        let wflag_short_names = self.args.flags().contains(&Flag::Word("short_names".into()));
+        let wflag_short_names = self
+            .args
+            .flags()
+            .contains(&Flag::Word("short_names".into()));
         let lflag_short_names = self.args.flags().contains(&Flag::Letter('n'));
         let flag_short_names = wflag_short_names || lflag_short_names;
         let wflag_show_types = self.args.flags().contains(&Flag::Word("show_types".into()));
         let lflag_show_types = self.args.flags().contains(&Flag::Letter('n'));
         let flag_show_types = wflag_show_types || lflag_show_types;
+        let wflag_ascii = self.args.flags().contains(&Flag::Word("ascii".into()));
+        let lflag_ascii = self.args.flags().contains(&Flag::Letter('a'));
+        let flag_ascii = wflag_ascii || lflag_ascii;
 
         // load profile
         let profile = self.load_profile(1)?;
@@ -48,14 +63,15 @@ impl Runner {
 
         // descent into profiles
         let mut are_last = Vec::<bool>::new();
+        let chars = if flag_ascii { TREE_ASCII } else { TREE };
         root_profile.descend(true, &mut loader, |ctx| {
             let p = ctx.path;
             let is_last = ctx.stack.last().map(|(p, _)| p) == ctx.path.last();
             let len = ctx.path.len();
-            let line = if is_last { TREE[3] } else { TREE[2] };
+            let line = if is_last { chars[3] } else { chars[2] };
             insert_at(&mut are_last, ctx.path.len(), is_last);
             for item in are_last.iter().take(len).skip(1) {
-                let line = if *item { TREE[1] } else { TREE[0] };
+                let line = if *item { chars[1] } else { chars[0] };
                 self.inout.write(line, Self::NO_COL);
             }
             self.inout.write(line.repeat(1.min(p.len())), Self::NO_COL);

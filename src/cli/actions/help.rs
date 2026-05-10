@@ -107,6 +107,8 @@ impl Runner {
                 io.writeln("Show profile names as their basename", nocol);
                 io.write("  --show-types -t     ", col);
                 io.writeln("Show the type of each profile", nocol);
+                io.write("  --ascii -a          ", col);
+                io.writeln("Use only ascii characters", nocol);
             }
             "" => {
                 io.writeln("Environment variables:", col);

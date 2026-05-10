@@ -7,6 +7,7 @@ All notable changes to this project will be documented here
 ### Features
 
 - added single letter flag shortscuts to tree word flags
+- added `--ascii|-a` flag for `tree` command to use only ascii characters
 
 ## v0.13.0
 
