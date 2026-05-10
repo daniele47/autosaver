@@ -101,6 +101,10 @@ impl Runner {
                 io.writeln("Commands:", col);
                 io.write("  tree [PROFILE] ", col);
                 io.writeln("Draw a tree of how a profile resolves", nocol);
+                io.writeln("", nocol);
+                io.writeln("Flags:", col);
+                io.write("  --short-names   ", col);
+                io.writeln("Show profile names as their basename", nocol);
             }
             "" => {
                 io.writeln("Environment variables:", col);

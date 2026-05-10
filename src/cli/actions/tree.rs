@@ -1,6 +1,9 @@
 use crate::{
-    cli::{actions::Runner, error::Result},
-    core::profile::{ProfileType, composite::ProfileLoader},
+    cli::{actions::Runner, error::Result, flags::Flag},
+    core::{
+        fs::RelPath,
+        profile::{ProfileType, composite::ProfileLoader},
+    },
     debug,
 };
 
@@ -23,7 +26,13 @@ impl Runner {
         if self.args.params().len() > 2 {
             return self.invalid_cmd_err();
         }
-        self.check_flags("tree", &["--no-color", "--debug"])?;
+        self.check_flags("tree", &["--short-names", "--no-color", "--debug"])?;
+
+        // flags
+        let flag_short_names = self
+            .args
+            .flags()
+            .contains(&Flag::Word("short-names".into()));
 
         // load profile
         let profile = self.load_profile(1)?;
@@ -49,7 +58,10 @@ impl Runner {
                 ProfileType::Module(_) => Self::TREE_MODULE_COL,
                 ProfileType::Runner(_) => Self::TREE_RUNNER_COL,
             };
-            let item_name = ctx.item.name();
+            let mut item_name = ctx.item.name().to_string();
+            if flag_short_names {
+                item_name = RelPath::from(item_name).basename().to_str_lossy();
+            }
             self.inout.writeln(item_name, item_col);
             Ok(())
         })?;

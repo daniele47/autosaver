@@ -7,6 +7,7 @@ All notable changes to this project will be documented here
 ### Features
 
 - added `tree` command to display the resolution tree of profiles
+- added `--short-names` flag for `tree` command to show only basename of profiles
 
 ### Patches
 
