@@ -15,6 +15,9 @@ fn main() {
     // get cli runner
     let mut runner = Runner::new(parsed_args, inout);
 
+    // initalize runner
+    runner.init();
+
     // run cli
     if let Err(e) = runner.run() {
         runner.inout.error(&e);

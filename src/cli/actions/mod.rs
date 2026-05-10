@@ -22,6 +22,7 @@ mod backup;
 mod clear;
 mod help;
 mod runner;
+mod tree;
 mod version;
 
 /// Struct with data and methods to run cli.
@@ -62,7 +63,7 @@ impl Runner {
     const LINE_LEN: usize = 80;
 
     // check there are no symlinks to the outside
-    fn assert_no_escaping_symlinks(&mut self) -> Result<()> {
+    fn assert_no_escaping_symlinks(&self) -> Result<()> {
         debug!(self.inout, "Checking there are no escaping symlinks...");
         for dir in [
             self.paths("config")?,
@@ -261,7 +262,7 @@ impl Runner {
     }
 
     // prompt user before running an action
-    fn prompt<T: Fn(&Self) -> Result<()>>(&mut self, msg: &str, run: T) -> Result<()> {
+    fn prompt<T: Fn(&Self) -> Result<()>>(&self, msg: &str, run: T) -> Result<()> {
         let wflag_y = self.args.flags().contains(&Flag::Word("assume-yes".into()));
         let lflag_y = self.args.flags().contains(&Flag::Letter('y'));
         let flag_y = wflag_y || lflag_y;
@@ -290,11 +291,11 @@ impl Runner {
     }
 
     // nice profile output
-    fn output_profile(&mut self, profile: &str) {
+    fn output_profile(&self, profile: &str) {
         let msg = format!("*** {profile} ***");
         self.inout.writeln(msg, Self::DECORATION_COL)
     }
-    fn output_main_profile(&mut self, profile: &str) {
+    fn output_main_profile(&self, profile: &str) {
         let msg = format!("****** {profile} ******");
         self.inout.writeln(msg, Self::MAIN_PROF_COL)
     }
@@ -370,19 +371,26 @@ impl Runner {
         Ok(ProfileLoaderImpl::new(config_dir, self.inout.clone()))
     }
 
-    /// Run the cli application.
-    pub fn run(&mut self) -> Result<()> {
+    pub fn init(&mut self) {
+        debug!(self.inout, "Initializing options...");
+
         // get flags
         let flags = self.args.flags();
-        let wflag_help = flags.contains(&Flag::Word("help".into()));
-        let lflag_help = flags.contains(&Flag::Letter('h'));
-        let flag_version = flags.contains(&Flag::Word("version".into()));
         let flag_nocolor = flags.contains(&Flag::Word("no-color".into()));
         let flag_debug = flags.contains(&Flag::Word("debug".into()));
 
         // handle global flags
         self.inout.options().has_colors = !flag_nocolor;
         self.inout.options().show_debug = flag_debug;
+    }
+
+    /// Run the cli application.
+    pub fn run(&self) -> Result<()> {
+        // get flags
+        let flags = self.args.flags();
+        let wflag_help = flags.contains(&Flag::Word("help".into()));
+        let lflag_help = flags.contains(&Flag::Letter('h'));
+        let flag_version = flags.contains(&Flag::Word("version".into()));
 
         // print some initial debug
         debug!(self.inout, "inout: {:?}", &self.inout);
@@ -406,6 +414,7 @@ impl Runner {
             "list" | "save" | "restore" | "rmhome" | "rmbackup" => self.backup(),
             "run" => self.runner(),
             "clear" => self.clear(),
+            "tree" => self.tree(),
             "" => self.check_flags("", &[]),
             _ => self.invalid_cmd_err(),
         }

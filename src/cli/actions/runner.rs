@@ -21,7 +21,7 @@ use crate::{
 
 impl Runner {
     /// Backup action to list/save/restore files.
-    pub fn runner(&mut self) -> Result<()> {
+    pub fn runner(&self) -> Result<()> {
         debug!(self.inout, "Running runner action...");
 
         // check command and flags

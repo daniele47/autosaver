@@ -5,14 +5,14 @@ use crate::{
 
 impl Runner {
     /// Help action to render help message.
-    pub fn help(&mut self) -> Result<()> {
+    pub fn help(&self) -> Result<()> {
         debug!(self.inout, "Running help action...");
 
         self.check_flags("--help", &["--help", "--no-color", "-h"])?;
         let command = self.args.params().join(" ");
         let col = Self::DECORATION_COL;
         let nocol = Self::NO_COL;
-        let io = &mut self.inout;
+        let io = &self.inout;
         match command.as_str() {
             "list" => {
                 io.writeln("Commands:", col);
@@ -97,6 +97,11 @@ impl Runner {
                 io.write("  --symlinks -s   ", col);
                 io.writeln("Allow clearing symlinks too", nocol);
             }
+            "tree" => {
+                io.writeln("Commands:", col);
+                io.write("  tree [PROFILE] ", col);
+                io.writeln("Draw a tree of how a profile resolves", nocol);
+            }
             "" => {
                 io.writeln("Environment variables:", col);
                 io.write("  AUTOSAVER_ROOT      ", col);
@@ -125,8 +130,10 @@ impl Runner {
                 io.writeln("Run scripts from the run directory", nocol);
                 io.write("  clear               ", col);
                 io.writeln("List and prompt to delete untracked files", nocol);
+                io.write("  tree [PROFILE] ", col);
+                io.writeln("Draw a tree of how a profile resolves", nocol);
                 io.writeln("", nocol);
-                io.writeln("Global Flags (can be used widely across commands):", col);
+                io.writeln("Global Flags:", col);
                 io.write("  --help -h           ", col);
                 io.writeln("Print the help message for commands and subcommands", nocol);
                 io.write("  --version           ", col);

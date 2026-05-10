@@ -5,7 +5,7 @@ use crate::{
 
 impl Runner {
     /// Version action to render the binary version.
-    pub fn version(&mut self) -> Result<()> {
+    pub fn version(&self) -> Result<()> {
         debug!(self.inout, "Running version action...");
         let fmt = format!("{} {}", Self::BIN_NAME, Self::CARGO_VERSION);
         if !self.args.params().is_empty() {

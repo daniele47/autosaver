@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented here
 
+## v0.13.0
+
+### Features
+
+- added `tree` command to display the resolution tree of profiles
+
+### Patches
+
+- stricter `Runner` methods, now don't borrow mutably anymore
+
 ## v0.12.1
 
 ### Changes
