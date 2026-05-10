@@ -6,7 +6,7 @@ use crate::{
     cli::{
         error::{Error, ErrorType, Result},
         flags::{Flag, ParsedArgs},
-        inout::{Style, TermInOut},
+        inout::{InOutOptions, Style, TermInOut},
     },
     core::{
         fs::{self, AbsPath, LineDiff, PathType, RelPath},
@@ -34,7 +34,12 @@ pub struct Runner {
 
 impl Runner {
     /// Create new runner.
-    pub fn new(args: ParsedArgs, inout: TermInOut) -> Self {
+    pub fn new(args: ParsedArgs) -> Self {
+        let flags = args.flags();
+        let flag_nocolor = flags.contains(&Flag::Word("no-color".into()));
+        let flag_debug = flags.contains(&Flag::Word("debug".into()));
+
+        let inout = TermInOut::new(InOutOptions::new(!flag_nocolor, flag_debug));
         Self { args, inout }
     }
 
@@ -424,19 +429,6 @@ impl Runner {
         }
         let config_dir = self.paths("config")?;
         Ok(ProfileLoaderImpl::new(config_dir, self.inout.clone()))
-    }
-
-    pub fn init(&mut self) {
-        // get flags
-        let flags = self.args.flags();
-        let flag_nocolor = flags.contains(&Flag::Word("no-color".into()));
-        let flag_debug = flags.contains(&Flag::Word("debug".into()));
-
-        // handle global flags
-        self.inout.options().has_colors = !flag_nocolor;
-        self.inout.options().show_debug = flag_debug;
-
-        debug!(self.inout, "Options initialized!");
     }
 
     /// Run the cli application.
