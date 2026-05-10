@@ -99,13 +99,13 @@ impl Runner {
             }
             "tree" => {
                 io.writeln("Commands:", col);
-                io.write("  tree [PROFILE] ", col);
+                io.write("  tree [PROFILE]      ", col);
                 io.writeln("Draw a tree of how a profile resolves", nocol);
                 io.writeln("", nocol);
                 io.writeln("Flags:", col);
-                io.write("  --short-names  ", col);
+                io.write("  --short-names -n    ", col);
                 io.writeln("Show profile names as their basename", nocol);
-                io.write("  --show-types   ", col);
+                io.write("  --show-types -t     ", col);
                 io.writeln("Show the type of each profile", nocol);
             }
             "" => {

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v0.14.0
+
+### Features
+
+- added single letter flag shortscuts to tree word flags
+
 ## v0.13.0
 
 ### Features

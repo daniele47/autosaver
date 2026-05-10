@@ -8,6 +8,7 @@ use crate::{
 };
 
 const TREE: [&str; 4] = ["│   ", "    ", "├── ", "└── "];
+const TREE_ASCII: [&str; 4] = ["|   ", "    ", "+-- ", "`-- "];
 
 fn insert_at(vec: &mut Vec<bool>, index: usize, value: bool) {
     if index < vec.len() {
@@ -28,15 +29,16 @@ impl Runner {
         }
         self.check_flags(
             "tree",
-            &["--short-names", "--show-types", "--no-color", "--debug"],
+            &["--short-names", "-n", "--show-types", "-t", "--no-color", "--debug"],
         )?;
 
         // flags
-        let flag_short_names = self
-            .args
-            .flags()
-            .contains(&Flag::Word("short-names".into()));
-        let flag_show_types = self.args.flags().contains(&Flag::Word("show-types".into()));
+        let wflag_short_names = self.args.flags().contains(&Flag::Word("short_names".into()));
+        let lflag_short_names = self.args.flags().contains(&Flag::Letter('n'));
+        let flag_short_names = wflag_short_names || lflag_short_names;
+        let wflag_show_types = self.args.flags().contains(&Flag::Word("show_types".into()));
+        let lflag_show_types = self.args.flags().contains(&Flag::Letter('n'));
+        let flag_show_types = wflag_show_types || lflag_show_types;
 
         // load profile
         let profile = self.load_profile(1)?;
