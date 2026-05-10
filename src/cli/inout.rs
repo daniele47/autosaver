@@ -123,7 +123,7 @@ impl TermInOut {
     /// Write an error.
     pub fn error(&self, str: impl Display) {
         let text = match self.options.has_colors {
-            true => format!("{RED}{BOLD}ERROR: {str}{RESET}"),
+            true => format!("{RED}{BOLD}ERROR:{RESET} {str}"),
             false => format!("ERROR: {str}"),
         };
         self.actual_error(text);
@@ -132,7 +132,7 @@ impl TermInOut {
     /// Write a warning.
     pub fn warning(&self, str: impl Display) {
         let text = match self.options.has_colors {
-            true => format!("{YELLOW}{BOLD}WARNING: {str}{RESET}"),
+            true => format!("{YELLOW}{BOLD}WARNING:{RESET} {str}"),
             false => format!("WARNING: {str}"),
         };
         self.actual_error(text);

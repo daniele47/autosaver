@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v0.14.2
+
+### Patches
+
+- errors and warnings now don't color the entire line anymore, just the `ERROR|WARNING:` part 
+
 ## v0.14.1
 
 ### Patches
