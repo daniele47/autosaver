@@ -64,7 +64,7 @@ impl From<ErrorType> for Error {
     fn from(etype: ErrorType) -> Self {
         Self {
             etype,
-            backtrace: Arc::new(Backtrace::force_capture()),
+            backtrace: Arc::new(Backtrace::capture()),
         }
     }
 }

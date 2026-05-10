@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v0.14.3
+
+### Patches
+
+- made backtrace capture optional, as it significantly slows down the program on failure
+
 ## v0.14.2
 
 ### Patches
