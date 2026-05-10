@@ -156,9 +156,40 @@ impl Runner {
         Ok(())
     }
 
-    // utility to avoid rewriting the same code multiple times
+    // utilities to avoid rewriting the same code multiple times
     fn invalid_cmd_err(&self) -> Result<()> {
         Err(ErrorType::InvalidCommand(self.args.params().join(" ")).into())
+    }
+
+    fn invalid_params_err(&self, cmd: String, params_from: usize) -> Result<()> {
+        let params = self
+            .args
+            .params()
+            .iter()
+            .skip(params_from)
+            .fold(String::new(), |acc, s| {
+                if acc.is_empty() {
+                    s.clone()
+                } else {
+                    format!("{} {}", acc, s)
+                }
+            });
+        Err(ErrorType::InvalidParams(cmd, params).into())
+    }
+    fn invalid_args_err(&self, cmd_len: usize) -> Result<()> {
+        let cmd = self
+            .args
+            .params()
+            .iter()
+            .take(cmd_len)
+            .fold(String::new(), |acc, s| {
+                if acc.is_empty() {
+                    s.clone()
+                } else {
+                    format!("{} {}", acc, s)
+                }
+            });
+        self.invalid_params_err(cmd, cmd_len)
     }
 
     // deal with environment variables

@@ -155,7 +155,7 @@ impl Runner {
                 io.write("  --assume-no -n      ", col);
                 io.writeln("Automatically answer no to all prompts", nocol);
             }
-            _ => self.invalid_cmd_err()?,
+            _ => self.invalid_params_err("--help".into(), 0)?,
         }
         Ok(())
     }

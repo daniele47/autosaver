@@ -12,6 +12,7 @@ All notable changes to this project will be documented here
 ### Patches
 
 - added checks for profile used, to avoid parent dirs in it and to avoid it being an absolute path
+- improved err msg for commands with invalid args
 
 ## v0.13.0
 

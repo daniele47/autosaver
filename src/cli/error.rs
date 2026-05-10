@@ -33,6 +33,9 @@ pub enum ErrorType {
     InvalidFlag(Flag, String),
 
     /// Invalid command passed.
+    InvalidParams(String, String),
+
+    /// Invalid command passed.
     InvalidCommand(String),
 
     /// No profile specified to work on.
@@ -104,9 +107,12 @@ impl Display for ErrorType {
             ErrorType::MissingProfile => write!(f, "No profile was specified"),
             ErrorType::OutOfBoundSymlink(file, target) => write!(
                 f,
-                "Symlink point where it is not allowed to: {file} -> {target}"
+                "Symlink points where it is not allowed to: {file} -> {target}"
             ),
             ErrorType::InvalidProfile(p, r) => write!(f, "Invalid profile '{p}': {r}"),
+            ErrorType::InvalidParams(cmd, args) => {
+                write!(f, "Command {cmd} has invalid args: {args}")
+            }
         }
     }
 }

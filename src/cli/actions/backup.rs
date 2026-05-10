@@ -11,7 +11,7 @@ impl Runner {
 
         // check command and flags
         if self.args.params().len() > 2 {
-            return self.invalid_cmd_err();
+            return self.invalid_args_err(1);
         }
         let cmd = self.args.params().first().map(String::as_str).unwrap_or("");
         match cmd {
