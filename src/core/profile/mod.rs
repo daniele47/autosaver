@@ -48,13 +48,13 @@ impl Profile {
     }
 
     /// Descend and act upon all nodes found.
-    pub fn descend<T, S>(&self, profile: &str, loader: &mut T, mut on_elem: S) -> Result<()>
+    pub fn descend<T, S>(&self, loader: &mut T, mut on_elem: S) -> Result<()>
     where
         T: ProfileLoader,
         S: FnMut(DescendContext) -> Result<()>,
     {
         if let ProfileType::Composite(c) = self.ptype() {
-            c.descend(profile, loader, on_elem)
+            c.descend(&self.name, loader, on_elem)
         } else {
             on_elem(DescendContext::new(self, &[], &[]))
         }
