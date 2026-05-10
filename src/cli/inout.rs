@@ -15,11 +15,10 @@ macro_rules! debug {
 // colors
 const RESET: &str = "\x1b[0m";
 const RED: &str = "\x1b[31m";
-const LGREEN: &str = "\x1b[32m";
+const GREEN: &str = "\x1b[32m";
 const YELLOW: &str = "\x1b[33m";
 const BLUE: &str = "\x1b[34m";
 const PURPLE: &str = "\x1b[35m";
-const GREEN: &str = "\x1b[32m";
 const WHITE: &str = "\x1b[37m";
 const BOLD: &str = "\x1b[1m";
 const UNDERLINE: &str = "\x1b[4m";
@@ -33,8 +32,6 @@ pub enum Style {
     Yellow,
     /// Color red.
     Red,
-    /// Color light green.
-    LGreen,
     /// Color green.
     Green,
     /// Color blue.
@@ -76,13 +73,19 @@ impl TermInOut {
     pub fn new(options: InOutOptions) -> Self {
         Self { options }
     }
-}
 
-impl TermInOut {
-    pub fn options(&mut self) -> &mut InOutOptions {
-        &mut self.options
+    fn actual_write(&self, text: impl Display, add_newline: bool, mut output: impl Write) {
+        let _ = if add_newline {
+            writeln!(output, "{text}")
+        } else {
+            write!(output, "{text}")
+        };
+    }
+    fn actual_error(&self, text: impl Display) {
+        self.actual_write(text, true, std::io::stderr());
     }
 
+    /// Write to the terminal, with choosen styles.
     pub fn write(&self, str: impl Display, styles: &[Style]) {
         let colors = styles
             .iter()
@@ -90,7 +93,6 @@ impl TermInOut {
                 Style::White => WHITE,
                 Style::Yellow => YELLOW,
                 Style::Red => RED,
-                Style::LGreen => LGREEN,
                 Style::Green => GREEN,
                 Style::Blue => BLUE,
                 Style::Purple => PURPLE,
@@ -99,37 +101,44 @@ impl TermInOut {
             })
             .collect::<Vec<_>>()
             .join("");
-        match self.options.has_colors {
-            true => print!("{colors}{str}{RESET}"),
-            false => print!("{str}"),
+        let text = match self.options.has_colors {
+            true => format!("{colors}{str}{RESET}"),
+            false => format!("{str}"),
         };
+        self.actual_write(text, false, std::io::stdout());
     }
 
+    /// Write a line to the terminal, with the choosen styles.
     pub fn writeln(&self, str: impl Display, styles: &[Style]) {
-        self.write(str, styles);
-        self.write("\n", &[]);
+        self.write(format!("{str}\n"), styles);
     }
 
+    /// Write to debug, only if debug is enabled.
     pub fn debug(&self, str: impl Display) {
         if self.options.show_debug {
-            eprintln!("{str}");
+            self.actual_error(str);
         }
     }
 
+    /// Write an error.
     pub fn error(&self, str: impl Display) {
-        match self.options.has_colors {
-            true => eprintln!("{RED}{BOLD}ERROR: {str}{RESET}"),
-            false => eprintln!("ERROR: {str}"),
+        let text = match self.options.has_colors {
+            true => format!("{RED}{BOLD}ERROR: {str}{RESET}"),
+            false => format!("ERROR: {str}"),
         };
+        self.actual_error(text);
     }
 
+    /// Write a warning.
     pub fn warning(&self, str: impl Display) {
-        match self.options.has_colors {
-            true => eprintln!("{YELLOW}{BOLD}WARNING: {str}{RESET}"),
-            false => eprintln!("WARNING: {str}"),
+        let text = match self.options.has_colors {
+            true => format!("{YELLOW}{BOLD}WARNING: {str}{RESET}"),
+            false => format!("WARNING: {str}"),
         };
+        self.actual_error(text);
     }
 
+    /// Read a line in input
     pub fn read_line(&self) -> String {
         let mut input = String::new();
 

@@ -239,7 +239,6 @@ impl Runner {
         }()
         .map_err(|_| Error::from(ErrorType::MissingProfile))
         .map(|env| {
-            println!("{env}");
             // invalid profile - abs path
             if PathType::from(env.as_str()) == PathType::Absolute {
                 Err(Error::from(ErrorType::InvalidProfile(

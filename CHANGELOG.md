@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v0.14.1
+
+### Patches
+
+- do not panic on broken stdout/stderr. Just keep running silently
+
 ## v0.14.0
 
 ### Features
