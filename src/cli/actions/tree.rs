@@ -8,7 +8,11 @@ impl Runner {
     pub fn tree(&self) -> Result<()> {
         debug!(self.inout, "Running tree action...");
 
-        self.check_flags("tree", &["--no-color"])?;
+        // checks
+        if self.args.params().len() > 1 {
+            return self.invalid_cmd_err();
+        }
+        self.check_flags("tree", &["--no-color", "--debug"])?;
         todo!()
     }
 }

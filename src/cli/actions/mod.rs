@@ -372,8 +372,6 @@ impl Runner {
     }
 
     pub fn init(&mut self) {
-        debug!(self.inout, "Initializing options...");
-
         // get flags
         let flags = self.args.flags();
         let flag_nocolor = flags.contains(&Flag::Word("no-color".into()));
@@ -382,6 +380,8 @@ impl Runner {
         // handle global flags
         self.inout.options().has_colors = !flag_nocolor;
         self.inout.options().show_debug = flag_debug;
+
+        debug!(self.inout, "Options initialized!");
     }
 
     /// Run the cli application.
