@@ -49,7 +49,7 @@ impl Runner {
         let lflag_short_names = self.args.flags().contains(&Flag::Letter('n'));
         let flag_short_names = wflag_short_names || lflag_short_names;
         let wflag_show_types = self.args.flags().contains(&Flag::Word("show_types".into()));
-        let lflag_show_types = self.args.flags().contains(&Flag::Letter('n'));
+        let lflag_show_types = self.args.flags().contains(&Flag::Letter('t'));
         let flag_show_types = wflag_show_types || lflag_show_types;
         let wflag_ascii = self.args.flags().contains(&Flag::Word("ascii".into()));
         let lflag_ascii = self.args.flags().contains(&Flag::Letter('a'));

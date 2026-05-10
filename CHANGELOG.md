@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v0.14.4
+
+### Patches
+
+- fixed wrongly parsed single letter flag 
+
 ## v0.14.3
 
 ### Patches
