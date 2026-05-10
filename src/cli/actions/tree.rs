@@ -33,14 +33,14 @@ impl Runner {
 
         // descent into profiles
         let mut are_last = Vec::<bool>::new();
-        root_profile.descend(&mut loader, |ctx| {
+        root_profile.descend(true, &mut loader, |ctx| {
             let p = ctx.path;
             let is_last = ctx.stack.last().map(|(p, _)| p) == ctx.path.last();
             let len = ctx.path.len();
             let line = if is_last { TREE[3] } else { TREE[2] };
             insert_at(&mut are_last, ctx.path.len(), is_last);
-            for i in 1..len {
-                let line = if are_last[i] { TREE[1] } else { TREE[0] };
+            for item in are_last.iter().take(len).skip(1) {
+                let line = if *item { TREE[1] } else { TREE[0] };
                 self.inout.write(line, Self::NO_COL);
             }
             self.inout.write(line.repeat(1.min(p.len())), Self::NO_COL);

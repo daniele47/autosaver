@@ -99,7 +99,13 @@ impl Composite {
     /// Generic function to explore in order the Profile DAG.
     ///
     /// `on_elem` will obtain all nodes visited in DFS order!
-    pub fn descend<T, S>(&self, profile: &str, loader: &mut T, mut on_elem: S) -> Result<()>
+    pub fn descend<T, S>(
+        &self,
+        profile: &str,
+        allow_dup: bool,
+        loader: &mut T,
+        mut on_elem: S,
+    ) -> Result<()>
     where
         T: ProfileLoader,
         S: FnMut(DescendContext) -> Result<()>,
@@ -126,7 +132,7 @@ impl Composite {
 
             // avoid revisiting already explored items, if graphs are complex and the same node is
             // reached multiple times from different nodes
-            if visited.contains(&item_name) {
+            if !allow_dup && visited.contains(&item_name) {
                 continue;
             }
 
@@ -161,7 +167,7 @@ impl Composite {
     pub fn resolve(&self, profile: &str, loader: &mut impl ProfileLoader) -> Result<Self> {
         let mut entries = Vec::<String>::new();
 
-        self.descend(profile, loader, |ctx| {
+        self.descend(profile, false, loader, |ctx| {
             if !matches!(ctx.item.ptype, ProfileType::Composite(_)) {
                 entries.push(ctx.item.name.to_string());
             }
