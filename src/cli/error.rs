@@ -45,7 +45,7 @@ pub enum ErrorType {
     InvalidProfile(String, String),
 
     /// A symlink where it is not allowed to.
-    OutOfBoundSymlink(String, String),
+    NotAllowedSymlink(String),
 }
 
 impl Error {
@@ -105,10 +105,7 @@ impl Display for ErrorType {
             }
             ErrorType::InvalidCommand(cmd) => write!(f, "Invalid command: {cmd}"),
             ErrorType::MissingProfile => write!(f, "No profile was specified"),
-            ErrorType::OutOfBoundSymlink(file, target) => write!(
-                f,
-                "Symlink points where it is not allowed to: {file} -> {target}"
-            ),
+            ErrorType::NotAllowedSymlink(symlink) => write!(f, "Not allowed symlink: '{symlink}'"),
             ErrorType::InvalidProfile(p, r) => write!(f, "Invalid profile '{p}': {r}"),
             ErrorType::InvalidParams(cmd, args) => {
                 write!(f, "Command {cmd} has invalid args: {args}")

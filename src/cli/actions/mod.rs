@@ -81,17 +81,8 @@ impl Runner {
             if !dir.exists() {
                 continue;
             }
-            for symlink in dir.all_files(AbsPath::FILTER_EXIST)? {
-                {
-                    if !symlink.check_inside(&dir) {
-                        let norm_path = symlink.to_str_lossy();
-                        let canon_path = symlink
-                            .canonicalize()
-                            .expect("path should have been canonicalizable")
-                            .to_str_lossy();
-                        return Err(ErrorType::OutOfBoundSymlink(norm_path, canon_path).into());
-                    }
-                }
+            if let Some(symlink) = dir.all_files(AbsPath::FILTER_SYMLINKS)?.into_iter().next() {
+                return Err(ErrorType::NotAllowedSymlink(symlink.to_str_lossy()).into());
             }
         }
 

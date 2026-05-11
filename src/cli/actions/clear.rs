@@ -27,8 +27,6 @@ impl Runner {
                 "-y",
                 "--assume-no",
                 "-n",
-                "--symlinks",
-                "-s",
                 "--no-color",
                 "--debug",
             ],
@@ -38,9 +36,6 @@ impl Runner {
         let wflag_list = self.args.flags().contains(&Flag::Word("list".into()));
         let lflag_list = self.args.flags().contains(&Flag::Letter('l'));
         let flag_list = wflag_list || lflag_list;
-        let wflag_symlinks = self.args.flags().contains(&Flag::Word("symlinks".into()));
-        let lflag_symlinks = self.args.flags().contains(&Flag::Letter('s'));
-        let flag_symlinks = wflag_symlinks || lflag_symlinks;
 
         // resolve profile into all leafs
         let profile = self.load_profile(1)?;
@@ -96,16 +91,6 @@ impl Runner {
                             Ok(file.purge_path(false)?)
                         })?;
                     }
-                }
-            }
-            if !file.exists() && AbsPath::FILTER_SYMLINKS(&file) && flag_symlinks {
-                let rel_path = file.to_relative(&self.paths("root")?)?;
-                let rel_path_str = rel_path.to_str_lossy();
-                self.inout.writeln(rel_path_str, Self::PATH_UNTRACKED_COL);
-                if !flag_list {
-                    self.prompt("Do you want to delete the broken symlink?", |_| {
-                        Ok(file.delete_broken_symlink()?)
-                    })?;
                 }
             }
         }

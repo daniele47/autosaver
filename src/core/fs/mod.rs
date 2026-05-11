@@ -1,7 +1,7 @@
 //! This module implements various filesystem wrappers, to guarantee safer fs operations.
 
 use std::{
-    collections::{BTreeSet, HashSet},
+    collections::BTreeSet,
     env,
     fs::{self, File, Metadata},
     io::{BufRead, BufReader, BufWriter, Lines, Read, Write},
@@ -332,17 +332,6 @@ impl AbsPath {
             abs_parent.delete_dirs()?;
         }
 
-        Ok(())
-    }
-
-    /// Deletes only broken symlinks.
-    pub fn delete_broken_symlink(&self) -> Result<()> {
-        if !self.exists() && Self::FILTER_SYMLINKS(self) {
-            fs::remove_file(&self.path).map_err(|e| ErrorType::IoError(e, self.path.clone()))?;
-        }
-        // deleting empty parent dirs
-        self.create_dir()?;
-        self.delete_dirs()?;
         Ok(())
     }
 
