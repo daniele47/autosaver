@@ -18,6 +18,7 @@ impl ModuleParser {
     ) -> Result<Profile> {
         let mut entries = vec![];
         let mut policy = ModulePolicy::default();
+        let mut backup_dir = None;
 
         for line in raw {
             let line = line?;
@@ -27,6 +28,13 @@ impl ModuleParser {
                     "policy track" => policy = ModulePolicy::Track,
                     "policy notdiff" => policy = ModulePolicy::NotDiff,
                     "policy ignore" => policy = ModulePolicy::Ignore,
+                    dir if dir.starts_with("dir") => {
+                        let path = dir
+                            .strip_prefix("dir")
+                            .expect("string must start with dir")
+                            .trim();
+                        backup_dir = Some(RelPath::from(path));
+                    }
                     _ => {
                         return Err(ErrorType::InvalidOptionLine(
                             profile,
@@ -56,10 +64,14 @@ impl ModuleParser {
             }
         }
 
-        Ok(Profile::new(
-            profile,
-            ProfileType::Module(Module::new(entries)),
-        ))
+        if let Some(backup_dir) = backup_dir {
+            Ok(Profile::new(
+                profile,
+                ProfileType::Module(Module::new(entries, backup_dir)),
+            ))
+        } else {
+            Err(ErrorType::MissingOptionLine("dir".into()).into())
+        }
     }
 }
 

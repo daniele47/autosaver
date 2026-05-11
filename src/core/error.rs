@@ -41,6 +41,9 @@ pub enum ErrorType {
 
     /// Invalid data line in config file.
     InvalidDataLine(String, usize, String, String),
+
+    /// Missing a mandatory option line.
+    MissingOptionLine(String),
 }
 
 impl Error {
@@ -110,6 +113,7 @@ impl Display for ErrorType {
                 let r = if r.is_empty() { r } else { &format!(" ({r})") };
                 write!(f, "Invalid data line {n} in profile '{name}' : {l}{r}")
             }
+            ErrorType::MissingOptionLine(opt) => write!(f, "Missing option line: '{opt}'"),
         }
     }
 }

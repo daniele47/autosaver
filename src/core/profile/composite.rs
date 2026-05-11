@@ -193,7 +193,7 @@ mod tests {
         let mut loader = HashMapProfileLoader {
             profiles: HashMap::new(),
         };
-        let empty_module = Module::empty();
+        let empty_module = Module::new(vec![], "".into());
         let mut profiles = vec![
             Profile::new(
                 "root".to_string(),

@@ -30,6 +30,7 @@ pub struct ModuleEntry {
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Module {
     entries: Vec<ModuleEntry>,
+    backup_dir: RelPath,
 }
 
 impl ModulePolicy {
@@ -62,13 +63,11 @@ impl ModuleEntry {
 
 impl Module {
     /// Create new Module.
-    pub fn new(entries: Vec<ModuleEntry>) -> Self {
-        Self { entries }
-    }
-
-    /// Create new empty Module. Useful for tests.
-    pub fn empty() -> Self {
-        Self::new(vec![])
+    pub fn new(entries: Vec<ModuleEntry>, backup_dir: RelPath) -> Self {
+        Self {
+            entries,
+            backup_dir,
+        }
     }
 
     /// Add new entry.
@@ -81,7 +80,7 @@ impl Module {
         &self.entries
     }
 
-    fn cleanup_paths(paths: Vec<(AbsPath, AbsPath, ModulePolicy)>) -> Result<Self> {
+    fn cleanup_paths(&self, paths: Vec<(AbsPath, AbsPath, ModulePolicy)>) -> Result<Self> {
         // Note: first abspath is the full path, second is the path prefix!
         let mut values = HashMap::<String, (AbsPath, AbsPath, ModulePolicy)>::new();
         let mut entries = vec![];
@@ -110,7 +109,7 @@ impl Module {
             }
         }
 
-        Ok(Self::new(entries))
+        Ok(Self::new(entries, self.backup_dir.clone()))
     }
 
     fn resolve_module(&self, base: &AbsPath) -> Result<Vec<(AbsPath, AbsPath, ModulePolicy)>> {
@@ -141,7 +140,7 @@ impl Module {
     ///
     /// This guarantees the result will be sorted based on lossy path string!
     pub fn resolve(&self, base: &AbsPath) -> Result<Self> {
-        let mut res = Self::cleanup_paths(self.resolve_module(base)?)?;
+        let mut res = self.cleanup_paths(self.resolve_module(base)?)?;
         res.sort();
         Ok(res)
     }
@@ -152,7 +151,7 @@ impl Module {
     pub fn merge_bases(&self, base: &AbsPath, oth_base: &AbsPath) -> Result<Self> {
         let mut tmp = self.resolve_module(base)?;
         tmp.extend(self.resolve_module(oth_base)?);
-        let mut res = Self::cleanup_paths(tmp)?;
+        let mut res = self.cleanup_paths(tmp)?;
         res.sort();
         Ok(res)
     }
@@ -202,19 +201,22 @@ mod tests {
         file4.create_file(false)?;
 
         // Create module with overlapping entries
-        let module = Module::new(vec![
-            ModuleEntry::new(RelPath::from("dir1//"), ModulePolicy::Track),
-            ModuleEntry::new(RelPath::from("dir1"), ModulePolicy::NotDiff),
-            ModuleEntry::new(
-                RelPath::from("dir1").joins(&["file3.txt"]),
-                ModulePolicy::Track,
-            ),
-            ModuleEntry::new(
-                RelPath::from("dir1").joins(&["subdir"]),
-                ModulePolicy::Track,
-            ),
-            ModuleEntry::new(RelPath::from("file1.txt"), ModulePolicy::Ignore),
-        ]);
+        let module = Module::new(
+            vec![
+                ModuleEntry::new(RelPath::from("dir1//"), ModulePolicy::Track),
+                ModuleEntry::new(RelPath::from("dir1"), ModulePolicy::NotDiff),
+                ModuleEntry::new(
+                    RelPath::from("dir1").joins(&["file3.txt"]),
+                    ModulePolicy::Track,
+                ),
+                ModuleEntry::new(
+                    RelPath::from("dir1").joins(&["subdir"]),
+                    ModulePolicy::Track,
+                ),
+                ModuleEntry::new(RelPath::from("file1.txt"), ModulePolicy::Ignore),
+            ],
+            RelPath::from(""),
+        );
 
         // Resolve
         let resolved = module.resolve(&tmp)?;
@@ -273,13 +275,16 @@ mod tests {
         file4_base2.create_file(false)?;
 
         // Create module that tracks paths
-        let module = Module::new(vec![
-            ModuleEntry::new(RelPath::from("in_neither.txt"), ModulePolicy::Track),
-            ModuleEntry::new(RelPath::from("only_in_home.txt"), ModulePolicy::Ignore),
-            ModuleEntry::new(RelPath::from("only_in_backup.txt"), ModulePolicy::NotDiff),
-            ModuleEntry::new(RelPath::from("in_both.txt"), ModulePolicy::Track),
-            ModuleEntry::new(RelPath::from("subdir"), ModulePolicy::Ignore),
-        ]);
+        let module = Module::new(
+            vec![
+                ModuleEntry::new(RelPath::from("in_neither.txt"), ModulePolicy::Track),
+                ModuleEntry::new(RelPath::from("only_in_home.txt"), ModulePolicy::Ignore),
+                ModuleEntry::new(RelPath::from("only_in_backup.txt"), ModulePolicy::NotDiff),
+                ModuleEntry::new(RelPath::from("in_both.txt"), ModulePolicy::Track),
+                ModuleEntry::new(RelPath::from("subdir"), ModulePolicy::Ignore),
+            ],
+            RelPath::from(""),
+        );
 
         // Merge bases
         let merged = module.merge_bases(&base1, &base2)?;
