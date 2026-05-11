@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{BTreeSet, HashSet};
 
 use crate::{
     cli::{actions::Runner, error::Result, flags::Flag},
@@ -8,6 +8,30 @@ use crate::{
     },
     debug,
 };
+
+fn clear_paths(
+    runner: &Runner,
+    all_paths: BTreeSet<AbsPath>,
+    tracked_paths: &HashSet<AbsPath>,
+    flag_list: bool,
+) -> Result<()> {
+    for path in all_paths {
+        let canon = path.canonicalize()?;
+        let rel_path = canon.to_relative(&runner.paths("root")?)?;
+        let rel_path_str = rel_path.to_str_lossy();
+        if !tracked_paths.contains(&canon) {
+            runner
+                .inout
+                .writeln(rel_path_str, Runner::PATH_UNTRACKED_COL);
+            if !flag_list {
+                runner.prompt("Do you want to delete the untracked file?", |_| {
+                    Ok(path.purge_path(false)?)
+                })?;
+            }
+        }
+    }
+    Ok(())
+}
 
 impl Runner {
     /// Backup action to list/save/restore files.
@@ -27,6 +51,8 @@ impl Runner {
                 "-y",
                 "--assume-no",
                 "-n",
+                "--all",
+                "-a",
                 "--no-color",
                 "--debug",
             ],
@@ -36,9 +62,16 @@ impl Runner {
         let wflag_list = self.args.flags().contains(&Flag::Word("list".into()));
         let lflag_list = self.args.flags().contains(&Flag::Letter('l'));
         let flag_list = wflag_list || lflag_list;
+        let wflag_all = self.args.flags().contains(&Flag::Word("all".into()));
+        let lflag_all = self.args.flags().contains(&Flag::Letter('a'));
+        let flag_all = wflag_all || lflag_all;
 
         // resolve profile into all leafs
-        let profile = self.load_profile(1)?;
+        let profile = if flag_all {
+            String::new()
+        } else {
+            self.load_profile(1)?
+        };
         let mut profile_loader = self.profile_loader()?;
         let root_profile = profile_loader.load(&profile)?;
         let profiles = root_profile.resolve(&mut profile_loader)?;
@@ -48,14 +81,19 @@ impl Runner {
         let run_dir = self.paths("run")?;
 
         // get all tracked paths
-        self.output_main_profile(&profile);
+        if !flag_all {
+            self.output_main_profile(&profile);
+        }
+        let mut tracked_paths = HashSet::new();
         for profile in profiles {
-            if !matches!(profile.ptype(), ProfileType::Composite(_)) {
+            if !flag_all && !matches!(profile.ptype(), ProfileType::Composite(_)) {
                 self.output_profile(profile.name());
             }
 
             // load tracked paths
-            let mut tracked_paths = HashSet::new();
+            if !flag_all {
+                tracked_paths.clear();
+            }
             let dir = match profile.ptype() {
                 ProfileType::Composite(_) => unreachable!("Composite profile impossible here"),
                 ProfileType::Module(module) => {
@@ -77,21 +115,16 @@ impl Runner {
             };
 
             // act on all paths
-            if let Ok(all_paths) = dir.all_files(AbsPath::FILTER_FILES) {
-                for path in all_paths {
-                    let canon = path.canonicalize()?;
-                    let rel_path = canon.to_relative(&self.paths("root")?)?;
-                    let rel_path_str = rel_path.to_str_lossy();
-                    if !tracked_paths.contains(&canon) {
-                        self.inout.writeln(rel_path_str, Self::PATH_UNTRACKED_COL);
-                        if !flag_list {
-                            self.prompt("Do you want to delete the untracked file?", |_| {
-                                Ok(path.purge_path(false)?)
-                            })?;
-                        }
-                    }
-                }
+            if !flag_all && let Ok(all_paths) = dir.all_files(AbsPath::FILTER_FILES) {
+                clear_paths(self, all_paths, &tracked_paths, flag_list)?;
             }
+        }
+
+        // find untracked files outside profile related dirs
+        if flag_all {
+            let mut all_paths = self.paths("backup")?.all_files(AbsPath::FILTER_FILES)?;
+            all_paths.extend(self.paths("run")?.all_files(AbsPath::FILTER_FILES)?);
+            clear_paths(self, all_paths, &tracked_paths, flag_list)?;
         }
 
         Ok(())

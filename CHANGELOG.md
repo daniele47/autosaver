@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v0.17.0
+
+### Features
+
+- added `--add|-a` to `clear` command, to allow deleting untracked files outside profile dirs
+
 ## v0.16.1
 
 ### Patches

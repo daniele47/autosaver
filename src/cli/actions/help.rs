@@ -94,6 +94,8 @@ impl Runner {
                 io.writeln("Flags:", col);
                 io.write("  --list -l       ", col);
                 io.writeln("Only list files, do not prompt to delete them", nocol);
+                io.write("  --all -a        ", col);
+                io.writeln("Find all untracked files outside the profile dirs", nocol);
             }
             "tree" => {
                 io.writeln("Commands:", col);
