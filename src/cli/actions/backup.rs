@@ -97,7 +97,7 @@ impl Runner {
                 ProfileType::Composite(_) => unreachable!("Composite profile impossible here"),
                 ProfileType::Runner(_) => {}
                 ProfileType::Module(module) => {
-                    let backup_dir = &backup_dir.joins(&[profile.name()]);
+                    let backup_dir = &backup_dir.join(module.id());
                     let module = module.merge_bases(&home_dir, backup_dir)?;
 
                     self.output_profile(profile.name());
