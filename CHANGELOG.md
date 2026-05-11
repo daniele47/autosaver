@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v0.16.1
+
+### Patches
+
+- fixed debug msg for symlink checks
+
 ## v0.16.0
 
 ### Features

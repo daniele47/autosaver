@@ -71,8 +71,8 @@ impl Runner {
     const LINE_LEN: usize = 80;
 
     // check there are no symlinks to the outside
-    fn assert_no_escaping_symlinks(&self) -> Result<()> {
-        debug!(self.inout, "Checking there are no escaping symlinks...");
+    fn assert_no_symlinks(&self) -> Result<()> {
+        debug!(self.inout, "Checking there are no symlinks...");
         for dir in [
             self.paths("config")?,
             self.paths("backup")?,
@@ -442,7 +442,7 @@ impl Runner {
 
         // run symlink checks
         if !self.args.params().is_empty() {
-            self.assert_no_escaping_symlinks()?;
+            self.assert_no_symlinks()?;
         }
 
         // handle commands
