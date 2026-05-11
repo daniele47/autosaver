@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v0.175
+
+### Changes
+
+- brough back support for symlinks in dir (just with check they don't escape containment)
+
 ## v0.17.4
 
 ### Patches

@@ -71,8 +71,8 @@ impl Runner {
     const LINE_LEN: usize = 80;
 
     // various init checks
-    fn assert_no_symlinks(&self) -> Result<()> {
-        debug!(self.inout, "Checking there are no symlinks...");
+    fn assert_no_escaping_symlinks(&self) -> Result<()> {
+        debug!(self.inout, "Checking there are no escaping symlinks...");
         for dir in [
             self.paths("config")?,
             self.paths("backup")?,
@@ -81,8 +81,17 @@ impl Runner {
             if !dir.exists() {
                 continue;
             }
-            if let Some(symlink) = dir.all_files(AbsPath::FILTER_SYMLINKS)?.into_iter().next() {
-                return Err(ErrorType::NotAllowedSymlink(symlink.to_str_lossy()).into());
+            for symlink in dir.all_files(AbsPath::FILTER_EXIST)? {
+                {
+                    if !symlink.check_inside(&dir) {
+                        let norm_path = symlink.to_str_lossy();
+                        let canon_path = symlink
+                            .canonicalize()
+                            .expect("path should have been canonicalizable")
+                            .to_str_lossy();
+                        return Err(ErrorType::OutOfBoundSymlink(norm_path, canon_path).into());
+                    }
+                }
             }
         }
 
@@ -454,7 +463,7 @@ impl Runner {
 
         // run symlink checks
         if !self.args.params().is_empty() {
-            self.assert_no_symlinks()?;
+            self.assert_no_escaping_symlinks()?;
             self.assert_no_hidden_config()?;
         }
 

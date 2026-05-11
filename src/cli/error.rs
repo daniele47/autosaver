@@ -45,7 +45,7 @@ pub enum ErrorType {
     InvalidProfile(String, String),
 
     /// A symlink where it is not allowed to.
-    NotAllowedSymlink(String),
+    OutOfBoundSymlink(String, String),
 
     /// Hidden config files are not allowed.
     NotAllowedHiddenConf(String),
@@ -108,7 +108,9 @@ impl Display for ErrorType {
             }
             ErrorType::InvalidCommand(cmd) => write!(f, "Invalid command: {cmd}"),
             ErrorType::MissingProfile => write!(f, "No profile was specified"),
-            ErrorType::NotAllowedSymlink(symlink) => write!(f, "Not allowed symlink: '{symlink}'"),
+            ErrorType::OutOfBoundSymlink(s, t) => {
+                write!(f, "Out of boundary symlink: '{s}' --> '{t}'")
+            }
             ErrorType::InvalidProfile(p, r) => write!(f, "Invalid profile '{p}': {r}"),
             ErrorType::InvalidParams(cmd, args) => {
                 write!(f, "Command {cmd} has invalid args: {args}")
