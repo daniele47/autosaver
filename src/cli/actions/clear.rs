@@ -50,7 +50,9 @@ impl Runner {
         // get all tracked paths
         self.output_main_profile(&profile);
         for profile in profiles {
-            self.output_profile(profile.name());
+            if !matches!(profile.ptype(), ProfileType::Composite(_)) {
+                self.output_profile(profile.name());
+            }
 
             // load tracked paths
             let mut tracked_paths = HashSet::new();
