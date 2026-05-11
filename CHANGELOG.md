@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v0.17.2
+
+### Patches
+
+- `clear` now checks ALL, to allow directories shared between profiles
+
 ## v0.17.1
 
 ### Patches

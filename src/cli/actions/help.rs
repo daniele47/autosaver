@@ -88,14 +88,12 @@ impl Runner {
             }
             "clear" => {
                 io.writeln("Commands:", col);
-                io.write("  clear [PROFILE] ", col);
+                io.write("  clear           ", col);
                 io.writeln("Clear all untracked files", nocol);
                 io.writeln("", nocol);
                 io.writeln("Flags:", col);
                 io.write("  --list -l       ", col);
                 io.writeln("Only list files, do not prompt to delete them", nocol);
-                io.write("  --all -a        ", col);
-                io.writeln("Find all untracked files outside the profile dirs", nocol);
             }
             "tree" => {
                 io.writeln("Commands:", col);

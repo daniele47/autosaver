@@ -39,7 +39,7 @@ impl Runner {
         debug!(self.inout, "Running clear action...");
 
         // check command and flags
-        if self.args.params().len() > 2 {
+        if self.args.params().len() > 1 {
             return self.invalid_args_err(1);
         }
         self.check_flags(
@@ -51,8 +51,6 @@ impl Runner {
                 "-y",
                 "--assume-no",
                 "-n",
-                "--all",
-                "-a",
                 "--no-color",
                 "--debug",
             ],
@@ -62,16 +60,9 @@ impl Runner {
         let wflag_list = self.args.flags().contains(&Flag::Word("list".into()));
         let lflag_list = self.args.flags().contains(&Flag::Letter('l'));
         let flag_list = wflag_list || lflag_list;
-        let wflag_all = self.args.flags().contains(&Flag::Word("all".into()));
-        let lflag_all = self.args.flags().contains(&Flag::Letter('a'));
-        let flag_all = wflag_all || lflag_all;
 
         // resolve profile into all leafs
-        let profile = if flag_all {
-            String::new()
-        } else {
-            self.load_profile(1)?
-        };
+        let profile = String::new();
         let mut profile_loader = self.profile_loader()?;
         let root_profile = profile_loader.load(&profile)?;
         let profiles = root_profile.resolve(&mut profile_loader)?;
@@ -81,20 +72,10 @@ impl Runner {
         let run_dir = self.paths("run")?;
 
         // get all tracked paths
-        if !flag_all {
-            self.output_main_profile(&profile);
-        }
         let mut tracked_paths = HashSet::new();
         for profile in profiles {
-            if !flag_all && !matches!(profile.ptype(), ProfileType::Composite(_)) {
-                self.output_profile(profile.name());
-            }
-
             // load tracked paths
-            if !flag_all {
-                tracked_paths.clear();
-            }
-            let dir = match profile.ptype() {
+            match profile.ptype() {
                 ProfileType::Composite(_) => unreachable!("Composite profile impossible here"),
                 ProfileType::Module(module) => {
                     let backup_dir = backup_dir.join(module.id());
@@ -102,7 +83,6 @@ impl Runner {
                     for entry in module.entries() {
                         tracked_paths.insert(backup_dir.join(entry.path()).canonicalize()?);
                     }
-                    backup_dir
                 }
                 ProfileType::Runner(runner) => {
                     let run_dir = run_dir.join(runner.id());
@@ -110,22 +90,14 @@ impl Runner {
                     for entry in runner.entries() {
                         tracked_paths.insert(run_dir.join(entry.path()).canonicalize()?);
                     }
-                    run_dir
                 }
             };
-
-            // act on all paths
-            if !flag_all && let Ok(all_paths) = dir.all_files(AbsPath::FILTER_FILES) {
-                clear_paths(self, all_paths, &tracked_paths, flag_list)?;
-            }
         }
 
         // find untracked files outside profile related dirs
-        if flag_all {
-            let mut all_paths = self.paths("backup")?.all_files(AbsPath::FILTER_FILES)?;
-            all_paths.extend(self.paths("run")?.all_files(AbsPath::FILTER_FILES)?);
-            clear_paths(self, all_paths, &tracked_paths, flag_list)?;
-        }
+        let mut all_paths = self.paths("backup")?.all_files(AbsPath::FILTER_FILES)?;
+        all_paths.extend(self.paths("run")?.all_files(AbsPath::FILTER_FILES)?);
+        clear_paths(self, all_paths, &tracked_paths, flag_list)?;
 
         Ok(())
     }
