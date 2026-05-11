@@ -1,6 +1,6 @@
 use crate::core::{
     error::{ErrorType, Result},
-    fs::{self, RelPath},
+    fs::{self, PathType, RelPath},
     parsers::{RawItem, RawKind},
     profile::{
         Profile, ProfileType,
@@ -31,6 +31,24 @@ impl RunnerParser {
                             .strip_prefix("dir")
                             .expect("string must start with dir")
                             .trim();
+                        if fs::check_has_parent_dirs(path) {
+                            return Err(ErrorType::InvalidOptionLine(
+                                profile,
+                                line.line,
+                                line.content,
+                                "dir path cannot contain parent directories".into(),
+                            )
+                            .into());
+                        }
+                        if PathType::from(path) == PathType::Absolute {
+                            return Err(ErrorType::InvalidOptionLine(
+                                profile,
+                                line.line,
+                                line.content,
+                                "dir path cannot be absolute".into(),
+                            )
+                            .into());
+                        }
                         run_dir = Some(RelPath::from(path));
                     }
                     _ => {
