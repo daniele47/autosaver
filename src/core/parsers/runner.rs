@@ -17,6 +17,7 @@ impl RunnerParser {
     ) -> Result<Profile> {
         let mut entries = vec![];
         let mut policy = RunnerPolicy::default();
+        let mut run_dir = None;
 
         for line in raw {
             let line = line?;
@@ -25,6 +26,13 @@ impl RunnerParser {
                 RawKind::Option => match line.content.as_str() {
                     "policy run" => policy = RunnerPolicy::Run,
                     "policy skip" => policy = RunnerPolicy::Skip,
+                    dir if dir.starts_with("dir") => {
+                        let path = dir
+                            .strip_prefix("dir")
+                            .expect("string must start with dir")
+                            .trim();
+                        run_dir = Some(RelPath::from(path));
+                    }
                     _ => {
                         return Err(ErrorType::InvalidOptionLine(
                             profile,
@@ -54,10 +62,14 @@ impl RunnerParser {
             }
         }
 
-        Ok(Profile::new(
-            profile,
-            ProfileType::Runner(Runner::new(entries)),
-        ))
+        if let Some(run_dir) = run_dir {
+            Ok(Profile::new(
+                profile,
+                ProfileType::Runner(Runner::new(entries, run_dir)),
+            ))
+        } else {
+            Err(ErrorType::MissingOptionLine("dir".into()).into())
+        }
     }
 }
 

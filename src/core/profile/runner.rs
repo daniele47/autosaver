@@ -28,6 +28,7 @@ pub struct RunnerEntry {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Runner {
     entries: Vec<RunnerEntry>,
+    run_dir: RelPath,
 }
 
 impl RunnerPolicy {
@@ -59,13 +60,8 @@ impl RunnerEntry {
 
 impl Runner {
     /// Create new Runner.
-    pub fn new(entries: Vec<RunnerEntry>) -> Self {
-        Self { entries }
-    }
-
-    /// Create new empty Runner. Useful for tests.
-    pub fn empty() -> Self {
-        Self::new(vec![])
+    pub fn new(entries: Vec<RunnerEntry>, run_dir: RelPath) -> Self {
+        Self { entries, run_dir }
     }
 
     /// Get entries.
@@ -124,7 +120,7 @@ impl Runner {
                 entries.push(RunnerEntry::new(found_ord_path.0, found_ord_path.1));
             }
         }
-        Ok(Self::new(entries))
+        Ok(Self::new(entries, self.run_dir.clone()))
     }
 }
 
@@ -170,16 +166,19 @@ mod tests {
         file5.create_file(false)?;
 
         // Create runner with overlapping entries
-        let runner = Runner::new(vec![
-            RunnerEntry::new(RelPath::from("dir1//"), RunnerPolicy::Run),
-            RunnerEntry::new(RelPath::from("dir1"), RunnerPolicy::Skip),
-            RunnerEntry::new(
-                RelPath::from("dir1").joins(&["file3.txt"]),
-                RunnerPolicy::Run,
-            ),
-            RunnerEntry::new(RelPath::from("dir1").joins(&["subdir"]), RunnerPolicy::Run),
-            RunnerEntry::new(RelPath::from("file1.txt"), RunnerPolicy::Run),
-        ]);
+        let runner = Runner::new(
+            vec![
+                RunnerEntry::new(RelPath::from("dir1//"), RunnerPolicy::Run),
+                RunnerEntry::new(RelPath::from("dir1"), RunnerPolicy::Skip),
+                RunnerEntry::new(
+                    RelPath::from("dir1").joins(&["file3.txt"]),
+                    RunnerPolicy::Run,
+                ),
+                RunnerEntry::new(RelPath::from("dir1").joins(&["subdir"]), RunnerPolicy::Run),
+                RunnerEntry::new(RelPath::from("file1.txt"), RunnerPolicy::Run),
+            ],
+            "".into(),
+        );
 
         // Resolve
         let resolved = runner.resolve(&tmp)?;
