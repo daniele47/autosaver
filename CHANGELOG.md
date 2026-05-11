@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v0.17.1
+
+### Patches
+
+- disabled hidden config files and directories, as those make possible to override . and "" (bad!)!
+
 ## v0.17.0
 
 ### Features

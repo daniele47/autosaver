@@ -173,8 +173,8 @@ impl AbsPath {
     }
 
     /// Get base name.
-    pub fn basename(&self) -> Self {
-        Self::from(
+    pub fn basename(&self) -> RelPath {
+        RelPath::from(
             self.path
                 .file_name()
                 .unwrap_or_default()

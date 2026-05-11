@@ -46,6 +46,9 @@ pub enum ErrorType {
 
     /// A symlink where it is not allowed to.
     NotAllowedSymlink(String),
+
+    /// Hidden config files are not allowed.
+    NotAllowedHiddenConf(String),
 }
 
 impl Error {
@@ -109,6 +112,9 @@ impl Display for ErrorType {
             ErrorType::InvalidProfile(p, r) => write!(f, "Invalid profile '{p}': {r}"),
             ErrorType::InvalidParams(cmd, args) => {
                 write!(f, "Command {cmd} has invalid args: {args}")
+            }
+            ErrorType::NotAllowedHiddenConf(path) => {
+                write!(f, "Not allowed hidden config: '{path}'")
             }
         }
     }

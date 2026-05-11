@@ -70,7 +70,7 @@ impl Runner {
     // conf variables
     const LINE_LEN: usize = 80;
 
-    // check there are no symlinks to the outside
+    // various init checks
     fn assert_no_symlinks(&self) -> Result<()> {
         debug!(self.inout, "Checking there are no symlinks...");
         for dir in [
@@ -86,6 +86,18 @@ impl Runner {
             }
         }
 
+        Ok(())
+    }
+    fn assert_no_hidden_config(&self) -> Result<()> {
+        debug!(self.inout, "Checking there are no hidden configs...");
+        let config_dir = self.paths("config")?;
+        if let Ok(paths) = config_dir.all_files(AbsPath::FILTER_ALL) {
+            for path in paths {
+                if path.basename().to_str_lossy().starts_with(".") {
+                    return Err(ErrorType::NotAllowedHiddenConf(path.to_str_lossy()).into());
+                }
+            }
+        }
         Ok(())
     }
 
@@ -443,6 +455,7 @@ impl Runner {
         // run symlink checks
         if !self.args.params().is_empty() {
             self.assert_no_symlinks()?;
+            self.assert_no_hidden_config()?;
         }
 
         // handle commands
