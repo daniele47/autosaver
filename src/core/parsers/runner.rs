@@ -17,7 +17,7 @@ impl RunnerParser {
     ) -> Result<Profile> {
         let mut entries = vec![];
         let mut policy = RunnerPolicy::default();
-        let mut run_dir = None;
+        let mut final_id = None;
 
         for line in raw {
             let line = line?;
@@ -26,17 +26,17 @@ impl RunnerParser {
                 RawKind::Option => match line.content.as_str() {
                     "policy run" => policy = RunnerPolicy::Run,
                     "policy skip" => policy = RunnerPolicy::Skip,
-                    dir if dir.starts_with("dir") => {
-                        let path = dir
-                            .strip_prefix("dir")
-                            .expect("string must start with dir")
+                    id if id.starts_with("id") => {
+                        let path = id
+                            .strip_prefix("id")
+                            .expect("string must start with id")
                             .trim();
                         if fs::check_has_parent_dirs(path) {
                             return Err(ErrorType::InvalidOptionLine(
                                 profile,
                                 line.line,
                                 line.content,
-                                "dir path cannot contain parent directories".into(),
+                                "id cannot contain parent directories".into(),
                             )
                             .into());
                         }
@@ -45,11 +45,11 @@ impl RunnerParser {
                                 profile,
                                 line.line,
                                 line.content,
-                                "dir path cannot be absolute".into(),
+                                "id path cannot be absolute".into(),
                             )
                             .into());
                         }
-                        run_dir = Some(RelPath::from(path));
+                        final_id = Some(RelPath::from(path));
                     }
                     _ => {
                         return Err(ErrorType::InvalidOptionLine(
@@ -80,13 +80,13 @@ impl RunnerParser {
             }
         }
 
-        if let Some(run_dir) = run_dir {
+        if let Some(id) = final_id {
             Ok(Profile::new(
                 profile,
-                ProfileType::Runner(Runner::new(entries, run_dir)),
+                ProfileType::Runner(Runner::new(entries, id)),
             ))
         } else {
-            Err(ErrorType::MissingOptionLine("dir".into()).into())
+            Err(ErrorType::MissingOptionLine("id".into()).into())
         }
     }
 }
@@ -107,7 +107,7 @@ mod tests {
             },
             RawItem {
                 line: 2,
-                content: "dir __whatever__".into(),
+                content: "id __whatever__".into(),
                 kind: RawKind::Option,
             },
             RawItem {
@@ -144,7 +144,7 @@ mod tests {
                 assert_eq!(*entries[1].policy(), RunnerPolicy::Run);
                 assert_eq!(entries[2].path().to_str_lossy(), "other/");
                 assert_eq!(*entries[2].policy(), RunnerPolicy::Skip);
-                assert_eq!(runner.run_dir(), &RelPath::from("__whatever__"))
+                assert_eq!(runner.id(), &RelPath::from("__whatever__"))
             }
             _ => panic!("Expected Runner profile type"),
         }

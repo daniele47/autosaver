@@ -28,7 +28,7 @@ pub struct RunnerEntry {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Runner {
     entries: Vec<RunnerEntry>,
-    run_dir: RelPath,
+    id: RelPath,
 }
 
 impl RunnerPolicy {
@@ -61,7 +61,7 @@ impl RunnerEntry {
 impl Runner {
     /// Create new Runner.
     pub fn new(entries: Vec<RunnerEntry>, run_dir: RelPath) -> Self {
-        Self { entries, run_dir }
+        Self { entries, id: run_dir }
     }
 
     /// Get entries.
@@ -69,9 +69,9 @@ impl Runner {
         &self.entries
     }
 
-    /// Get run directory,
-    pub fn run_dir(&self) -> &RelPath {
-        &self.run_dir
+    /// Get runner id, used to identify associated resources.
+    pub fn id(&self) -> &RelPath {
+        &self.id
     }
 
     /// Add a new entry.
@@ -125,7 +125,7 @@ impl Runner {
                 entries.push(RunnerEntry::new(found_ord_path.0, found_ord_path.1));
             }
         }
-        Ok(Self::new(entries, self.run_dir.clone()))
+        Ok(Self::new(entries, self.id.clone()))
     }
 }
 

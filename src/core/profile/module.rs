@@ -30,7 +30,7 @@ pub struct ModuleEntry {
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Module {
     entries: Vec<ModuleEntry>,
-    backup_dir: RelPath,
+    id: RelPath,
 }
 
 impl ModulePolicy {
@@ -66,7 +66,7 @@ impl Module {
     pub fn new(entries: Vec<ModuleEntry>, backup_dir: RelPath) -> Self {
         Self {
             entries,
-            backup_dir,
+            id: backup_dir,
         }
     }
 
@@ -80,9 +80,9 @@ impl Module {
         &self.entries
     }
 
-    /// Get backup dir.
-    pub fn backup_dir(&self) -> &RelPath {
-        &self.backup_dir
+    /// Get id, used to identify resources associated with the module.
+    pub fn id(&self) -> &RelPath {
+        &self.id
     }
 
     fn cleanup_paths(&self, paths: Vec<(AbsPath, AbsPath, ModulePolicy)>) -> Result<Self> {
@@ -114,7 +114,7 @@ impl Module {
             }
         }
 
-        Ok(Self::new(entries, self.backup_dir.clone()))
+        Ok(Self::new(entries, self.id.clone()))
     }
 
     fn resolve_module(&self, base: &AbsPath) -> Result<Vec<(AbsPath, AbsPath, ModulePolicy)>> {

@@ -72,7 +72,7 @@ Module entries can have a `policy` with priority matching the following order:
 A Module profile configuration file looks like this:
 ```
 /! type module
-/! dir neovim
+/! id neovim
 
 // this is a comment
 // NOTE: directories do not require an ending slash!
@@ -104,7 +104,7 @@ Runner entries can have a `policy` with priority matching the following order:
 A runner profile configuration file looks like this:
 ```
 /! type runner
-/! dir kde-init
+/! id kde-init
 
 // this is a comment
 // NOTE: directories do not require an ending slash!
@@ -118,7 +118,7 @@ kde-init/data
 
 ```
 This profile will:
-- use the `run/kde-init` as the run directory
+- use the `run/kde-init` as the run directory (as specified by `id`)
 - run the `init_script.sh` script
 - run all the files found in `kde-init/` path
 - will skip all scripts in `kde-init/data` path

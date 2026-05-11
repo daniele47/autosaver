@@ -18,7 +18,7 @@ impl ModuleParser {
     ) -> Result<Profile> {
         let mut entries = vec![];
         let mut policy = ModulePolicy::default();
-        let mut backup_dir = None;
+        let mut final_id = None;
 
         for line in raw {
             let line = line?;
@@ -28,17 +28,17 @@ impl ModuleParser {
                     "policy track" => policy = ModulePolicy::Track,
                     "policy notdiff" => policy = ModulePolicy::NotDiff,
                     "policy ignore" => policy = ModulePolicy::Ignore,
-                    dir if dir.starts_with("dir") => {
-                        let path = dir
-                            .strip_prefix("dir")
-                            .expect("string must start with dir")
+                    id if id.starts_with("id") => {
+                        let path = id
+                            .strip_prefix("id")
+                            .expect("string must start with id")
                             .trim();
                         if fs::check_has_parent_dirs(path) {
                             return Err(ErrorType::InvalidOptionLine(
                                 profile,
                                 line.line,
                                 line.content,
-                                "dir path cannot contain parent directories".into(),
+                                "id cannot contain parent directories".into(),
                             )
                             .into());
                         }
@@ -47,11 +47,11 @@ impl ModuleParser {
                                 profile,
                                 line.line,
                                 line.content,
-                                "dir path cannot be absolute".into(),
+                                "id cannot be absolute".into(),
                             )
                             .into());
                         }
-                        backup_dir = Some(RelPath::from(path));
+                        final_id = Some(RelPath::from(path));
                     }
                     _ => {
                         return Err(ErrorType::InvalidOptionLine(
@@ -82,10 +82,10 @@ impl ModuleParser {
             }
         }
 
-        if let Some(backup_dir) = backup_dir {
+        if let Some(id) = final_id {
             Ok(Profile::new(
                 profile,
-                ProfileType::Module(Module::new(entries, backup_dir)),
+                ProfileType::Module(Module::new(entries, id)),
             ))
         } else {
             Err(ErrorType::MissingOptionLine("dir".into()).into())
@@ -104,7 +104,7 @@ mod tests {
         let raw = vec![
             RawItem {
                 line: 1,
-                content: "dir testing69".into(),
+                content: "id testing69".into(),
                 kind: RawKind::Option,
             },
             RawItem {
@@ -139,7 +139,7 @@ mod tests {
                 assert_eq!(entries[0].policy(), ModulePolicy::Track);
                 assert_eq!(entries[1].path().to_str_lossy(), "target/");
                 assert_eq!(entries[1].policy(), ModulePolicy::Ignore);
-                assert_eq!(module.backup_dir(), &RelPath::from("testing69"))
+                assert_eq!(module.id(), &RelPath::from("testing69"))
             }
             _ => panic!("Expected Module profile type"),
         }

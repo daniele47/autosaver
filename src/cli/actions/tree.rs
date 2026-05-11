@@ -106,10 +106,10 @@ impl Runner {
                 match ctx.item.ptype() {
                     ProfileType::Composite(_) => {}
                     ProfileType::Module(m) => {
-                        dir = format!(" ({})", m.backup_dir().to_str_lossy())
+                        dir = format!(" ({})", m.id().to_str_lossy())
                     }
                     ProfileType::Runner(r) => {
-                        dir = format!(" ({})", r.run_dir().to_str_lossy())
+                        dir = format!(" ({})", r.id().to_str_lossy())
                     }
                 }
             }
