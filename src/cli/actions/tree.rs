@@ -105,12 +105,8 @@ impl Runner {
             if flag_show_dir {
                 match ctx.item.ptype() {
                     ProfileType::Composite(_) => {}
-                    ProfileType::Module(m) => {
-                        dir = format!(" ({})", m.id().to_str_lossy())
-                    }
-                    ProfileType::Runner(r) => {
-                        dir = format!(" ({})", r.id().to_str_lossy())
-                    }
+                    ProfileType::Module(m) => dir = format!(" ({})", m.id().to_str_lossy()),
+                    ProfileType::Runner(r) => dir = format!(" ({})", r.id().to_str_lossy()),
                 }
             }
             self.inout.write(item_name, item_col);

@@ -48,48 +48,45 @@ impl Runner {
         let run_dir = self.paths("run")?;
 
         // get all tracked paths
-        let mut tracked_paths = HashSet::<AbsPath>::new();
         self.output_main_profile(&profile);
         for profile in profiles {
-            match profile.ptype() {
+            self.output_profile(profile.name());
+
+            // load tracked paths
+            let mut tracked_paths = HashSet::new();
+            let dir = match profile.ptype() {
                 ProfileType::Composite(_) => unreachable!("Composite profile impossible here"),
                 ProfileType::Module(module) => {
-                    let backup_dir = backup_dir.joins(&[profile.name()]);
+                    let backup_dir = backup_dir.join(module.id());
                     let module = module.resolve(&backup_dir)?;
                     for entry in module.entries() {
-                        let abs_path = backup_dir.join(entry.path());
-                        tracked_paths.insert(abs_path.canonicalize()?);
+                        tracked_paths.insert(backup_dir.join(entry.path()).canonicalize()?);
                     }
+                    backup_dir
                 }
                 ProfileType::Runner(runner) => {
-                    let run_dir = run_dir.joins(&[profile.name()]);
+                    let run_dir = run_dir.join(runner.id());
                     let runner = runner.resolve(&run_dir)?;
                     for entry in runner.entries() {
-                        let abs_path = run_dir.join(entry.path());
-                        tracked_paths.insert(abs_path.canonicalize()?);
+                        tracked_paths.insert(run_dir.join(entry.path()).canonicalize()?);
                     }
+                    run_dir
                 }
-            }
-        }
+            };
 
-        // clear all paths in backup and run dir
-        let backup_dir = self.paths("backup")?.joins(&[&profile]);
-        let run_dir = self.paths("run")?.joins(&[&profile]);
-        let mut all_paths = backup_dir
-            .all_files(AbsPath::FILTER_ALL)
-            .unwrap_or_default();
-        all_paths.extend(run_dir.all_files(AbsPath::FILTER_ALL).unwrap_or_default());
-        for file in all_paths {
-            if AbsPath::FILTER_FILES(&file) {
-                let canon_path = file.canonicalize()?;
-                let rel_path = canon_path.to_relative(&self.paths("root")?)?;
-                let rel_path_str = rel_path.to_str_lossy();
-                if !tracked_paths.contains(&canon_path) {
-                    self.inout.writeln(rel_path_str, Self::PATH_UNTRACKED_COL);
-                    if !flag_list {
-                        self.prompt("Do you want to delete the untracked file?", |_| {
-                            Ok(file.purge_path(false)?)
-                        })?;
+            // act on all paths
+            if let Ok(all_paths) = dir.all_files(AbsPath::FILTER_FILES) {
+                for path in all_paths {
+                    let canon = path.canonicalize()?;
+                    let rel_path = canon.to_relative(&self.paths("root")?)?;
+                    let rel_path_str = rel_path.to_str_lossy();
+                    if !tracked_paths.contains(&canon) {
+                        self.inout.writeln(rel_path_str, Self::PATH_UNTRACKED_COL);
+                        if !flag_list {
+                            self.prompt("Do you want to delete the untracked file?", |_| {
+                                Ok(path.purge_path(false)?)
+                            })?;
+                        }
                     }
                 }
             }

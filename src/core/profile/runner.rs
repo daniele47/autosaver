@@ -61,7 +61,10 @@ impl RunnerEntry {
 impl Runner {
     /// Create new Runner.
     pub fn new(entries: Vec<RunnerEntry>, run_dir: RelPath) -> Self {
-        Self { entries, id: run_dir }
+        Self {
+            entries,
+            id: run_dir,
+        }
     }
 
     /// Get entries.
