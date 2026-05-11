@@ -8,7 +8,7 @@ use std::{
 #[macro_export]
 macro_rules! debug {
     ($ctx:expr, $($arg:tt)*) => {
-        $ctx.debug(format!("DEBUG [{}:{}]: {}", file!(), line!(), format_args!($($arg)*)));
+        $ctx.debug(format!("[{}:{}]: {}", file!(), line!(), format_args!($($arg)*)));
     };
 }
 
@@ -102,7 +102,7 @@ impl TermInOut {
             .collect::<Vec<_>>()
             .join("");
         let text = match self.options.has_colors {
-            true => format!("{colors}{str}{RESET}"),
+            true => format!("{RESET}{colors}{str}{RESET}"),
             false => format!("{str}"),
         };
         self.actual_write(text, false, std::io::stdout());
@@ -116,14 +116,18 @@ impl TermInOut {
     /// Write to debug, only if debug is enabled.
     pub fn debug(&self, str: impl Display) {
         if self.options.show_debug {
-            self.actual_error(str);
+            let text = match self.options.has_colors {
+                true => format!("{RESET}DEBUG: {RESET} {str}{RESET}"),
+                false => format!("DEBUG: {str}"),
+            };
+            self.actual_error(text);
         }
     }
 
     /// Write an error.
     pub fn error(&self, str: impl Display) {
         let text = match self.options.has_colors {
-            true => format!("{RED}{BOLD}ERROR:{RESET} {str}"),
+            true => format!("{RESET}{RED}{BOLD}ERROR:{RESET} {str}{RESET}"),
             false => format!("ERROR: {str}"),
         };
         self.actual_error(text);
@@ -132,7 +136,7 @@ impl TermInOut {
     /// Write a warning.
     pub fn warning(&self, str: impl Display) {
         let text = match self.options.has_colors {
-            true => format!("{YELLOW}{BOLD}WARNING:{RESET} {str}"),
+            true => format!("{RESET}{YELLOW}{BOLD}WARNING:{RESET} {str}{RESET}"),
             false => format!("WARNING: {str}"),
         };
         self.actual_error(text);

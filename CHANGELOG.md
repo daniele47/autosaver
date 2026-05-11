@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v0.17.4
+
+### Patches
+
+- fixed inout to make sure there are no broken colors
+
 ## v0.17.3
 
 ### Patches
