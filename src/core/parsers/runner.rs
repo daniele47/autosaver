@@ -89,21 +89,26 @@ mod tests {
             },
             RawItem {
                 line: 2,
+                content: "dir __whatever__".into(),
+                kind: RawKind::Option,
+            },
+            RawItem {
+                line: 3,
                 content: "01_init.sh".into(),
                 kind: RawKind::Data,
             },
             RawItem {
-                line: 3,
+                line: 4,
                 content: "02_flatpak.sh".into(),
                 kind: RawKind::Data,
             },
             RawItem {
-                line: 4,
+                line: 5,
                 content: "policy skip".into(),
                 kind: RawKind::Option,
             },
             RawItem {
-                line: 5,
+                line: 6,
                 content: "other/".into(),
                 kind: RawKind::Data,
             },
@@ -115,15 +120,13 @@ mod tests {
             ProfileType::Runner(runner) => {
                 let entries = runner.entries();
                 assert_eq!(entries.len(), 3);
-
                 assert_eq!(entries[0].path().to_str_lossy(), "01_init.sh");
                 assert_eq!(*entries[0].policy(), RunnerPolicy::Run);
-
                 assert_eq!(entries[1].path().to_str_lossy(), "02_flatpak.sh");
                 assert_eq!(*entries[1].policy(), RunnerPolicy::Run);
-
                 assert_eq!(entries[2].path().to_str_lossy(), "other/");
                 assert_eq!(*entries[2].policy(), RunnerPolicy::Skip);
+                assert_eq!(runner.run_dir(), &RelPath::from("__whatever__"))
             }
             _ => panic!("Expected Runner profile type"),
         }

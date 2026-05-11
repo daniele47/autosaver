@@ -69,6 +69,11 @@ impl Runner {
         &self.entries
     }
 
+    /// Get run directory,
+    pub fn run_dir(&self) -> &RelPath {
+        &self.run_dir
+    }
+
     /// Add a new entry.
     pub fn add_entry(&mut self, entry: RunnerEntry) {
         self.entries.push(entry);

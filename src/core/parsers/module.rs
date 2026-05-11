@@ -86,21 +86,26 @@ mod tests {
         let raw = vec![
             RawItem {
                 line: 1,
-                content: "policy track".into(),
+                content: "dir testing69".into(),
                 kind: RawKind::Option,
             },
             RawItem {
                 line: 2,
+                content: "policy track".into(),
+                kind: RawKind::Option,
+            },
+            RawItem {
+                line: 3,
                 content: "src/lib.rs".into(),
                 kind: RawKind::Data,
             },
             RawItem {
-                line: 3,
+                line: 4,
                 content: "policy ignore".into(),
                 kind: RawKind::Option,
             },
             RawItem {
-                line: 4,
+                line: 5,
                 content: "target/".into(),
                 kind: RawKind::Data,
             },
@@ -116,6 +121,7 @@ mod tests {
                 assert_eq!(entries[0].policy(), ModulePolicy::Track);
                 assert_eq!(entries[1].path().to_str_lossy(), "target/");
                 assert_eq!(entries[1].policy(), ModulePolicy::Ignore);
+                assert_eq!(module.backup_dir(), &RelPath::from("testing69"))
             }
             _ => panic!("Expected Module profile type"),
         }

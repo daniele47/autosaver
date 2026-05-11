@@ -80,6 +80,11 @@ impl Module {
         &self.entries
     }
 
+    /// Get backup dir.
+    pub fn backup_dir(&self) -> &RelPath {
+        &self.backup_dir
+    }
+
     fn cleanup_paths(&self, paths: Vec<(AbsPath, AbsPath, ModulePolicy)>) -> Result<Self> {
         // Note: first abspath is the full path, second is the path prefix!
         let mut values = HashMap::<String, (AbsPath, AbsPath, ModulePolicy)>::new();
