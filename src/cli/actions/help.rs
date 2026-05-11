@@ -109,6 +109,8 @@ impl Runner {
                 io.writeln("Use only ascii characters", nocol);
                 io.write("  --unique -u         ", col);
                 io.writeln("Do not show duplicated entries", nocol);
+                io.write("  --show-dir -d       ", col);
+                io.writeln("For each module/runner show its dir", nocol);
             }
             "" => {
                 io.writeln("Environment variables:", col);

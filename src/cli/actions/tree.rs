@@ -38,6 +38,8 @@ impl Runner {
                 "-a",
                 "--unique",
                 "-u",
+                "--show-dir",
+                "-d",
                 "--no-color",
                 "--debug",
             ],
@@ -50,7 +52,7 @@ impl Runner {
             .contains(&Flag::Word("short_names".into()));
         let lflag_short_names = self.args.flags().contains(&Flag::Letter('n'));
         let flag_short_names = wflag_short_names || lflag_short_names;
-        let wflag_show_types = self.args.flags().contains(&Flag::Word("show_types".into()));
+        let wflag_show_types = self.args.flags().contains(&Flag::Word("show-types".into()));
         let lflag_show_types = self.args.flags().contains(&Flag::Letter('t'));
         let flag_show_types = wflag_show_types || lflag_show_types;
         let wflag_ascii = self.args.flags().contains(&Flag::Word("ascii".into()));
@@ -59,6 +61,9 @@ impl Runner {
         let wflag_unique = self.args.flags().contains(&Flag::Word("unique".into()));
         let lflag_unique = self.args.flags().contains(&Flag::Letter('u'));
         let flag_unique = wflag_unique || lflag_unique;
+        let wflag_show_dir = self.args.flags().contains(&Flag::Word("show-dir".into()));
+        let lflag_show_dir = self.args.flags().contains(&Flag::Letter('d'));
+        let flag_show_dir = wflag_show_dir || lflag_show_dir;
 
         // load profile
         let profile = self.load_profile(1)?;
@@ -96,7 +101,20 @@ impl Runner {
                     ProfileType::Runner(_) => item_name.insert_str(0, "[R] "),
                 };
             }
-            self.inout.writeln(item_name, item_col);
+            let mut dir = String::new();
+            if flag_show_dir {
+                match ctx.item.ptype() {
+                    ProfileType::Composite(_) => {}
+                    ProfileType::Module(m) => {
+                        dir = format!(" ({})", m.backup_dir().to_str_lossy())
+                    }
+                    ProfileType::Runner(r) => {
+                        dir = format!(" ({})", r.run_dir().to_str_lossy())
+                    }
+                }
+            }
+            self.inout.write(item_name, item_col);
+            self.inout.writeln(dir, Self::NO_COL);
             Ok(())
         })?;
 

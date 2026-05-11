@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented here
 
+## v0.16.0
+
+### Features
+
+- added `dir` option type in `module|runner` profiles to indicate the dirname (allows easy config refactor)
+- added `--show-dir|-d` flag to show the directory in `tree` command
+
 ## v0.15.1
 
 ### Patches
