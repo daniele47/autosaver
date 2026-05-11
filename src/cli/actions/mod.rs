@@ -281,7 +281,7 @@ impl Runner {
         let mut last_eq = false;
         let cut_line = |i: String| {
             if cut {
-                let len = Self::LINE_LEN - 2;
+                let len = Self::LINE_LEN - 6;
                 let res: String = i.chars().take(len).collect();
                 res + if i.len() > len { " ..." } else { "" }
             } else {

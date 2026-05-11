@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v0.17.3
+
+### Patches
+
+- cut output now stays precisely in 80 char width
+
 ## v0.17.2
 
 ### Patches

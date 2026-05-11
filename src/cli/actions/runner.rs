@@ -60,7 +60,7 @@ impl Runner {
         // closure to shrink output
         let cut_line = |i: String| {
             if !flag_full {
-                let len = Self::LINE_LEN - 2;
+                let len = Self::LINE_LEN - 6;
                 let res: String = i.chars().take(len).collect();
                 res + if i.len() > len { " ..." } else { "" }
             } else {
