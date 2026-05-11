@@ -447,14 +447,8 @@ impl AbsPath {
     ///
     /// Note: this will get ALL files, even directories, symlinks, all rust can get.
     /// Manual filtering is required when using this function!
-    ///
-    /// Implementation details: this function uses DFS, using a vector as a stack of directories
-    /// found but yet to be explored, and a hashset of all paths explored until now, canonicalized.
-    /// The hash set allows to easily check if a new directory was already explored, and if so,
-    /// avoid exploring it again. This easily resolves all symlink loops that could be created.
     pub fn all_files<F: Fn(&AbsPath) -> bool>(&self, filter: F) -> Result<BTreeSet<AbsPath>> {
         let mut files = BTreeSet::new();
-        let mut norm_files = HashSet::new();
         let mut stack = Vec::new();
         stack.push(self.clone());
 
@@ -462,25 +456,10 @@ impl AbsPath {
         // avoid endless recursion if there are symlinks creating endless loops
         while let Some(item) = stack.pop() {
             for dir_file in item.list_files(AbsPath::FILTER_ALL)? {
-                // fully ignore broken symlinks
-                if dir_file
-                    .path
-                    .symlink_metadata()
-                    .is_ok_and(|m| m.is_symlink())
-                    && !dir_file.exists()
-                {
-                    assert!(files.insert(dir_file));
-                    continue;
-                }
-                let canon = dir_file.canonicalize()?;
-                if norm_files.contains(&canon) {
-                    continue;
-                }
                 if dir_file.metadata()?.is_dir() {
                     stack.push(dir_file.clone());
                 }
-                norm_files.insert(canon);
-                files.insert(dir_file.clone());
+                files.insert(dir_file);
             }
         }
 
