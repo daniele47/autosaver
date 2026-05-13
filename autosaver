@@ -67,7 +67,7 @@ if [[ ! -f "$LOCAL_BIN_PATH" && ! -v UNINSTALL || -v INSTALL ]]; then
     # checking checksum if jq is installed
     if command -v jq &>/dev/null && command -v sha256sum &>/dev/null; then
         echo "(2/4) Checking checksum of downloaded binary from '$REMOTE_API_URL'..."
-        digest="$(curl -L --fail --show-error --silent "$REMOTE_API_URL" | jq '.assets[] | select(.name == "'"$REMOTE_BIN_NAME"'") | .digest' -r)"
+        digest="$(curl -L --fail --show-error --progress-bar "$REMOTE_API_URL" | jq '.assets[] | select(.name == "'"$REMOTE_BIN_NAME"'") | .digest' -r)"
         tar_digest="$(sha256sum "$output")"
         digest_clean="${digest#sha256:}"
         tar_digest_clean="${tar_digest%% *}"
