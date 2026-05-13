@@ -4,7 +4,7 @@ use std::{
     str::FromStr,
 };
 
-use anyhow::{Ok, Result, bail};
+use anyhow::{Result, bail};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PathStr {
@@ -12,7 +12,7 @@ pub struct PathStr {
 }
 
 impl PathStr {
-    fn new_from_pathbuf(path: PathBuf) -> Result<Self> {
+    pub fn new(path: PathBuf) -> Result<Self> {
         // check path doesn't contain parent directory
         if path.components().any(|c| c == Component::ParentDir) {
             bail!("Path string contains parent directory: {}", path.display());
@@ -20,22 +20,18 @@ impl PathStr {
 
         Ok(Self { path })
     }
-
-    pub fn new(path: String) -> Result<Self> {
-        Self::new_from_pathbuf(path.into())
-    }
 }
 
-// &str ---> PathStr
+// &str ---> [PathStr]
 impl FromStr for PathStr {
     type Err = anyhow::Error;
 
     fn from_str(s: &str) -> std::prelude::v1::Result<Self, Self::Err> {
-        Self::new_from_pathbuf(s.into())
+        Self::new(s.into())
     }
 }
 
-// PathStr ---> {}
+// [PathStr] ---> {}
 impl Display for PathStr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.path.display())
