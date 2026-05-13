@@ -4,8 +4,9 @@ use std::{
 };
 
 use anyhow::{Result, anyhow, bail};
+use derive_getters::{Dissolve, Getters};
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Getters, Dissolve)]
 pub struct PathStr {
     path: PathBuf,
 }
