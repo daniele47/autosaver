@@ -10,3 +10,5 @@ opt-level = 3 # Keep optimizations but with symbols
 
 [dependencies]
 anyhow = "1.0.102"
+tracing = "0.1.44"
+tracing-subscriber = { version = "0.3.23", features = ["env-filter", "chrono", "local-time"] }
