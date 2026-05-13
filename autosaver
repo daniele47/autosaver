@@ -61,7 +61,7 @@ if [[ ! -f "$LOCAL_BIN_PATH" && ! -v UNINSTALL || -v INSTALL ]]; then
         wget --no-verbose --show-progress --output-document="$output" "$url"
     else
         echo "ERROR: Neither curl nor wget found. Please install one." >&2
-        return 1
+        exit 1
     fi
 
     # checking checksum if jq is installed
@@ -73,7 +73,7 @@ if [[ ! -f "$LOCAL_BIN_PATH" && ! -v UNINSTALL || -v INSTALL ]]; then
         tar_digest_clean="${tar_digest%% *}"
         if [[ "$digest_clean" != "$tar_digest_clean" ]]; then
             echo "ERROR: checksum of downloaded binary does not match the expected one." >&2
-            return 1
+            exit 1
         fi
     else
         echo "(2/4) Skipping checksum check as either jq or sha256sum is not available..."
