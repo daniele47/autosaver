@@ -4,6 +4,8 @@ use std::{
     os::unix::fs::PermissionsExt,
     path::PathBuf,
     process::{Command, Stdio},
+    sync::{Arc, Mutex},
+    thread,
 };
 
 use crate::{
@@ -58,7 +60,7 @@ impl Runner {
         let flag_full = wflag_full || lflag_full;
 
         // closure to shrink output
-        let cut_line = |i: String| {
+        let cut_line = |i: String, flag_full: bool| {
             if !flag_full {
                 let len = Self::LINE_LEN - 6;
                 let res: String = i.chars().take(len).collect();
@@ -110,7 +112,7 @@ impl Runner {
                                 match line {
                                     Ok(l) => {
                                         self.inout.write("* ", Self::SIGN_SCRIPT_COL);
-                                        self.inout.writeln(cut_line(l), Self::NO_COL);
+                                        self.inout.writeln(cut_line(l, flag_full), Self::NO_COL);
                                     }
                                     Err(_) => {
                                         self.inout.warning("Could not show the entire script file");
@@ -136,58 +138,116 @@ impl Runner {
                                 })?;
 
                                 let cmd_res = || -> Result<()> {
-                                    // execute the script
-                                    let mut child = Command::new("sh")
-                                        .arg("-c")
-                                        .arg(format!("{} 2>&1", abs_path.to_str_lossy()))
+                                    // execute the script directly
+                                    let mut child = Command::new(abs_path.to_str_lossy())
                                         .stdin(Stdio::null())
                                         .stdout(Stdio::piped())
-                                        .stderr(Stdio::null())
+                                        .stderr(Stdio::piped())
                                         .spawn()
                                         .map_err(|e| {
                                             let p = abs_path.clone().into();
                                             Error::from(ErrorType::ScriptFailure(p, e.to_string()))
                                         })?;
 
-                                    // parse stdout and rewrite it nicely formatted
-                                    if let Some(child_stdout) = child.stdout.take() {
-                                        let reader = BufReader::new(child_stdout);
-                                        for line in reader.lines() {
-                                            match line {
-                                                Ok(l) => {
-                                                    s.inout.write("> ", Self::SIGN_STDOUT_COL);
-                                                    s.inout.writeln(cut_line(l), Self::NO_COL);
-                                                }
-                                                Err(e) => {
-                                                    return Err(ErrorType::ScriptFailure(
-                                                        abs_path.clone().into(),
-                                                        format!("Failure parsing stdout {e}"),
-                                                    )
-                                                    .into());
-                                                }
-                                            }
-                                        }
-                                    } else {
-                                        unreachable!("Stdout was set to be piped")
-                                    }
+                                    let stdout = child.stdout.take().expect("stdout not piped");
+                                    let stderr = child.stderr.take().expect("stderr not piped");
 
-                                    // wait for script to end
-                                    child
-                                        .wait()
-                                        .map_err(|e| {
-                                            let p = abs_path.clone().into();
-                                            ErrorType::ScriptFailure(p, e.to_string()).into()
-                                        })
-                                        .and_then(|code| {
-                                            if !code.success() {
-                                                return Err(ErrorType::ScriptFailure(
-                                                    abs_path.clone().into(),
-                                                    format!("Exited with code {code}"),
-                                                )
-                                                .into());
+                                    let inout_mutex = Arc::new(Mutex::new(s.inout.clone()));
+
+                                    // stdout thread
+                                    let stdout_handle = {
+                                        let inout_mutex = Arc::clone(&inout_mutex);
+                                        let abspath_out = abs_path.clone();
+                                        thread::spawn(move || -> Result<()> {
+                                            let reader = BufReader::new(stdout);
+
+                                            for line in reader.lines() {
+                                                match line {
+                                                    Ok(l) => {
+                                                        let inout = inout_mutex
+                                                            .lock()
+                                                            .expect("Failure to lock mutex");
+                                                        inout.write("> ", Self::SIGN_STDOUT_COL);
+                                                        inout.writeln(
+                                                            cut_line(l, flag_full),
+                                                            Self::NO_COL,
+                                                        );
+                                                    }
+                                                    Err(e) => {
+                                                        return Err(ErrorType::ScriptFailure(
+                                                            abspath_out.into(),
+                                                            format!("Failure parsing stdout: {e}"),
+                                                        )
+                                                        .into());
+                                                    }
+                                                }
                                             }
+
                                             Ok(())
                                         })
+                                    };
+
+                                    // stderr thread
+                                    let stderr_handle = {
+                                        let inout_mutex = Arc::clone(&inout_mutex);
+                                        let abspath_err = abs_path.clone();
+                                        thread::spawn(move || -> Result<()> {
+                                            let reader = BufReader::new(stderr);
+
+                                            for line in reader.lines() {
+                                                match line {
+                                                    Ok(l) => {
+                                                        let inout = inout_mutex
+                                                            .lock()
+                                                            .expect("Failure to lock mutex");
+                                                        inout.write("! ", Self::SIGN_STDERR_COL);
+                                                        inout.writeln(
+                                                            cut_line(l, flag_full),
+                                                            Self::NO_COL,
+                                                        );
+                                                    }
+                                                    Err(e) => {
+                                                        return Err(ErrorType::ScriptFailure(
+                                                            abspath_err.into(),
+                                                            format!("Failure parsing stderr: {e}"),
+                                                        )
+                                                        .into());
+                                                    }
+                                                }
+                                            }
+
+                                            Ok(())
+                                        })
+                                    };
+
+                                    // wait for process
+                                    let status = child.wait().map_err(|e| {
+                                        let p = abs_path.clone().into();
+                                        ErrorType::ScriptFailure(p, e.to_string())
+                                    })?;
+
+                                    // wait for reader threads
+                                    stdout_handle.join().map_err(|e| {
+                                        let p = abs_path.clone().into();
+                                        let r = format!("Failure joining stdout: {e:?}");
+                                        ErrorType::ScriptFailure(p, r)
+                                    })??;
+                                    stderr_handle.join().map_err(|e| {
+                                        let p = abs_path.clone().into();
+                                        let r = format!("Failure joining stderr: {e:?}");
+                                        ErrorType::ScriptFailure(p, r)
+                                    })??;
+
+                                    // script failed
+                                    if !status.success() {
+                                        return Err(ErrorType::ScriptFailure(
+                                            abs_path.clone().into(),
+                                            format!("Exited with code {status}"),
+                                        )
+                                        .into());
+                                    }
+
+                                    Ok(())
                                 }();
 
                                 // write line separator no matter what

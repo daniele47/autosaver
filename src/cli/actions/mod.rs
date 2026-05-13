@@ -61,6 +61,7 @@ impl Runner {
     const SIGN_ADD_COL: &[Style] = &[Style::Green];
     const SIGN_SEP_COL: &[Style] = &[Style::Blue];
     const SIGN_STDOUT_COL: &[Style] = &[Style::White];
+    const SIGN_STDERR_COL: &[Style] = &[Style::Red];
     const SIGN_SCRIPT_COL: &[Style] = &[Style::White];
     const SIGN_INPUT_COL: &[Style] = &[Style::White];
     const TREE_COMPOSITE_COL: &[Style] = &[Style::Blue, Style::Bold];

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v0.18.1
+
+### Changes
+
+- multithreaded stdout/stderr handler, which nicer split between the two visually
+
 ## v0.18.0
 
 ### Features
