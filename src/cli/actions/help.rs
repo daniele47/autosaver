@@ -24,6 +24,8 @@ impl Runner {
                 io.writeln("Show files which are ignored by default", nocol);
                 io.write("  --unmodified -u ", col);
                 io.writeln("Show tracked and unmodified files too", nocol);
+                io.write("  --show-types -t     ", col);
+                io.writeln("Show the type of each file", nocol);
             }
             "save" => {
                 io.writeln("Commands:", col);
@@ -39,6 +41,8 @@ impl Runner {
                 io.writeln("Only list files, do not prompt to save them", nocol);
                 io.write("  --full -f       ", col);
                 io.writeln("Show the entire diff between the files", nocol);
+                io.write("  --show-types -t     ", col);
+                io.writeln("Show the type of each file", nocol);
             }
             "restore" => {
                 io.writeln("Commands:", col);
@@ -54,6 +58,8 @@ impl Runner {
                 io.writeln("Only list files, do not prompt to restore them", nocol);
                 io.write("  --full -f           ", col);
                 io.writeln("Show the entire diff between the files", nocol);
+                io.write("  --show-types -t     ", col);
+                io.writeln("Show the type of each file", nocol);
             }
             "rmhome" => {
                 io.writeln("Commands:", col);

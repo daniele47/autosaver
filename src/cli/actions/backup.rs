@@ -17,7 +17,16 @@ impl Runner {
         match cmd {
             "list" => self.check_flags(
                 cmd,
-                &["--all", "-a", "--unmodified", "-u", "--no-color", "--debug"],
+                &[
+                    "--all",
+                    "-a",
+                    "--unmodified",
+                    "-u",
+                    "--show-types",
+                    "-t",
+                    "--no-color",
+                    "--debug",
+                ],
             )?,
             "save" | "restore" => self.check_flags(
                 cmd,
@@ -34,6 +43,8 @@ impl Runner {
                     "-f",
                     "--list",
                     "-l",
+                    "--show-types",
+                    "-t",
                     "--no-color",
                     "--debug",
                 ],
@@ -80,6 +91,9 @@ impl Runner {
         let wflag_unmodified = self.args.flags().contains(&Flag::Word("unmodified".into()));
         let lflag_unmodified = self.args.flags().contains(&Flag::Letter('u'));
         let flag_unmodified = wflag_unmodified || lflag_unmodified;
+        let wflag_show_types = self.args.flags().contains(&Flag::Word("show-types".into()));
+        let lflag_show_types = self.args.flags().contains(&Flag::Letter('t'));
+        let flag_show_types = wflag_show_types || lflag_show_types;
 
         // paths
         let home_dir = self.paths("home")?;
@@ -144,6 +158,9 @@ impl Runner {
                                 if entry.policy() == ModulePolicy::NotDiff && !flag_all {
                                     continue;
                                 }
+                                if flag_show_types {
+                                    self.inout.write("[D] ", Self::PATH_DIFF_COL);
+                                }
                                 self.inout.writeln(path.to_string(), Self::PATH_DIFF_COL);
                                 if flag_diff {
                                     if act_restore {
@@ -166,6 +183,9 @@ impl Runner {
                             // files are equal
                             (true, true) => {
                                 if act_list && flag_unmodified {
+                                    if flag_show_types {
+                                        self.inout.write("[U] ", Self::PATH_EQ_COL);
+                                    }
                                     self.inout.writeln(path.to_string(), Self::PATH_EQ_COL);
                                 }
                             }
@@ -173,6 +193,9 @@ impl Runner {
                             (true, false) => {
                                 if !act_save && !act_list {
                                     continue;
+                                }
+                                if flag_show_types {
+                                    self.inout.write("[M] ", Self::PATH_MISS_COL);
                                 }
                                 self.inout.writeln(path.to_string(), Self::PATH_MISS_COL);
                                 if !flag_list && act_save {
@@ -185,6 +208,9 @@ impl Runner {
                             (false, true) => {
                                 if !act_restore && !act_list {
                                     continue;
+                                }
+                                if flag_show_types {
+                                    self.inout.write("[M] ", Self::PATH_MISS_COL);
                                 }
                                 self.inout.writeln(path.to_string(), Self::PATH_MISS_COL);
                                 if !flag_list && act_restore {

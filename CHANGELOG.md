@@ -2,7 +2,13 @@
 
 All notable changes to this project will be documented here
 
-## v0.175
+## v0.18.0
+
+### Features
+
+- added `--show-types|-t` for `list|save|restore` commands
+
+## v0.17.5
 
 ### Changes
 
