@@ -4,9 +4,8 @@ use std::{
 };
 
 use anyhow::{Result, anyhow, bail};
-use derive_getters::{Dissolve, Getters};
 
-#[derive(Debug, Clone, PartialEq, Eq, Getters, Dissolve)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PathStr {
     path: PathBuf,
 }
@@ -19,6 +18,10 @@ impl PathStr {
         }
 
         Ok(Self { path })
+    }
+
+    pub fn path(&self) -> &Path {
+        &self.path
     }
 
     pub fn to_string_lossy(&self) -> String {

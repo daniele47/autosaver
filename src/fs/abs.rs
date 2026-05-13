@@ -4,13 +4,12 @@ use std::{
 };
 
 use anyhow::{Result, bail};
-use derive_getters::{Dissolve, Getters};
 
 use crate::fs::path::PathStr;
 
-#[derive(Debug, Clone, PartialEq, Eq, Getters, Dissolve)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AbsPathStr {
-    path: PathStr,
+    pathstr: PathStr,
 }
 
 impl AbsPathStr {
@@ -20,16 +19,20 @@ impl AbsPathStr {
             let p = path.as_ref().display();
             bail!("Path is not absolute: {p}");
         } else {
-            Ok(Self { path })
+            Ok(Self { pathstr: path })
         }
     }
 
+    pub fn path(&self) -> &Path {
+        self.pathstr.as_ref()
+    }
+
     pub fn to_string_lossy(&self) -> String {
-        self.path.to_string_lossy().to_string()
+        self.pathstr.to_string_lossy()
     }
 
     pub fn join(&self, suffix: Self) -> Result<Self> {
-        self.path.path().join(suffix.path).try_into()
+        self.path().join(suffix.path()).try_into()
     }
 }
 
@@ -66,23 +69,23 @@ impl FromStr for AbsPathStr {
 // CONVERT FROM
 impl From<AbsPathStr> for PathStr {
     fn from(value: AbsPathStr) -> Self {
-        value.path
+        value.pathstr
     }
 }
 impl TryFrom<AbsPathStr> for String {
     type Error = anyhow::Error;
 
     fn try_from(value: AbsPathStr) -> std::prelude::v1::Result<Self, Self::Error> {
-        value.path.try_into()
+        value.pathstr.try_into()
     }
 }
 impl From<AbsPathStr> for PathBuf {
     fn from(value: AbsPathStr) -> Self {
-        value.path.into()
+        value.pathstr.into()
     }
 }
 impl AsRef<Path> for AbsPathStr {
     fn as_ref(&self) -> &Path {
-        self.path.as_ref()
+        self.path()
     }
 }
