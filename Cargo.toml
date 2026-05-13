@@ -7,3 +7,6 @@ edition = "2024"
 debug = true  # Retain debug symbols
 strip = false # Don't strip symbols
 opt-level = 3 # Keep optimizations but with symbols
+
+[dependencies]
+anyhow = "1.0.102"
