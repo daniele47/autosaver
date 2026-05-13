@@ -10,4 +10,3 @@ opt-level = 3 # Keep optimizations but with symbols
 
 [dependencies]
 anyhow = "1.0.102"
-derive-getters = "0.5.0"
