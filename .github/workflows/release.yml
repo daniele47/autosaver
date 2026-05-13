@@ -153,7 +153,7 @@ jobs:
 
       - name: Build with cross
         if: matrix.platform.use_cross
-        run: cross build --release --frozen --target ${{ matrix.platform.target }}
+        run: cross build --release --target ${{ matrix.platform.target }}
 
       # test, assert there are no clippy warnings and finally build natively
       - name: Test natively (debug)
@@ -170,7 +170,7 @@ jobs:
 
       - name: Build natively
         if: ${{ !matrix.platform.use_cross }}
-        run: cargo build --release --frozen --target ${{ matrix.platform.target }}
+        run: cargo build --release --target ${{ matrix.platform.target }}
 
       # package binaries
       - name: Get binary name
