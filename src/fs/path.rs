@@ -19,6 +19,10 @@ impl PathStr {
 
         Ok(Self { path })
     }
+
+    pub fn to_string_lossy(&self) -> String {
+        self.path.to_string_lossy().to_string()
+    }
 }
 
 // CONVERT FROM
