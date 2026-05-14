@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use anyhow::{Result, bail};
+use anyhow::{Context, Error, Result, anyhow, bail};
 use tracing::{instrument, warn};
 
 use crate::{
@@ -8,15 +8,15 @@ use crate::{
     prof::{
         Profile, ProfileKind,
         composite::{Composite, CompositeEntry},
-        module::Module,
+        module::{Module, ModuleEntry, ModulePolicy},
         runner::Runner,
     },
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum RawProfileLine<'a> {
-    Option(&'a str),
-    Data(&'a str),
+    Option(&'a str, usize),
+    Data(&'a str, usize),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -34,7 +34,7 @@ impl<'a> RawProfile<'a> {
         let mut kind = "";
         let mut id = name;
 
-        for line in config.lines() {
+        for (i, line) in config.lines().enumerate() {
             // option lines
             if let Some(option) = line.strip_prefix("/!") {
                 let option = option.trim();
@@ -48,7 +48,7 @@ impl<'a> RawProfile<'a> {
                 }
                 // fallback to storing not shared options
                 else {
-                    lines.push(RawProfileLine::Option(option));
+                    lines.push(RawProfileLine::Option(option, i));
                 }
             }
             // comment lines
@@ -61,7 +61,7 @@ impl<'a> RawProfile<'a> {
             else {
                 let line = line.trim();
                 if !line.is_empty() {
-                    lines.push(RawProfileLine::Data(line));
+                    lines.push(RawProfileLine::Data(line, i));
                 }
             }
         }
@@ -89,7 +89,7 @@ impl Profile {
             "module" => Self::parse_module(raw),
             "runner" => Self::parse_runner(raw),
             _ => bail!(
-                "Unknown kind option for profile {}: '{}'. Only valid kinds are 'composite', 'module' and 'runner'",
+                "Unknown kind option for profile {}: '{}'",
                 raw.name,
                 raw.kind,
             ),
@@ -98,13 +98,15 @@ impl Profile {
 
     fn parse_composite(raw: RawProfile) -> Result<Self> {
         let mut entries = vec![];
+        let kind = "composite";
         for line in raw.lines {
             match line {
-                RawProfileLine::Option(opt) => {
-                    bail!("Invalid option '{opt}' for composite profile {}", raw.name);
+                RawProfileLine::Option(opt, i) => {
+                    bail!(Self::err_opt(raw.name, opt, i, kind));
                 }
-                RawProfileLine::Data(data) => {
-                    let entry = CompositeEntry::new(RelPathStr::from_str(data)?);
+                RawProfileLine::Data(data, i) => {
+                    let data = Self::data_ctx(raw.name, data, i, kind)?;
+                    let entry = CompositeEntry::new(data);
                     entries.push(entry);
                 }
             }
@@ -116,7 +118,29 @@ impl Profile {
     }
 
     fn parse_module(raw: RawProfile) -> Result<Self> {
-        let entries = vec![];
+        let mut entries = vec![];
+        let mut policy = ModulePolicy::Track;
+        let kind = "module";
+        for line in raw.lines {
+            match line {
+                RawProfileLine::Option(opt, i) => match opt {
+                    opt_policy if let Some(opt_val) = opt_policy.strip_prefix("policy") => {
+                        match opt_val.trim() {
+                            "track" => policy = ModulePolicy::Track,
+                            "notdiff" => policy = ModulePolicy::NotDiff,
+                            "ignore" => policy = ModulePolicy::Ignore,
+                            _ => bail!(Self::err_val(raw.name, opt, i, kind, opt_val)),
+                        }
+                    }
+                    _ => bail!(Self::err_opt(raw.name, opt, i, kind)),
+                },
+                RawProfileLine::Data(data, i) => {
+                    let data = Self::data_ctx(raw.name, data, i, kind)?;
+                    let entry = ModuleEntry::new(data, policy);
+                    entries.push(entry);
+                }
+            }
+        }
         let name = RelPathStr::from_str(raw.name)?;
         let id = RelPathStr::from_str(raw.id)?;
         let kind = ProfileKind::Module(Module::new(entries));
@@ -129,5 +153,17 @@ impl Profile {
         let id = RelPathStr::from_str(raw.id)?;
         let kind = ProfileKind::Runner(Runner::new(entries));
         Ok(Profile::new(name, id, kind))
+    }
+
+    // packaged error messages
+    fn data_ctx(name: &str, data: &str, i: usize, kind: &str) -> Result<RelPathStr> {
+        RelPathStr::from_str(data)
+            .with_context(|| format!("Invalid data '{data}' for {kind} profile {name} at line {i}"))
+    }
+    fn err_opt(name: &str, opt: &str, i: usize, kind: &str) -> Error {
+        anyhow!("Invalid option '{opt}' for {kind} profile {name} at line {i}")
+    }
+    fn err_val(name: &str, opt: &str, i: usize, kind: &str, value: &str) -> Error {
+        anyhow!("Option '{opt}' for {kind} profile {name} at line {i} has invalid value '{value}'")
     }
 }
