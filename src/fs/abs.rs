@@ -45,7 +45,12 @@ impl AbsPathStr {
             let b = base.to_string_lossy();
             format!("Could not turn get relative path for {p} with base {b}")
         })?;
-        RelPathStr::try_from(PathBuf::from(stripped))
+        RelPathStr::try_from(stripped)
+    }
+
+    #[instrument(ret, err, level = "trace")]
+    pub fn basename(&self) -> Result<Self> {
+        self.pathstr.basename()?.try_into()
     }
 }
 
@@ -76,6 +81,13 @@ impl FromStr for AbsPathStr {
 
     fn from_str(s: &str) -> std::prelude::v1::Result<Self, Self::Err> {
         Self::new(PathStr::from_str(s)?)
+    }
+}
+impl TryFrom<&Path> for AbsPathStr {
+    type Error = anyhow::Error;
+
+    fn try_from(value: &Path) -> std::prelude::v1::Result<Self, Self::Error> {
+        PathStr::try_from(value)?.try_into()
     }
 }
 

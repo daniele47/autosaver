@@ -3,7 +3,7 @@ use std::{
     str::FromStr,
 };
 
-use anyhow::{Result, anyhow, bail};
+use anyhow::{Context, Result, anyhow, bail};
 use tracing::instrument;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -29,6 +29,14 @@ impl PathStr {
     pub fn to_string_lossy(&self) -> String {
         self.path.to_string_lossy().to_string()
     }
+
+    #[instrument(ret, err, level = "trace")]
+    pub fn basename(&self) -> Result<Self> {
+        self.path
+            .file_name()
+            .map(|p| Self::try_from(p.as_ref()))
+            .with_context(|| format!("Could not get basename of {}", self.to_string_lossy()))?
+    }
 }
 
 // CONVERT FROM
@@ -51,6 +59,13 @@ impl FromStr for PathStr {
 
     fn from_str(s: &str) -> std::prelude::v1::Result<Self, Self::Err> {
         Self::new(s.into())
+    }
+}
+impl TryFrom<&Path> for PathStr {
+    type Error = anyhow::Error;
+
+    fn try_from(value: &Path) -> std::prelude::v1::Result<Self, Self::Error> {
+        Self::try_from(PathBuf::from(value))
     }
 }
 
