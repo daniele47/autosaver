@@ -1,5 +1,6 @@
 use std::{
     fs::{self, File},
+    io::Read,
     path::Component,
 };
 
@@ -156,5 +157,54 @@ impl AbsPathStr {
             format!("Failed to copy from {p} to {t}")
         })?;
         Ok(())
+    }
+
+    #[instrument(ret, level = "trace")]
+    pub fn files_eq(&self, other: &Self) -> bool {
+        if let Ok(sm) = self.path().metadata()
+            && let Ok(om) = other.path().metadata()
+        {
+            // check both paths are files
+            if !sm.is_file() || !om.is_file() {
+                return false;
+            }
+
+            // check file len for faster checks
+            if sm.len() != om.len() {
+                return false;
+            }
+
+            // chunked byte comparison (works for both text and binary)
+            let mut file1 = match std::fs::File::open(self.path()) {
+                Ok(f) => f,
+                Err(_) => return false,
+            };
+            let mut file2 = match std::fs::File::open(other.path()) {
+                Ok(f) => f,
+                Err(_) => return false,
+            };
+
+            let mut buf1 = [0; 4096];
+            let mut buf2 = [0; 4096];
+
+            loop {
+                let n1 = match file1.read(&mut buf1) {
+                    Ok(n) => n,
+                    Err(_) => return false,
+                };
+                let n2 = match file2.read(&mut buf2) {
+                    Ok(n) => n,
+                    Err(_) => return false,
+                };
+
+                if n1 != n2 || buf1[..n1] != buf2[..n2] {
+                    return false;
+                }
+                if n1 == 0 {
+                    return true;
+                }
+            }
+        }
+        false
     }
 }
