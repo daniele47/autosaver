@@ -37,9 +37,9 @@ impl<'a> RawProfile<'a> {
             let line = line.trim();
             if let Some(opt) = line.strip_prefix("/!").map(str::trim) {
                 // specific shared options
-                if let Some(kind_str) = opt.strip_prefix("kind").map(str::trim) {
+                if let Some(kind_str) = opt.strip_prefix("kind ").map(str::trim) {
                     kind = kind_str;
-                } else if let Some(id_str) = opt.strip_prefix("id").map(str::trim) {
+                } else if let Some(id_str) = opt.strip_prefix("id ").map(str::trim) {
                     id = id_str;
                 }
                 // fallback to storing not shared options
