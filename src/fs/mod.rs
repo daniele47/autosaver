@@ -1,4 +1,7 @@
-use std::fs;
+use std::{
+    fs::{self, File},
+    path::Component,
+};
 
 use anyhow::{Context, Result, bail};
 use tracing::instrument;
@@ -64,8 +67,8 @@ impl AbsPathStr {
             return Ok(());
         }
 
-        let canon = self.canonicalize()?;
         // purge file
+        let canon = self.canonicalize()?;
         if canon.is_file() {
             fs::remove_file(canon.path()).with_context(|| {
                 let p = canon.to_string_lossy();
@@ -93,6 +96,38 @@ impl AbsPathStr {
             }
             parent = p.parent();
         }
+
+        Ok(())
+    }
+
+    #[instrument(ret, err, level = "trace")]
+    pub fn create_file(&self) -> Result<()> {
+        if self.is_file() {
+            return Ok(());
+        }
+
+        // valid file can be created
+        if !matches!(self.path().components().last(), Some(Component::Normal(_))) {
+            let p = self.to_string_lossy();
+            bail!("Path cannot be created as a file: {p}")
+        }
+
+        // create parent dirs
+        if let Some(parent) = self.path().parent() {
+            fs::create_dir_all(parent).with_context(|| {
+                let p = parent.to_string_lossy();
+                format!("Failed to create directory: {p}")
+            })?;
+        } else {
+            let p = self.to_string_lossy();
+            bail!("Could not create parent directories: {p}");
+        }
+
+        // create file
+        File::create(self.path()).with_context(|| {
+            let p = self.to_string_lossy();
+            format!("Failed to create file: {p}")
+        })?;
 
         Ok(())
     }
