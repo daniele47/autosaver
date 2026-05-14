@@ -65,19 +65,33 @@ impl AbsPathStr {
         }
 
         let canon = self.canonicalize()?;
+        // purge file
         if canon.is_file() {
             fs::remove_file(canon.path()).with_context(|| {
                 let p = canon.to_string_lossy();
                 format!("Could not delete file: {p}")
             })?;
-        } else if canon.is_dir() {
+        }
+        // purge empty directory
+        else if canon.is_dir() {
             fs::remove_dir(canon.path()).with_context(|| {
                 let p = canon.to_string_lossy();
                 format!("Could not delete directory: {p}")
             })?;
-        } else {
+        }
+        // fail if not either file nor directory
+        else {
             let p = canon.to_string_lossy();
             bail!("Could not delete path: {p}");
+        }
+
+        // delete empty directories
+        let mut parent = canon.path().parent();
+        while let Some(p) = parent {
+            if fs::remove_dir(p).is_err() {
+                break;
+            }
+            parent = p.parent();
         }
 
         Ok(())
