@@ -57,7 +57,7 @@ impl AbsPathStr {
     pub fn canonicalize(&self) -> Result<Self> {
         self.path()
             .canonicalize()
-            .map(|p| Self::try_from(p))?
+            .map(Self::try_from)?
             .with_context(|| format!("Failed to canonicalize {}", self.to_string_lossy()))
     }
 

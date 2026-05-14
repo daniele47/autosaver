@@ -107,7 +107,10 @@ impl AbsPathStr {
         }
 
         // valid file can be created
-        if !matches!(self.path().components().last(), Some(Component::Normal(_))) {
+        if !matches!(
+            self.path().components().next_back(),
+            Some(Component::Normal(_))
+        ) {
             let p = self.to_string_lossy();
             bail!("Path cannot be created as a file: {p}")
         }
@@ -130,5 +133,17 @@ impl AbsPathStr {
         })?;
 
         Ok(())
+    }
+
+    #[instrument(ret, err, level = "trace")]
+    pub fn read_file(&self) -> Result<String> {
+        if !self.is_file() {
+            let p = self.to_string_lossy();
+            bail!("Cannot read a path that is not a file: {p}");
+        }
+        fs::read_to_string(self.path()).with_context(|| {
+            let p = self.to_string_lossy();
+            format!("Could not read file: {p}")
+        })
     }
 }
