@@ -8,7 +8,7 @@ use tracing::instrument;
 
 use crate::fs::{abs::AbsPathStr, path::PathStr};
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct RelPathStr {
     pathstr: PathStr,
 }

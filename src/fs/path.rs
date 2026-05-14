@@ -6,7 +6,7 @@ use std::{
 use anyhow::{Context, Result, anyhow, bail};
 use tracing::instrument;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct PathStr {
     path: PathBuf,
 }
