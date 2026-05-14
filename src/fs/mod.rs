@@ -1,6 +1,6 @@
 use std::fs;
 
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, bail};
 use tracing::instrument;
 
 use crate::fs::abs::AbsPathStr;
@@ -56,5 +56,30 @@ impl AbsPathStr {
         }
 
         Ok(res)
+    }
+
+    #[instrument(ret, err, level = "trace")]
+    pub fn delete_path(&self) -> Result<()> {
+        if !self.path().exists() {
+            return Ok(());
+        }
+
+        let canon = self.canonicalize()?;
+        if canon.is_file() {
+            fs::remove_file(canon.path()).with_context(|| {
+                let p = canon.to_string_lossy();
+                format!("Could not delete file: {p}")
+            })?;
+        } else if canon.is_dir() {
+            fs::remove_dir(canon.path()).with_context(|| {
+                let p = canon.to_string_lossy();
+                format!("Could not delete directory: {p}")
+            })?;
+        } else {
+            let p = canon.to_string_lossy();
+            bail!("Could not delete path: {p}");
+        }
+
+        Ok(())
     }
 }
