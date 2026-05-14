@@ -9,7 +9,7 @@ pub mod fs;
 
 fn main() -> Result<()> {
     tracing_subscriber::registry()
-        .with(fmt::layer().with_timer(fmt::time::ChronoLocal::rfc_3339()))
+        .with(fmt::layer().with_timer(fmt::time::ChronoLocal::default()))
         .with(EnvFilter::from_default_env())
         .init();
 

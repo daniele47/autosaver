@@ -30,10 +30,23 @@ impl AbsPathStr {
     pub fn find_all(&self) -> Result<Vec<AbsPathStr>> {
         let mut stack = Vec::<usize>::new();
         let mut res = Vec::<AbsPathStr>::new();
+        let mut root_dir_used = false;
 
-        while let Some(item) = stack.pop() {
-            let item = &res[item];
+        loop {
+            // get next stack item
+            let item: &AbsPathStr;
+            if !root_dir_used {
+                item = self;
+                root_dir_used = true;
+            } else {
+                if let Some(item_index) = stack.pop() {
+                    item = &res[item_index];
+                } else {
+                    break;
+                }
+            }
 
+            // append children to vector + push chilren dirs to stack
             for child in item.list_all()? {
                 if child.is_dir() {
                     stack.push(res.len());
