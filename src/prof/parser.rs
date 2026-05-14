@@ -5,7 +5,12 @@ use tracing::{instrument, warn};
 
 use crate::{
     fs::rel::RelPathStr,
-    prof::{Profile, ProfileKind, composite::Composite, module::Module, runner::Runner},
+    prof::{
+        Profile, ProfileKind,
+        composite::{Composite, CompositeEntry},
+        module::Module,
+        runner::Runner,
+    },
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -24,7 +29,7 @@ struct RawProfile<'a> {
 
 impl<'a> RawProfile<'a> {
     #[instrument(ret, level = "trace")]
-    pub fn parse_config(config: &'a str, name: &'a str) -> Self {
+    pub fn parse_config(config: &'a str, name: &'a str) -> Result<Self> {
         let mut lines = Vec::new();
         let mut kind = "";
         let mut id = name;
@@ -61,20 +66,26 @@ impl<'a> RawProfile<'a> {
             }
         }
 
-        Self {
+        if kind.is_empty() {
+            bail!("Option 'kind' is missing from profile {name}");
+        } else if id.is_empty() {
+            bail!("Option 'id' is missing from profile {name}");
+        }
+
+        Ok(Self {
             lines,
             kind,
             name,
             id,
-        }
+        })
     }
 }
 
 impl Profile {
     pub fn parse_profile(config: String, name: String) -> Result<Profile> {
-        let raw = RawProfile::parse_config(&config, &name);
+        let raw = RawProfile::parse_config(&config, &name)?;
         match raw.kind {
-            "" | "composite" => Self::parse_composite(raw),
+            "composite" => Self::parse_composite(raw),
             "module" => Self::parse_module(raw),
             "runner" => Self::parse_runner(raw),
             _ => bail!(
@@ -86,7 +97,18 @@ impl Profile {
     }
 
     fn parse_composite(raw: RawProfile) -> Result<Self> {
-        let entries = vec![];
+        let mut entries = vec![];
+        for line in raw.lines {
+            match line {
+                RawProfileLine::Option(opt) => {
+                    bail!("Invalid option '{opt}' for composite profile {}", raw.name);
+                }
+                RawProfileLine::Data(data) => {
+                    let entry = CompositeEntry::new(RelPathStr::from_str(data)?);
+                    entries.push(entry);
+                }
+            }
+        }
         let name = RelPathStr::from_str(raw.name)?;
         let id = RelPathStr::from_str(raw.id)?;
         let kind = ProfileKind::Composite(Composite::new(entries));
