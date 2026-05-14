@@ -36,19 +36,17 @@ impl<'a> RawProfile<'a> {
 
         for (i, line) in config.lines().enumerate() {
             // option lines
-            if let Some(option) = line.strip_prefix("/!") {
-                let option = option.trim();
+            let line = line.trim();
+            if let Some(opt) = line.strip_prefix("/!").map(str::trim) {
                 // specific shared options
-                if let Some(kind_str) = option.strip_prefix("kind") {
-                    let kind_str = kind_str.trim();
+                if let Some(kind_str) = opt.strip_prefix("kind").map(str::trim) {
                     kind = kind_str;
-                } else if let Some(id_str) = option.strip_prefix("id") {
-                    let id_str = id_str.trim();
+                } else if let Some(id_str) = opt.strip_prefix("id").map(str::trim) {
                     id = id_str;
                 }
                 // fallback to storing not shared options
                 else {
-                    lines.push(RawProfileLine::Option(option, i));
+                    lines.push(RawProfileLine::Option(opt, i));
                 }
             }
             // comment lines
@@ -59,7 +57,6 @@ impl<'a> RawProfile<'a> {
             }
             // data lines
             else {
-                let line = line.trim();
                 if !line.is_empty() {
                     lines.push(RawProfileLine::Data(line, i));
                 }
@@ -191,5 +188,115 @@ impl Profile {
         let opt1 = opt_split.next().unwrap_or("");
         let opt2 = opt_split.next().unwrap_or("");
         anyhow!("Option '{opt1}' for {kind} profile {name} at line {i} has invalid value '{opt2}'")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::prof::ProfileKind;
+
+    #[test]
+    fn test_parse_composite_profile() -> Result<()> {
+        let config = r#"
+            /! kind composite
+            /! id profiles/my_composite
+            path/to/file1.txt
+            path/to/file2.txt
+            // This is a comment
+            path/to/file3.txt
+        "#
+        .to_string();
+
+        let profile = Profile::parse_profile(config, "my_composite".to_string())?;
+
+        assert_eq!(profile.name().as_ref(), "my_composite");
+        assert_eq!(profile.id().as_ref(), "profiles/my_composite");
+
+        match profile.kind() {
+            ProfileKind::Composite(composite) => {
+                assert_eq!(composite.entries().len(), 3);
+            }
+            _ => panic!("Expected Composite profile"),
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_parse_module_profile() -> Result<()> {
+        let config = r#"
+            /! kind module
+            /! id profiles/my_module
+            /! policy track
+            src/main.rs
+            src/lib.rs
+            /! policy ignore
+            target/
+            /! policy notdiff
+            Cargo.lock
+        "#
+        .to_string();
+
+        let profile = Profile::parse_profile(config, "my_module".to_string())?;
+
+        assert_eq!(profile.name().as_ref(), "my_module");
+        assert_eq!(profile.id().as_ref(), "profiles/my_module");
+
+        match profile.kind() {
+            ProfileKind::Module(module) => {
+                let entries = module.entries();
+                assert_eq!(entries.len(), 4);
+
+                // First two should be Track
+                assert_eq!(*entries[0].policy(), ModulePolicy::Track);
+                assert_eq!(*entries[1].policy(), ModulePolicy::Track);
+
+                // Third should be Ignore
+                assert_eq!(*entries[2].policy(), ModulePolicy::Ignore);
+
+                // Fourth should be NotDiff
+                assert_eq!(*entries[3].policy(), ModulePolicy::NotDiff);
+            }
+            _ => panic!("Expected Module profile"),
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_parse_runner_profile() -> Result<()> {
+        let config = r#"
+            /! kind runner
+            /! id profiles/my_runner
+            /! policy run
+            echo "Hello"
+            ls -la
+            /! policy skip
+            rm -rf /tmp/test
+            /! policy run
+            cargo build
+        "#
+        .to_string();
+
+        let profile = Profile::parse_profile(config, "my_runner".to_string())?;
+
+        assert_eq!(profile.name().as_ref(), "my_runner");
+        assert_eq!(profile.id().as_ref(), "profiles/my_runner");
+
+        match profile.kind() {
+            ProfileKind::Runner(runner) => {
+                let entries = runner.entries();
+                assert_eq!(entries.len(), 4);
+
+                assert_eq!(*entries[0].policy(), RunnerPolicy::Run);
+                assert_eq!(*entries[1].policy(), RunnerPolicy::Run);
+                assert_eq!(*entries[2].policy(), RunnerPolicy::Skip);
+                assert_eq!(*entries[3].policy(), RunnerPolicy::Run);
+            }
+            _ => panic!("Expected Runner profile"),
+        }
+
+        Ok(())
     }
 }
