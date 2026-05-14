@@ -43,7 +43,7 @@ impl AbsPathStr {
         let stripped = self.path().strip_prefix(base.path()).with_context(|| {
             let p = self.to_string_lossy();
             let b = base.to_string_lossy();
-            format!("Could not turn get relative path for {p} with base {b}")
+            format!("Could not get relative path for {p} with base {b}")
         })?;
         RelPathStr::try_from(stripped)
     }
@@ -51,6 +51,24 @@ impl AbsPathStr {
     #[instrument(ret, err, level = "trace")]
     pub fn basename(&self) -> Result<Self> {
         self.pathstr.basename()?.try_into()
+    }
+
+    #[instrument(ret, level = "trace")]
+    pub fn canonicalize(&self) -> Result<Self> {
+        self.path()
+            .canonicalize()
+            .map(|p| Self::try_from(p))?
+            .with_context(|| format!("Failed to canonicalize {}", self.to_string_lossy()))
+    }
+
+    #[instrument(ret, level = "trace")]
+    pub fn is_file(&self) -> bool {
+        self.path().is_file()
+    }
+
+    #[instrument(ret, level = "trace")]
+    pub fn is_dir(&self) -> bool {
+        self.path().is_dir()
     }
 }
 
