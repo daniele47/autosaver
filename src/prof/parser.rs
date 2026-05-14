@@ -1,7 +1,12 @@
+use std::str::FromStr;
+
 use anyhow::{Result, bail};
 use tracing::{instrument, warn};
 
-use crate::prof::Profile;
+use crate::{
+    fs::rel::RelPathStr,
+    prof::{Profile, ProfileKind, composite::Composite, module::Module, runner::Runner},
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum RawProfileLine<'a> {
@@ -41,12 +46,18 @@ impl<'a> RawProfile<'a> {
                     lines.push(RawProfileLine::Option(option));
                 }
             }
-            // data lines
-            else if !line.starts_with("/") {
+            // comment lines
+            else if line.starts_with("/") {
                 if !line.starts_with("//") {
-                    warn!("Comments are meant to start with // ({line})");
+                    warn!("Comments are meant to start with double slashes: {line}");
                 }
-                lines.push(RawProfileLine::Data(line.trim()));
+            }
+            // data lines
+            else {
+                let line = line.trim();
+                if !line.is_empty() {
+                    lines.push(RawProfileLine::Data(line));
+                }
             }
         }
 
@@ -63,11 +74,38 @@ impl Profile {
     pub fn parse_profile(config: String, name: String) -> Result<Profile> {
         let raw = RawProfile::parse_config(&config, &name);
         match raw.kind {
-            "" | "composite" => {}
-            "module" => {}
-            "runner" => {}
-            _ => bail!("Invalid kind option: {}", raw.kind),
+            "" | "composite" => Self::parse_composite(raw),
+            "module" => Self::parse_module(raw),
+            "runner" => Self::parse_runner(raw),
+            _ => bail!(
+                "Unknown kind option for profile {}: '{}'. Only valid kinds are 'composite', 'module' and 'runner'",
+                raw.name,
+                raw.kind,
+            ),
         }
-        todo!()
+    }
+
+    fn parse_composite(raw: RawProfile) -> Result<Self> {
+        let entries = vec![];
+        let name = RelPathStr::from_str(raw.name)?;
+        let id = RelPathStr::from_str(raw.id)?;
+        let kind = ProfileKind::Composite(Composite::new(entries));
+        Ok(Profile::new(name, id, kind))
+    }
+
+    fn parse_module(raw: RawProfile) -> Result<Self> {
+        let entries = vec![];
+        let name = RelPathStr::from_str(raw.name)?;
+        let id = RelPathStr::from_str(raw.id)?;
+        let kind = ProfileKind::Module(Module::new(entries));
+        Ok(Profile::new(name, id, kind))
+    }
+
+    fn parse_runner(raw: RawProfile) -> Result<Self> {
+        let entries = vec![];
+        let name = RelPathStr::from_str(raw.name)?;
+        let id = RelPathStr::from_str(raw.id)?;
+        let kind = ProfileKind::Runner(Runner::new(entries));
+        Ok(Profile::new(name, id, kind))
     }
 }
