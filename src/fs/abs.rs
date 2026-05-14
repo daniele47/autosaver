@@ -4,6 +4,7 @@ use std::{
 };
 
 use anyhow::{Result, bail};
+use tracing::instrument;
 
 use crate::fs::path::PathStr;
 
@@ -13,6 +14,7 @@ pub struct AbsPathStr {
 }
 
 impl AbsPathStr {
+    #[instrument(ret, err)]
     pub fn new(path: PathStr) -> Result<Self> {
         // check path is relative
         if !path.as_ref().is_absolute() {
@@ -31,6 +33,7 @@ impl AbsPathStr {
         self.pathstr.to_string_lossy()
     }
 
+    #[instrument(ret, err)]
     pub fn join(&self, suffix: Self) -> Result<Self> {
         self.path().join(suffix.path()).try_into()
     }

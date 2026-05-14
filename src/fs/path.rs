@@ -4,6 +4,7 @@ use std::{
 };
 
 use anyhow::{Result, anyhow, bail};
+use tracing::instrument;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PathStr {
@@ -11,6 +12,7 @@ pub struct PathStr {
 }
 
 impl PathStr {
+    #[instrument(ret, err)]
     pub fn new(path: PathBuf) -> Result<Self> {
         // check path doesn't contain parent directory
         if path.components().any(|c| c == Component::ParentDir) {

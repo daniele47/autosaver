@@ -1,6 +1,9 @@
+use std::str::FromStr;
+
 use anyhow::Result;
-use tracing::{trace, *};
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
+
+use crate::fs::abs::AbsPathStr;
 
 pub mod fs;
 
@@ -10,11 +13,7 @@ fn main() -> Result<()> {
         .with(EnvFilter::new("debug"))
         .init();
 
-    trace!("Test trace");
-    warn!("Wanr");
-    info!("Info");
-    debug!("debug");
-    error!("Err");
+    let _ = AbsPathStr::from_str("/bin/tree")?;
 
     Ok(())
 }
