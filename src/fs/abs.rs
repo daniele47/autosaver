@@ -4,6 +4,7 @@ use std::{
 };
 
 use anyhow::{Context, Result, bail};
+use tracing::instrument;
 
 use crate::fs::{path::PathStr, rel::RelPathStr};
 
@@ -13,6 +14,7 @@ pub struct AbsPathStr {
 }
 
 impl AbsPathStr {
+    #[instrument(ret, err, level = "trace")]
     pub fn new(path: PathStr) -> Result<Self> {
         // check path is relative
         if !path.as_ref().is_absolute() {
@@ -31,10 +33,12 @@ impl AbsPathStr {
         self.pathstr.to_string_lossy()
     }
 
+    #[instrument(ret, err, level = "trace")]
     pub fn join(&self, suffix: &RelPathStr) -> Result<Self> {
         self.path().join(suffix.path()).try_into()
     }
 
+    #[instrument(ret, err, level = "trace")]
     pub fn to_rel(&self, base: &Self) -> Result<RelPathStr> {
         let stripped = self.path().strip_prefix(base.path()).with_context(|| {
             let p = self.to_string_lossy();
