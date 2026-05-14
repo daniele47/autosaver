@@ -200,22 +200,27 @@ mod tests {
     fn test_parse_composite_profile() -> Result<()> {
         let config = r#"
             /! kind composite
-            /! id profiles/my_composite
-            path/to/file1.txt
-            path/to/file2.txt
+            /! id profiles_my_composite
+            path_to_file1.txt
+            path_to_file2.txt
             // This is a comment
-            path/to/file3.txt
+            path_to_file3.txt
         "#
         .to_string();
 
+        // parse
         let profile = Profile::parse_profile(config, "my_composite".to_string())?;
 
+        // validate
         assert_eq!(profile.name().as_ref(), "my_composite");
-        assert_eq!(profile.id().as_ref(), "profiles/my_composite");
-
+        assert_eq!(profile.id().as_ref(), "profiles_my_composite");
         match profile.kind() {
             ProfileKind::Composite(composite) => {
-                assert_eq!(composite.entries().len(), 3);
+                let entries = composite.entries();
+                assert_eq!(entries.len(), 3);
+                assert_eq!(*entries[0].child(), "path_to_file1.txt".parse()?);
+                assert_eq!(*entries[1].child(), "path_to_file2.txt".parse()?);
+                assert_eq!(*entries[2].child(), "path_to_file3.txt".parse()?);
             }
             _ => panic!("Expected Composite profile"),
         }
@@ -227,35 +232,34 @@ mod tests {
     fn test_parse_module_profile() -> Result<()> {
         let config = r#"
             /! kind module
-            /! id profiles/my_module
+            /! id profile_my_module
             /! policy track
-            src/main.rs
-            src/lib.rs
+            src_main.rs
+            src_lib.rs
             /! policy ignore
-            target/
+            target
             /! policy notdiff
             Cargo.lock
         "#
         .to_string();
 
+        // parse
         let profile = Profile::parse_profile(config, "my_module".to_string())?;
 
+        // validate
         assert_eq!(profile.name().as_ref(), "my_module");
-        assert_eq!(profile.id().as_ref(), "profiles/my_module");
-
+        assert_eq!(profile.id().as_ref(), "profile_my_module");
         match profile.kind() {
             ProfileKind::Module(module) => {
                 let entries = module.entries();
                 assert_eq!(entries.len(), 4);
-
-                // First two should be Track
+                assert_eq!(*entries[0].path(), "src_main.rs".parse()?);
                 assert_eq!(*entries[0].policy(), ModulePolicy::Track);
+                assert_eq!(*entries[1].path(), "src_lib.rs".parse()?);
                 assert_eq!(*entries[1].policy(), ModulePolicy::Track);
-
-                // Third should be Ignore
+                assert_eq!(*entries[2].path(), "target".parse()?);
                 assert_eq!(*entries[2].policy(), ModulePolicy::Ignore);
-
-                // Fourth should be NotDiff
+                assert_eq!(*entries[3].path(), "Cargo.lock".parse()?);
                 assert_eq!(*entries[3].policy(), ModulePolicy::NotDiff);
             }
             _ => panic!("Expected Module profile"),
@@ -268,30 +272,34 @@ mod tests {
     fn test_parse_runner_profile() -> Result<()> {
         let config = r#"
             /! kind runner
-            /! id profiles/my_runner
+            /! id profiles_my_runner
             /! policy run
-            echo "Hello"
-            ls -la
+            script1.sh
+            scripts
             /! policy skip
-            rm -rf /tmp/test
+            data
             /! policy run
-            cargo build
+            script2.sh
         "#
         .to_string();
 
+        // parse
         let profile = Profile::parse_profile(config, "my_runner".to_string())?;
 
+        // validate
         assert_eq!(profile.name().as_ref(), "my_runner");
-        assert_eq!(profile.id().as_ref(), "profiles/my_runner");
-
+        assert_eq!(profile.id().as_ref(), "profiles_my_runner");
         match profile.kind() {
             ProfileKind::Runner(runner) => {
                 let entries = runner.entries();
                 assert_eq!(entries.len(), 4);
-
+                assert_eq!(*entries[0].path(), "script1.sh".parse()?);
                 assert_eq!(*entries[0].policy(), RunnerPolicy::Run);
+                assert_eq!(*entries[1].path(), "scripts".parse()?);
                 assert_eq!(*entries[1].policy(), RunnerPolicy::Run);
+                assert_eq!(*entries[2].path(), "data".parse()?);
                 assert_eq!(*entries[2].policy(), RunnerPolicy::Skip);
+                assert_eq!(*entries[3].path(), "script2.sh".parse()?);
                 assert_eq!(*entries[3].policy(), RunnerPolicy::Run);
             }
             _ => panic!("Expected Runner profile"),
