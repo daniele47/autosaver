@@ -4,7 +4,6 @@ use std::{
 };
 
 use anyhow::{Context, Result, anyhow, bail};
-use tracing::instrument;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct PathStr {
@@ -12,7 +11,6 @@ pub struct PathStr {
 }
 
 impl PathStr {
-    #[instrument(ret, err, level = "trace")]
     pub fn new(path: PathBuf) -> Result<Self> {
         // check path doesn't contain parent directory
         if path.components().any(|c| c == Component::ParentDir) {
@@ -30,7 +28,6 @@ impl PathStr {
         self.path.to_string_lossy().to_string()
     }
 
-    #[instrument(ret, err, level = "trace")]
     pub fn basename(&self) -> Result<Self> {
         self.path
             .file_name()

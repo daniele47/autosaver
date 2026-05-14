@@ -1,7 +1,6 @@
 use std::str::FromStr;
 
 use anyhow::{Context, Error, Result, anyhow, bail};
-use tracing::{instrument, warn};
 
 use crate::{
     fs::rel::RelPathStr,
@@ -28,7 +27,6 @@ struct RawProfile<'a> {
 }
 
 impl<'a> RawProfile<'a> {
-    #[instrument(ret, level = "trace")]
     pub fn parse_config(config: &'a str, name: &'a str) -> Result<Self> {
         let mut lines = Vec::new();
         let mut kind = "";
@@ -49,14 +47,8 @@ impl<'a> RawProfile<'a> {
                     lines.push(RawProfileLine::Option(opt, i));
                 }
             }
-            // comment lines
-            else if line.starts_with("/") {
-                if !line.starts_with("//") {
-                    warn!("Comments are meant to start with double slashes: {line}");
-                }
-            }
             // data lines
-            else {
+            else if !line.starts_with("/") {
                 if !line.is_empty() {
                     lines.push(RawProfileLine::Data(line, i));
                 }

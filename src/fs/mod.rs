@@ -5,7 +5,6 @@ use std::{
 };
 
 use anyhow::{Context, Result, bail};
-use tracing::instrument;
 
 use crate::fs::abs::AbsPathStr;
 
@@ -14,7 +13,6 @@ pub mod path;
 pub mod rel;
 
 impl AbsPathStr {
-    #[instrument(ret, err, level = "trace")]
     pub fn list_all(&self) -> Result<Vec<AbsPathStr>> {
         fs::read_dir(self)
             .with_context(|| {
@@ -30,7 +28,6 @@ impl AbsPathStr {
             .collect()
     }
 
-    #[instrument(ret, err, level = "trace")]
     pub fn find_all(&self) -> Result<Vec<AbsPathStr>> {
         let mut stack = Vec::<usize>::new();
         let mut res = Vec::<AbsPathStr>::new();
@@ -62,7 +59,6 @@ impl AbsPathStr {
         Ok(res)
     }
 
-    #[instrument(ret, err, level = "trace")]
     pub fn delete_path(&self) -> Result<()> {
         if !self.path().exists() {
             return Ok(());
@@ -101,7 +97,6 @@ impl AbsPathStr {
         Ok(())
     }
 
-    #[instrument(ret, err, level = "trace")]
     pub fn create_file(&self) -> Result<()> {
         if self.is_file() {
             return Ok(());
@@ -136,7 +131,6 @@ impl AbsPathStr {
         Ok(())
     }
 
-    #[instrument(ret, err, level = "trace")]
     pub fn read_file(&self) -> Result<String> {
         if !self.is_file() {
             let p = self.to_string_lossy();
@@ -148,7 +142,6 @@ impl AbsPathStr {
         })
     }
 
-    #[instrument(ret, err, level = "trace")]
     pub fn copy_file(&self, target: &Self) -> Result<()> {
         target.create_file()?;
         fs::copy(self, target).with_context(|| {
@@ -159,7 +152,6 @@ impl AbsPathStr {
         Ok(())
     }
 
-    #[instrument(ret, level = "trace")]
     pub fn files_eq(&self, other: &Self) -> bool {
         || -> Result<()> {
             let sm = self.path().metadata()?;

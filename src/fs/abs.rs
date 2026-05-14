@@ -4,7 +4,6 @@ use std::{
 };
 
 use anyhow::{Context, Result, bail};
-use tracing::instrument;
 
 use crate::fs::{path::PathStr, rel::RelPathStr};
 
@@ -14,7 +13,6 @@ pub struct AbsPathStr {
 }
 
 impl AbsPathStr {
-    #[instrument(ret, err, level = "trace")]
     pub fn new(path: PathStr) -> Result<Self> {
         // check path is relative
         if !path.as_ref().is_absolute() {
@@ -33,12 +31,10 @@ impl AbsPathStr {
         self.pathstr.to_string_lossy()
     }
 
-    #[instrument(ret, err, level = "trace")]
     pub fn join(&self, suffix: &RelPathStr) -> Result<Self> {
         self.path().join(suffix.path()).try_into()
     }
 
-    #[instrument(ret, err, level = "trace")]
     pub fn to_rel(&self, base: &Self) -> Result<RelPathStr> {
         let stripped = self.path().strip_prefix(base.path()).with_context(|| {
             let p = self.to_string_lossy();
@@ -48,12 +44,10 @@ impl AbsPathStr {
         RelPathStr::try_from(stripped)
     }
 
-    #[instrument(ret, err, level = "trace")]
     pub fn basename(&self) -> Result<Self> {
         self.pathstr.basename()?.try_into()
     }
 
-    #[instrument(ret, level = "trace")]
     pub fn canonicalize(&self) -> Result<Self> {
         self.path()
             .canonicalize()
@@ -61,17 +55,14 @@ impl AbsPathStr {
             .with_context(|| format!("Failed to canonicalize {}", self.to_string_lossy()))
     }
 
-    #[instrument(ret, level = "trace")]
     pub fn is_file(&self) -> bool {
         self.path().is_file()
     }
 
-    #[instrument(ret, level = "trace")]
     pub fn is_dir(&self) -> bool {
         self.path().is_dir()
     }
 
-    #[instrument(ret, level = "trace")]
     pub fn is_inside(&self, base: &Self) -> bool {
         if let Ok(self_canon) = self.canonicalize()
             && let Ok(dir_canon) = base.canonicalize()
