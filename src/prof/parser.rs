@@ -129,7 +129,7 @@ impl Profile {
                             "ignore" => policy = ModulePolicy::Ignore,
                             "notdiff" => policy = ModulePolicy::NotDiff,
                             "track" => policy = ModulePolicy::Track,
-                            _ => bail!(Self::err_val(raw.name, opt, i, kind, opt_val)),
+                            _ => bail!(Self::err_val(raw.name, opt, i, kind)),
                         }
                     }
                     _ => bail!(Self::err_opt(raw.name, opt, i, kind)),
@@ -158,7 +158,7 @@ impl Profile {
                         match opt_val.trim() {
                             "run" => policy = RunnerPolicy::Run,
                             "skip" => policy = RunnerPolicy::Skip,
-                            _ => bail!(Self::err_val(raw.name, opt, i, kind, opt_val)),
+                            _ => bail!(Self::err_val(raw.name, opt, i, kind)),
                         }
                     }
                     _ => bail!(Self::err_opt(raw.name, opt, i, kind)),
@@ -182,9 +182,14 @@ impl Profile {
             .with_context(|| format!("Invalid data '{data}' for {kind} profile {name} at line {i}"))
     }
     fn err_opt(name: &str, opt: &str, i: usize, kind: &str) -> Error {
-        anyhow!("Invalid option '{opt}' for {kind} profile {name} at line {i}")
+        let mut opt_split = opt.split_whitespace();
+        let opt1 = opt_split.next().unwrap_or("");
+        anyhow!("Invalid option '{opt1}' for {kind} profile {name} at line {i}")
     }
-    fn err_val(name: &str, opt: &str, i: usize, kind: &str, value: &str) -> Error {
-        anyhow!("Option '{opt}' for {kind} profile {name} at line {i} has invalid value '{value}'")
+    fn err_val(name: &str, opt: &str, i: usize, kind: &str) -> Error {
+        let mut opt_split = opt.split_whitespace();
+        let opt1 = opt_split.next().unwrap_or("");
+        let opt2 = opt_split.next().unwrap_or("");
+        anyhow!("Option '{opt1}' for {kind} profile {name} at line {i} has invalid value '{opt2}'")
     }
 }
