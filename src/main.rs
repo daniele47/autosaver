@@ -17,6 +17,8 @@ fn main() -> Result<()> {
     let base = AbsPathStr::from_str("/bin")?;
     let rel = path.to_rel(&base)?;
     println!("{rel:?}");
+    let abs = rel.to_abs(&base)?;
+    println!("{abs:?}");
 
     Ok(())
 }
