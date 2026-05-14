@@ -15,7 +15,7 @@ pub mod rel;
 impl AbsPathStr {
     #[instrument(ret, err, level = "trace")]
     pub fn list_all(&self) -> Result<Vec<AbsPathStr>> {
-        fs::read_dir(self.path())
+        fs::read_dir(self)
             .with_context(|| {
                 let p = self.to_string_lossy();
                 format!("Could not list files in directory {p}")
@@ -70,14 +70,14 @@ impl AbsPathStr {
         // purge file
         let canon = self.canonicalize()?;
         if canon.is_file() {
-            fs::remove_file(canon.path()).with_context(|| {
+            fs::remove_file(&canon).with_context(|| {
                 let p = canon.to_string_lossy();
                 format!("Could not delete file: {p}")
             })?;
         }
         // purge empty directory
         else if canon.is_dir() {
-            fs::remove_dir(canon.path()).with_context(|| {
+            fs::remove_dir(&canon).with_context(|| {
                 let p = canon.to_string_lossy();
                 format!("Could not delete directory: {p}")
             })?;
@@ -127,7 +127,7 @@ impl AbsPathStr {
         }
 
         // create file
-        File::create(self.path()).with_context(|| {
+        File::create(self).with_context(|| {
             let p = self.to_string_lossy();
             format!("Failed to create file: {p}")
         })?;
@@ -141,9 +141,20 @@ impl AbsPathStr {
             let p = self.to_string_lossy();
             bail!("Cannot read a path that is not a file: {p}");
         }
-        fs::read_to_string(self.path()).with_context(|| {
+        fs::read_to_string(self).with_context(|| {
             let p = self.to_string_lossy();
             format!("Could not read file: {p}")
         })
+    }
+
+    #[instrument(ret, err, level = "trace")]
+    pub fn copy_file(&self, target: &Self) -> Result<()> {
+        target.create_file()?;
+        fs::copy(self, target).with_context(|| {
+            let p = self.to_string_lossy();
+            let t = target.to_string_lossy();
+            format!("Failed to copy from {p} to {t}")
+        })?;
+        Ok(())
     }
 }
