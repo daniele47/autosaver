@@ -47,6 +47,15 @@ impl RelPathStr {
     pub fn basename(&self) -> Result<Self> {
         self.pathstr.basename()?.try_into()
     }
+
+    #[instrument(ret, level = "trace")]
+    pub fn is_inside(&self, base: &AbsPathStr) -> bool {
+        if let Ok(abs) = self.to_abs(base) {
+            abs.is_inside(base)
+        } else {
+            false
+        }
+    }
 }
 
 // CONVERT INTO
