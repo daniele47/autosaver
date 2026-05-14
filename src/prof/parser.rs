@@ -9,7 +9,7 @@ use crate::{
         Profile, ProfileKind,
         composite::{Composite, CompositeEntry},
         module::{Module, ModuleEntry, ModulePolicy},
-        runner::Runner,
+        runner::{Runner, RunnerEntry, RunnerPolicy},
     },
 };
 
@@ -126,9 +126,9 @@ impl Profile {
                 RawProfileLine::Option(opt, i) => match opt {
                     opt_policy if let Some(opt_val) = opt_policy.strip_prefix("policy") => {
                         match opt_val.trim() {
-                            "track" => policy = ModulePolicy::Track,
-                            "notdiff" => policy = ModulePolicy::NotDiff,
                             "ignore" => policy = ModulePolicy::Ignore,
+                            "notdiff" => policy = ModulePolicy::NotDiff,
+                            "track" => policy = ModulePolicy::Track,
                             _ => bail!(Self::err_val(raw.name, opt, i, kind, opt_val)),
                         }
                     }
@@ -148,7 +148,28 @@ impl Profile {
     }
 
     fn parse_runner(raw: RawProfile) -> Result<Self> {
-        let entries = vec![];
+        let mut entries = vec![];
+        let mut policy = RunnerPolicy::Run;
+        let kind = "runner";
+        for line in raw.lines {
+            match line {
+                RawProfileLine::Option(opt, i) => match opt {
+                    opt_policy if let Some(opt_val) = opt_policy.strip_prefix("policy") => {
+                        match opt_val.trim() {
+                            "run" => policy = RunnerPolicy::Run,
+                            "skip" => policy = RunnerPolicy::Skip,
+                            _ => bail!(Self::err_val(raw.name, opt, i, kind, opt_val)),
+                        }
+                    }
+                    _ => bail!(Self::err_opt(raw.name, opt, i, kind)),
+                },
+                RawProfileLine::Data(data, i) => {
+                    let data = Self::data_ctx(raw.name, data, i, kind)?;
+                    let entry = RunnerEntry::new(data, policy);
+                    entries.push(entry);
+                }
+            }
+        }
         let name = RelPathStr::from_str(raw.name)?;
         let id = RelPathStr::from_str(raw.id)?;
         let kind = ProfileKind::Runner(Runner::new(entries));
