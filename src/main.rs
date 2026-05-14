@@ -10,10 +10,13 @@ pub mod fs;
 fn main() -> Result<()> {
     tracing_subscriber::registry()
         .with(fmt::layer().with_timer(fmt::time::ChronoLocal::rfc_3339()))
-        .with(EnvFilter::new("debug"))
+        .with(EnvFilter::from_default_env())
         .init();
 
-    let _ = AbsPathStr::from_str("/bin/tree")?;
+    let path = AbsPathStr::from_str("/bin/tree")?;
+    let base = AbsPathStr::from_str("/bin")?;
+    let rel = path.to_rel(&base)?;
+    println!("{rel:?}");
 
     Ok(())
 }

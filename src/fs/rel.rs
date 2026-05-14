@@ -6,7 +6,7 @@ use std::{
 use anyhow::{Result, bail};
 use tracing::instrument;
 
-use crate::fs::path::PathStr;
+use crate::fs::{abs::AbsPathStr, path::PathStr};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RelPathStr {
@@ -36,6 +36,11 @@ impl RelPathStr {
     #[instrument(ret, err)]
     pub fn join(&self, suffix: Self) -> Result<Self> {
         self.path().join(suffix.path()).try_into()
+    }
+
+    #[instrument(ret, err)]
+    pub fn to_abs(&self, base: &AbsPathStr) -> Result<AbsPathStr> {
+        base.join(self)
     }
 }
 
