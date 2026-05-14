@@ -6,6 +6,7 @@ use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberI
 use crate::fs::abs::AbsPathStr;
 
 pub mod fs;
+pub mod prof;
 
 fn main() -> Result<()> {
     tracing_subscriber::registry()
