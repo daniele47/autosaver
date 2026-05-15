@@ -52,6 +52,7 @@ pub enum CliCmd {
 }
 
 impl Cli {
+    #[tracing::instrument(ret, err, level = "trace")]
     pub fn run(&self) -> Result<()> {
         dbg!(self);
         Ok(())

@@ -13,6 +13,7 @@ pub struct RelPathStr {
 }
 
 impl RelPathStr {
+    #[tracing::instrument(ret, err, level = "trace")]
     pub fn new(path: PathStr) -> Result<Self> {
         // check path is relative
         if !path.as_ref().is_relative() {
@@ -31,18 +32,22 @@ impl RelPathStr {
         self.pathstr.to_string_lossy()
     }
 
+    #[tracing::instrument(ret, err, level = "trace")]
     pub fn join(&self, suffix: Self) -> Result<Self> {
         self.path().join(suffix.path()).try_into()
     }
 
+    #[tracing::instrument(ret, err, level = "trace")]
     pub fn to_abs(&self, base: &AbsPathStr) -> Result<AbsPathStr> {
         base.join(self)
     }
 
+    #[tracing::instrument(ret, err, level = "trace")]
     pub fn basename(&self) -> Result<Self> {
         self.pathstr.basename()?.try_into()
     }
 
+    #[tracing::instrument(ret, level = "trace")]
     pub fn is_inside(&self, base: &AbsPathStr) -> bool {
         if let Ok(abs) = self.to_abs(base) {
             abs.is_inside(base)

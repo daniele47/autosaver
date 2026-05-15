@@ -27,7 +27,7 @@ struct RawProfile<'a> {
 }
 
 impl<'a> RawProfile<'a> {
-    pub fn parse_config(config: &'a str, name: &'a str) -> Result<Self> {
+    fn parse_config(config: &'a str, name: &'a str) -> Result<Self> {
         let mut lines = Vec::new();
         let mut kind = "";
         let mut id = name;
@@ -69,6 +69,7 @@ impl<'a> RawProfile<'a> {
 }
 
 impl Profile {
+    #[tracing::instrument(ret, err, level = "trace")]
     pub fn parse_profile(config: String, name: String) -> Result<Profile> {
         let raw = RawProfile::parse_config(&config, &name)?;
         match raw.kind {

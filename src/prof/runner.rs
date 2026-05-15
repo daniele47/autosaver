@@ -18,6 +18,7 @@ pub struct Runner {
 }
 
 impl RunnerEntry {
+    #[tracing::instrument(ret, level = "trace")]
     pub fn new(path: RelPathStr, policy: RunnerPolicy) -> Self {
         Self { path, policy }
     }
@@ -32,6 +33,7 @@ impl RunnerEntry {
 }
 
 impl Runner {
+    #[tracing::instrument(ret, level = "trace")]
     pub fn new(entries: Vec<RunnerEntry>) -> Self {
         Self { entries }
     }
