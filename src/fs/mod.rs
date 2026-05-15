@@ -5,6 +5,7 @@ use std::{
 };
 
 use anyhow::{Context, Result, bail};
+use tracing::{debug, instrument};
 
 use crate::fs::abs::AbsPathStr;
 
@@ -13,7 +14,7 @@ pub mod path;
 pub mod rel;
 
 impl AbsPathStr {
-    #[tracing::instrument(ret, err, level = "trace")]
+    #[instrument(ret, err, level = "trace")]
     pub fn list_all(&self) -> Result<Vec<AbsPathStr>> {
         fs::read_dir(self)
             .with_context(|| {
@@ -29,7 +30,7 @@ impl AbsPathStr {
             .collect()
     }
 
-    #[tracing::instrument(ret, err, level = "trace")]
+    #[instrument(ret, err, level = "trace")]
     pub fn find_all(&self) -> Result<Vec<AbsPathStr>> {
         let mut stack = Vec::<usize>::new();
         let mut res = Vec::<AbsPathStr>::new();
@@ -61,9 +62,10 @@ impl AbsPathStr {
         Ok(res)
     }
 
-    #[tracing::instrument(ret, err, level = "trace")]
+    #[instrument(ret, err, level = "trace")]
     pub fn delete_path(&self) -> Result<()> {
         if !self.path().exists() {
+            debug!(path = ?self, "Path does not exist, nothing to delete");
             return Ok(());
         }
 
@@ -74,6 +76,7 @@ impl AbsPathStr {
                 let p = canon.to_string_lossy();
                 format!("Could not delete file: {p}")
             })?;
+            debug!(path = ?self, "File successfully deleted");
         }
         // purge empty directory
         else if canon.is_dir() {
@@ -81,6 +84,7 @@ impl AbsPathStr {
                 let p = canon.to_string_lossy();
                 format!("Could not delete directory: {p}")
             })?;
+            debug!(path = ?self, "Directory successfully deleted");
         }
         // fail if not either file nor directory
         else {
@@ -94,15 +98,17 @@ impl AbsPathStr {
             if fs::remove_dir(p).is_err() {
                 break;
             }
+            debug!(path = ?p, "Deleted empty parent directory");
             parent = p.parent();
         }
 
         Ok(())
     }
 
-    #[tracing::instrument(ret, err, level = "trace")]
+    #[instrument(ret, err, level = "trace")]
     pub fn create_file(&self) -> Result<()> {
         if self.is_file() {
+            debug!(path = ?self, "File already exists, left untouched");
             return Ok(());
         }
 
@@ -121,6 +127,7 @@ impl AbsPathStr {
                 let p = parent.to_string_lossy();
                 format!("Failed to create directory: {p}")
             })?;
+            debug!(path = ?parent, "Parent directory successfully created");
         } else {
             let p = self.to_string_lossy();
             bail!("Could not create parent directories: {p}");
@@ -131,23 +138,26 @@ impl AbsPathStr {
             let p = self.to_string_lossy();
             format!("Failed to create file: {p}")
         })?;
+        debug!(path = ?self, "File successfully created");
 
         Ok(())
     }
 
-    #[tracing::instrument(ret, err, level = "trace")]
+    #[instrument(ret, err, level = "trace")]
     pub fn read_file(&self) -> Result<String> {
         if !self.is_file() {
             let p = self.to_string_lossy();
             bail!("Cannot read a path that is not a file: {p}");
         }
-        fs::read_to_string(self).with_context(|| {
-            let p = self.to_string_lossy();
-            format!("Could not read file: {p}")
-        })
+        fs::read_to_string(self)
+            .with_context(|| {
+                let p = self.to_string_lossy();
+                format!("Could not read file: {p}")
+            })
+            .inspect(|_| debug!(path = ?self, "File successfully read into string"))
     }
 
-    #[tracing::instrument(ret, err, level = "trace")]
+    #[instrument(ret, err, level = "trace")]
     pub fn copy_file(&self, target: &Self) -> Result<()> {
         target.create_file()?;
         fs::copy(self, target).with_context(|| {
@@ -155,10 +165,11 @@ impl AbsPathStr {
             let t = target.to_string_lossy();
             format!("Failed to copy from {p} to {t}")
         })?;
+        debug!(src_path = ?self, dst_path = ?target, "Source file successfully copied into destination file");
         Ok(())
     }
 
-    #[tracing::instrument(ret, level = "trace")]
+    #[instrument(ret, level = "trace")]
     pub fn files_eq(&self, other: &Self) -> bool {
         || -> Result<()> {
             let sm = self.path().metadata()?;
@@ -171,7 +182,7 @@ impl AbsPathStr {
 
             // check file len for faster checks
             if sm.len() != om.len() {
-                bail!("Len differs");
+                bail!("Length differs");
             }
 
             // chunked byte comparison (works for both text and binary)

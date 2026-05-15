@@ -104,7 +104,7 @@ impl Profile {
                     format!("Profile {name} traversal found invalid profile name {inv_name} as a child of {inv_par}")
                 })?;
                 on_elem(TraverseContext {
-                    item: &item_profile,
+                    item: item_profile,
                     path: &path,
                     stack: &stack,
                 })?;
