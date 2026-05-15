@@ -1,5 +1,6 @@
 use anyhow::Result;
-use clap::{Parser, Subcommand};
+use clap::{Parser, Subcommand, builder::PossibleValuesParser};
+use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::fs::rel::RelPathStr;
 
@@ -12,14 +13,6 @@ pub struct Cli {
     #[command(subcommand)]
     cmd: CliCmd,
 
-    /// Auto-answer yes to all prompts
-    #[arg(short = 'y', long, global = true, conflicts_with = "assume_no")]
-    assume_yes: bool,
-
-    /// Auto-answer no to all prompts
-    #[arg(short = 'n', long, global = true, conflicts_with = "assume_yes")]
-    assume_no: bool,
-
     /// Specify which profile to use
     #[arg(short, long, env = "AUTOSAVER_PROFILE")]
     profile: Option<RelPathStr>,
@@ -31,6 +24,18 @@ pub struct Cli {
     /// Specify a different root directory to use
     #[arg(long, env = "AUTOSAVER_ROOT")]
     root: Option<RelPathStr>,
+
+    /// Auto-answer yes to all prompts
+    #[arg(short = 'y', long, global = true, conflicts_with = "assume_no")]
+    assume_yes: bool,
+
+    /// Auto-answer no to all prompts
+    #[arg(short = 'n', long, global = true, conflicts_with = "assume_yes")]
+    assume_no: bool,
+
+    /// Show debug informations
+    #[arg(long, default_missing_value="debug",  value_parser = PossibleValuesParser::new(["trace", "debug", "info", "warn", "error"]))]
+    debug: Option<String>,
 }
 
 #[derive(Subcommand, Debug, Clone, PartialEq, Eq)]
@@ -52,9 +57,13 @@ pub enum CliCmd {
 }
 
 impl Cli {
-    #[tracing::instrument(ret, err, level = "trace")]
     pub fn run(&self) -> Result<()> {
-        dbg!(self);
+        // enable logging
+        tracing_subscriber::registry()
+            .with(fmt::layer().with_timer(fmt::time::ChronoLocal::default()))
+            .with(EnvFilter::new(self.debug.as_deref().unwrap_or("off")))
+            .init();
+
         Ok(())
     }
 }
