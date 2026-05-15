@@ -8,6 +8,11 @@ pub mod fs;
 pub mod prof;
 
 fn main() -> Result<()> {
-    // launch cli
-    Cli::parse().run()
+    // parse cmdline
+    let cli = Cli::parse();
+
+    // run application
+    cli.run()?;
+
+    Ok(())
 }
