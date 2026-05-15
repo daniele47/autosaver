@@ -3,6 +3,8 @@ use clap::{Parser, Subcommand};
 
 #[derive(Parser, Debug, Clone, PartialEq, Eq)]
 #[command(version)]
+#[command(infer_subcommands = true)]
+#[command(disable_help_subcommand = true)]
 #[command(about = "A simple dotfiles manager that doesn't pollute the system", long_about = None)]
 pub struct Cli {
     #[command(subcommand)]
@@ -18,7 +20,22 @@ pub struct Cli {
 }
 
 #[derive(Subcommand, Debug, Clone, PartialEq, Eq)]
-pub enum CliCmd {}
+pub enum CliCmd {
+    /// List changes between home and backup directories
+    List,
+    /// Save changes in home directory to the backup
+    Save,
+    /// Restore changes in backup directory to the home
+    Restore,
+    /// Delete tracked dotfiles
+    Delete,
+    /// Run init scripts
+    Run,
+    /// Show dependency tree of profiles
+    Tree,
+    /// Clear untracked files in backup directories
+    Clear,
+}
 
 impl Cli {
     pub fn run(&self) -> Result<()> {
