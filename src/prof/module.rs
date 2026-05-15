@@ -1,3 +1,5 @@
+use tracing::instrument;
+
 use crate::fs::rel::RelPathStr;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -19,7 +21,7 @@ pub struct Module {
 }
 
 impl ModuleEntry {
-    #[tracing::instrument(ret, level = "trace")]
+    #[instrument(ret, level = "trace")]
     pub fn new(path: RelPathStr, policy: ModulePolicy) -> Self {
         Self { path, policy }
     }
@@ -34,7 +36,7 @@ impl ModuleEntry {
 }
 
 impl Module {
-    #[tracing::instrument(ret, level = "trace")]
+    #[instrument(ret, level = "trace")]
     pub fn new(entries: Vec<ModuleEntry>) -> Self {
         Self { entries }
     }

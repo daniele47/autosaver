@@ -1,3 +1,5 @@
+use tracing::instrument;
+
 use crate::fs::rel::RelPathStr;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -18,7 +20,7 @@ pub struct Composite {
 }
 
 impl CompositeEntry {
-    #[tracing::instrument(ret, level = "trace")]
+    #[instrument(ret, level = "trace")]
     pub fn new(child: RelPathStr) -> Self {
         Self { child }
     }
@@ -29,7 +31,7 @@ impl CompositeEntry {
 }
 
 impl Composite {
-    #[tracing::instrument(ret, level = "trace")]
+    #[instrument(ret, level = "trace")]
     pub fn new(entries: Vec<CompositeEntry>) -> Self {
         Self { entries }
     }

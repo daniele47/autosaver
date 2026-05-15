@@ -1,6 +1,7 @@
 use std::str::FromStr;
 
 use anyhow::{Context, Error, Result, anyhow, bail};
+use tracing::instrument;
 
 use crate::{
     fs::rel::RelPathStr,
@@ -69,7 +70,7 @@ impl<'a> RawProfile<'a> {
 }
 
 impl Profile {
-    #[tracing::instrument(ret, err, level = "trace")]
+    #[instrument(ret, err, level = "trace")]
     pub fn parse_profile(config: String, name: String) -> Result<Profile> {
         let raw = RawProfile::parse_config(&config, &name)?;
         match raw.kind {
