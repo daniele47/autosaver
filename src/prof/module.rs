@@ -21,7 +21,7 @@ pub struct Module {
 }
 
 impl ModuleEntry {
-    #[instrument(ret, level = "trace")]
+    #[instrument(ret, level = "trace", skip_all)]
     pub fn new(path: RelPathStr, policy: ModulePolicy) -> Self {
         Self { path, policy }
     }
@@ -36,7 +36,7 @@ impl ModuleEntry {
 }
 
 impl Module {
-    #[instrument(ret, level = "trace")]
+    #[instrument(ret, level = "trace", skip_all)]
     pub fn new(entries: Vec<ModuleEntry>) -> Self {
         Self { entries }
     }

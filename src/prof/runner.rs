@@ -20,7 +20,7 @@ pub struct Runner {
 }
 
 impl RunnerEntry {
-    #[instrument(ret, level = "trace")]
+    #[instrument(ret, level = "trace", skip_all)]
     pub fn new(path: RelPathStr, policy: RunnerPolicy) -> Self {
         Self { path, policy }
     }
@@ -35,7 +35,7 @@ impl RunnerEntry {
 }
 
 impl Runner {
-    #[instrument(ret, level = "trace")]
+    #[instrument(ret, level = "trace", skip_all)]
     pub fn new(entries: Vec<RunnerEntry>) -> Self {
         Self { entries }
     }

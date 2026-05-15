@@ -14,7 +14,7 @@ pub struct RelPathStr {
 }
 
 impl RelPathStr {
-    #[instrument(ret, err, level = "trace")]
+    #[instrument(ret, err, level = "trace", skip_all)]
     pub fn new(path: PathStr) -> Result<Self> {
         // check path is relative
         if !path.as_ref().is_relative() {

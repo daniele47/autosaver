@@ -20,7 +20,7 @@ pub struct Composite {
 }
 
 impl CompositeEntry {
-    #[instrument(ret, level = "trace")]
+    #[instrument(ret, level = "trace", skip_all)]
     pub fn new(child: RelPathStr) -> Self {
         Self { child }
     }
@@ -31,7 +31,7 @@ impl CompositeEntry {
 }
 
 impl Composite {
-    #[instrument(ret, level = "trace")]
+    #[instrument(ret, level = "trace", skip_all)]
     pub fn new(entries: Vec<CompositeEntry>) -> Self {
         Self { entries }
     }
