@@ -97,8 +97,9 @@ impl Profile {
                 // check if leaf profile
                 let item_profile = params.all_profiles.get(item_name).with_context(|| {
                     let name = self.name().to_string_lossy();
+                    let inv_par = path.last().map(|p|p.to_string_lossy()).unwrap_or(name.clone());
                     let inv_name = item_name.to_string_lossy();
-                    format!("Profile {name} traversal found invalid profile name {inv_name}")
+                    format!("Profile {name} traversal found invalid profile name {inv_name} as a child of {inv_par}")
                 })?;
                 on_elem(TraverseContext {
                     item: &item_profile,
@@ -128,5 +129,83 @@ impl Profile {
                 stack: &[],
             })
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::prof::composite::CompositeEntry;
+
+    use super::*;
+    use std::{collections::HashMap, str::FromStr};
+
+    fn setup_test_profiles() -> Result<AllProfiles> {
+        let mut profiles = HashMap::new();
+
+        // Leaf module
+        let module1 = Profile::new(
+            RelPathStr::from_str("module1")?,
+            RelPathStr::from_str("module1")?,
+            ProfileKind::Module(Module::new(vec![])),
+        );
+        profiles.insert(RelPathStr::from_str("module1")?, module1);
+
+        // profile3 depends on module1
+        let profile3 = Profile::new(
+            RelPathStr::from_str("profile3")?,
+            RelPathStr::from_str("profile3")?,
+            ProfileKind::Composite(Composite::new(vec![CompositeEntry::new(
+                RelPathStr::from_str("module1")?,
+            )])),
+        );
+        profiles.insert(RelPathStr::from_str("profile3")?, profile3);
+
+        // profile2 is a leaf (no dependencies)
+        let profile2 = Profile::new(
+            RelPathStr::from_str("profile2")?,
+            RelPathStr::from_str("profile2")?,
+            ProfileKind::Module(Module::new(vec![])),
+        );
+        profiles.insert(RelPathStr::from_str("profile2")?, profile2);
+
+        // profile1 depends on profile2 and profile3
+        let profile1 = Profile::new(
+            RelPathStr::from_str("profile1")?,
+            RelPathStr::from_str("profile1")?,
+            ProfileKind::Composite(Composite::new(vec![
+                CompositeEntry::new(RelPathStr::from_str("profile3")?),
+                CompositeEntry::new(RelPathStr::from_str("profile2")?),
+            ])),
+        );
+        profiles.insert(RelPathStr::from_str("profile1")?, profile1);
+
+        Ok(profiles)
+    }
+
+    #[test]
+    fn test_traverse_full_tree() -> Result<()> {
+        let profiles = setup_test_profiles()?;
+        let profile1 = profiles
+            .get(&RelPathStr::from_str("profile1")?)
+            .expect("profile1 was here");
+
+        let params = TraverseParams {
+            allow_duplicates: false,
+            all_profiles: &profiles,
+        };
+
+        let mut visited_order = Vec::new();
+
+        profile1.traverse(params, |ctx| {
+            visited_order.push(ctx.item.name().to_string_lossy());
+            Ok(())
+        })?;
+
+        assert_eq!(
+            visited_order,
+            vec!["profile1", "profile3", "module1", "profile2"]
+        );
+
+        Ok(())
     }
 }
