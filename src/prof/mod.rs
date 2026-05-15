@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
 use anyhow::{Context, Result, bail};
-use tracing::instrument;
+use tracing::{debug, instrument, trace};
 
 use crate::{
     fs::rel::RelPathStr,
@@ -64,74 +64,73 @@ impl Profile {
     where
         S: FnMut(TraverseContext) -> Result<()>,
     {
-        if let ProfileKind::Composite(_) = self.kind() {
-            let mut visited = HashSet::<&RelPathStr>::new();
-            let mut path = Vec::<&RelPathStr>::new();
-            let mut stack = Vec::<(&RelPathStr, bool)>::new();
-            stack.push((self.name(), false));
+        let mut visited = HashSet::<&RelPathStr>::new();
+        let mut path = Vec::<&RelPathStr>::new();
+        let mut stack = Vec::<(&RelPathStr, bool)>::new();
+        stack.push((self.name(), false));
 
-            // 3 colors DFS to traverse whilst properly detecting loops
-            while let Some((item_name, item_visited)) = stack.pop() {
-                // grey -> black: item already visited, aka we explored all from here, and backtracked
-                if item_visited {
-                    path.pop();
-                    visited.insert(item_name);
-                    continue;
-                }
+        // 3 colors DFS to traverse whilst properly detecting loops
+        while let Some((item_name, item_visited)) = stack.pop() {
+            // grey -> black: item already visited, aka we explored all from here, and backtracked
+            if item_visited {
+                trace!(profile = ?item_name, "Backtracing from profile...");
+                path.pop();
+                visited.insert(item_name);
+                continue;
+            }
 
-                // check if current item is already in path, aka if this is a cycle
-                if let Some(pos) = path.iter().position(|x| x == &item_name) {
-                    let cycle = &path[pos..]
-                        .iter()
-                        .chain(path.get(pos))
-                        .map(|s| s.to_string_lossy())
-                        .collect::<Vec<_>>()
-                        .join(" → ");
-                    let name = self.name().to_string_lossy();
-                    bail!(format!("Profile {name} has a dependency cycle: {cycle}"));
-                }
+            // check if current item is already in path, aka if this is a cycle
+            if let Some(pos) = path.iter().position(|x| x == &item_name) {
+                let cycle = &path[pos..]
+                    .iter()
+                    .chain(path.get(pos))
+                    .map(|s| s.to_string_lossy())
+                    .collect::<Vec<_>>()
+                    .join(" → ");
+                let name = self.name().to_string_lossy();
+                bail!(format!("Profile {name} has a dependency cycle: {cycle}"));
+            }
 
-                // avoid revisiting already explored items, if graphs are complex and the same node is
-                // reached multiple times from different nodes
-                if !params.allow_duplicates && visited.contains(&item_name) {
-                    continue;
-                }
+            // avoid revisiting already explored items, if graphs are complex and the same node is
+            // reached multiple times from different nodes
+            if !params.allow_duplicates && visited.contains(&item_name) {
+                trace!(profile = ?item_name, "Skipping already visited profile...");
+                continue;
+            }
 
-                // check if leaf profile
-                let item_profile = params.all_profiles.get(item_name).with_context(|| {
+            // check if leaf profile
+            let item_profile = params.all_profiles.get(item_name).with_context(|| {
                     let name = self.name().to_string_lossy();
                     let inv_par = path.last().map(|p|p.to_string_lossy()).unwrap_or(name.clone());
                     let inv_name = item_name.to_string_lossy();
                     format!("Profile {name} traversal found invalid profile name {inv_name} as a child of {inv_par}")
                 })?;
-                on_elem(TraverseContext {
-                    item: item_profile,
-                    path: &path,
-                    stack: &stack,
-                })?;
-                if !matches!(item_profile.kind(), ProfileKind::Composite(_)) {
-                    visited.insert(item_name);
-                    continue;
-                }
-
-                // add item and children to stack + add item to path
-                path.push(item_name);
-                stack.push((item_name, true));
-                if let ProfileKind::Composite(composite) = item_profile.kind() {
-                    for child in composite.entries().iter().rev() {
-                        stack.push((child.child(), false));
-                    }
-                }
+            let ctx = TraverseContext {
+                item: item_profile,
+                path: &path,
+                stack: &stack,
+            };
+            debug!(profile = ?item_name, "Traversed profile");
+            trace!(context = ?ctx, "Traversed context");
+            on_elem(ctx)?;
+            if !matches!(item_profile.kind(), ProfileKind::Composite(_)) {
+                visited.insert(item_name);
+                continue;
             }
 
-            Ok(())
-        } else {
-            on_elem(TraverseContext {
-                item: self,
-                path: &[],
-                stack: &[],
-            })
+            // add item and children to stack + add item to path
+            trace!(profile = ?item_name, "Adding profile to stack and path...");
+            path.push(item_name);
+            stack.push((item_name, true));
+            if let ProfileKind::Composite(composite) = item_profile.kind() {
+                for child in composite.entries().iter().rev() {
+                    trace!(child = ?child, "Adding profile child to stack and path...");
+                    stack.push((child.child(), false));
+                }
+            }
         }
+
+        Ok(())
     }
 }
 
