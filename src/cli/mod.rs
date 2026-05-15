@@ -60,7 +60,7 @@ impl Cli {
     pub fn run(&self) -> Result<()> {
         // enable logging
         tracing_subscriber::registry()
-            .with(fmt::layer().with_timer(fmt::time::ChronoLocal::default()))
+            .with(fmt::layer().without_time())
             .with(EnvFilter::new(self.log.as_deref().unwrap_or("off")))
             .init();
 
