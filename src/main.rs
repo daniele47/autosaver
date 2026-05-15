@@ -1,4 +1,5 @@
 use anyhow::Result;
+use clap::Parser;
 
 use crate::cli::Cli;
 
@@ -7,5 +8,5 @@ pub mod fs;
 pub mod prof;
 
 fn main() -> Result<()> {
-    Cli::run()
+    Cli::parse().run()
 }

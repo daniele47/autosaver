@@ -48,10 +48,9 @@ impl<'a> RawProfile<'a> {
                 }
             }
             // data lines
-            else if !line.starts_with("/")
-                && !line.is_empty() {
-                    lines.push(RawProfileLine::Data(line, i));
-                }
+            else if !line.starts_with("/") && !line.is_empty() {
+                lines.push(RawProfileLine::Data(line, i));
+            }
         }
 
         if kind.is_empty() {
