@@ -7,7 +7,7 @@ use anyhow::{Result, bail};
 
 use crate::fs::{abs::AbsPathStr, path::PathStr};
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, PartialEq, Hash, Eq, PartialOrd, Ord)]
 pub struct RelPathStr {
     pathstr: PathStr,
 }
