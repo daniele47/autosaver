@@ -1,5 +1,5 @@
 use anyhow::Result;
-use clap::{Parser, Subcommand, builder::PossibleValuesParser};
+use clap::{Parser, Subcommand};
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::fs::rel::RelPathStr;
@@ -33,9 +33,9 @@ pub struct Cli {
     #[arg(short = 'n', long, global = true, conflicts_with = "assume_yes")]
     assume_no: bool,
 
-    /// Show debug informations
-    #[arg(long, default_missing_value="debug",  value_parser = PossibleValuesParser::new(["trace", "debug", "info", "warn", "error"]))]
-    debug: Option<String>,
+    /// Show logs at the specified log level
+    #[arg(long, env = "RUST_LOG", value_name = "LEVEL")]
+    log: Option<String>,
 }
 
 #[derive(Subcommand, Debug, Clone, PartialEq, Eq)]
@@ -61,7 +61,7 @@ impl Cli {
         // enable logging
         tracing_subscriber::registry()
             .with(fmt::layer().with_timer(fmt::time::ChronoLocal::default()))
-            .with(EnvFilter::new(self.debug.as_deref().unwrap_or("off")))
+            .with(EnvFilter::new(self.log.as_deref().unwrap_or("off")))
             .init();
 
         Ok(())
