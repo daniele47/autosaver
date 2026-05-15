@@ -1,6 +1,8 @@
 use anyhow::Result;
 use clap::{Parser, Subcommand};
 
+use crate::fs::rel::RelPathStr;
+
 #[derive(Parser, Debug, Clone, PartialEq, Eq)]
 #[command(version)]
 #[command(infer_subcommands = true)]
@@ -17,6 +19,18 @@ pub struct Cli {
     /// Auto-answer no to all prompts
     #[arg(short = 'n', long, global = true, conflicts_with = "assume_yes")]
     assume_no: bool,
+
+    /// Specify which profile to use
+    #[arg(short, long, env = "AUTOSAVER_PROFILE")]
+    profile: Option<RelPathStr>,
+
+    /// Specify a different home directory to use
+    #[arg(long, env = "AUTOSAVER_HOME")]
+    home: Option<RelPathStr>,
+
+    /// Specify a different root directory to use
+    #[arg(long, env = "AUTOSAVER_ROOT")]
+    root: Option<RelPathStr>,
 }
 
 #[derive(Subcommand, Debug, Clone, PartialEq, Eq)]
