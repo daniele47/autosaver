@@ -59,7 +59,7 @@ impl Profile {
         &self.kind
     }
 
-    #[instrument(ret, err, level = "trace", skip(on_elem))]
+    #[instrument(ret, err, level = "trace", skip_all)]
     pub fn traverse<S>(&self, params: TraverseParams, mut on_elem: S) -> Result<()>
     where
         S: FnMut(TraverseContext) -> Result<()>,
@@ -68,12 +68,13 @@ impl Profile {
         let mut path = Vec::<&RelPathStr>::new();
         let mut stack = Vec::<(&RelPathStr, bool)>::new();
         stack.push((self.name(), false));
+        debug!(root = ?self.name(), "Traversing profiles from root:");
 
         // 3 colors DFS to traverse whilst properly detecting loops
         while let Some((item_name, item_visited)) = stack.pop() {
             // grey -> black: item already visited, aka we explored all from here, and backtracked
             if item_visited {
-                trace!(profile = ?item_name, "Backtracing from profile...");
+                trace!(profile = ?item_name, "Backtracking:");
                 path.pop();
                 visited.insert(item_name);
                 continue;
@@ -94,7 +95,7 @@ impl Profile {
             // avoid revisiting already explored items, if graphs are complex and the same node is
             // reached multiple times from different nodes
             if !params.allow_duplicates && visited.contains(&item_name) {
-                trace!(profile = ?item_name, "Skipping already visited profile...");
+                trace!(profile = ?item_name, "Skipping already visited profile:");
                 continue;
             }
 
@@ -105,26 +106,24 @@ impl Profile {
                     let inv_name = item_name.to_string_lossy();
                     format!("Profile {name} traversal found invalid profile name {inv_name} as a child of {inv_par}")
                 })?;
-            let ctx = TraverseContext {
+            debug!(profile = ?item_name, "Traversed profile:");
+            on_elem(TraverseContext {
                 item: item_profile,
                 path: &path,
                 stack: &stack,
-            };
-            debug!(profile = ?item_name, "Traversed profile");
-            trace!(context = ?ctx, "Traversed context");
-            on_elem(ctx)?;
+            })?;
             if !matches!(item_profile.kind(), ProfileKind::Composite(_)) {
                 visited.insert(item_name);
                 continue;
             }
 
             // add item and children to stack + add item to path
-            trace!(profile = ?item_name, "Adding profile to stack and path...");
+            trace!(profile = ?item_name, "Adding profile to stack and path as already visited:");
             path.push(item_name);
             stack.push((item_name, true));
             if let ProfileKind::Composite(composite) = item_profile.kind() {
                 for child in composite.entries().iter().rev() {
-                    trace!(child = ?child, "Adding profile child to stack and path...");
+                    trace!(child = ?child, "Adding profile child to stack and path:");
                     stack.push((child.child(), false));
                 }
             }
