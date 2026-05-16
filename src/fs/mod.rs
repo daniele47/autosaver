@@ -65,6 +65,25 @@ impl AbsPathStr {
     }
 
     #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
+    pub fn all_files(&self) -> Result<Vec<AbsPathStr>> {
+        if self.is_file() {
+            trace!(path=%self.display(), "Path is a file (return only file itself):");
+            Ok(vec![self.clone()])
+        } else if self.is_dir() {
+            trace!(path=%self.display(), "Path is a directory (return all files inside):");
+            Ok(self
+                .find_all()?
+                .into_iter()
+                .inspect(|f| trace!(file=%f.display(), "File found:"))
+                .filter(AbsPathStr::is_file)
+                .collect())
+        } else {
+            trace!(path=%self.display(), "Path is a file (return nothing):");
+            Ok(vec![])
+        }
+    }
+
+    #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
     pub fn delete_path(&self) -> Result<()> {
         if !self.path().exists() {
             debug!(path = %self.display(), "Path does not exist, nothing to delete:");
