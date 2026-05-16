@@ -2,8 +2,8 @@
 
 All notable changes to this project will be documented here
 
-- [ ] pathstr caching: keep them all in a pool, and just borrow from them (this works because pathstr is 100% immutable!)
-    - [ ] in this cache, it could be possible to cache also the result of canonicalize and other expensive operations?
+TODO:
+- [ ] save/restore should allow also deleting files from the invalid side, with a --dangerous flag for restore to allow deleting files from home!
 
 ## v2.0.0
 
