@@ -1,7 +1,7 @@
 use clap::{Parser, Subcommand};
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
-use crate::fs::rel::RelPathStr;
+use crate::fs::{abs::AbsPathStr, rel::RelPathStr};
 
 #[derive(Parser, Debug, Clone, PartialEq, Eq)]
 #[command(version)]
@@ -18,11 +18,11 @@ pub struct Cli {
 
     /// Specify a different home directory to use
     #[arg(long, env = "AUTOSAVER_HOME")]
-    home: Option<RelPathStr>,
+    home: AbsPathStr,
 
     /// Specify a different root directory to use
     #[arg(long, env = "AUTOSAVER_ROOT")]
-    root: Option<RelPathStr>,
+    root: AbsPathStr,
 
     /// Auto-answer yes to all prompts
     #[arg(short = 'y', long, global = true, conflicts_with = "assume_no")]
