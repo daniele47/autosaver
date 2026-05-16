@@ -13,6 +13,32 @@ pub mod abs;
 pub mod path;
 pub mod rel;
 
+pub struct FindCache {
+    stack: Vec<(Option<usize>, Option<usize>)>,
+    filtered_out: Vec<AbsPathStr>,
+    buffer: Vec<AbsPathStr>,
+}
+impl FindCache {
+    pub fn new() -> Self {
+        Self {
+            stack: vec![],
+            filtered_out: vec![],
+            buffer: vec![],
+        }
+    }
+
+    fn clear(&mut self) {
+        self.stack.clear();
+        self.filtered_out.clear();
+        self.buffer.clear();
+    }
+}
+impl Default for FindCache {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl AbsPathStr {
     #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
     pub fn list_filtered<F>(&self, paths: &mut Vec<AbsPathStr>, filter: F) -> Result<()>
@@ -50,13 +76,19 @@ impl AbsPathStr {
     }
 
     #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
-    pub fn find_filtered<F>(&self, paths: &mut Vec<AbsPathStr>, filter: F) -> Result<()>
+    pub fn find_filtered<F>(
+        &self,
+        paths: &mut Vec<AbsPathStr>,
+        cache: &mut FindCache,
+        filter: F,
+    ) -> Result<()>
     where
         F: Fn(&AbsPathStr) -> bool,
     {
-        let mut stack = Vec::<(Option<usize>, Option<usize>)>::new();
-        let mut filtered_out = Vec::<AbsPathStr>::new();
-        let mut buffer = Vec::<AbsPathStr>::new();
+        cache.clear();
+        let stack = &mut cache.stack;
+        let filtered_out = &mut cache.filtered_out;
+        let buffer = &mut cache.buffer;
         let mut root_dir_used = false;
 
         loop {
@@ -80,7 +112,7 @@ impl AbsPathStr {
             }
 
             // append children to vector + push chilren dirs to stack
-            item.list_all(&mut buffer)?;
+            item.list_all(buffer)?;
             for child in buffer.drain(..) {
                 trace!(file = %child.display(), "Found path recursively inside directory:");
                 if filter(&child) {
@@ -102,19 +134,19 @@ impl AbsPathStr {
 
         Ok(())
     }
-    pub fn find_all(&self, paths: &mut Vec<AbsPathStr>) -> Result<()> {
-        self.find_filtered(paths, |_| true)
+    pub fn find_all(&self, paths: &mut Vec<AbsPathStr>, cache: &mut FindCache) -> Result<()> {
+        self.find_filtered(paths, cache, |_| true)
     }
 
     #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
-    pub fn all_files(&self, files: &mut Vec<AbsPathStr>) -> Result<()> {
+    pub fn all_files(&self, files: &mut Vec<AbsPathStr>, cache: &mut FindCache) -> Result<()> {
         if self.is_file() {
             trace!(path=%self.display(), "Path is a file:");
             files.push(self.clone());
         } else if self.is_dir() {
             trace!(path=%self.display(), "Path is a directory:");
             files.push(self.clone());
-            self.find_filtered(files, AbsPathStr::is_file)?;
+            self.find_filtered(files, cache, AbsPathStr::is_file)?;
         } else {
             trace!(path=%self.display(), "Path is neither a file nor a directory:");
         }
