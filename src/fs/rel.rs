@@ -17,16 +17,20 @@ pub struct RelPathStr {
 impl RelPathStr {
     pub fn new(path: PathStr) -> Result<Self> {
         // check path is relative
-        if !path.as_ref().is_relative() {
-            let p = path.as_ref().display();
+        if !path.path().is_relative() {
+            let p = path.path().display();
             bail!("Path is not relative: {p}");
         } else {
             Ok(Self { pathstr: path })
         }
     }
 
-    pub fn path(&self) -> &Path {
-        self.pathstr.as_ref()
+    pub(super) fn path(&self) -> &Path {
+        self.pathstr.path()
+    }
+
+    pub fn to_str(&self) -> Option<&str> {
+        self.pathstr.to_str()
     }
 
     pub fn to_string_lossy(&self) -> String {
@@ -62,7 +66,6 @@ impl RelPathStr {
     }
 }
 
-// CONVERT INTO
 impl TryFrom<PathStr> for RelPathStr {
     type Error = anyhow::Error;
 
@@ -99,24 +102,6 @@ impl TryFrom<&Path> for RelPathStr {
     }
 }
 
-// CONVERT FROM
-impl From<RelPathStr> for PathStr {
-    fn from(value: RelPathStr) -> Self {
-        value.pathstr
-    }
-}
-impl TryFrom<RelPathStr> for String {
-    type Error = anyhow::Error;
-
-    fn try_from(value: RelPathStr) -> std::prelude::v1::Result<Self, Self::Error> {
-        value.pathstr.try_into()
-    }
-}
-impl From<RelPathStr> for PathBuf {
-    fn from(value: RelPathStr) -> Self {
-        value.pathstr.into()
-    }
-}
 impl AsRef<Path> for RelPathStr {
     fn as_ref(&self) -> &Path {
         self.path()

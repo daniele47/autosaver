@@ -17,16 +17,20 @@ pub struct AbsPathStr {
 impl AbsPathStr {
     pub fn new(path: PathStr) -> Result<Self> {
         // check path is relative
-        if !path.as_ref().is_absolute() {
-            let p = path.as_ref().display();
+        if !path.path().is_absolute() {
+            let p = path.path().display();
             bail!("Path is not absolute: {p}");
         } else {
             Ok(Self { pathstr: path })
         }
     }
 
-    pub fn path(&self) -> &Path {
-        self.pathstr.as_ref()
+    pub(super) fn path(&self) -> &Path {
+        self.pathstr.path()
+    }
+
+    pub fn to_str(&self) -> Option<&str> {
+        self.pathstr.to_str()
     }
 
     pub fn to_string_lossy(&self) -> String {
@@ -87,7 +91,6 @@ impl AbsPathStr {
     }
 }
 
-// CONVERT INTO
 impl TryFrom<PathStr> for AbsPathStr {
     type Error = anyhow::Error;
 
@@ -124,24 +127,6 @@ impl TryFrom<&Path> for AbsPathStr {
     }
 }
 
-// CONVERT FROM
-impl From<AbsPathStr> for PathStr {
-    fn from(value: AbsPathStr) -> Self {
-        value.pathstr
-    }
-}
-impl TryFrom<AbsPathStr> for String {
-    type Error = anyhow::Error;
-
-    fn try_from(value: AbsPathStr) -> std::prelude::v1::Result<Self, Self::Error> {
-        value.pathstr.try_into()
-    }
-}
-impl From<AbsPathStr> for PathBuf {
-    fn from(value: AbsPathStr) -> Self {
-        value.pathstr.into()
-    }
-}
 impl AsRef<Path> for AbsPathStr {
     fn as_ref(&self) -> &Path {
         self.path()
