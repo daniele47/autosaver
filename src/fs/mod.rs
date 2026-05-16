@@ -260,7 +260,7 @@ impl AbsPathStr {
         Ok(())
     }
 
-    #[instrument(ret, level = "trace", , skip_all, fields(self = %self.display(), other = %other.display()))]
+    #[instrument(ret, level = "trace", skip_all, fields(self = %self.display(), other = %other.display()))]
     pub fn files_eq(&self, other: &Self) -> bool {
         || -> Result<()> {
             let sm = self.path().metadata()?;
@@ -280,8 +280,8 @@ impl AbsPathStr {
             let mut file1 = File::open(self)?;
             let mut file2 = File::open(other)?;
 
-            let mut buf1 = [0; 4096];
-            let mut buf2 = [0; 4096];
+            let mut buf1 = [0; 8192];
+            let mut buf2 = [0; 8192];
 
             loop {
                 let n1 = file1.read(&mut buf1)?;
