@@ -29,10 +29,6 @@ impl RelPathStr {
         Self::new_from_pathstr(PathStr::new_from_pathbuf(path)?)
     }
 
-    pub(super) fn new_from_path(path: &Path) -> anyhow::Result<Self> {
-        Self::new_from_pathbuf(PathBuf::from(path))
-    }
-
     pub(super) fn path(&self) -> &Path {
         self.pathstr.path()
     }
@@ -67,7 +63,7 @@ impl RelPathStr {
     pub fn basename(&self) -> anyhow::Result<Self> {
         self.path()
             .file_name()
-            .map(|f| Self::new_from_path(f.as_ref()))
+            .map(|f| Self::new_from_pathbuf(PathBuf::from(f)))
             .with_context(|| format!("Could not get basename of {}", self.display()))?
     }
 

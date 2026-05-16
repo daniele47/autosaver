@@ -29,10 +29,6 @@ impl AbsPathStr {
         Self::new_from_pathstr(PathStr::new_from_pathbuf(path)?)
     }
 
-    pub(super) fn new_from_path(path: &Path) -> anyhow::Result<Self> {
-        Self::new_from_pathbuf(PathBuf::from(path))
-    }
-
     pub(super) fn path(&self) -> &Path {
         self.pathstr.path()
     }
@@ -65,14 +61,14 @@ impl AbsPathStr {
             let b = base.display();
             format!("Could not get relative path for {p} with base {b}")
         })?;
-        RelPathStr::new_from_path(stripped)
+        RelPathStr::new_from_pathbuf(stripped.into())
     }
 
     #[instrument(ret, err, level = "trace", skip_all, fields(self= %self.display()))]
     pub fn basename(&self) -> Result<Self> {
         self.path()
             .file_name()
-            .map(|f| Self::new_from_path(f.as_ref()))
+            .map(|f| Self::new_from_pathbuf(PathBuf::from(f)))
             .with_context(|| format!("Could not get basename of {}", self.display()))?
     }
 
@@ -80,7 +76,7 @@ impl AbsPathStr {
     pub fn canonicalize(&self) -> Result<Self> {
         self.path()
             .canonicalize()
-            .map(|p| Self::new_from_path(p.as_ref()))?
+            .map(Self::new_from_pathbuf)?
             .with_context(|| format!("Failed to canonicalize {}", self.display()))
     }
 
@@ -116,8 +112,8 @@ impl TryFrom<PathStr> for AbsPathStr {
 impl TryFrom<String> for AbsPathStr {
     type Error = anyhow::Error;
 
-    fn try_from(path: String) -> std::prelude::v1::Result<Self, Self::Error> {
-        Self::new(path.try_into()?)
+    fn try_from(value: String) -> std::prelude::v1::Result<Self, Self::Error> {
+        Self::new(value)
     }
 }
 impl FromStr for AbsPathStr {

@@ -204,8 +204,8 @@ mod tests {
         let profile = Profile::parse_profile(config, "my_composite".to_string())?;
 
         // validate
-        assert_eq!(profile.name().as_ref(), "my_composite");
-        assert_eq!(profile.id().as_ref(), "profiles_my_composite");
+        assert_eq!(profile.name().to_string_lossy(), "my_composite");
+        assert_eq!(profile.id().to_string_lossy(), "profiles_my_composite");
         match profile.kind() {
             ProfileKind::Composite(composite) => {
                 let entries = composite.entries();
@@ -239,8 +239,8 @@ mod tests {
         let profile = Profile::parse_profile(config, "my_module".to_string())?;
 
         // validate
-        assert_eq!(profile.name().as_ref(), "my_module");
-        assert_eq!(profile.id().as_ref(), "profile_my_module");
+        assert_eq!(profile.name().to_string_lossy(), "my_module");
+        assert_eq!(profile.id().to_string_lossy(), "profile_my_module");
         match profile.kind() {
             ProfileKind::Module(module) => {
                 let entries = module.entries();
@@ -279,8 +279,8 @@ mod tests {
         let profile = Profile::parse_profile(config, "my_runner".to_string())?;
 
         // validate
-        assert_eq!(profile.name().as_ref(), "my_runner");
-        assert_eq!(profile.id().as_ref(), "profiles_my_runner");
+        assert_eq!(profile.name().to_string_lossy(), "my_runner");
+        assert_eq!(profile.id().to_string_lossy(), "profiles_my_runner");
         match profile.kind() {
             ProfileKind::Runner(runner) => {
                 let entries = runner.entries();

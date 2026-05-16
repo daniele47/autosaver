@@ -45,7 +45,7 @@ impl AbsPathStr {
     where
         F: Fn(&AbsPathStr) -> bool,
     {
-        fs::read_dir(self)
+        fs::read_dir(self.path())
             .with_context(|| {
                 let p = self.display();
                 format!("Could not list files in directory {p}")
@@ -53,7 +53,7 @@ impl AbsPathStr {
             .map(|e| {
                 let e = e.with_context(|| format!("Failed to read entry in {}", self.display()))?;
                 trace!(file = %e.path().display(), "Listed path inside directory:");
-                AbsPathStr::try_from(e.path())
+                AbsPathStr::new_from_pathbuf(e.path())
             })
             .filter(|e| {
                 if let Ok(p) = e {
@@ -163,7 +163,7 @@ impl AbsPathStr {
         // purge file
         let canon = self.canonicalize()?;
         if canon.is_file() {
-            fs::remove_file(&canon).with_context(|| {
+            fs::remove_file(canon.path()).with_context(|| {
                 let p = canon.display();
                 format!("Could not delete file: {p}")
             })?;
@@ -171,7 +171,7 @@ impl AbsPathStr {
         }
         // purge empty directory
         else if canon.is_dir() {
-            fs::remove_dir(&canon).with_context(|| {
+            fs::remove_dir(canon.path()).with_context(|| {
                 let p = canon.display();
                 format!("Could not delete directory: {p}")
             })?;
@@ -225,7 +225,7 @@ impl AbsPathStr {
         }
 
         // create file
-        File::create(self).with_context(|| {
+        File::create(self.path()).with_context(|| {
             let p = self.display();
             format!("Failed to create file: {p}")
         })?;
@@ -240,7 +240,7 @@ impl AbsPathStr {
             let p = self.display();
             bail!("Cannot read a path that is not a file: {p}");
         }
-        fs::read_to_string(self)
+        fs::read_to_string(self.path())
             .with_context(|| {
                 let p = self.display();
                 format!("Could not read file: {p}")
@@ -251,7 +251,7 @@ impl AbsPathStr {
     #[instrument(err, level = "trace", , skip_all, fields(self = %self.display(), dst=%dst.display()))]
     pub fn copy_file(&self, dst: &Self) -> Result<()> {
         dst.create_file()?;
-        fs::copy(self, dst).with_context(|| {
+        fs::copy(self.path(), dst.path()).with_context(|| {
             let p = self.display();
             let t = dst.display();
             format!("Failed to copy from {p} to {t}")
@@ -277,8 +277,8 @@ impl AbsPathStr {
             }
 
             // chunked byte comparison (works for both text and binary)
-            let mut file1 = File::open(self)?;
-            let mut file2 = File::open(other)?;
+            let mut file1 = File::open(self.path())?;
+            let mut file2 = File::open(other.path())?;
 
             let mut buf1 = [0; 8192];
             let mut buf2 = [0; 8192];

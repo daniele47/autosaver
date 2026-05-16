@@ -23,10 +23,6 @@ impl PathStr {
         })
     }
 
-    pub(super) fn new_from_path(path: &Path) -> anyhow::Result<Self> {
-        Self::new_from_pathbuf(path.into())
-    }
-
     pub(super) fn path(&self) -> &Path {
         &self.path
     }
