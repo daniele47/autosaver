@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented here
 
+TODO:
+- [ ] find_all breaks with filters, since now index do not get updated alongside the actual content of the res vec
+
 ## v2.0.0
 
 ### Features
