@@ -26,14 +26,14 @@ impl AbsPathStr {
             })?
             .map(|e| {
                 let e = e.with_context(|| format!("Failed to read entry in {}", self.display()))?;
-                trace!(file = %e.path().display(), "Listed file inside directory:");
+                trace!(file = %e.path().display(), "Listed path inside directory:");
                 AbsPathStr::try_from(e.path())
             })
             .filter(|e| {
                 if let Ok(p) = e {
                     let keep = filter(p);
                     if !keep {
-                        trace!(file = %p.path().display(), "Listed file got filtered out:");
+                        trace!(file = %p.path().display(), "Listed path got filtered out:");
                     }
                     keep
                 } else {
@@ -67,7 +67,7 @@ impl AbsPathStr {
                     if let Some(ri) = item_index {
                         item = &res[ri];
                     } else if let Some(fi) = filtered_index {
-                        item = &res[fi];
+                        item = &filtered_out[fi];
                     } else {
                         unreachable!("Items must be in res or in filtered")
                     }
@@ -78,7 +78,7 @@ impl AbsPathStr {
 
             // append children to vector + push chilren dirs to stack
             for child in item.list_all()? {
-                trace!(file = %child.display(), "Found file recursively inside directory:");
+                trace!(file = %child.display(), "Found path recursively inside directory:");
                 if filter(&child) {
                     if child.is_dir() {
                         trace!(directory = %child.display(), "Directory added to stack:");
@@ -86,7 +86,7 @@ impl AbsPathStr {
                     }
                     res.push(child);
                 } else {
-                    trace!(file = %child.display(), "Found file got filtered out:");
+                    trace!(file = %child.display(), "Found path got filtered out:");
                     if child.is_dir() {
                         trace!(directory = %child.display(), "Directory added to stack:");
                         stack.push((None, Some(filtered_out.len())));
