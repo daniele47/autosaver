@@ -1,4 +1,5 @@
 use std::{
+    fmt::Display,
     path::{Path, PathBuf},
     str::FromStr,
 };
@@ -32,6 +33,10 @@ impl AbsPathStr {
         self.pathstr.to_string_lossy()
     }
 
+    pub fn display(&self) -> impl Display {
+        self.path().display()
+    }
+
     #[instrument(ret, err, level = "trace")]
     pub fn join(&self, suffix: &RelPathStr) -> Result<Self> {
         self.path().join(suffix.path()).try_into()
@@ -40,8 +45,8 @@ impl AbsPathStr {
     #[instrument(ret, err, level = "trace")]
     pub fn to_rel(&self, base: &Self) -> Result<RelPathStr> {
         let stripped = self.path().strip_prefix(base.path()).with_context(|| {
-            let p = self.to_string_lossy();
-            let b = base.to_string_lossy();
+            let p = self.display();
+            let b = base.display();
             format!("Could not get relative path for {p} with base {b}")
         })?;
         RelPathStr::try_from(stripped)
@@ -57,7 +62,7 @@ impl AbsPathStr {
         self.path()
             .canonicalize()
             .map(Self::try_from)?
-            .with_context(|| format!("Failed to canonicalize {}", self.to_string_lossy()))
+            .with_context(|| format!("Failed to canonicalize {}", self.display()))
     }
 
     #[instrument(ret, level = "trace")]

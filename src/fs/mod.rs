@@ -18,13 +18,12 @@ impl AbsPathStr {
     pub fn list_all(&self) -> Result<Vec<AbsPathStr>> {
         fs::read_dir(self)
             .with_context(|| {
-                let p = self.to_string_lossy();
+                let p = self.display();
                 format!("Could not list files in directory {p}")
             })?
             .map(|entry| {
-                let entry = entry.with_context(|| {
-                    format!("Failed to read entry in {}", self.to_string_lossy())
-                })?;
+                let entry =
+                    entry.with_context(|| format!("Failed to read entry in {}", self.display()))?;
                 trace!(file = ?entry.path(), directory = ?self, "Listed file inside directory:");
                 AbsPathStr::try_from(entry.path())
             })
@@ -76,7 +75,7 @@ impl AbsPathStr {
         let canon = self.canonicalize()?;
         if canon.is_file() {
             fs::remove_file(&canon).with_context(|| {
-                let p = canon.to_string_lossy();
+                let p = canon.display();
                 format!("Could not delete file: {p}")
             })?;
             debug!(file = ?self, "File successfully deleted: ");
@@ -84,14 +83,14 @@ impl AbsPathStr {
         // purge empty directory
         else if canon.is_dir() {
             fs::remove_dir(&canon).with_context(|| {
-                let p = canon.to_string_lossy();
+                let p = canon.display();
                 format!("Could not delete directory: {p}")
             })?;
             debug!(directory = ?self, "Directory successfully deleted");
         }
         // fail if not either file nor directory
         else {
-            let p = canon.to_string_lossy();
+            let p = canon.display();
             bail!("Could not delete path: {p}");
         }
 
@@ -120,25 +119,25 @@ impl AbsPathStr {
             self.path().components().next_back(),
             Some(Component::Normal(_))
         ) {
-            let p = self.to_string_lossy();
+            let p = self.display();
             bail!("Path cannot be created as a file: {p}")
         }
 
         // create parent dirs
         if let Some(parent) = self.path().parent() {
             fs::create_dir_all(parent).with_context(|| {
-                let p = parent.to_string_lossy();
+                let p = parent.display();
                 format!("Failed to create directory: {p}")
             })?;
             debug!(directory = ?parent, "Parent directory successfully created:");
         } else {
-            let p = self.to_string_lossy();
+            let p = self.display();
             bail!("Could not create parent directories: {p}");
         }
 
         // create file
         File::create(self).with_context(|| {
-            let p = self.to_string_lossy();
+            let p = self.display();
             format!("Failed to create file: {p}")
         })?;
         debug!(file = ?self, "File successfully created:");
@@ -149,12 +148,12 @@ impl AbsPathStr {
     #[instrument(err, level = "trace")]
     pub fn read_file(&self) -> Result<String> {
         if !self.is_file() {
-            let p = self.to_string_lossy();
+            let p = self.display();
             bail!("Cannot read a path that is not a file: {p}");
         }
         fs::read_to_string(self)
             .with_context(|| {
-                let p = self.to_string_lossy();
+                let p = self.display();
                 format!("Could not read file: {p}")
             })
             .inspect(|_| debug!(file = ?self, "File successfully read into string:"))
@@ -164,8 +163,8 @@ impl AbsPathStr {
     pub fn copy_file(&self, target: &Self) -> Result<()> {
         target.create_file()?;
         fs::copy(self, target).with_context(|| {
-            let p = self.to_string_lossy();
-            let t = target.to_string_lossy();
+            let p = self.display();
+            let t = target.display();
             format!("Failed to copy from {p} to {t}")
         })?;
         debug!(src_path = ?self, dst_path = ?target, "Source file successfully copied into destination file:");

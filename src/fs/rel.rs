@@ -1,4 +1,5 @@
 use std::{
+    fmt::Display,
     path::{Path, PathBuf},
     str::FromStr,
 };
@@ -30,6 +31,10 @@ impl RelPathStr {
 
     pub fn to_string_lossy(&self) -> String {
         self.pathstr.to_string_lossy()
+    }
+
+    pub fn display(&self) -> impl Display {
+        self.path().display()
     }
 
     #[instrument(ret, err, level = "trace")]

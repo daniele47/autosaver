@@ -86,7 +86,7 @@ impl Profile {
                     .map(|s| s.to_string_lossy())
                     .collect::<Vec<_>>()
                     .join(" → ");
-                let name = self.name().to_string_lossy();
+                let name = self.name().display();
                 bail!(format!("Profile {name} has a dependency cycle: {cycle}"));
             }
 
@@ -101,7 +101,7 @@ impl Profile {
             let item_profile = params.all_profiles.get(item_name).with_context(|| {
                     let name = self.name().to_string_lossy();
                     let inv_par = path.last().map(|p|p.to_string_lossy()).unwrap_or(name.clone());
-                    let inv_name = item_name.to_string_lossy();
+                    let inv_name = item_name.display();
                     format!("Profile {name} traversal found invalid profile name {inv_name} as a child of {inv_par}")
                 })?;
             debug!(profile = ?item_name, "Traversed profile:");

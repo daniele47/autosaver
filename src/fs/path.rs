@@ -1,4 +1,5 @@
 use std::{
+    fmt::Display,
     path::{Component, Path, PathBuf},
     str::FromStr,
 };
@@ -29,12 +30,16 @@ impl PathStr {
         self.path.to_string_lossy().to_string()
     }
 
+    pub fn display(&self) -> impl Display {
+        self.path().display()
+    }
+
     #[instrument(ret, err, level = "trace")]
     pub fn basename(&self) -> Result<Self> {
         self.path
             .file_name()
             .map(|p| Self::try_from(p.as_ref()))
-            .with_context(|| format!("Could not get basename of {}", self.to_string_lossy()))?
+            .with_context(|| format!("Could not get basename of {}", self.display()))?
     }
 }
 
