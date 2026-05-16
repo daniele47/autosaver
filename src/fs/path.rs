@@ -24,7 +24,8 @@ impl PathStr {
                     bail!("Path contains current directory: {}", path.display());
                 }
             }
-            trace!(path=%path.display(), "Interned path:");
+            let interned = Intern::<PathBuf>::num_objects_interned() + 1;
+            trace!(path=%path.display(),interned=%interned, "Interned new path:");
         }
         Ok(Self {
             path: Intern::new(path),
