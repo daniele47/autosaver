@@ -56,6 +56,7 @@ impl AbsPathStr {
     {
         let mut stack = Vec::<(Option<usize>, Option<usize>)>::new();
         let mut filtered_out = Vec::<AbsPathStr>::new();
+        let mut buffer = Vec::<AbsPathStr>::new();
         let mut root_dir_used = false;
 
         loop {
@@ -79,9 +80,8 @@ impl AbsPathStr {
             }
 
             // append children to vector + push chilren dirs to stack
-            let mut buffer = Vec::<AbsPathStr>::new();
             item.list_all(&mut buffer)?;
-            for child in buffer {
+            for child in buffer.drain(..) {
                 trace!(file = %child.display(), "Found path recursively inside directory:");
                 if filter(&child) {
                     if child.is_dir() {
@@ -107,19 +107,18 @@ impl AbsPathStr {
     }
 
     #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
-    pub fn all_files(&self) -> Result<Vec<AbsPathStr>> {
+    pub fn all_files(&self, files: &mut Vec<AbsPathStr>) -> Result<()> {
         if self.is_file() {
-            trace!(path=%self.display(), "Path is a file (return only file itself):");
-            Ok(vec![self.clone()])
+            trace!(path=%self.display(), "Path is a file:");
+            files.push(self.clone());
         } else if self.is_dir() {
-            trace!(path=%self.display(), "Path is a directory (return all files inside):");
-            let mut res = vec![self.clone()];
-            self.find_filtered(&mut res, AbsPathStr::is_file)?;
-            Ok(res)
+            trace!(path=%self.display(), "Path is a directory:");
+            files.push(self.clone());
+            self.find_filtered(files, AbsPathStr::is_file)?;
         } else {
-            trace!(path=%self.display(), "Path is a file (return nothing):");
-            Ok(vec![])
+            trace!(path=%self.display(), "Path is neither a file nor a directory:");
         }
+        Ok(())
     }
 
     #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
