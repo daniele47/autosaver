@@ -42,7 +42,7 @@ pub struct TraverseParams<'a> {
 }
 
 impl Profile {
-    #[instrument(ret, level = "trace", skip_all)]
+    #[instrument(level = "trace")]
     pub fn new(name: RelPathStr, id: RelPathStr, kind: ProfileKind) -> Self {
         Self { name, id, kind }
     }
@@ -59,7 +59,7 @@ impl Profile {
         &self.kind
     }
 
-    #[instrument(ret, err, level = "trace", skip_all)]
+    #[instrument(ret, err, level = "trace", skip_all, fields(root= ?self.name))]
     pub fn traverse<S>(&self, params: TraverseParams, mut on_elem: S) -> Result<()>
     where
         S: FnMut(TraverseContext) -> Result<()>,
@@ -68,7 +68,6 @@ impl Profile {
         let mut path = Vec::<&RelPathStr>::new();
         let mut stack = Vec::<(&RelPathStr, bool)>::new();
         stack.push((self.name(), false));
-        debug!(root = ?self.name(), "Traversing profiles from root:");
 
         // 3 colors DFS to traverse whilst properly detecting loops
         while let Some((item_name, item_visited)) = stack.pop() {

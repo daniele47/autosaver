@@ -14,7 +14,7 @@ pub mod path;
 pub mod rel;
 
 impl AbsPathStr {
-    #[instrument(ret, err, level = "trace")]
+    #[instrument(err, level = "trace")]
     pub fn list_all(&self) -> Result<Vec<AbsPathStr>> {
         fs::read_dir(self)
             .with_context(|| {

@@ -36,7 +36,7 @@ impl ModuleEntry {
 }
 
 impl Module {
-    #[instrument(ret, level = "trace", skip_all)]
+    #[instrument(level = "trace", skip_all)]
     pub fn new(entries: Vec<ModuleEntry>) -> Self {
         Self { entries }
     }

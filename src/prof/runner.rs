@@ -35,7 +35,7 @@ impl RunnerEntry {
 }
 
 impl Runner {
-    #[instrument(ret, level = "trace", skip_all)]
+    #[instrument(level = "trace", skip_all)]
     pub fn new(entries: Vec<RunnerEntry>) -> Self {
         Self { entries }
     }
