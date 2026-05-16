@@ -51,8 +51,9 @@ impl AbsPathStr {
     where
         F: Fn(&AbsPathStr) -> bool,
     {
-        let mut stack = Vec::<usize>::new();
+        let mut stack = Vec::<(Option<usize>, Option<usize>)>::new();
         let mut res = Vec::<AbsPathStr>::new();
+        let mut filtered_out = Vec::<AbsPathStr>::new();
         let mut root_dir_used = false;
 
         loop {
@@ -62,8 +63,14 @@ impl AbsPathStr {
                 item = self;
                 root_dir_used = true;
             } else {
-                if let Some(item_index) = stack.pop() {
-                    item = &res[item_index];
+                if let Some((item_index, filtered_index)) = stack.pop() {
+                    if let Some(ri) = item_index {
+                        item = &res[ri];
+                    } else if let Some(fi) = filtered_index {
+                        item = &res[fi];
+                    } else {
+                        unreachable!("Items must be in res or in filtered")
+                    }
                 } else {
                     break;
                 }
@@ -71,15 +78,20 @@ impl AbsPathStr {
 
             // append children to vector + push chilren dirs to stack
             for child in item.list_all()? {
-                if child.is_dir() {
-                    trace!(directory = %child.display(), "Directory added to stack:");
-                    stack.push(res.len());
-                }
                 trace!(file = %child.display(), "Found file recursively inside directory:");
                 if filter(&child) {
+                    if child.is_dir() {
+                        trace!(directory = %child.display(), "Directory added to stack:");
+                        stack.push((Some(res.len()), None));
+                    }
                     res.push(child);
                 } else {
                     trace!(file = %child.display(), "Found file got filtered out:");
+                    if child.is_dir() {
+                        trace!(directory = %child.display(), "Directory added to stack:");
+                        stack.push((None, Some(filtered_out.len())));
+                    }
+                    filtered_out.push(child);
                 }
             }
         }
