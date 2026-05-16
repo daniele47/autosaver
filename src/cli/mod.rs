@@ -18,11 +18,11 @@ pub struct Cli {
 
     /// Specify a different home directory to use
     #[arg(long, env = "AUTOSAVER_HOME")]
-    home: AbsPathStr,
+    home: Option<AbsPathStr>,
 
     /// Specify a different root directory to use
     #[arg(long, env = "AUTOSAVER_ROOT")]
-    root: AbsPathStr,
+    root: Option<AbsPathStr>,
 
     /// Auto-answer yes to all prompts
     #[arg(short = 'y', long, global = true, conflicts_with = "assume_no")]

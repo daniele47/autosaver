@@ -18,6 +18,10 @@ impl PathStr {
         if path.components().any(|c| c == Component::ParentDir) {
             bail!("Path contains parent directory: {}", path.display());
         }
+        // check path doesn't contain current directory
+        if path.components().any(|c| c == Component::CurDir) {
+            bail!("Path contains current directory: {}", path.display());
+        }
         Ok(Self {
             path: Intern::new(path),
         })
