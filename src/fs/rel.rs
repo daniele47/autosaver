@@ -4,7 +4,7 @@ use std::{
     str::FromStr,
 };
 
-use anyhow::{Result, bail};
+use anyhow::{Context, bail};
 use tracing::instrument;
 
 use crate::fs::{abs::AbsPathStr, path::PathStr};
@@ -15,7 +15,7 @@ pub struct RelPathStr {
 }
 
 impl RelPathStr {
-    pub fn new(path: PathStr) -> Result<Self> {
+    pub(super) fn new_from_pathstr(path: PathStr) -> anyhow::Result<Self> {
         // check path is relative
         if !path.path().is_relative() {
             let p = path.path().display();
@@ -25,8 +25,20 @@ impl RelPathStr {
         }
     }
 
+    pub(super) fn new_from_pathbuf(path: PathBuf) -> anyhow::Result<Self> {
+        Self::new_from_pathstr(PathStr::new_from_pathbuf(path)?)
+    }
+
+    pub(super) fn new_from_path(path: &Path) -> anyhow::Result<Self> {
+        Self::new_from_pathbuf(PathBuf::from(path))
+    }
+
     pub(super) fn path(&self) -> &Path {
         self.pathstr.path()
+    }
+
+    pub fn new(path: String) -> anyhow::Result<Self> {
+        Self::new_from_pathbuf(path.into())
     }
 
     pub fn to_str(&self) -> Option<&str> {
@@ -42,18 +54,21 @@ impl RelPathStr {
     }
 
     #[instrument(ret, err, level = "trace", skip_all, fields(self= %self.display(), suffix=%suffix.display()))]
-    pub fn join(&self, suffix: Self) -> Result<Self> {
-        self.path().join(suffix.path()).try_into()
+    pub fn join(&self, suffix: Self) -> anyhow::Result<Self> {
+        PathStr::new_from_pathbuf(self.path().join(suffix.path()))?.try_into()
     }
 
     #[instrument(ret, err, level = "trace", skip_all, fields(self= %self.display(), base=%base.display()))]
-    pub fn to_abs(&self, base: &AbsPathStr) -> Result<AbsPathStr> {
+    pub fn to_abs(&self, base: &AbsPathStr) -> anyhow::Result<AbsPathStr> {
         base.join(self)
     }
 
     #[instrument(ret, err, level = "trace", skip_all, fields(self= %self.display()))]
-    pub fn basename(&self) -> Result<Self> {
-        self.pathstr.basename()?.try_into()
+    pub fn basename(&self) -> anyhow::Result<Self> {
+        self.path()
+            .file_name()
+            .map(|f| Self::new_from_path(f.as_ref()))
+            .with_context(|| format!("Could not get basename of {}", self.display()))?
     }
 
     #[instrument(ret, level = "trace", skip_all, fields(self= %self.display(), base=%base.display()))]
@@ -69,41 +84,21 @@ impl RelPathStr {
 impl TryFrom<PathStr> for RelPathStr {
     type Error = anyhow::Error;
 
-    fn try_from(value: PathStr) -> std::prelude::v1::Result<Self, Self::Error> {
-        Self::new(value)
-    }
-}
-impl TryFrom<PathBuf> for RelPathStr {
-    type Error = anyhow::Error;
-
-    fn try_from(path: PathBuf) -> std::prelude::v1::Result<Self, Self::Error> {
-        Self::new(path.try_into()?)
+    fn try_from(value: PathStr) -> Result<Self, Self::Error> {
+        Self::new_from_pathstr(value)
     }
 }
 impl TryFrom<String> for RelPathStr {
     type Error = anyhow::Error;
 
-    fn try_from(path: String) -> std::prelude::v1::Result<Self, Self::Error> {
-        Self::new(path.try_into()?)
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        Self::new(value)
     }
 }
 impl FromStr for RelPathStr {
     type Err = anyhow::Error;
 
-    fn from_str(s: &str) -> std::prelude::v1::Result<Self, Self::Err> {
-        Self::new(PathStr::from_str(s)?)
-    }
-}
-impl TryFrom<&Path> for RelPathStr {
-    type Error = anyhow::Error;
-
-    fn try_from(value: &Path) -> std::prelude::v1::Result<Self, Self::Error> {
-        PathStr::try_from(value)?.try_into()
-    }
-}
-
-impl AsRef<Path> for RelPathStr {
-    fn as_ref(&self) -> &Path {
-        self.path()
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Self::new(s.into())
     }
 }

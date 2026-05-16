@@ -15,7 +15,7 @@ pub struct AbsPathStr {
 }
 
 impl AbsPathStr {
-    pub fn new(path: PathStr) -> Result<Self> {
+    pub(super) fn new_from_pathstr(path: PathStr) -> anyhow::Result<Self> {
         // check path is relative
         if !path.path().is_absolute() {
             let p = path.path().display();
@@ -25,8 +25,20 @@ impl AbsPathStr {
         }
     }
 
+    pub(super) fn new_from_pathbuf(path: PathBuf) -> anyhow::Result<Self> {
+        Self::new_from_pathstr(PathStr::new_from_pathbuf(path)?)
+    }
+
+    pub(super) fn new_from_path(path: &Path) -> anyhow::Result<Self> {
+        Self::new_from_pathbuf(PathBuf::from(path))
+    }
+
     pub(super) fn path(&self) -> &Path {
         self.pathstr.path()
+    }
+
+    pub fn new(path: String) -> anyhow::Result<Self> {
+        Self::new_from_pathbuf(path.into())
     }
 
     pub fn to_str(&self) -> Option<&str> {
@@ -43,7 +55,7 @@ impl AbsPathStr {
 
     #[instrument(ret, err, level = "trace", skip_all, fields(self=%self.display(), suffix=%suffix.display()))]
     pub fn join(&self, suffix: &RelPathStr) -> Result<Self> {
-        self.path().join(suffix.path()).try_into()
+        Self::new_from_pathbuf(self.path().join(suffix.path()))
     }
 
     #[instrument(ret, err, level = "trace", skip_all, fields(self=%self.display(), base=%base.display()))]
@@ -53,19 +65,22 @@ impl AbsPathStr {
             let b = base.display();
             format!("Could not get relative path for {p} with base {b}")
         })?;
-        RelPathStr::try_from(stripped)
+        RelPathStr::new_from_path(stripped)
     }
 
     #[instrument(ret, err, level = "trace", skip_all, fields(self= %self.display()))]
     pub fn basename(&self) -> Result<Self> {
-        self.pathstr.basename()?.try_into()
+        self.path()
+            .file_name()
+            .map(|f| Self::new_from_path(f.as_ref()))
+            .with_context(|| format!("Could not get basename of {}", self.display()))?
     }
 
     #[instrument(ret, err, level = "trace", skip_all, fields(self= %self.display()))]
     pub fn canonicalize(&self) -> Result<Self> {
         self.path()
             .canonicalize()
-            .map(Self::try_from)?
+            .map(|p| Self::new_from_path(p.as_ref()))?
             .with_context(|| format!("Failed to canonicalize {}", self.display()))
     }
 
@@ -95,14 +110,7 @@ impl TryFrom<PathStr> for AbsPathStr {
     type Error = anyhow::Error;
 
     fn try_from(value: PathStr) -> std::prelude::v1::Result<Self, Self::Error> {
-        Self::new(value)
-    }
-}
-impl TryFrom<PathBuf> for AbsPathStr {
-    type Error = anyhow::Error;
-
-    fn try_from(path: PathBuf) -> std::prelude::v1::Result<Self, Self::Error> {
-        Self::new(path.try_into()?)
+        Self::new_from_pathstr(value)
     }
 }
 impl TryFrom<String> for AbsPathStr {
@@ -116,19 +124,6 @@ impl FromStr for AbsPathStr {
     type Err = anyhow::Error;
 
     fn from_str(s: &str) -> std::prelude::v1::Result<Self, Self::Err> {
-        Self::new(PathStr::from_str(s)?)
-    }
-}
-impl TryFrom<&Path> for AbsPathStr {
-    type Error = anyhow::Error;
-
-    fn try_from(value: &Path) -> std::prelude::v1::Result<Self, Self::Error> {
-        PathStr::try_from(value)?.try_into()
-    }
-}
-
-impl AsRef<Path> for AbsPathStr {
-    fn as_ref(&self) -> &Path {
-        self.path()
+        Self::new(s.into())
     }
 }
