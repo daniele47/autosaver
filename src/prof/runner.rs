@@ -1,5 +1,3 @@
-use tracing::instrument;
-
 use crate::fs::rel::RelPathStr;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -20,7 +18,6 @@ pub struct Runner {
 }
 
 impl RunnerEntry {
-    #[instrument(ret, level = "trace")]
     pub fn new(path: RelPathStr, policy: RunnerPolicy) -> Self {
         Self { path, policy }
     }
@@ -35,7 +32,6 @@ impl RunnerEntry {
 }
 
 impl Runner {
-    #[instrument(level = "trace", skip_all, fields(len = %entries.len()))]
     pub fn new(entries: Vec<RunnerEntry>) -> Self {
         Self { entries }
     }

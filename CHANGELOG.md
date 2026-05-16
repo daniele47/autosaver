@@ -4,6 +4,9 @@ All notable changes to this project will be documented here
 
 ## v2.0.0
 
+TODO:
+- [ ] better logs (use display, remove useless info and more)
+
 ### Features
 
 - complete rewrite, using 3rd party crates as dependencies

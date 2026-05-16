@@ -42,7 +42,6 @@ pub struct TraverseParams<'a> {
 }
 
 impl Profile {
-    #[instrument(ret, level = "trace")]
     pub fn new(name: RelPathStr, id: RelPathStr, kind: ProfileKind) -> Self {
         Self { name, id, kind }
     }

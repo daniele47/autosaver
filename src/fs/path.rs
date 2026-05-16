@@ -12,7 +12,6 @@ pub struct PathStr {
 }
 
 impl PathStr {
-    #[instrument(ret, err, level = "trace", skip_all)]
     pub fn new(path: PathBuf) -> Result<Self> {
         // check path doesn't contain parent directory
         if path.components().any(|c| c == Component::ParentDir) {

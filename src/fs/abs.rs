@@ -14,7 +14,6 @@ pub struct AbsPathStr {
 }
 
 impl AbsPathStr {
-    #[instrument(ret, err, level = "trace")]
     pub fn new(path: PathStr) -> Result<Self> {
         // check path is relative
         if !path.as_ref().is_absolute() {
