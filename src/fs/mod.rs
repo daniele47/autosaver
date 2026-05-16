@@ -65,7 +65,7 @@ impl AbsPathStr {
         Ok(res)
     }
 
-    #[instrument(ret, err, level = "trace")]
+    #[instrument(err, level = "trace")]
     pub fn delete_path(&self) -> Result<()> {
         if !self.path().exists() {
             debug!(path = ?self, "Path does not exist, nothing to delete:");
@@ -108,7 +108,7 @@ impl AbsPathStr {
         Ok(())
     }
 
-    #[instrument(ret, err, level = "trace")]
+    #[instrument(err, level = "trace")]
     pub fn create_file(&self) -> Result<()> {
         if self.is_file() {
             debug!(file = ?self, "File already exists, left untouched:");
@@ -146,7 +146,7 @@ impl AbsPathStr {
         Ok(())
     }
 
-    #[instrument(ret, err, level = "trace")]
+    #[instrument(err, level = "trace")]
     pub fn read_file(&self) -> Result<String> {
         if !self.is_file() {
             let p = self.to_string_lossy();
@@ -160,7 +160,7 @@ impl AbsPathStr {
             .inspect(|_| debug!(file = ?self, "File successfully read into string:"))
     }
 
-    #[instrument(ret, err, level = "trace")]
+    #[instrument(err, level = "trace")]
     pub fn copy_file(&self, target: &Self) -> Result<()> {
         target.create_file()?;
         fs::copy(self, target).with_context(|| {

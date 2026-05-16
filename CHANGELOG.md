@@ -4,9 +4,6 @@ All notable changes to this project will be documented here
 
 ## v2.0.0
 
-WIP:
-- [ ] decide how many logs to have and fix current logging
-
 ### Features
 
 - complete rewrite, using 3rd party crates as dependencies
