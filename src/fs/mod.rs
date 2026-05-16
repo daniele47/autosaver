@@ -15,23 +15,42 @@ pub mod rel;
 
 impl AbsPathStr {
     #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
-    pub fn list_all(&self) -> Result<Vec<AbsPathStr>> {
+    pub fn list_filtered<F>(&self, filter: F) -> Result<Vec<AbsPathStr>>
+    where
+        F: Fn(&AbsPathStr) -> bool,
+    {
         fs::read_dir(self)
             .with_context(|| {
                 let p = self.display();
                 format!("Could not list files in directory {p}")
             })?
-            .map(|entry| {
-                let entry =
-                    entry.with_context(|| format!("Failed to read entry in {}", self.display()))?;
-                trace!(file = %entry.path().display(), "Listed file inside directory:");
-                AbsPathStr::try_from(entry.path())
+            .map(|e| {
+                let e = e.with_context(|| format!("Failed to read entry in {}", self.display()))?;
+                trace!(file = %e.path().display(), "Listed file inside directory:");
+                AbsPathStr::try_from(e.path())
+            })
+            .filter(|e| {
+                if let Ok(p) = e {
+                    let keep = filter(p);
+                    if !keep {
+                        trace!(file = %p.path().display(), "Listed file got filtered out:");
+                    }
+                    keep
+                } else {
+                    true
+                }
             })
             .collect()
     }
+    pub fn list_all(&self) -> Result<Vec<AbsPathStr>> {
+        self.list_filtered(|_| true)
+    }
 
     #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
-    pub fn find_all(&self) -> Result<Vec<AbsPathStr>> {
+    pub fn find_filtered<F>(&self, filter: F) -> Result<Vec<AbsPathStr>>
+    where
+        F: Fn(&AbsPathStr) -> bool,
+    {
         let mut stack = Vec::<usize>::new();
         let mut res = Vec::<AbsPathStr>::new();
         let mut root_dir_used = false;
@@ -57,11 +76,18 @@ impl AbsPathStr {
                     stack.push(res.len());
                 }
                 trace!(file = %child.display(), "Found file recursively inside directory:");
-                res.push(child);
+                if filter(&child) {
+                    res.push(child);
+                } else {
+                    trace!(file = %child.display(), "Found file got filtered out:");
+                }
             }
         }
 
         Ok(res)
+    }
+    pub fn find_all(&self) -> Result<Vec<AbsPathStr>> {
+        self.find_filtered(|_| true)
     }
 
     #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
@@ -71,12 +97,9 @@ impl AbsPathStr {
             Ok(vec![self.clone()])
         } else if self.is_dir() {
             trace!(path=%self.display(), "Path is a directory (return all files inside):");
-            Ok(self
-                .find_all()?
-                .into_iter()
-                .inspect(|f| trace!(file=%f.display(), "File found:"))
-                .filter(AbsPathStr::is_file)
-                .collect())
+            let mut res = vec![self.clone()];
+            res.extend(self.find_filtered(AbsPathStr::is_file)?);
+            Ok(res)
         } else {
             trace!(path=%self.display(), "Path is a file (return nothing):");
             Ok(vec![])
