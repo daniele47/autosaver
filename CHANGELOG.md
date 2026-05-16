@@ -7,6 +7,11 @@ All notable changes to this project will be documented here
 WIP:
 - [ ] decide how many logs to have and fix current logging
 
+### Features
+
+- complete rewrite, using 3rd party crates as dependencies
+- added `--log` flag with proper logs
+
 ## v0.18.1 / v1.0.0
 
 ### Changes

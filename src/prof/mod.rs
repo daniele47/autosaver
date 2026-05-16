@@ -42,7 +42,7 @@ pub struct TraverseParams<'a> {
 }
 
 impl Profile {
-    #[instrument(level = "trace")]
+    #[instrument(ret, level = "trace")]
     pub fn new(name: RelPathStr, id: RelPathStr, kind: ProfileKind) -> Self {
         Self { name, id, kind }
     }
@@ -59,7 +59,7 @@ impl Profile {
         &self.kind
     }
 
-    #[instrument(ret, err, level = "trace", skip_all, fields(root= ?self.name))]
+    #[instrument(err, level = "trace", skip_all, fields(root= ?self.name))]
     pub fn traverse<S>(&self, params: TraverseParams, mut on_elem: S) -> Result<()>
     where
         S: FnMut(TraverseContext) -> Result<()>,

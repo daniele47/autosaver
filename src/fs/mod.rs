@@ -5,7 +5,7 @@ use std::{
 };
 
 use anyhow::{Context, Result, bail};
-use tracing::{debug, instrument};
+use tracing::{debug, instrument, trace};
 
 use crate::fs::abs::AbsPathStr;
 
@@ -25,12 +25,13 @@ impl AbsPathStr {
                 let entry = entry.with_context(|| {
                     format!("Failed to read entry in {}", self.to_string_lossy())
                 })?;
+                trace!(file = ?entry.path(), directory = ?self, "Listed file inside directory:");
                 AbsPathStr::try_from(entry.path())
             })
             .collect()
     }
 
-    #[instrument(ret, err, level = "trace")]
+    #[instrument(err, level = "trace")]
     pub fn find_all(&self) -> Result<Vec<AbsPathStr>> {
         let mut stack = Vec::<usize>::new();
         let mut res = Vec::<AbsPathStr>::new();
@@ -53,8 +54,10 @@ impl AbsPathStr {
             // append children to vector + push chilren dirs to stack
             for child in item.list_all()? {
                 if child.is_dir() {
+                    trace!(file = ?child, directory = ?self, "Directory added to stack:");
                     stack.push(res.len());
                 }
+                trace!(file = ?child, directory = ?self, "Found file recursively inside directory:");
                 res.push(child);
             }
         }
@@ -65,7 +68,7 @@ impl AbsPathStr {
     #[instrument(ret, err, level = "trace")]
     pub fn delete_path(&self) -> Result<()> {
         if !self.path().exists() {
-            debug!(path = ?self, "Path does not exist, nothing to delete");
+            debug!(path = ?self, "Path does not exist, nothing to delete:");
             return Ok(());
         }
 
@@ -76,7 +79,7 @@ impl AbsPathStr {
                 let p = canon.to_string_lossy();
                 format!("Could not delete file: {p}")
             })?;
-            debug!(path = ?self, "File successfully deleted");
+            debug!(file = ?self, "File successfully deleted: ");
         }
         // purge empty directory
         else if canon.is_dir() {
@@ -84,7 +87,7 @@ impl AbsPathStr {
                 let p = canon.to_string_lossy();
                 format!("Could not delete directory: {p}")
             })?;
-            debug!(path = ?self, "Directory successfully deleted");
+            debug!(directory = ?self, "Directory successfully deleted");
         }
         // fail if not either file nor directory
         else {
@@ -98,7 +101,7 @@ impl AbsPathStr {
             if fs::remove_dir(p).is_err() {
                 break;
             }
-            debug!(path = ?p, "Deleted empty parent directory");
+            debug!(directory = ?p, "Deleted empty parent directory");
             parent = p.parent();
         }
 
@@ -108,7 +111,7 @@ impl AbsPathStr {
     #[instrument(ret, err, level = "trace")]
     pub fn create_file(&self) -> Result<()> {
         if self.is_file() {
-            debug!(path = ?self, "File already exists, left untouched");
+            debug!(file = ?self, "File already exists, left untouched:");
             return Ok(());
         }
 
@@ -127,7 +130,7 @@ impl AbsPathStr {
                 let p = parent.to_string_lossy();
                 format!("Failed to create directory: {p}")
             })?;
-            debug!(path = ?parent, "Parent directory successfully created");
+            debug!(directory = ?parent, "Parent directory successfully created:");
         } else {
             let p = self.to_string_lossy();
             bail!("Could not create parent directories: {p}");
@@ -138,7 +141,7 @@ impl AbsPathStr {
             let p = self.to_string_lossy();
             format!("Failed to create file: {p}")
         })?;
-        debug!(path = ?self, "File successfully created");
+        debug!(file = ?self, "File successfully created:");
 
         Ok(())
     }
@@ -154,7 +157,7 @@ impl AbsPathStr {
                 let p = self.to_string_lossy();
                 format!("Could not read file: {p}")
             })
-            .inspect(|_| debug!(path = ?self, "File successfully read into string"))
+            .inspect(|_| debug!(file = ?self, "File successfully read into string:"))
     }
 
     #[instrument(ret, err, level = "trace")]
@@ -165,7 +168,7 @@ impl AbsPathStr {
             let t = target.to_string_lossy();
             format!("Failed to copy from {p} to {t}")
         })?;
-        debug!(src_path = ?self, dst_path = ?target, "Source file successfully copied into destination file");
+        debug!(src_path = ?self, dst_path = ?target, "Source file successfully copied into destination file:");
         Ok(())
     }
 
