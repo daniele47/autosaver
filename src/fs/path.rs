@@ -6,6 +6,7 @@ use std::{
 
 use anyhow::bail;
 use internment::Intern;
+use tracing::trace;
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct PathStr {
@@ -15,12 +16,15 @@ pub struct PathStr {
 impl PathStr {
     pub(super) fn new_from_pathbuf(path: PathBuf) -> anyhow::Result<Self> {
         // check path contains invalid components
-        for component in path.components() {
-            if component == Component::ParentDir {
-                bail!("Path contains parent directory: {}", path.display());
-            } else if component == Component::CurDir {
-                bail!("Path contains current directory: {}", path.display());
+        if !Intern::<PathBuf>::is_interned(&path) {
+            for component in path.components() {
+                if component == Component::ParentDir {
+                    bail!("Path contains parent directory: {}", path.display());
+                } else if component == Component::CurDir {
+                    bail!("Path contains current directory: {}", path.display());
+                }
             }
+            trace!(path=%path.display(), "Interned path:");
         }
         Ok(Self {
             path: Intern::new(path),
