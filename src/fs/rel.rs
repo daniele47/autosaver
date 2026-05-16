@@ -37,22 +37,22 @@ impl RelPathStr {
         self.path().display()
     }
 
-    #[instrument(ret, err, level = "trace")]
+    #[instrument(ret, err, level = "trace", skip_all, fields(self= %self.display(), suffix=%suffix.display()))]
     pub fn join(&self, suffix: Self) -> Result<Self> {
         self.path().join(suffix.path()).try_into()
     }
 
-    #[instrument(ret, err, level = "trace")]
+    #[instrument(ret, err, level = "trace", skip_all, fields(self= %self.display(), base=%base.display()))]
     pub fn to_abs(&self, base: &AbsPathStr) -> Result<AbsPathStr> {
         base.join(self)
     }
 
-    #[instrument(ret, err, level = "trace")]
+    #[instrument(ret, err, level = "trace", skip_all, fields(self= %self.display()))]
     pub fn basename(&self) -> Result<Self> {
         self.pathstr.basename()?.try_into()
     }
 
-    #[instrument(ret, level = "trace")]
+    #[instrument(ret, level = "trace", skip_all, fields(self= %self.display(), base=%base.display()))]
     pub fn is_inside(&self, base: &AbsPathStr) -> bool {
         if let Ok(abs) = self.to_abs(base) {
             abs.is_inside(base)

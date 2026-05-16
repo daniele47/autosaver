@@ -37,12 +37,12 @@ impl AbsPathStr {
         self.path().display()
     }
 
-    #[instrument(ret, err, level = "trace")]
+    #[instrument(err, level = "trace", skip_all, fields(self=%self.display(), suffix=%suffix.display()))]
     pub fn join(&self, suffix: &RelPathStr) -> Result<Self> {
         self.path().join(suffix.path()).try_into()
     }
 
-    #[instrument(ret, err, level = "trace")]
+    #[instrument(ret, err, level = "trace", skip_all, fields(self=%self.display(), base=%base.display()))]
     pub fn to_rel(&self, base: &Self) -> Result<RelPathStr> {
         let stripped = self.path().strip_prefix(base.path()).with_context(|| {
             let p = self.display();
@@ -52,12 +52,12 @@ impl AbsPathStr {
         RelPathStr::try_from(stripped)
     }
 
-    #[instrument(ret, err, level = "trace")]
+    #[instrument(ret, err, level = "trace", skip_all, fields(self= %self.display()))]
     pub fn basename(&self) -> Result<Self> {
         self.pathstr.basename()?.try_into()
     }
 
-    #[instrument(ret, err, level = "trace")]
+    #[instrument(ret, err, level = "trace", skip_all, fields(self= %self.display()))]
     pub fn canonicalize(&self) -> Result<Self> {
         self.path()
             .canonicalize()
@@ -65,17 +65,17 @@ impl AbsPathStr {
             .with_context(|| format!("Failed to canonicalize {}", self.display()))
     }
 
-    #[instrument(ret, level = "trace")]
+    #[instrument(ret, level = "trace", skip_all, fields(self= %self.display()))]
     pub fn is_file(&self) -> bool {
         self.path().is_file()
     }
 
-    #[instrument(ret, level = "trace")]
+    #[instrument(ret, level = "trace", skip_all, fields(self= %self.display()))]
     pub fn is_dir(&self) -> bool {
         self.path().is_dir()
     }
 
-    #[instrument(ret, level = "trace")]
+    #[instrument(ret, level = "trace", skip_all, fields(self= %self.display(),base=%base.display()))]
     pub fn is_inside(&self, base: &Self) -> bool {
         if let Ok(self_canon) = self.canonicalize()
             && let Ok(dir_canon) = base.canonicalize()

@@ -14,7 +14,7 @@ pub mod path;
 pub mod rel;
 
 impl AbsPathStr {
-    #[instrument(err, level = "trace")]
+    #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
     pub fn list_all(&self) -> Result<Vec<AbsPathStr>> {
         fs::read_dir(self)
             .with_context(|| {
@@ -24,13 +24,13 @@ impl AbsPathStr {
             .map(|entry| {
                 let entry =
                     entry.with_context(|| format!("Failed to read entry in {}", self.display()))?;
-                trace!(file = ?entry.path(), directory = ?self, "Listed file inside directory:");
+                trace!(file = %entry.path().display(), "Listed file inside directory:");
                 AbsPathStr::try_from(entry.path())
             })
             .collect()
     }
 
-    #[instrument(err, level = "trace")]
+    #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
     pub fn find_all(&self) -> Result<Vec<AbsPathStr>> {
         let mut stack = Vec::<usize>::new();
         let mut res = Vec::<AbsPathStr>::new();
@@ -53,10 +53,10 @@ impl AbsPathStr {
             // append children to vector + push chilren dirs to stack
             for child in item.list_all()? {
                 if child.is_dir() {
-                    trace!(file = ?child, directory = ?self, "Directory added to stack:");
+                    trace!(directory = %child.display(), "Directory added to stack:");
                     stack.push(res.len());
                 }
-                trace!(file = ?child, directory = ?self, "Found file recursively inside directory:");
+                trace!(file = %child.display(), "Found file recursively inside directory:");
                 res.push(child);
             }
         }
@@ -64,10 +64,10 @@ impl AbsPathStr {
         Ok(res)
     }
 
-    #[instrument(err, level = "trace")]
+    #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
     pub fn delete_path(&self) -> Result<()> {
         if !self.path().exists() {
-            debug!(path = ?self, "Path does not exist, nothing to delete:");
+            debug!(path = %self.display(), "Path does not exist, nothing to delete:");
             return Ok(());
         }
 
@@ -78,7 +78,7 @@ impl AbsPathStr {
                 let p = canon.display();
                 format!("Could not delete file: {p}")
             })?;
-            debug!(file = ?self, "File successfully deleted: ");
+            debug!(file = %self.display(), "File successfully deleted: ");
         }
         // purge empty directory
         else if canon.is_dir() {
@@ -86,7 +86,7 @@ impl AbsPathStr {
                 let p = canon.display();
                 format!("Could not delete directory: {p}")
             })?;
-            debug!(directory = ?self, "Directory successfully deleted");
+            debug!(directory = %self.display(), "Directory successfully deleted");
         }
         // fail if not either file nor directory
         else {
@@ -100,17 +100,17 @@ impl AbsPathStr {
             if fs::remove_dir(p).is_err() {
                 break;
             }
-            debug!(directory = ?p, "Deleted empty parent directory");
+            debug!(directory = %p.display(), "Deleted empty parent directory");
             parent = p.parent();
         }
 
         Ok(())
     }
 
-    #[instrument(err, level = "trace")]
+    #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
     pub fn create_file(&self) -> Result<()> {
         if self.is_file() {
-            debug!(file = ?self, "File already exists, left untouched:");
+            debug!(file = %self.display(), "File already exists, left untouched:");
             return Ok(());
         }
 
@@ -129,7 +129,7 @@ impl AbsPathStr {
                 let p = parent.display();
                 format!("Failed to create directory: {p}")
             })?;
-            debug!(directory = ?parent, "Parent directory successfully created:");
+            debug!(directory = %parent.display(), "Parent directory successfully created:");
         } else {
             let p = self.display();
             bail!("Could not create parent directories: {p}");
@@ -140,12 +140,12 @@ impl AbsPathStr {
             let p = self.display();
             format!("Failed to create file: {p}")
         })?;
-        debug!(file = ?self, "File successfully created:");
+        debug!(file = %self.display(), "File successfully created:");
 
         Ok(())
     }
 
-    #[instrument(err, level = "trace")]
+    #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
     pub fn read_file(&self) -> Result<String> {
         if !self.is_file() {
             let p = self.display();
@@ -156,22 +156,22 @@ impl AbsPathStr {
                 let p = self.display();
                 format!("Could not read file: {p}")
             })
-            .inspect(|_| debug!(file = ?self, "File successfully read into string:"))
+            .inspect(|_| debug!(file = %self.display(), "File successfully read into string:"))
     }
 
-    #[instrument(err, level = "trace")]
-    pub fn copy_file(&self, target: &Self) -> Result<()> {
-        target.create_file()?;
-        fs::copy(self, target).with_context(|| {
+    #[instrument(err, level = "trace", , skip_all, fields(self = %self.display(), dst=%dst.display()))]
+    pub fn copy_file(&self, dst: &Self) -> Result<()> {
+        dst.create_file()?;
+        fs::copy(self, dst).with_context(|| {
             let p = self.display();
-            let t = target.display();
+            let t = dst.display();
             format!("Failed to copy from {p} to {t}")
         })?;
-        debug!(src_path = ?self, dst_path = ?target, "Source file successfully copied into destination file:");
+        debug!(src_path = %self.display(), dst_path = %dst.display(), "Source file successfully copied into destination file:");
         Ok(())
     }
 
-    #[instrument(ret, level = "trace")]
+    #[instrument(ret, level = "trace", , skip_all, fields(self = %self.display(), other = %other.display()))]
     pub fn files_eq(&self, other: &Self) -> bool {
         || -> Result<()> {
             let sm = self.path().metadata()?;
