@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented here
 
+TODO:
+- [ ] avoid double allocation list_all -> find_all -> all_files
+
 ## v2.0.0
 
 ### Features
