@@ -4,7 +4,7 @@ use std::{
     str::FromStr,
 };
 
-use anyhow::{Context, Result, bail};
+use anyhow::{Context, bail};
 use tracing::instrument;
 
 use crate::fs::{path::PathStr, rel::RelPathStr};
@@ -50,12 +50,12 @@ impl AbsPathStr {
     }
 
     #[instrument(ret, err, level = "trace", skip_all, fields(self=%self.display(), suffix=%suffix.display()))]
-    pub fn join(&self, suffix: &RelPathStr) -> Result<Self> {
+    pub fn join(&self, suffix: &RelPathStr) -> anyhow::Result<Self> {
         Self::new_from_pathbuf(self.path().join(suffix.path()))
     }
 
     #[instrument(ret, err, level = "trace", skip_all, fields(self=%self.display(), base=%base.display()))]
-    pub fn to_rel(&self, base: &Self) -> Result<RelPathStr> {
+    pub fn to_rel(&self, base: &Self) -> anyhow::Result<RelPathStr> {
         let stripped = self.path().strip_prefix(base.path()).with_context(|| {
             let p = self.display();
             let b = base.display();
@@ -65,7 +65,7 @@ impl AbsPathStr {
     }
 
     #[instrument(ret, err, level = "trace", skip_all, fields(self= %self.display()))]
-    pub fn basename(&self) -> Result<Self> {
+    pub fn basename(&self) -> anyhow::Result<Self> {
         self.path()
             .file_name()
             .map(|f| Self::new_from_pathbuf(PathBuf::from(f)))
@@ -73,7 +73,7 @@ impl AbsPathStr {
     }
 
     #[instrument(ret, err, level = "trace", skip_all, fields(self= %self.display()))]
-    pub fn canonicalize(&self) -> Result<Self> {
+    pub fn canonicalize(&self) -> anyhow::Result<Self> {
         self.path()
             .canonicalize()
             .map(Self::new_from_pathbuf)?
@@ -105,21 +105,21 @@ impl AbsPathStr {
 impl TryFrom<PathStr> for AbsPathStr {
     type Error = anyhow::Error;
 
-    fn try_from(value: PathStr) -> std::prelude::v1::Result<Self, Self::Error> {
+    fn try_from(value: PathStr) -> Result<Self, Self::Error> {
         Self::new_from_pathstr(value)
     }
 }
 impl TryFrom<String> for AbsPathStr {
     type Error = anyhow::Error;
 
-    fn try_from(value: String) -> std::prelude::v1::Result<Self, Self::Error> {
+    fn try_from(value: String) -> Result<Self, Self::Error> {
         Self::new(value)
     }
 }
 impl FromStr for AbsPathStr {
     type Err = anyhow::Error;
 
-    fn from_str(s: &str) -> std::prelude::v1::Result<Self, Self::Err> {
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
         Self::new(s.into())
     }
 }

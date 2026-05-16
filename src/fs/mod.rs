@@ -4,7 +4,7 @@ use std::{
     path::Component,
 };
 
-use anyhow::{Context, Result, bail};
+use anyhow::{Context, bail};
 use tracing::{debug, instrument, trace};
 
 use crate::fs::abs::AbsPathStr;
@@ -41,7 +41,7 @@ impl Default for FindCache {
 
 impl AbsPathStr {
     #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
-    pub fn list_filtered<F>(&self, paths: &mut Vec<AbsPathStr>, filter: F) -> Result<()>
+    pub fn list_filtered<F>(&self, paths: &mut Vec<AbsPathStr>, filter: F) -> anyhow::Result<()>
     where
         F: Fn(&AbsPathStr) -> bool,
     {
@@ -71,7 +71,7 @@ impl AbsPathStr {
                 Ok(())
             })
     }
-    pub fn list_all(&self, paths: &mut Vec<AbsPathStr>) -> Result<()> {
+    pub fn list_all(&self, paths: &mut Vec<AbsPathStr>) -> anyhow::Result<()> {
         self.list_filtered(paths, |_| true)
     }
 
@@ -81,7 +81,7 @@ impl AbsPathStr {
         paths: &mut Vec<AbsPathStr>,
         cache: &mut FindCache,
         filter: F,
-    ) -> Result<()>
+    ) -> anyhow::Result<()>
     where
         F: Fn(&AbsPathStr) -> bool,
     {
@@ -134,12 +134,20 @@ impl AbsPathStr {
 
         Ok(())
     }
-    pub fn find_all(&self, paths: &mut Vec<AbsPathStr>, cache: &mut FindCache) -> Result<()> {
+    pub fn find_all(
+        &self,
+        paths: &mut Vec<AbsPathStr>,
+        cache: &mut FindCache,
+    ) -> anyhow::Result<()> {
         self.find_filtered(paths, cache, |_| true)
     }
 
     #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
-    pub fn all_files(&self, files: &mut Vec<AbsPathStr>, cache: &mut FindCache) -> Result<()> {
+    pub fn all_files(
+        &self,
+        files: &mut Vec<AbsPathStr>,
+        cache: &mut FindCache,
+    ) -> anyhow::Result<()> {
         if self.is_file() {
             trace!(path=%self.display(), "Path is a file:");
             files.push(self.clone());
@@ -154,7 +162,7 @@ impl AbsPathStr {
     }
 
     #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
-    pub fn delete_path(&self) -> Result<()> {
+    pub fn delete_path(&self) -> anyhow::Result<()> {
         if !self.path().exists() {
             debug!(path = %self.display(), "Path does not exist, nothing to delete:");
             return Ok(());
@@ -197,7 +205,7 @@ impl AbsPathStr {
     }
 
     #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
-    pub fn create_file(&self) -> Result<()> {
+    pub fn create_file(&self) -> anyhow::Result<()> {
         if self.is_file() {
             debug!(file = %self.display(), "File already exists, left untouched:");
             return Ok(());
@@ -235,7 +243,7 @@ impl AbsPathStr {
     }
 
     #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
-    pub fn read_file(&self) -> Result<String> {
+    pub fn read_file(&self) -> anyhow::Result<String> {
         if !self.is_file() {
             let p = self.display();
             bail!("Cannot read a path that is not a file: {p}");
@@ -249,7 +257,7 @@ impl AbsPathStr {
     }
 
     #[instrument(err, level = "trace", , skip_all, fields(self = %self.display(), dst=%dst.display()))]
-    pub fn copy_file(&self, dst: &Self) -> Result<()> {
+    pub fn copy_file(&self, dst: &Self) -> anyhow::Result<()> {
         dst.create_file()?;
         fs::copy(self.path(), dst.path()).with_context(|| {
             let p = self.display();
@@ -262,7 +270,7 @@ impl AbsPathStr {
 
     #[instrument(ret, level = "trace", skip_all, fields(self = %self.display(), other = %other.display()))]
     pub fn files_eq(&self, other: &Self) -> bool {
-        || -> Result<()> {
+        || -> anyhow::Result<()> {
             let sm = self.path().metadata()?;
             let om = other.path().metadata()?;
 

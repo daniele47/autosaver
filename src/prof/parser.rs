@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use anyhow::{Context, Error, Result, anyhow, bail};
+use anyhow::{Context, anyhow, bail};
 use tracing::instrument;
 
 use crate::{
@@ -28,7 +28,7 @@ struct RawProfile<'a> {
 }
 
 impl<'a> RawProfile<'a> {
-    fn parse_config(config: &'a str, name: &'a str) -> Result<Self> {
+    fn parse_config(config: &'a str, name: &'a str) -> anyhow::Result<Self> {
         let mut lines = Vec::new();
         let mut kind = "";
         let mut id = name;
@@ -71,7 +71,7 @@ impl<'a> RawProfile<'a> {
 
 impl Profile {
     #[instrument(err, level = "trace", skip_all, fields(name=%name))]
-    pub fn parse_profile(config: String, name: String) -> Result<Profile> {
+    pub fn parse_profile(config: String, name: String) -> anyhow::Result<Profile> {
         let raw = RawProfile::parse_config(&config, &name)?;
         match raw.kind {
             "composite" => Self::parse_composite(raw),
@@ -85,7 +85,7 @@ impl Profile {
         }
     }
 
-    fn parse_composite(raw: RawProfile) -> Result<Self> {
+    fn parse_composite(raw: RawProfile) -> anyhow::Result<Self> {
         let mut entries = vec![];
         let kind = "composite";
         for line in raw.lines {
@@ -106,7 +106,7 @@ impl Profile {
         Ok(Profile::new(name, id, kind))
     }
 
-    fn parse_module(raw: RawProfile) -> Result<Self> {
+    fn parse_module(raw: RawProfile) -> anyhow::Result<Self> {
         let mut entries = vec![];
         let mut policy = ModulePolicy::Track;
         let kind = "module";
@@ -136,7 +136,7 @@ impl Profile {
         Ok(Profile::new(name, id, kind))
     }
 
-    fn parse_runner(raw: RawProfile) -> Result<Self> {
+    fn parse_runner(raw: RawProfile) -> anyhow::Result<Self> {
         let mut entries = vec![];
         let mut policy = RunnerPolicy::Run;
         let kind = "runner";
@@ -166,16 +166,16 @@ impl Profile {
     }
 
     // packaged error messages
-    fn data_ctx(name: &str, data: &str, i: usize, kind: &str) -> Result<RelPathStr> {
+    fn data_ctx(name: &str, data: &str, i: usize, kind: &str) -> anyhow::Result<RelPathStr> {
         RelPathStr::from_str(data)
             .with_context(|| format!("Invalid data '{data}' for {kind} profile {name} at line {i}"))
     }
-    fn err_opt(name: &str, opt: &str, i: usize, kind: &str) -> Error {
+    fn err_opt(name: &str, opt: &str, i: usize, kind: &str) -> anyhow::Error {
         let mut opt_split = opt.split_whitespace();
         let opt1 = opt_split.next().unwrap_or("");
         anyhow!("Invalid option '{opt1}' for {kind} profile {name} at line {i}")
     }
-    fn err_val(name: &str, opt: &str, i: usize, kind: &str) -> Error {
+    fn err_val(name: &str, opt: &str, i: usize, kind: &str) -> anyhow::Error {
         let mut opt_split = opt.split_whitespace();
         let opt1 = opt_split.next().unwrap_or("");
         let opt2 = opt_split.next().unwrap_or("");
@@ -189,7 +189,7 @@ mod tests {
     use crate::prof::ProfileKind;
 
     #[test]
-    fn test_parse_composite_profile() -> Result<()> {
+    fn test_parse_composite_profile() -> anyhow::Result<()> {
         let config = r#"
             /! kind composite
             /! id profiles_my_composite
@@ -221,7 +221,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_module_profile() -> Result<()> {
+    fn test_parse_module_profile() -> anyhow::Result<()> {
         let config = r#"
             /! kind module
             /! id profile_my_module
@@ -261,7 +261,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_runner_profile() -> Result<()> {
+    fn test_parse_runner_profile() -> anyhow::Result<()> {
         let config = r#"
             /! kind runner
             /! id profiles_my_runner

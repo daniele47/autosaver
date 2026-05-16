@@ -1,4 +1,3 @@
-use anyhow::Result;
 use clap::{Parser, Subcommand};
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -57,7 +56,7 @@ pub enum CliCmd {
 }
 
 impl Cli {
-    pub fn run(&self) -> Result<()> {
+    pub fn run(&self) -> anyhow::Result<()> {
         // enable logging
         tracing_subscriber::registry()
             .with(fmt::layer().without_time())

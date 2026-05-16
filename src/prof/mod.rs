@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use anyhow::{Context, Result, bail};
+use anyhow::{Context, bail};
 use tracing::{debug, instrument, trace};
 
 use crate::{
@@ -59,9 +59,9 @@ impl Profile {
     }
 
     #[instrument(err, level = "trace", skip_all, fields(root= %self.name.display()))]
-    pub fn traverse<S>(&self, params: TraverseParams, mut on_elem: S) -> Result<()>
+    pub fn traverse<S>(&self, params: TraverseParams, mut on_elem: S) -> anyhow::Result<()>
     where
-        S: FnMut(TraverseContext) -> Result<()>,
+        S: FnMut(TraverseContext) -> anyhow::Result<()>,
     {
         let mut visited = HashSet::<&RelPathStr>::new();
         let mut path = Vec::<&RelPathStr>::new();
@@ -138,7 +138,7 @@ mod tests {
     use super::*;
     use std::{collections::HashMap, str::FromStr};
 
-    fn setup_test_profiles() -> Result<AllProfiles> {
+    fn setup_test_profiles() -> anyhow::Result<AllProfiles> {
         let mut profiles = HashMap::new();
 
         // Leaf module
@@ -182,7 +182,7 @@ mod tests {
     }
 
     #[test]
-    fn test_traverse_full_tree() -> Result<()> {
+    fn test_traverse_full_tree() -> anyhow::Result<()> {
         let profiles = setup_test_profiles()?;
         let profile1 = profiles
             .get(&RelPathStr::from_str("profile1")?)
