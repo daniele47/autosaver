@@ -34,7 +34,7 @@ impl PathStr {
         self.path().display()
     }
 
-    #[instrument(err, level = "trace", skip_all, fields(self= %self.display()))]
+    #[instrument(ret, err, level = "trace", skip_all, fields(self= %self.display()))]
     pub fn basename(&self) -> Result<Self> {
         self.path
             .file_name()

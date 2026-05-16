@@ -70,7 +70,7 @@ impl<'a> RawProfile<'a> {
 }
 
 impl Profile {
-    #[instrument(err, level = "trace", skip(config))]
+    #[instrument(err, level = "trace", skip_all, fields(name=%name))]
     pub fn parse_profile(config: String, name: String) -> Result<Profile> {
         let raw = RawProfile::parse_config(&config, &name)?;
         match raw.kind {

@@ -37,7 +37,7 @@ impl AbsPathStr {
         self.path().display()
     }
 
-    #[instrument(err, level = "trace", skip_all, fields(self=%self.display(), suffix=%suffix.display()))]
+    #[instrument(ret, err, level = "trace", skip_all, fields(self=%self.display(), suffix=%suffix.display()))]
     pub fn join(&self, suffix: &RelPathStr) -> Result<Self> {
         self.path().join(suffix.path()).try_into()
     }

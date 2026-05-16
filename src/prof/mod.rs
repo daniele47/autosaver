@@ -58,7 +58,7 @@ impl Profile {
         &self.kind
     }
 
-    #[instrument(err, level = "trace", skip_all, fields(root= ?self.name))]
+    #[instrument(err, level = "trace", skip_all, fields(root= %self.name.display()))]
     pub fn traverse<S>(&self, params: TraverseParams, mut on_elem: S) -> Result<()>
     where
         S: FnMut(TraverseContext) -> Result<()>,
@@ -72,7 +72,7 @@ impl Profile {
         while let Some((item_name, item_visited)) = stack.pop() {
             // grey -> black: item already visited, aka we explored all from here, and backtracked
             if item_visited {
-                trace!(profile = ?item_name, "Backtracking:");
+                trace!(profile = %item_name.display(), "Backtracking:");
                 path.pop();
                 visited.insert(item_name);
                 continue;
@@ -93,7 +93,7 @@ impl Profile {
             // avoid revisiting already explored items, if graphs are complex and the same node is
             // reached multiple times from different nodes
             if !params.allow_duplicates && visited.contains(&item_name) {
-                trace!(profile = ?item_name, "Skipping already visited profile:");
+                trace!(profile = %item_name.display(), "Skipping already visited profile:");
                 continue;
             }
 
@@ -104,7 +104,7 @@ impl Profile {
                     let inv_name = item_name.display();
                     format!("Profile {name} traversal found invalid profile name {inv_name} as a child of {inv_par}")
                 })?;
-            debug!(profile = ?item_name, "Traversed profile:");
+            debug!(profile = %item_name.display(), "Traversed profile:");
             on_elem(TraverseContext {
                 item: item_profile,
                 path: &path,
@@ -116,12 +116,12 @@ impl Profile {
             }
 
             // add item and children to stack + add item to path
-            trace!(profile = ?item_name, "Adding profile to stack and path as already visited:");
+            trace!(profile = %item_name.display(), "Adding profile to stack and path as already visited:");
             path.push(item_name);
             stack.push((item_name, true));
             if let ProfileKind::Composite(composite) = item_profile.kind() {
                 for child in composite.entries().iter().rev() {
-                    trace!(child = ?child, "Adding profile child to stack and path:");
+                    trace!(child = %child.child().display(), "Adding profile child to stack and path:");
                     stack.push((child.child(), false));
                 }
             }
