@@ -2,7 +2,12 @@
 
 All notable changes to this project will be documented here
 
-## v0.18.1
+## v2.0.0
+
+WIP:
+- [ ] decide how many logs to have and fix current logging
+
+## v0.18.1 / v1.0.0
 
 ### Changes
 

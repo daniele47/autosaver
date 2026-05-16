@@ -2,7 +2,7 @@ use anyhow::Result;
 use clap::{Parser, Subcommand};
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
-use crate::{fs::rel::RelPathStr, prof::{module::Module, runner::Runner}};
+use crate::fs::rel::RelPathStr;
 
 #[derive(Parser, Debug, Clone, PartialEq, Eq)]
 #[command(version)]
