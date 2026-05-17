@@ -26,6 +26,8 @@ impl PathStr {
             }
             let interned = Intern::<PathBuf>::num_objects_interned() + 1;
             trace!(path=%path.display(),interned=%interned, "Interned new path:");
+        } else {
+            trace!(path=%path.display(), "Path was already interned:");
         }
         Ok(Self {
             path: Intern::new(path),
