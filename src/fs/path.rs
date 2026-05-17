@@ -5,33 +5,23 @@ use std::{
 };
 
 use anyhow::bail;
-use internment::Intern;
-use tracing::trace;
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct PathStr {
-    path: Intern<PathBuf>,
+    path: PathBuf,
 }
 
 impl PathStr {
     pub(super) fn new_from_pathbuf(path: PathBuf) -> anyhow::Result<Self> {
         // check path contains invalid components
-        if !Intern::<PathBuf>::is_interned(&path) {
-            for component in path.components() {
-                if component == Component::ParentDir {
-                    bail!("Path contains parent directory: {}", path.display());
-                } else if component == Component::CurDir {
-                    bail!("Path contains current directory: {}", path.display());
-                }
+        for component in path.components() {
+            if component == Component::ParentDir {
+                bail!("Path contains parent directory: {}", path.display());
+            } else if component == Component::CurDir {
+                bail!("Path contains current directory: {}", path.display());
             }
-            let interned = Intern::<PathBuf>::num_objects_interned() + 1;
-            trace!(path=%path.display(),interned=%interned, "Interned new path:");
-        } else {
-            trace!(path=%path.display(), "Path was already interned:");
         }
-        Ok(Self {
-            path: Intern::new(path),
-        })
+        Ok(Self { path })
     }
 
     pub(super) fn path(&self) -> &Path {
