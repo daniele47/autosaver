@@ -162,35 +162,52 @@ impl AbsPathStr {
     }
 
     #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
-    pub fn delete_path(&self) -> anyhow::Result<()> {
-        if !self.path().exists() {
-            debug!(path = %self.display(), "Path does not exist, nothing to delete:");
+    pub fn purge_path(&self, allow_recursive_delete: bool) -> anyhow::Result<()> {
+        // skip if path not exist
+        if self.path().symlink_metadata().is_err() {
+            debug!(path=%self.display(), "Path does not exist, nothing to delete:");
             return Ok(());
         }
 
+        // purge symlink
+        if self.path().symlink_metadata().is_ok_and(|f| f.is_symlink()) {
+            fs::remove_file(self.path()).with_context(|| {
+                let p = self.display();
+                format!("Could not delete symlink: {p}")
+            })?;
+            debug!(symlink=%self.display(), "Symlink successfully deleted: ");
+        }
         // purge file
-        if self.is_file() {
+        else if self.is_file() {
             fs::remove_file(self.path()).with_context(|| {
                 let p = self.display();
                 format!("Could not delete file: {p}")
             })?;
             debug!(file = %self.display(), "File successfully deleted: ");
         }
-        // purge empty directory
+        // purge directory
         else if self.is_dir() {
-            fs::remove_dir(self.path()).with_context(|| {
-                let p = self.display();
-                format!("Could not delete directory: {p}")
-            })?;
-            debug!(directory = %self.display(), "Directory successfully deleted");
+            if allow_recursive_delete {
+                fs::remove_dir_all(self.path()).with_context(|| {
+                    let p = self.display();
+                    format!("Could not delete directory recursively: {p}")
+                })?;
+                debug!(directory = %self.display(), "Directory successfully deleted recursively");
+            } else {
+                fs::remove_dir(self.path()).with_context(|| {
+                    let p = self.display();
+                    format!("Could not delete directory: {p}")
+                })?;
+                debug!(directory = %self.display(), "Directory successfully deleted");
+            }
         }
-        // fail if not either file nor directory
+        // fail if it was something else
         else {
             let p = self.display();
             bail!("Could not delete path: {p}");
         }
 
-        // delete empty directories
+        // delete empty parent directories
         let mut parent = self.path().parent();
         while let Some(p) = parent {
             if fs::remove_dir(p).is_err() {
