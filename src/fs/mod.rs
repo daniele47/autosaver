@@ -162,7 +162,7 @@ impl AbsPathStr {
     }
 
     #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
-    pub fn purge_path(&self, allow_recursive_delete: bool) -> anyhow::Result<()> {
+    pub fn purge_path_opts(&self, allow_recursive_delete: bool) -> anyhow::Result<()> {
         // skip if path not exist
         if self.path().symlink_metadata().is_err() {
             debug!(path=%self.display(), "Path does not exist, nothing to delete:");
@@ -218,6 +218,9 @@ impl AbsPathStr {
         }
 
         Ok(())
+    }
+    pub fn purge_path(&self) -> anyhow::Result<()> {
+        self.purge_path_opts(false)
     }
 
     #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
