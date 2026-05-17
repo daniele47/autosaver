@@ -4,6 +4,7 @@ All notable changes to this project will be documented here
 
 TODO:
 - [ ] save/restore should allow also deleting files from the invalid side, with a --dangerous flag for restore to allow deleting files from home!
+- [ ] add logging to files in `$AUTOSAVER_LOGFILE` / `--logfile`, so that i get automatic logs on file
 
 ## v2.0.0
 
