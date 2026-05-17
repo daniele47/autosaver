@@ -41,10 +41,11 @@ impl Default for FindCache {
 
 impl AbsPathStr {
     #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
-    pub fn list_filtered<F>(&self, paths: &mut Vec<AbsPathStr>, filter: F) -> anyhow::Result<()>
-    where
-        F: Fn(&AbsPathStr) -> bool,
-    {
+    pub fn list_filtered(
+        &self,
+        paths: &mut Vec<AbsPathStr>,
+        filter: impl Fn(&AbsPathStr) -> bool,
+    ) -> anyhow::Result<()> {
         fs::read_dir(self.path())
             .with_context(|| {
                 let p = self.display();
@@ -76,15 +77,12 @@ impl AbsPathStr {
     }
 
     #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
-    pub fn find_filtered<F>(
+    pub fn find_filtered(
         &self,
         paths: &mut Vec<AbsPathStr>,
         cache: &mut FindCache,
-        filter: F,
-    ) -> anyhow::Result<()>
-    where
-        F: Fn(&AbsPathStr) -> bool,
-    {
+        filter: impl Fn(&AbsPathStr) -> bool,
+    ) -> anyhow::Result<()> {
         cache.clear();
         let stack = &mut cache.stack;
         let filtered_out = &mut cache.filtered_out;
@@ -143,18 +141,20 @@ impl AbsPathStr {
     }
 
     #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
-    pub fn all_files(
-        &self,
+    pub fn all_files<F>(
+        self,
         files: &mut Vec<AbsPathStr>,
         cache: &mut FindCache,
+        filter: impl Fn(&AbsPathStr) -> bool,
     ) -> anyhow::Result<()> {
         if self.is_file() {
             trace!(path=%self.display(), "Path is a file:");
-            files.push(self.clone());
+            if filter(&self) {
+                files.push(self);
+            }
         } else if self.is_dir() {
             trace!(path=%self.display(), "Path is a directory:");
-            files.push(self.clone());
-            self.find_filtered(files, cache, AbsPathStr::is_file)?;
+            self.find_filtered(files, cache, |f| f.is_file() && filter(f))?;
         } else {
             trace!(path=%self.display(), "Path is neither a file nor a directory:");
         }
