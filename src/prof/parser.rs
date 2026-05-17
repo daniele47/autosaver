@@ -71,8 +71,8 @@ impl<'a> RawProfile<'a> {
 
 impl Profile {
     #[instrument(err, level = "trace", skip_all, fields(name=%name))]
-    pub fn parse_profile(config: String, name: String) -> anyhow::Result<Profile> {
-        let raw = RawProfile::parse_config(&config, &name)?;
+    pub fn parse_config(config: &str, name: &str) -> anyhow::Result<Profile> {
+        let raw = RawProfile::parse_config(config, name)?;
         match raw.kind {
             "composite" => Self::parse_composite(raw),
             "module" => Self::parse_module(raw),
@@ -197,11 +197,10 @@ mod tests {
             path_to_file2.txt
             // This is a comment
             path_to_file3.txt
-        "#
-        .to_string();
+        "#;
 
         // parse
-        let profile = Profile::parse_profile(config, "my_composite".to_string())?;
+        let profile = Profile::parse_config(config, "my_composite")?;
 
         // validate
         assert_eq!(profile.name().to_string_lossy(), "my_composite");
@@ -232,11 +231,10 @@ mod tests {
             target
             /! policy notdiff
             Cargo.lock
-        "#
-        .to_string();
+        "#;
 
         // parse
-        let profile = Profile::parse_profile(config, "my_module".to_string())?;
+        let profile = Profile::parse_config(config, "my_module")?;
 
         // validate
         assert_eq!(profile.name().to_string_lossy(), "my_module");
@@ -272,11 +270,10 @@ mod tests {
             data
             /! policy run
             script2.sh
-        "#
-        .to_string();
+        "#;
 
         // parse
-        let profile = Profile::parse_profile(config, "my_runner".to_string())?;
+        let profile = Profile::parse_config(config, "my_runner")?;
 
         // validate
         assert_eq!(profile.name().to_string_lossy(), "my_runner");

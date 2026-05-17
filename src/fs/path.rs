@@ -4,7 +4,7 @@ use std::{
     str::FromStr,
 };
 
-use anyhow::bail;
+use anyhow::{Context, bail};
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct PathStr {
@@ -42,6 +42,13 @@ impl PathStr {
 
     pub fn display(&self) -> impl Display {
         self.path().display()
+    }
+
+    pub fn basename(&self) -> anyhow::Result<Self> {
+        self.path()
+            .file_name()
+            .map(|f| Self::new_from_pathbuf(PathBuf::from(f)))
+            .with_context(|| format!("Could not get basename of {}", self.display()))?
     }
 }
 

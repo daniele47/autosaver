@@ -12,7 +12,7 @@ impl<'a> LogOptions<'a> {
     pub fn init(&self) {
         tracing_subscriber::registry()
             .with(fmt::layer())
-            .with(EnvFilter::new(&self.level))
+            .with(EnvFilter::new(self.level))
             .init();
     }
 }

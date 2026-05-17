@@ -66,10 +66,7 @@ impl AbsPathStr {
 
     #[instrument(ret, err, level = "trace", skip_all, fields(self= %self.display()))]
     pub fn basename(&self) -> anyhow::Result<Self> {
-        self.path()
-            .file_name()
-            .map(|f| Self::new_from_pathbuf(PathBuf::from(f)))
-            .with_context(|| format!("Could not get basename of {}", self.display()))?
+        self.pathstr.basename()?.try_into()
     }
 
     #[instrument(ret, err, level = "trace", skip_all, fields(self= %self.display()))]
