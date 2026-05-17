@@ -5,6 +5,13 @@ All notable changes to this project will be documented here
 TODO:
 - [ ] save/restore should allow also deleting files from the invalid side, with a --dangerous flag for restore to allow deleting files from home!
 - [ ] add logging to files in `$AUTOSAVER_LOGFILE` / `--logfile`, so that i get automatic logs on file
+- [ ] more powerful prompts (maybe with this i could remove the -d/-s/... flag? or maybe keep both, maybe both be useful!):
+    - [ ] `N` to skip entire profile
+    - [ ] `d` to show diff
+    - [ ] `s` to show file/script in its entirety
+    - [ ] `e` to edit the file?
+    - [ ] `d` to delete the file?
+    ...
 
 ## v2.0.0
 
