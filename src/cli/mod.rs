@@ -1,7 +1,9 @@
 use clap::{Parser, Subcommand};
-use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
-use crate::fs::{abs::AbsPathStr, rel::RelPathStr};
+use crate::{
+    fs::{abs::AbsPathStr, rel::RelPathStr},
+    log::LogOptions,
+};
 
 #[derive(Parser, Debug, Clone, PartialEq, Eq)]
 #[command(version)]
@@ -58,10 +60,7 @@ pub enum CliCmd {
 impl Cli {
     pub fn run(&self) -> anyhow::Result<()> {
         // enable logging
-        tracing_subscriber::registry()
-            .with(fmt::layer().without_time())
-            .with(EnvFilter::new(self.log.as_deref().unwrap_or("off")))
-            .init();
+        LogOptions::new(self.log.as_deref().unwrap_or("off")).init();
 
         Ok(())
     }
