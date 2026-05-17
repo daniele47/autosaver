@@ -1,11 +1,6 @@
 use anyhow::Result;
+use autosaver::cli::Cli;
 use clap::Parser;
-
-use crate::cli::Cli;
-
-pub mod cli;
-pub mod fs;
-pub mod prof;
 
 fn main() -> Result<()> {
     // parse cmdline
