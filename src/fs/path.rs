@@ -5,6 +5,7 @@ use std::{
 };
 
 use anyhow::{Context, bail};
+use tracing::instrument;
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct PathStr {
@@ -44,11 +45,17 @@ impl PathStr {
         self.path().display()
     }
 
+    #[instrument(ret, err, level = "trace", skip_all, fields(self= %self.display()))]
     pub fn basename(&self) -> anyhow::Result<Self> {
         self.path()
             .file_name()
             .map(|f| Self::new_from_pathbuf(PathBuf::from(f)))
             .with_context(|| format!("Could not get basename of {}", self.display()))?
+    }
+
+    #[instrument(ret, level = "trace", skip_all, fields(self= %self.display(), other=%other.display()))]
+    pub fn same_path(&self, other: &Self) -> bool {
+        self.path().components() == other.path().components()
     }
 }
 

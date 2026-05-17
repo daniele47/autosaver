@@ -97,6 +97,11 @@ impl AbsPathStr {
             false
         }
     }
+
+    #[instrument(ret, level = "trace", skip_all, fields(self= %self.display(), other=%other.display()))]
+    pub fn same_path(&self, other: &Self) -> bool {
+        self.pathstr.same_path(&self.pathstr)
+    }
 }
 
 impl TryFrom<PathStr> for AbsPathStr {
