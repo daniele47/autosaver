@@ -69,14 +69,6 @@ impl AbsPathStr {
         self.pathstr.basename()?.try_into()
     }
 
-    #[instrument(ret, err, level = "trace", skip_all, fields(self= %self.display()))]
-    pub fn canonicalize(&self) -> anyhow::Result<Self> {
-        self.path()
-            .canonicalize()
-            .map(Self::new_from_pathbuf)?
-            .with_context(|| format!("Failed to canonicalize {}", self.display()))
-    }
-
     #[instrument(ret, level = "trace", skip_all, fields(self= %self.display()))]
     pub fn is_file(&self) -> bool {
         self.path().is_file()
@@ -85,17 +77,6 @@ impl AbsPathStr {
     #[instrument(ret, level = "trace", skip_all, fields(self= %self.display()))]
     pub fn is_dir(&self) -> bool {
         self.path().is_dir()
-    }
-
-    #[instrument(ret, level = "trace", skip_all, fields(self= %self.display(),base=%base.display()))]
-    pub fn is_inside(&self, base: &Self) -> bool {
-        if let Ok(self_canon) = self.canonicalize()
-            && let Ok(dir_canon) = base.canonicalize()
-        {
-            self_canon.path().starts_with(dir_canon.path())
-        } else {
-            false
-        }
     }
 
     #[instrument(ret, level = "trace", skip_all, fields(self= %self.display(), other=%other.display()))]

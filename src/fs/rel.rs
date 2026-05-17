@@ -64,15 +64,6 @@ impl RelPathStr {
         self.pathstr.basename()?.try_into()
     }
 
-    #[instrument(ret, level = "trace", skip_all, fields(self= %self.display(), base=%base.display()))]
-    pub fn is_inside(&self, base: &AbsPathStr) -> bool {
-        if let Ok(abs) = self.to_abs(base) {
-            abs.is_inside(base)
-        } else {
-            false
-        }
-    }
-
     #[instrument(ret, level = "trace", skip_all, fields(self= %self.display(), other=%other.display()))]
     pub fn same_path(&self, other: &Self) -> bool {
         self.pathstr.same_path(&self.pathstr)
