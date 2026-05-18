@@ -3,10 +3,7 @@ use std::{collections::HashMap, env, str::FromStr};
 use anyhow::Context;
 use tracing::trace;
 
-use crate::{
-    cli::Cli,
-    fs::{abs::AbsPathStr, rel::RelPathStr},
-};
+use crate::fs::{abs::AbsPathStr, rel::RelPathStr};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Paths {
@@ -21,12 +18,12 @@ pub struct CliContext {
 }
 
 impl CliContext {
-    pub fn new(cli: &Cli) -> anyhow::Result<Self> {
+    pub fn new(home: &Option<AbsPathStr>, root: &Option<AbsPathStr>) -> anyhow::Result<Self> {
         let mut paths = HashMap::new();
 
         // load home directory
         let home_dir;
-        if let Some(home) = &cli.home {
+        if let Some(home) = home {
             home_dir = home.clone();
         } else {
             let home = env::home_dir().context("Failure getting home directory")?;
@@ -35,7 +32,7 @@ impl CliContext {
 
         // load root directory
         let root_dir;
-        if let Some(root) = &cli.root {
+        if let Some(root) = root {
             root_dir = root.clone();
         } else {
             let root = env::current_dir().context("Failure getting root directory")?;

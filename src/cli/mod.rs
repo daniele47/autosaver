@@ -1,12 +1,12 @@
 use clap::{Parser, Subcommand};
+use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::{
-    cli::{ctx::CliContext, log::LogOptions},
+    cli::ctx::CliContext,
     fs::{abs::AbsPathStr, rel::RelPathStr},
 };
 
 pub mod ctx;
-pub mod log;
 
 #[derive(Parser, Debug, Clone, PartialEq, Eq)]
 #[command(version)]
@@ -38,7 +38,7 @@ pub struct Cli {
     assume_no: bool,
 
     /// Show logs at the specified log level
-    #[arg(long, env = "RUST_LOG", value_name = "LEVEL")]
+    #[arg(long, env = "AUTOSAVER_LOGLEVEL", value_name = "LEVEL")]
     log: Option<String>,
 }
 
@@ -63,10 +63,13 @@ pub enum CliCmd {
 impl Cli {
     pub fn run(&self) -> anyhow::Result<()> {
         // enable logging
-        LogOptions::new(self.log.as_deref().unwrap_or("off")).init();
+        tracing_subscriber::registry()
+            .with(fmt::layer().with_line_number(true))
+            .with(EnvFilter::new(self.log.as_deref().unwrap_or("off")))
+            .init();
 
         // init context
-        let _ = CliContext::new(self)?;
+        let _ = CliContext::new(&self.home, &self.root)?;
 
         Ok(())
     }
