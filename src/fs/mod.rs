@@ -1,5 +1,5 @@
 use std::{
-    fs::{self, File},
+    fs::{self, DirEntry, File},
     io::Read,
     path::Component,
 };
@@ -24,21 +24,24 @@ impl FindCache {
 }
 
 impl AbsPathStr {
-    #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
-    pub fn list<F>(&self, mut on_each: F) -> anyhow::Result<()>
+    fn list_raw<F>(&self, mut on_each: F) -> anyhow::Result<()>
     where
-        F: FnMut(AbsPathStr) -> anyhow::Result<()>,
+        F: FnMut(DirEntry) -> anyhow::Result<()>,
     {
         fs::read_dir(self.path())
             .with_context(|| {
                 let p = self.display();
                 format!("Could not list files in directory {p}")
             })?
-            .map(|e| {
-                let e = e.with_context(|| format!("Failed to read entry in {}", self.display()))?;
-                AbsPathStr::new_from_pathbuf(e.path())
-            })
             .try_for_each(|e| on_each(e?))
+    }
+
+    #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
+    pub fn list<F>(&self, mut on_each: F) -> anyhow::Result<()>
+    where
+        F: FnMut(AbsPathStr) -> anyhow::Result<()>,
+    {
+        self.list_raw(|e| on_each(AbsPathStr::new_from_pathbuf(e.path())?))
     }
 
     #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
@@ -50,8 +53,9 @@ impl AbsPathStr {
         let stack = &mut cache.stack;
 
         // iterate on root children
-        self.list(|child| {
-            if child.is_dir() {
+        self.list_raw(|child_raw| {
+            let child = AbsPathStr::new_from_pathbuf(child_raw.path())?;
+            if child_raw.file_type()?.is_dir() {
                 stack.push(child);
             } else {
                 on_each(child)?;
@@ -62,8 +66,9 @@ impl AbsPathStr {
         // DFS exploration
         while let Some(stack_item) = stack.pop() {
             // iterate on children
-            stack_item.list(|child| {
-                if child.is_dir() {
+            stack_item.list_raw(|child_raw| {
+                let child = AbsPathStr::new_from_pathbuf(child_raw.path())?;
+                if child_raw.file_type()?.is_dir() {
                     stack.push(child);
                 } else {
                     on_each(child)?;
