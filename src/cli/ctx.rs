@@ -8,19 +8,19 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub(super) enum Paths {
+pub enum Paths {
     Home,
     Root,
     Backup,
     Config,
     Run,
 }
-pub(super) struct CliContext {
+pub struct CliContext {
     paths: HashMap<Paths, AbsPathStr>,
 }
 
 impl CliContext {
-    pub(super) fn new(cli: &Cli) -> anyhow::Result<Self> {
+    pub fn new(cli: &Cli) -> anyhow::Result<Self> {
         let mut paths = HashMap::new();
 
         // load home directory
@@ -53,5 +53,9 @@ impl CliContext {
         paths.insert(Paths::Config, config_dir);
 
         Ok(Self { paths })
+    }
+
+    pub fn path(&self, path: Paths) -> &AbsPathStr {
+        self.paths.get(&path).expect("Paths is incomplete")
     }
 }

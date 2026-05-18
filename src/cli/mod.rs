@@ -5,7 +5,7 @@ use crate::{
     log::LogOptions,
 };
 
-mod ctx;
+pub mod ctx;
 
 #[derive(Parser, Debug, Clone, PartialEq, Eq)]
 #[command(version)]
