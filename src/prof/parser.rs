@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use anyhow::{Context, anyhow, bail};
-use tracing::instrument;
+use tracing::{instrument, trace};
 
 use crate::{
     fs::rel::RelPathStr,
@@ -32,6 +32,7 @@ impl<'a> RawProfile<'a> {
         let mut lines = Vec::new();
         let mut kind = "";
         let mut id = name;
+        trace!(profile=%name,"Parsing profile config:");
 
         for (i, line) in config.lines().enumerate() {
             // option lines
