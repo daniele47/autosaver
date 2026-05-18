@@ -15,13 +15,11 @@ pub mod rel;
 
 #[derive(Debug, Default)]
 pub struct FindCache {
-    stack_visit: Vec<bool>,
-    stack_items: Vec<Option<AbsPathStr>>,
+    stack: Vec<AbsPathStr>,
 }
 impl FindCache {
     fn clear(&mut self) {
-        self.stack_visit.clear();
-        self.stack_items.clear();
+        self.stack.clear();
     }
 }
 
@@ -49,47 +47,32 @@ impl AbsPathStr {
         F: FnMut(AbsPathStr) -> anyhow::Result<()>,
     {
         cache.clear();
-        let stack_visit = &mut cache.stack_visit;
-        let stack_items = &mut cache.stack_items;
+        let stack = &mut cache.stack;
 
         // iterate on root children
         self.list(|child| {
             if child.is_dir() {
-                stack_visit.push(false);
-                stack_items.push(Some(child));
+                stack.push(child);
             } else {
                 on_each(child)?;
             }
             Ok(())
         })?;
 
-        // 3 colors DFS
-        while let Some(visited) = stack_visit.pop() {
-            let item = stack_items
-                .pop()
-                .expect("empty item stack")
-                .expect("None item");
-
-            // grey -> black: item already visited, aka we explored all from here, and backtracked
-            if visited {
-                on_each(item)?;
-                continue;
-            }
-
+        // DFS exploration
+        while let Some(stack_item) = stack.pop() {
             // iterate on children
-            let item_index = stack_items.len();
-            stack_visit.push(true);
-            stack_items.push(None);
-            item.list(|child| {
+            stack_item.list(|child| {
                 if child.is_dir() {
-                    stack_visit.push(false);
-                    stack_items.push(Some(child));
+                    stack.push(child);
                 } else {
                     on_each(child)?;
                 }
                 Ok(())
             })?;
-            stack_items[item_index] = Some(item);
+
+            // act on current stack item
+            on_each(stack_item)?;
         }
 
         Ok(())
