@@ -63,10 +63,12 @@ pub enum CliCmd {
 impl Cli {
     pub fn run(&self) -> anyhow::Result<()> {
         // enable logging
-        tracing_subscriber::registry()
-            .with(fmt::layer().with_line_number(true))
-            .with(EnvFilter::new(self.log.as_deref().unwrap_or("off")))
-            .init();
+        if let Some(loglevel) = &self.log {
+            tracing_subscriber::registry()
+                .with(fmt::layer().with_line_number(true))
+                .with(EnvFilter::new(loglevel))
+                .init();
+        }
 
         // init context
         let _ = CliContext::new(&self.home, &self.root)?;
