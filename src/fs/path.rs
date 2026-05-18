@@ -13,7 +13,7 @@ pub struct PathStr {
 }
 
 impl PathStr {
-    pub(super) fn new_from_pathbuf(path: PathBuf) -> anyhow::Result<Self> {
+    pub fn new_from_pathbuf(path: PathBuf) -> anyhow::Result<Self> {
         // check path contains invalid components
         for component in path.components() {
             if component == Component::ParentDir {
@@ -25,7 +25,7 @@ impl PathStr {
         Ok(Self { path })
     }
 
-    pub(super) fn path(&self) -> &Path {
+    pub fn path(&self) -> &Path {
         &self.path
     }
 

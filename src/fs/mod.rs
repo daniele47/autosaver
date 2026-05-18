@@ -13,6 +13,7 @@ pub mod abs;
 pub mod path;
 pub mod rel;
 
+#[derive(Debug, Default)]
 pub struct FindCache {
     stack: Vec<(Option<usize>, Option<usize>)>,
     filtered_out: Vec<AbsPathStr>,
@@ -31,11 +32,6 @@ impl FindCache {
         self.stack.clear();
         self.filtered_out.clear();
         self.buffer.clear();
-    }
-}
-impl Default for FindCache {
-    fn default() -> Self {
-        Self::new()
     }
 }
 

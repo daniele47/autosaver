@@ -5,6 +5,8 @@ use crate::{
     log::LogOptions,
 };
 
+mod ctx;
+
 #[derive(Parser, Debug, Clone, PartialEq, Eq)]
 #[command(version)]
 #[command(infer_subcommands = true)]

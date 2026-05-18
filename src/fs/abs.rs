@@ -15,7 +15,7 @@ pub struct AbsPathStr {
 }
 
 impl AbsPathStr {
-    pub(super) fn new_from_pathstr(path: PathStr) -> anyhow::Result<Self> {
+    pub fn new_from_pathstr(path: PathStr) -> anyhow::Result<Self> {
         // check path is relative
         if !path.path().is_absolute() {
             let p = path.path().display();
@@ -25,11 +25,11 @@ impl AbsPathStr {
         }
     }
 
-    pub(super) fn new_from_pathbuf(path: PathBuf) -> anyhow::Result<Self> {
+    pub fn new_from_pathbuf(path: PathBuf) -> anyhow::Result<Self> {
         Self::new_from_pathstr(PathStr::new_from_pathbuf(path)?)
     }
 
-    pub(super) fn path(&self) -> &Path {
+    pub fn path(&self) -> &Path {
         self.pathstr.path()
     }
 
