@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use anyhow::{Context, bail};
 use tracing::{instrument, trace};
@@ -34,6 +34,12 @@ pub struct TraverseContext<'a> {
     pub item: &'a Profile,
     pub path: &'a [&'a RelPathStr],
     pub stack: &'a [(&'a RelPathStr, bool)],
+    pub is_dup: bool,
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TraverseParams<'a> {
+    pub allow_duplicates: bool,
+    pub all_profiles: &'a AllProfiles,
 }
 
 impl Profile {
@@ -54,10 +60,11 @@ impl Profile {
     }
 
     #[instrument(err, level = "trace", skip_all, fields(root= %self.name.display()))]
-    pub fn traverse<S>(&self, profiles: &AllProfiles, mut on_elem: S) -> anyhow::Result<()>
+    pub fn traverse<S>(&self, params: TraverseParams, mut on_elem: S) -> anyhow::Result<()>
     where
         S: FnMut(TraverseContext) -> anyhow::Result<()>,
     {
+        let mut visited = HashSet::<&RelPathStr>::new();
         let mut path = Vec::<&RelPathStr>::new();
         let mut stack = Vec::<(&RelPathStr, bool)>::new();
         stack.push((self.name(), false));
@@ -65,7 +72,7 @@ impl Profile {
 
         // 3 colors DFS to traverse whilst properly detecting loops
         while let Some((item_name, item_visited)) = stack.pop() {
-            // grey -> black: item already visited, aka we explored all from here, and backtracked
+            // item already visited, aka we explored all from here, and backtracked
             if item_visited {
                 path.pop();
                 continue;
@@ -84,24 +91,35 @@ impl Profile {
             }
 
             // check if leaf profile
-            let item_profile = profiles.get(item_name).with_context(|| {
+            let item_profile = params.all_profiles.get(item_name).with_context(|| {
                     let name = self.name().to_string_lossy();
                     let inv_par = path.last().map(|p|p.to_string_lossy()).unwrap_or(name.clone());
                     let inv_name = item_name.display();
                     format!("Profile {name} traversal found invalid profile name {inv_name} as a child of {inv_par}")
                 })?;
+
+            // act on profile
             on_elem(TraverseContext {
                 item: item_profile,
                 path: &path,
                 stack: &stack,
+                is_dup: visited.contains(&item_name),
             })?;
 
-            // add item and children to stack + add item to path
-            path.push(item_name);
-            stack.push((item_name, true));
-            if let ProfileKind::Composite(composite) = item_profile.kind() {
-                for child in composite.entries().iter().rev() {
-                    stack.push((child.child(), false));
+            // end traversal if it was a duplicate, otherwise add to visited set
+            if !params.allow_duplicates && visited.contains(&item_name) {
+                continue;
+            }
+            visited.insert(item_name);
+
+            // add item and children to stack + add item to path if composite
+            if matches!(item_profile.kind(), ProfileKind::Composite(_)) {
+                path.push(item_name);
+                stack.push((item_name, true));
+                if let ProfileKind::Composite(composite) = item_profile.kind() {
+                    for child in composite.entries().iter().rev() {
+                        stack.push((child.child(), false));
+                    }
                 }
             }
         }
@@ -167,9 +185,14 @@ mod tests {
             .get(&RelPathStr::from_str("profile1")?)
             .expect("profile1 was here");
 
+        let params = TraverseParams {
+            allow_duplicates: false,
+            all_profiles: &profiles,
+        };
+
         let mut visited_order = Vec::new();
 
-        profile1.traverse(&profiles, |ctx| {
+        profile1.traverse(params, |ctx| {
             visited_order.push(ctx.item.name().to_string_lossy());
             Ok(())
         })?;
