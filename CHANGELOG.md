@@ -12,6 +12,8 @@ TODO:
     - [ ] `e` to edit the file?
     - [ ] `d` to delete the file?
 - [ ] profile `resolve` should be rewritten, in a way i like + optimized removing not composite profiles from stack!
+- [ ] `all` profile could be reserved for all profiles?
+- [ ] `default` profile could be reserved to specify what to run when no profiles are specified otherwise? this would be fallback if `--profile` flag is not passed
 
 ## v2.0.0
 

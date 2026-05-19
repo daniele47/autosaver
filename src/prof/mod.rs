@@ -1,7 +1,7 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 use anyhow::{Context, bail};
-use tracing::{debug, instrument, trace};
+use tracing::{instrument, trace};
 
 use crate::{
     fs::rel::RelPathStr,
@@ -35,11 +35,6 @@ pub struct TraverseContext<'a> {
     pub path: &'a [&'a RelPathStr],
     pub stack: &'a [(&'a RelPathStr, bool)],
 }
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct TraverseParams<'a> {
-    pub allow_duplicates: bool,
-    pub all_profiles: &'a AllProfiles,
-}
 
 impl Profile {
     pub fn new(name: RelPathStr, id: RelPathStr, kind: ProfileKind) -> Self {
@@ -59,22 +54,20 @@ impl Profile {
     }
 
     #[instrument(err, level = "trace", skip_all, fields(root= %self.name.display()))]
-    pub fn traverse<S>(&self, params: TraverseParams, mut on_elem: S) -> anyhow::Result<()>
+    pub fn traverse<S>(&self, profiles: &AllProfiles, mut on_elem: S) -> anyhow::Result<()>
     where
         S: FnMut(TraverseContext) -> anyhow::Result<()>,
     {
-        let mut visited = HashSet::<&RelPathStr>::new();
         let mut path = Vec::<&RelPathStr>::new();
         let mut stack = Vec::<(&RelPathStr, bool)>::new();
         stack.push((self.name(), false));
+        trace!(profile = %self.name().display(), "Traversing profile:");
 
         // 3 colors DFS to traverse whilst properly detecting loops
         while let Some((item_name, item_visited)) = stack.pop() {
             // grey -> black: item already visited, aka we explored all from here, and backtracked
             if item_visited {
-                trace!(profile = %item_name.display(), "Backtracking:");
                 path.pop();
-                visited.insert(item_name);
                 continue;
             }
 
@@ -90,38 +83,24 @@ impl Profile {
                 bail!(format!("Profile {name} has a dependency cycle: {cycle}"));
             }
 
-            // avoid revisiting already explored items, if graphs are complex and the same node is
-            // reached multiple times from different nodes
-            if !params.allow_duplicates && visited.contains(&item_name) {
-                trace!(profile = %item_name.display(), "Skipping already visited profile:");
-                continue;
-            }
-
             // check if leaf profile
-            let item_profile = params.all_profiles.get(item_name).with_context(|| {
+            let item_profile = profiles.get(item_name).with_context(|| {
                     let name = self.name().to_string_lossy();
                     let inv_par = path.last().map(|p|p.to_string_lossy()).unwrap_or(name.clone());
                     let inv_name = item_name.display();
                     format!("Profile {name} traversal found invalid profile name {inv_name} as a child of {inv_par}")
                 })?;
-            debug!(profile = %item_name.display(), "Traversed profile:");
             on_elem(TraverseContext {
                 item: item_profile,
                 path: &path,
                 stack: &stack,
             })?;
-            if !matches!(item_profile.kind(), ProfileKind::Composite(_)) {
-                visited.insert(item_name);
-                continue;
-            }
 
             // add item and children to stack + add item to path
-            trace!(profile = %item_name.display(), "Adding profile to stack and path as already visited:");
             path.push(item_name);
             stack.push((item_name, true));
             if let ProfileKind::Composite(composite) = item_profile.kind() {
                 for child in composite.entries().iter().rev() {
-                    trace!(child = %child.child().display(), "Adding profile child to stack and path:");
                     stack.push((child.child(), false));
                 }
             }
@@ -188,14 +167,9 @@ mod tests {
             .get(&RelPathStr::from_str("profile1")?)
             .expect("profile1 was here");
 
-        let params = TraverseParams {
-            allow_duplicates: false,
-            all_profiles: &profiles,
-        };
-
         let mut visited_order = Vec::new();
 
-        profile1.traverse(params, |ctx| {
+        profile1.traverse(&profiles, |ctx| {
             visited_order.push(ctx.item.name().to_string_lossy());
             Ok(())
         })?;

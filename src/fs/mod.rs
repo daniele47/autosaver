@@ -87,7 +87,7 @@ impl AbsPathStr {
     pub fn purge_path_opts(&self, allow_recursive_delete: bool) -> anyhow::Result<()> {
         // skip if path not exist
         if self.path().symlink_metadata().is_err() {
-            debug!(path=%self.display(), "Path does not exist, nothing to delete:");
+            trace!(path=%self.display(), "Path does not exist, nothing to delete:");
             return Ok(());
         }
 
@@ -148,7 +148,7 @@ impl AbsPathStr {
     #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
     pub fn create_file(&self) -> anyhow::Result<()> {
         if self.is_file() {
-            debug!(file = %self.display(), "File already exists, left untouched:");
+            trace!(file = %self.display(), "File already exists, left untouched:");
             return Ok(());
         }
 
