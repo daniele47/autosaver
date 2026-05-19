@@ -5,7 +5,7 @@ use tracing::trace;
 
 use crate::{
     fs::{abs::AbsPathStr, rel::RelPathStr},
-    prof::AllProfiles,
+    prof::{AllProfiles, Profile},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -72,23 +72,33 @@ impl CliContext {
     }
 
     fn load_profiles(config_dir: &AbsPathStr) -> anyhow::Result<AllProfiles> {
-        let all_profiles = AllProfiles::new();
+        let mut all_profiles = AllProfiles::new();
 
-        dbg!(all_profiles, config_dir);
-        todo!("implement profile loader function");
+        // load nothing if there are no profiles
+        if !config_dir.is_dir() {
+            return Ok(all_profiles);
+        }
 
-        // // load nothing if there are no profiles
-        // if !config_dir.is_dir() {
-        //     return Ok(all_profiles);
-        // }
-        //
-        // // find and load all profiles config files
-        // config_dir.find(|ctx| {
-        //     println!("IMPLEMENT PROFILE LOADER FUNCTION! {ctx:?}");
-        //     Ok(())
-        // })?;
-        //
-        // Ok(all_profiles)
+        // find and load all profiles config files
+        config_dir.find(|ctx| {
+            // ignore dotfiles in config directory
+            let file_name = ctx.entry.file_name();
+            let name = file_name.to_string_lossy();
+            if name.starts_with(".") {
+                return Ok(false);
+            }
+
+            if let Some(pname) = name.strip_suffix(".conf") {
+                let conf_file = ctx.path.read_file()?;
+                let profile = Profile::parse_config(&conf_file, pname)?;
+                trace!(profile=%pname, conf_file=%ctx.path.display(), "Loaded profile from config file:");
+                all_profiles.insert(RelPathStr::from_str(pname)?, profile);
+            }
+
+            Ok(true)
+        })?;
+
+        Ok(all_profiles)
     }
 
     pub fn path(&self, path: &Paths) -> &AbsPathStr {
