@@ -5,7 +5,7 @@ use std::{
 };
 
 use anyhow::{Context, bail};
-use tracing::{debug, instrument, trace};
+use tracing::{debug, instrument, trace, warn};
 
 use crate::fs::abs::AbsPathStr;
 
@@ -74,6 +74,7 @@ impl AbsPathStr {
         let mut root_traversed = false;
         let mut children;
         let mut depth;
+        let mut depth_warned = false;
         trace!(directory=%self.display(), "Finding files recursively in directory:");
 
         loop {
@@ -95,6 +96,13 @@ impl AbsPathStr {
             children.try_for_each(|dir_entry| {
                 let dir_entry = dir_entry?;
                 let abs = AbsPathStr::new_from_pathbuf(dir_entry.path())?;
+
+                // too deeply nested path warning
+                if !depth_warned && depth > 25 {
+                    warn!(path=%abs.display(), "Find function reached a VERY deeply nested path:");
+                    depth_warned = true;
+                }
+
                 let ftype = dir_entry.file_type()?;
                 let is_dir = ftype.is_dir() || (ftype.is_symlink() && abs.path().is_dir());
                 let ctx = FindCtx::new(abs, dir_entry, depth);

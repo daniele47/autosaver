@@ -1,4 +1,7 @@
-use std::time::Instant;
+use std::{
+    io::{Write, stdout},
+    time::Instant,
+};
 
 use autosaver::fs::abs::AbsPathStr;
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
@@ -6,16 +9,19 @@ use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberI
 fn main() -> anyhow::Result<()> {
     init_logs();
 
-    let abs = AbsPathStr::try_from(env!("HOME").to_string() + "")?;
+    // let abs = AbsPathStr::try_from(env!("HOME").to_string() + "")?;
+    let abs = AbsPathStr::try_from("/tmp".to_string())?;
     let time = Instant::now();
     let mut count = 0;
     abs.find(|ctx| {
         count += 1;
+        println!("{}", ctx.path.display());
         if count % 1024 == 0 {
-            println!("{count}");
+            // print!("\r{count}");
+            stdout().flush()?;
         }
-        println!("PATH ({}): {}", ctx.depth, ctx.path.display());
-        Ok(false)
+        // println!("PATH ({}): {}", ctx.depth, ctx.path.display());
+        Ok(true)
     })
     .unwrap();
     println!("{count}");
