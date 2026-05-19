@@ -43,7 +43,7 @@ impl AbsPathStr {
     }
 
     #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
-    pub fn find<F>(&self, mut on_each: F, cache: &mut FindCache) -> anyhow::Result<()>
+    pub fn find_with_cache<F>(&self, mut on_each: F, cache: &mut FindCache) -> anyhow::Result<()>
     where
         F: FnMut(AbsPathStr) -> anyhow::Result<()>,
     {
@@ -81,6 +81,13 @@ impl AbsPathStr {
         }
 
         Ok(())
+    }
+
+    pub fn find<F>(&self, on_each: F) -> anyhow::Result<()>
+    where
+        F: FnMut(AbsPathStr) -> anyhow::Result<()>,
+    {
+        self.find_with_cache(on_each, &mut Default::default())
     }
 
     #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
@@ -197,7 +204,7 @@ impl AbsPathStr {
             .inspect(|_| debug!(file = %self.display(), "File successfully read into string:"))
     }
 
-    #[instrument(err, level = "trace", , skip_all, fields(self = %self.display(), dst=%dst.display()))]
+    #[instrument(err, level = "trace", skip_all, fields(self = %self.display(), dst=%dst.display()))]
     pub fn copy_file(&self, dst: &Self) -> anyhow::Result<()> {
         dst.create_file()?;
         fs::copy(self.path(), dst.path()).with_context(|| {
