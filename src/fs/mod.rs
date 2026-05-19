@@ -5,7 +5,7 @@ use std::{
 };
 
 use anyhow::{Context, bail};
-use tracing::{debug, instrument};
+use tracing::{debug, instrument, trace};
 
 use crate::fs::abs::AbsPathStr;
 
@@ -41,6 +41,7 @@ impl AbsPathStr {
     where
         F: FnMut(AbsPathStr) -> anyhow::Result<()>,
     {
+        trace!(directory=%self.display(), "Finding files recursively in directory:");
         self.list_raw(|e| on_each(AbsPathStr::new_from_pathbuf(e.path())?))
     }
 
@@ -51,6 +52,7 @@ impl AbsPathStr {
     {
         cache.clear();
         let stack = &mut cache.stack;
+        trace!(directory=%self.display(), "Finding files recursively in directory:");
 
         // iterate on root children
         self.list_raw(|child_raw| {
