@@ -6,7 +6,7 @@ use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberI
 fn main() -> anyhow::Result<()> {
     init_logs();
 
-    let abs = AbsPathStr::try_from(env!("HOME").to_string() + "/.config/nvim")?;
+    let abs = AbsPathStr::try_from(env!("HOME").to_string() + "")?;
     let time = Instant::now();
     let mut count = 0;
     abs.find(|ctx| {
@@ -16,7 +16,8 @@ fn main() -> anyhow::Result<()> {
         }
         println!("PATH ({}): {}", ctx.depth, ctx.path.display());
         Ok(())
-    })?;
+    })
+    .unwrap();
     println!("{count}");
     println!("Function took: {:?}", time.elapsed());
 

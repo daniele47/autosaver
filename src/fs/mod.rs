@@ -1,7 +1,6 @@
 use std::{
     fs::{self, DirEntry, File, ReadDir},
     io::Read,
-    os::unix::ffi::OsStrExt,
     path::Component,
 };
 
@@ -24,11 +23,6 @@ pub struct FindCtx {
     pub entry: DirEntry,
     pub depth: usize,
 }
-#[derive(Debug, Default)]
-pub struct FindOpts {
-    follow_symlinks: bool,
-    keep_dotfiles: bool,
-}
 
 impl FindCache {
     pub fn new() -> Self {
@@ -46,14 +40,6 @@ impl Default for FindCache {
 impl FindCtx {
     pub fn new(path: AbsPathStr, entry: DirEntry, depth: usize) -> Self {
         Self { path, entry, depth }
-    }
-}
-impl FindOpts {
-    pub fn new(follow_symlinks: bool, keep_dotfiles: bool) -> Self {
-        Self {
-            follow_symlinks,
-            keep_dotfiles,
-        }
     }
 }
 
@@ -79,12 +65,7 @@ impl AbsPathStr {
     }
 
     #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
-    pub fn find_with<F>(
-        &self,
-        mut on_each: F,
-        opts: FindOpts,
-        cache: &mut FindCache,
-    ) -> anyhow::Result<()>
+    pub fn find_with_cache<F>(&self, mut on_each: F, cache: &mut FindCache) -> anyhow::Result<()>
     where
         F: FnMut(FindCtx) -> anyhow::Result<()>,
     {
@@ -111,12 +92,9 @@ impl AbsPathStr {
 
             children.try_for_each(|dir_entry| {
                 let dir_entry = dir_entry?;
-                if !opts.keep_dotfiles && dir_entry.file_name().as_bytes().first() == Some(&b'.') {
-                    return anyhow::Ok(());
-                }
                 let abs = AbsPathStr::new_from_pathbuf(dir_entry.path())?;
                 let ftype = dir_entry.file_type()?;
-                if ftype.is_dir() || (opts.follow_symlinks && ftype.is_symlink() && abs.is_dir()) {
+                if ftype.is_dir() {
                     stack.push(FindCtx::new(abs, dir_entry, depth));
                 } else {
                     on_each(FindCtx::new(abs, dir_entry, depth))?;
@@ -132,7 +110,7 @@ impl AbsPathStr {
     where
         F: FnMut(FindCtx) -> anyhow::Result<()>,
     {
-        self.find_with(on_each, Default::default(), &mut Default::default())
+        self.find_with_cache(on_each, &mut Default::default())
     }
 
     #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
