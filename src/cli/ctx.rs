@@ -16,10 +16,9 @@ pub enum Paths {
     Config,
     Run,
 }
-pub type AllPaths = HashMap<Paths, AbsPathStr>;
 pub struct CliContext {
-    pub paths: AllPaths,
-    pub profiles: AllProfiles,
+    paths: HashMap<Paths, AbsPathStr>,
+    profiles: AllProfiles,
 }
 
 impl CliContext {
@@ -73,6 +72,30 @@ impl CliContext {
     }
 
     fn load_profiles(config_dir: &AbsPathStr) -> anyhow::Result<AllProfiles> {
-        todo!()
+        let all_profiles = AllProfiles::new();
+
+        dbg!(all_profiles, config_dir);
+        todo!("implement profile loader function");
+
+        // // load nothing if there are no profiles
+        // if !config_dir.is_dir() {
+        //     return Ok(all_profiles);
+        // }
+        //
+        // // find and load all profiles config files
+        // config_dir.find(|ctx| {
+        //     println!("IMPLEMENT PROFILE LOADER FUNCTION! {ctx:?}");
+        //     Ok(())
+        // })?;
+        //
+        // Ok(all_profiles)
+    }
+
+    pub fn path(&self, path: &Paths) -> &AbsPathStr {
+        &self.paths[path]
+    }
+
+    pub fn profiles(&self) -> &AllProfiles {
+        &self.profiles
     }
 }
