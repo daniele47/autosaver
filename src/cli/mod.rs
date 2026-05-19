@@ -1,5 +1,4 @@
 use clap::{Parser, Subcommand};
-use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::{
     cli::ctx::CliContext,
@@ -62,14 +61,6 @@ pub enum CliCmd {
 
 impl Cli {
     pub fn run(&self) -> anyhow::Result<()> {
-        // enable logging
-        if let Some(loglevel) = &self.log {
-            tracing_subscriber::registry()
-                .with(fmt::layer().with_line_number(true))
-                .with(EnvFilter::new(loglevel))
-                .init();
-        }
-
         // init context
         let _ = CliContext::new(&self.home, &self.root)?;
 

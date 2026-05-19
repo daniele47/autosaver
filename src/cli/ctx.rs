@@ -1,7 +1,6 @@
 use std::{collections::HashMap, env, str::FromStr};
 
 use anyhow::Context;
-use tracing::trace;
 
 use crate::{
     fs::{abs::AbsPathStr, rel::RelPathStr},
@@ -58,11 +57,6 @@ impl CliContext {
         let config_dir = root_dir.join(&RelPathStr::from_str("config")?)?;
         let run_dir = root_dir.join(&RelPathStr::from_str("run")?)?;
 
-        trace!(home_dir=%home_dir.display(),"Home directory:");
-        trace!(root_dir=%root_dir.display(),"Root directory:");
-        trace!(backup_dir=%backup_dir.display(),"Backup directory:");
-        trace!(run_dir=%run_dir.display(),"Run directory:");
-        trace!(config_dir=%config_dir.display(),"Config directory:");
         paths.insert(Paths::Home, home_dir);
         paths.insert(Paths::Root, root_dir);
         paths.insert(Paths::Backup, backup_dir);
@@ -83,7 +77,7 @@ impl CliContext {
         // find and load all profiles config files
         config_dir.find(|ctx| {
             // ignore symlinks
-            if ctx.entry.file_type()?.is_symlink(){
+            if ctx.entry.file_type()?.is_symlink() {
                 return Ok(false);
             }
 
@@ -92,10 +86,14 @@ impl CliContext {
                 return Ok(false);
             }
 
-            if let Some(pname) = ctx.path.to_rel(config_dir)?.to_string_lossy().strip_suffix(".conf") {
+            if let Some(pname) = ctx
+                .path
+                .to_rel(config_dir)?
+                .to_string_lossy()
+                .strip_suffix(".conf")
+            {
                 let conf_file = ctx.path.read_file()?;
                 let profile = Profile::parse_config(&conf_file, pname)?;
-                trace!(profile=%pname, conf_file=%ctx.path.display(), "Loaded profile from config file:");
                 all_profiles.insert(RelPathStr::from_str(pname)?, profile);
             }
 

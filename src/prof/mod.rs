@@ -1,7 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
 use anyhow::{Context, bail};
-use tracing::{instrument, trace};
 
 use crate::{
     fs::rel::RelPathStr,
@@ -73,7 +72,6 @@ impl AllProfiles {
             .with_context(|| format!("Missing profile: {}", name.display()))
     }
 
-    #[instrument(err, level = "trace", skip_all, fields(root= %root.display()))]
     pub fn traverse<S>(
         &self,
         root: &RelPathStr,
@@ -87,7 +85,6 @@ impl AllProfiles {
         let mut path = Vec::<&RelPathStr>::new();
         let mut stack = Vec::<(&RelPathStr, bool)>::new();
         stack.push((root, false));
-        trace!(profile = %root.display(), "Traversing profile:");
 
         // 3 colors DFS to traverse whilst properly detecting loops
         while let Some((item_name, item_visited)) = stack.pop() {

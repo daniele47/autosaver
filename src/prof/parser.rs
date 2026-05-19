@@ -1,7 +1,6 @@
 use std::str::FromStr;
 
 use anyhow::{Context, anyhow, bail};
-use tracing::{instrument, trace};
 
 use crate::{
     fs::rel::RelPathStr,
@@ -32,7 +31,6 @@ impl<'a> RawProfile<'a> {
         let mut lines = Vec::new();
         let mut kind = "";
         let mut id = name;
-        trace!(profile=%name,"Parsing profile config:");
 
         for (i, line) in config.lines().enumerate() {
             // option lines
@@ -71,7 +69,6 @@ impl<'a> RawProfile<'a> {
 }
 
 impl Profile {
-    #[instrument(err, level = "trace", skip_all, fields(name=%name))]
     pub fn parse_config(config: &str, name: &str) -> anyhow::Result<Profile> {
         let raw = RawProfile::parse_config(config, name)?;
         match raw.kind {

@@ -6,7 +6,6 @@ use std::{
 };
 
 use anyhow::{Context, bail};
-use tracing::instrument;
 
 use crate::fs::{path::PathStr, rel::RelPathStr};
 
@@ -50,12 +49,10 @@ impl AbsPathStr {
         self.path().display()
     }
 
-    #[instrument(ret, err, level = "trace", skip_all, fields(self=%self.display(), suffix=%suffix.display()))]
     pub fn join(&self, suffix: &RelPathStr) -> anyhow::Result<Self> {
         Self::new_from_pathbuf(self.path().join(suffix.path()))
     }
 
-    #[instrument(ret, err, level = "trace", skip_all, fields(self=%self.display(), base=%base.display()))]
     pub fn to_rel(&self, base: &Self) -> anyhow::Result<RelPathStr> {
         let stripped = self.path().strip_prefix(base.path()).with_context(|| {
             let p = self.display();
@@ -65,24 +62,20 @@ impl AbsPathStr {
         RelPathStr::new_from_pathbuf(stripped.into())
     }
 
-    #[instrument(ret, err, level = "trace", skip_all, fields(self= %self.display()))]
     pub fn basename(&self) -> anyhow::Result<Self> {
         self.pathstr.basename()?.try_into()
     }
 
-    #[instrument(ret, level = "trace", skip_all, fields(self= %self.display()))]
     pub fn is_file(&self) -> bool {
         self.path().is_file()
     }
 
-    #[instrument(ret, level = "trace", skip_all, fields(self= %self.display()))]
     pub fn is_dir(&self) -> bool {
         self.path().is_dir()
     }
 
-    #[instrument(ret, level = "trace", skip_all, fields(self= %self.display(), other=%other.display()))]
     pub fn same_path(&self, other: &Self) -> bool {
-        self.pathstr.same_path(&self.pathstr)
+        self.pathstr.same_path(&other.pathstr)
     }
 }
 

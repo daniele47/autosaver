@@ -5,7 +5,6 @@ use std::{
 };
 
 use anyhow::{Context, bail};
-use tracing::{debug, instrument, trace, warn};
 
 use crate::fs::abs::AbsPathStr;
 
@@ -51,12 +50,10 @@ impl AbsPathStr {
         })
     }
 
-    #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
     pub fn list<F>(&self, mut on_each: F) -> anyhow::Result<()>
     where
         F: FnMut(FindCtx) -> anyhow::Result<()>,
     {
-        trace!(directory=%self.display(), "Finding files in directory:");
         self.list_raw()?.try_for_each(|e| {
             let e = e?;
             let abs = AbsPathStr::new_from_pathbuf(e.path())?;
@@ -64,7 +61,6 @@ impl AbsPathStr {
         })
     }
 
-    #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
     pub fn find_with_cache<F>(&self, mut on_each: F, cache: &mut FindCache) -> anyhow::Result<()>
     where
         F: FnMut(FindCtx) -> anyhow::Result<bool>,
@@ -74,8 +70,6 @@ impl AbsPathStr {
         let mut root_traversed = false;
         let mut children;
         let mut depth;
-        let mut depth_warned = false;
-        trace!(directory=%self.display(), "Finding files recursively in directory:");
 
         loop {
             let item = stack.pop();
@@ -96,13 +90,6 @@ impl AbsPathStr {
             children.try_for_each(|dir_entry| {
                 let dir_entry = dir_entry?;
                 let abs = AbsPathStr::new_from_pathbuf(dir_entry.path())?;
-
-                // too deeply nested path warning
-                if !depth_warned && depth > 25 {
-                    warn!(path=%abs.display(), "Find function reached a VERY deeply nested path:");
-                    depth_warned = true;
-                }
-
                 let ftype = dir_entry.file_type()?;
                 let is_dir = ftype.is_dir() || (ftype.is_symlink() && abs.path().is_dir());
                 let ctx = FindCtx::new(abs, dir_entry, depth);
@@ -125,11 +112,9 @@ impl AbsPathStr {
         self.find_with_cache(on_each, &mut Default::default())
     }
 
-    #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
     pub fn purge_path_opts(&self, allow_recursive_delete: bool) -> anyhow::Result<()> {
         // skip if path not exist
         if self.path().symlink_metadata().is_err() {
-            trace!(path=%self.display(), "Path does not exist, nothing to delete:");
             return Ok(());
         }
 
@@ -139,7 +124,6 @@ impl AbsPathStr {
                 let p = self.display();
                 format!("Could not delete symlink: {p}")
             })?;
-            debug!(symlink=%self.display(), "Symlink successfully deleted: ");
         }
         // purge file
         else if self.is_file() {
@@ -147,7 +131,6 @@ impl AbsPathStr {
                 let p = self.display();
                 format!("Could not delete file: {p}")
             })?;
-            debug!(file = %self.display(), "File successfully deleted: ");
         }
         // purge directory
         else if self.is_dir() {
@@ -156,13 +139,11 @@ impl AbsPathStr {
                     let p = self.display();
                     format!("Could not delete directory recursively: {p}")
                 })?;
-                debug!(directory = %self.display(), "Directory successfully deleted recursively");
             } else {
                 fs::remove_dir(self.path()).with_context(|| {
                     let p = self.display();
                     format!("Could not delete directory: {p}")
                 })?;
-                debug!(directory = %self.display(), "Directory successfully deleted");
             }
         }
         // fail if it was something else
@@ -177,7 +158,6 @@ impl AbsPathStr {
             if fs::remove_dir(p).is_err() {
                 break;
             }
-            debug!(directory = %p.display(), "Deleted empty parent directory");
             parent = p.parent();
         }
 
@@ -187,10 +167,8 @@ impl AbsPathStr {
         self.purge_path_opts(false)
     }
 
-    #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
     pub fn create_file(&self) -> anyhow::Result<()> {
         if self.is_file() {
-            trace!(file = %self.display(), "File already exists, left untouched:");
             return Ok(());
         }
 
@@ -209,7 +187,6 @@ impl AbsPathStr {
                 let p = parent.display();
                 format!("Failed to create directory: {p}")
             })?;
-            debug!(directory = %parent.display(), "Parent directory successfully created:");
         } else {
             let p = self.display();
             bail!("Could not create parent directories: {p}");
@@ -220,26 +197,21 @@ impl AbsPathStr {
             let p = self.display();
             format!("Failed to create file: {p}")
         })?;
-        debug!(file = %self.display(), "File successfully created:");
 
         Ok(())
     }
 
-    #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
     pub fn read_file(&self) -> anyhow::Result<String> {
         if !self.is_file() {
             let p = self.display();
             bail!("Cannot read a path that is not a file: {p}");
         }
-        fs::read_to_string(self.path())
-            .with_context(|| {
-                let p = self.display();
-                format!("Could not read file: {p}")
-            })
-            .inspect(|_| trace!(file = %self.display(), "File successfully read into string:"))
+        fs::read_to_string(self.path()).with_context(|| {
+            let p = self.display();
+            format!("Could not read file: {p}")
+        })
     }
 
-    #[instrument(err, level = "trace", skip_all, fields(self = %self.display(), dst=%dst.display()))]
     pub fn copy_file(&self, dst: &Self) -> anyhow::Result<()> {
         dst.create_file()?;
         fs::copy(self.path(), dst.path()).with_context(|| {
@@ -247,11 +219,9 @@ impl AbsPathStr {
             let t = dst.display();
             format!("Failed to copy from {p} to {t}")
         })?;
-        debug!(src_path = %self.display(), dst_path = %dst.display(), "Source file successfully copied into destination file:");
         Ok(())
     }
 
-    #[instrument(ret, level = "trace", skip_all, fields(self = %self.display(), other = %other.display()))]
     pub fn files_eq(&self, other: &Self) -> bool {
         || -> anyhow::Result<()> {
             let sm = self.path().metadata()?;

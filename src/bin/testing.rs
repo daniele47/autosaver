@@ -4,11 +4,8 @@ use std::{
 };
 
 use autosaver::fs::abs::AbsPathStr;
-use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
 fn main() -> anyhow::Result<()> {
-    init_logs();
-
     // let abs = AbsPathStr::try_from(env!("HOME").to_string() + "")?;
     let abs = AbsPathStr::try_from("/tmp".to_string())?;
     let time = Instant::now();
@@ -28,11 +25,4 @@ fn main() -> anyhow::Result<()> {
     println!("Function took: {:?}", time.elapsed());
 
     Ok(())
-}
-
-fn init_logs() {
-    tracing_subscriber::registry()
-        .with(fmt::layer().with_line_number(true))
-        .with(EnvFilter::new("trace"))
-        .init();
 }

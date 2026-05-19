@@ -6,7 +6,6 @@ use std::{
 };
 
 use anyhow::bail;
-use tracing::instrument;
 
 use crate::fs::{abs::AbsPathStr, path::PathStr};
 
@@ -50,24 +49,20 @@ impl RelPathStr {
         self.path().display()
     }
 
-    #[instrument(ret, err, level = "trace", skip_all, fields(self= %self.display(), suffix=%suffix.display()))]
     pub fn join(&self, suffix: Self) -> anyhow::Result<Self> {
         PathStr::new_from_pathbuf(self.path().join(suffix.path()))?.try_into()
     }
 
-    #[instrument(ret, err, level = "trace", skip_all, fields(self= %self.display(), base=%base.display()))]
     pub fn to_abs(&self, base: &AbsPathStr) -> anyhow::Result<AbsPathStr> {
         base.join(self)
     }
 
-    #[instrument(ret, err, level = "trace", skip_all, fields(self= %self.display()))]
     pub fn basename(&self) -> anyhow::Result<Self> {
         self.pathstr.basename()?.try_into()
     }
 
-    #[instrument(ret, level = "trace", skip_all, fields(self= %self.display(), other=%other.display()))]
     pub fn same_path(&self, other: &Self) -> bool {
-        self.pathstr.same_path(&self.pathstr)
+        self.pathstr.same_path(&other.pathstr)
     }
 }
 
