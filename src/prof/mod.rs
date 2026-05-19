@@ -39,9 +39,9 @@ pub struct TraverseContext<'a> {
     pub stack: &'a [(&'a RelPathStr, bool)],
     pub is_dup: bool,
 }
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct TraverseOpts {
-    pub allow_duplicates: bool,
+    pub hide_duplicates: bool,
 }
 
 impl Profile {
@@ -126,7 +126,7 @@ impl AllProfiles {
             })?;
 
             // end traversal if it was a duplicate, otherwise add to visited set
-            if !visited.insert(item_name) && !opts.allow_duplicates {
+            if !visited.insert(item_name) && !opts.hide_duplicates {
                 continue;
             }
 
@@ -199,13 +199,9 @@ mod tests {
         let profiles = setup_test_profiles()?;
         let pname = RelPathStr::from_str("profile1")?;
 
-        let opts = TraverseOpts {
-            allow_duplicates: false,
-        };
-
         let mut visited_order = Vec::new();
 
-        profiles.traverse(&pname, opts, |ctx| {
+        profiles.traverse(&pname, Default::default(), |ctx| {
             visited_order.push(ctx.item.name().to_string_lossy().to_string());
             Ok(())
         })?;
