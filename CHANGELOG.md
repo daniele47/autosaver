@@ -14,7 +14,6 @@ TODO:
 - [ ] `all` profile could be reserved for all profiles?
 - [ ] `default` profile could be reserved to specify what to run when no profiles are specified otherwise? this would be fallback if `--profile` flag is not passed
 - [ ] think how to handle symlink recursion in find function
-- [ ] make closure return a bool, which if false, allows not recursing directories entirely
 
 ## v2.0.0
 

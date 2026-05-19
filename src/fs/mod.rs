@@ -67,7 +67,7 @@ impl AbsPathStr {
     #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
     pub fn find_with_cache<F>(&self, mut on_each: F, cache: &mut FindCache) -> anyhow::Result<()>
     where
-        F: FnMut(FindCtx) -> anyhow::Result<()>,
+        F: FnMut(FindCtx) -> anyhow::Result<bool>,
     {
         cache.clear();
         let stack = &mut cache.stack;
@@ -85,7 +85,9 @@ impl AbsPathStr {
             } else if let Some(ctx) = item {
                 children = ctx.path.list_raw()?;
                 depth = ctx.depth + 1;
-                on_each(ctx)?;
+                if !on_each(ctx)? {
+                    continue;
+                }
             } else {
                 break;
             }
@@ -94,10 +96,12 @@ impl AbsPathStr {
                 let dir_entry = dir_entry?;
                 let abs = AbsPathStr::new_from_pathbuf(dir_entry.path())?;
                 let ftype = dir_entry.file_type()?;
-                if ftype.is_dir() {
-                    stack.push(FindCtx::new(abs, dir_entry, depth));
+                let is_dir = ftype.is_dir() || (ftype.is_symlink() && abs.path().is_dir());
+                let ctx = FindCtx::new(abs, dir_entry, depth);
+                if is_dir {
+                    stack.push(ctx);
                 } else {
-                    on_each(FindCtx::new(abs, dir_entry, depth))?;
+                    on_each(ctx)?;
                 }
                 anyhow::Ok(())
             })?;
@@ -108,7 +112,7 @@ impl AbsPathStr {
 
     pub fn find<F>(&self, on_each: F) -> anyhow::Result<()>
     where
-        F: FnMut(FindCtx) -> anyhow::Result<()>,
+        F: FnMut(FindCtx) -> anyhow::Result<bool>,
     {
         self.find_with_cache(on_each, &mut Default::default())
     }

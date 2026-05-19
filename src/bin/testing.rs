@@ -15,7 +15,7 @@ fn main() -> anyhow::Result<()> {
             println!("{count}");
         }
         println!("PATH ({}): {}", ctx.depth, ctx.path.display());
-        Ok(())
+        Ok(false)
     })
     .unwrap();
     println!("{count}");
