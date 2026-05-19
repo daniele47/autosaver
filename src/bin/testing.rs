@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{str::FromStr, time::Instant};
 
 use autosaver::fs::abs::AbsPathStr;
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
@@ -6,14 +6,21 @@ use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberI
 fn main() -> anyhow::Result<()> {
     init_logs();
 
-    let abs = AbsPathStr::from_str("/home/daniele/.config/nvim")?;
+    let abs = AbsPathStr::from_str("/home")?;
+    let time = Instant::now();
+    let mut count = 0;
     abs.find(
-        |e| {
-            println!("{e:?}");
+        |_| {
+            count += 1;
+            if count % 1024 == 0 {
+                println!("{count}");
+            }
             Ok(())
         },
         &mut Default::default(),
     )?;
+    println!("{count}");
+    println!("Function took: {:?}", time.elapsed());
 
     Ok(())
 }
