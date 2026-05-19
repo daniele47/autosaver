@@ -16,6 +16,7 @@ pub enum Paths {
     Config,
     Run,
 }
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CliContext {
     paths: HashMap<Paths, AbsPathStr>,
     profiles: AllProfiles,
@@ -81,14 +82,17 @@ impl CliContext {
 
         // find and load all profiles config files
         config_dir.find(|ctx| {
-            // ignore dotfiles in config directory
-            let file_name = ctx.entry.file_name();
-            let name = file_name.to_string_lossy();
-            if name.starts_with(".") {
+            // ignore symlinks
+            if ctx.entry.file_type()?.is_symlink(){
                 return Ok(false);
             }
 
-            if let Some(pname) = name.strip_suffix(".conf") {
+            // ignore dotfiles in config directory
+            if ctx.entry.file_name().to_string_lossy().starts_with(".") {
+                return Ok(false);
+            }
+
+            if let Some(pname) = ctx.path.to_rel(config_dir)?.to_string_lossy().strip_suffix(".conf") {
                 let conf_file = ctx.path.read_file()?;
                 let profile = Profile::parse_config(&conf_file, pname)?;
                 trace!(profile=%pname, conf_file=%ctx.path.display(), "Loaded profile from config file:");

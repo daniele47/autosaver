@@ -1,4 +1,5 @@
 use std::{
+    borrow::Cow,
     fmt::Display,
     path::{Component, Path, PathBuf},
     str::FromStr,
@@ -37,8 +38,8 @@ impl PathStr {
         self.path().to_str()
     }
 
-    pub fn to_string_lossy(&self) -> String {
-        self.path.to_string_lossy().to_string()
+    pub fn to_string_lossy<'a>(&'a self) -> Cow<'a, str> {
+        self.path.to_string_lossy()
     }
 
     pub fn display(&self) -> impl Display {

@@ -71,7 +71,8 @@ impl Cli {
         }
 
         // init context
-        let _ = CliContext::new(&self.home, &self.root)?;
+        let cli = CliContext::new(&self.home, &self.root)?;
+        println!("{cli:#?}");
 
         Ok(())
     }

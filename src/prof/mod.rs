@@ -190,7 +190,7 @@ mod tests {
         let mut visited_order = Vec::new();
 
         profile1.traverse(params, |ctx| {
-            visited_order.push(ctx.item.name().to_string_lossy());
+            visited_order.push(ctx.item.name().to_string_lossy().to_string());
             Ok(())
         })?;
 
