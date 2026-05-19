@@ -4,7 +4,10 @@ use anyhow::Context;
 
 use crate::{
     fs::{abs::AbsPathStr, rel::RelPathStr},
-    prof::{AllProfiles, Profile},
+    prof::{
+        AllProfiles, Profile, ProfileKind,
+        composite::{Composite, CompositeEntry},
+    },
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -76,25 +79,26 @@ impl CliContext {
 
         // find and load all profiles config files
         config_dir.find(|ctx| {
+            let ftype = ctx.entry.file_type()?;
+            let fname = ctx.entry.file_name();
+            let fname = fname.to_string_lossy();
+            let conf_rel = ctx.path.to_rel(config_dir)?;
+            let conf_str = conf_rel.to_string_lossy();
+
             // ignore symlinks
-            if ctx.entry.file_type()?.is_symlink() {
+            if ftype.is_symlink() {
                 return Ok(false);
             }
 
             // ignore dotfiles in config directory
-            if ctx.entry.file_name().to_string_lossy().starts_with(".") {
+            if fname.starts_with(".") {
                 return Ok(false);
             }
 
-            if let Some(pname) = ctx
-                .path
-                .to_rel(config_dir)?
-                .to_string_lossy()
-                .strip_suffix(".conf")
-            {
-                let conf_file = ctx.path.read_file()?;
-                let profile = Profile::parse_config(&conf_file, pname)?;
-                all_profiles.insert(RelPathStr::from_str(pname)?, profile);
+            // normal profile parsing
+            if let Some(pname) = conf_str.strip_suffix(".conf") {
+                let profile = Profile::parse_config(&ctx.path.read_file()?, pname)?;
+                all_profiles.insert(conf_rel, profile);
             }
 
             Ok(true)
