@@ -236,7 +236,7 @@ impl AbsPathStr {
                 let p = self.display();
                 format!("Could not read file: {p}")
             })
-            .inspect(|_| debug!(file = %self.display(), "File successfully read into string:"))
+            .inspect(|_| trace!(file = %self.display(), "File successfully read into string:"))
     }
 
     #[instrument(err, level = "trace", skip_all, fields(self = %self.display(), dst=%dst.display()))]
