@@ -5,8 +5,7 @@ use anyhow::Context;
 use crate::{
     fs::{abs::AbsPathStr, rel::RelPathStr},
     prof::{
-        AllProfiles, Profile, ProfileKind,
-        composite::{Composite, CompositeEntry},
+        AllProfiles, Profile,
     },
 };
 
@@ -79,16 +78,10 @@ impl CliContext {
 
         // find and load all profiles config files
         config_dir.find(|ctx| {
-            let ftype = ctx.entry.file_type()?;
             let fname = ctx.entry.file_name();
             let fname = fname.to_string_lossy();
             let conf_rel = ctx.path.to_rel(config_dir)?;
             let conf_str = conf_rel.to_string_lossy();
-
-            // ignore symlinks
-            if ftype.is_symlink() {
-                return Ok(false);
-            }
 
             // ignore dotfiles in config directory
             if fname.starts_with(".") {
