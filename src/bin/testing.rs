@@ -9,12 +9,12 @@ fn main() -> anyhow::Result<()> {
     let abs = AbsPathStr::try_from(env!("HOME").to_string() + "/.config/nvim")?;
     let time = Instant::now();
     let mut count = 0;
-    abs.find(|p, _| {
+    abs.find(|ctx| {
         count += 1;
         if count % 1024 == 0 {
             println!("{count}");
         }
-        println!("PATH: {}", p.display());
+        println!("PATH ({}): {}", ctx.depth, ctx.path.display());
         Ok(())
     })?;
     println!("{count}");

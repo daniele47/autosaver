@@ -13,13 +13,33 @@ pub mod abs;
 pub mod path;
 pub mod rel;
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct FindCache {
-    stack: Vec<(AbsPathStr, DirEntry)>,
+    stack: Vec<FindCtx>,
 }
+#[derive(Debug)]
+pub struct FindCtx {
+    pub path: AbsPathStr,
+    pub entry: DirEntry,
+    pub depth: usize,
+}
+
 impl FindCache {
+    pub fn new() -> Self {
+        Self { stack: vec![] }
+    }
     fn clear(&mut self) {
         self.stack.clear();
+    }
+}
+impl Default for FindCache {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl FindCtx {
+    pub fn new(path: AbsPathStr, entry: DirEntry, depth: usize) -> Self {
+        Self { path, entry, depth }
     }
 }
 
@@ -34,25 +54,26 @@ impl AbsPathStr {
     #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
     pub fn list<F>(&self, mut on_each: F) -> anyhow::Result<()>
     where
-        F: FnMut(AbsPathStr, DirEntry) -> anyhow::Result<()>,
+        F: FnMut(FindCtx) -> anyhow::Result<()>,
     {
         trace!(directory=%self.display(), "Finding files in directory:");
         self.list_raw()?.try_for_each(|e| {
             let e = e?;
             let abs = AbsPathStr::new_from_pathbuf(e.path())?;
-            on_each(abs, e)
+            on_each(FindCtx::new(abs, e, 1))
         })
     }
 
     #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
     pub fn find_with_cache<F>(&self, mut on_each: F, cache: &mut FindCache) -> anyhow::Result<()>
     where
-        F: FnMut(AbsPathStr, DirEntry) -> anyhow::Result<()>,
+        F: FnMut(FindCtx) -> anyhow::Result<()>,
     {
         cache.clear();
         let stack = &mut cache.stack;
         let mut root_traversed = false;
         let mut children;
+        let mut depth;
         trace!(directory=%self.display(), "Finding files recursively in directory:");
 
         loop {
@@ -60,9 +81,11 @@ impl AbsPathStr {
             if !root_traversed {
                 children = self.list_raw()?;
                 root_traversed = true;
-            } else if let Some((abs, dir_entry)) = item {
-                children = abs.list_raw()?;
-                on_each(abs, dir_entry)?;
+                depth = 1;
+            } else if let Some(ctx) = item {
+                children = ctx.path.list_raw()?;
+                depth = ctx.depth + 1;
+                on_each(ctx)?;
             } else {
                 break;
             }
@@ -71,9 +94,9 @@ impl AbsPathStr {
                 let dir_entry = dir_entry?;
                 let abs = AbsPathStr::new_from_pathbuf(dir_entry.path())?;
                 if dir_entry.file_type()?.is_dir() {
-                    stack.push((abs, dir_entry));
+                    stack.push(FindCtx::new(abs, dir_entry, depth));
                 } else {
-                    on_each(abs, dir_entry)?;
+                    on_each(FindCtx::new(abs, dir_entry, depth))?;
                 }
                 anyhow::Ok(())
             })?;
@@ -84,7 +107,7 @@ impl AbsPathStr {
 
     pub fn find<F>(&self, on_each: F) -> anyhow::Result<()>
     where
-        F: FnMut(AbsPathStr, DirEntry) -> anyhow::Result<()>,
+        F: FnMut(FindCtx) -> anyhow::Result<()>,
     {
         self.find_with_cache(on_each, &mut Default::default())
     }
