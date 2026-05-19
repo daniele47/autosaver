@@ -3,7 +3,10 @@ use std::{collections::HashMap, env, str::FromStr};
 use anyhow::Context;
 use tracing::trace;
 
-use crate::fs::{abs::AbsPathStr, rel::RelPathStr};
+use crate::{
+    fs::{abs::AbsPathStr, rel::RelPathStr},
+    prof::AllProfiles,
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Paths {
@@ -13,12 +16,23 @@ pub enum Paths {
     Config,
     Run,
 }
+pub type AllPaths = HashMap<Paths, AbsPathStr>;
 pub struct CliContext {
-    paths: HashMap<Paths, AbsPathStr>,
+    pub paths: AllPaths,
+    pub profiles: AllProfiles,
 }
 
 impl CliContext {
     pub fn new(home: &Option<AbsPathStr>, root: &Option<AbsPathStr>) -> anyhow::Result<Self> {
+        let paths = Self::load_paths(home, root)?;
+        let profiles = Self::load_profiles(&paths[&Paths::Config])?;
+        Ok(Self { paths, profiles })
+    }
+
+    fn load_paths(
+        home: &Option<AbsPathStr>,
+        root: &Option<AbsPathStr>,
+    ) -> anyhow::Result<HashMap<Paths, AbsPathStr>> {
         let mut paths = HashMap::new();
 
         // load home directory
@@ -55,10 +69,10 @@ impl CliContext {
         paths.insert(Paths::Run, run_dir);
         paths.insert(Paths::Config, config_dir);
 
-        Ok(Self { paths })
+        Ok(paths)
     }
 
-    pub fn path(&self, path: Paths) -> &AbsPathStr {
-        self.paths.get(&path).expect("Paths is incomplete")
+    fn load_profiles(config_dir: &AbsPathStr) -> anyhow::Result<AllProfiles> {
+        todo!()
     }
 }
