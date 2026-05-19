@@ -13,6 +13,7 @@ TODO:
     - [ ] `d` to delete the file?
 - [ ] `all` profile could be reserved for all profiles?
 - [ ] `default` profile could be reserved to specify what to run when no profiles are specified otherwise? this would be fallback if `--profile` flag is not passed
+- [ ] improve error messages
 
 ## v2.0.0
 
