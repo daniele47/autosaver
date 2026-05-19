@@ -35,10 +35,6 @@ pub struct Cli {
     /// Auto-answer no to all prompts
     #[arg(short = 'n', long, global = true, conflicts_with = "assume_yes")]
     assume_no: bool,
-
-    /// Show logs at the specified log level
-    #[arg(long, env = "AUTOSAVER_LOGLEVEL", value_name = "LEVEL")]
-    log: Option<String>,
 }
 
 #[derive(Subcommand, Debug, Clone, PartialEq, Eq)]
