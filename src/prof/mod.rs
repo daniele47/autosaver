@@ -26,7 +26,10 @@ pub struct Profile {
     id: RelPathStr,
     kind: ProfileKind,
 }
-pub type AllProfiles = HashMap<RelPathStr, Profile>;
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AllProfiles {
+    profiles: HashMap<RelPathStr, Profile>,
+}
 
 // structs to make traverse function work properly
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -37,9 +40,8 @@ pub struct TraverseContext<'a> {
     pub is_dup: bool,
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct TraverseParams<'a> {
+pub struct TraverseOpts {
     pub allow_duplicates: bool,
-    pub all_profiles: &'a AllProfiles,
 }
 
 impl Profile {
@@ -58,17 +60,34 @@ impl Profile {
     pub fn kind(&self) -> &ProfileKind {
         &self.kind
     }
+}
 
-    #[instrument(err, level = "trace", skip_all, fields(root= %self.name.display()))]
-    pub fn traverse<S>(&self, params: TraverseParams, mut on_elem: S) -> anyhow::Result<()>
+impl AllProfiles {
+    pub fn new(profiles: HashMap<RelPathStr, Profile>) -> Self {
+        Self { profiles }
+    }
+
+    pub fn get(&self, name: &RelPathStr) -> anyhow::Result<&Profile> {
+        self.profiles
+            .get(name)
+            .with_context(|| format!("Missing profile: {}", name.display()))
+    }
+
+    #[instrument(err, level = "trace", skip_all, fields(root= %root.display()))]
+    pub fn traverse<S>(
+        &self,
+        root: &RelPathStr,
+        opts: TraverseOpts,
+        mut on_elem: S,
+    ) -> anyhow::Result<()>
     where
         S: FnMut(TraverseContext) -> anyhow::Result<()>,
     {
         let mut visited = HashSet::<&RelPathStr>::new();
         let mut path = Vec::<&RelPathStr>::new();
         let mut stack = Vec::<(&RelPathStr, bool)>::new();
-        stack.push((self.name(), false));
-        trace!(profile = %self.name().display(), "Traversing profile:");
+        stack.push((root, false));
+        trace!(profile = %root.display(), "Traversing profile:");
 
         // 3 colors DFS to traverse whilst properly detecting loops
         while let Some((item_name, item_visited)) = stack.pop() {
@@ -86,13 +105,13 @@ impl Profile {
                     .map(|s| s.to_string_lossy())
                     .collect::<Vec<_>>()
                     .join(" --> ");
-                let name = self.name().display();
+                let name = root.display();
                 bail!(format!("Profile {name} has a dependency cycle: {cycle}"));
             }
 
             // load profile
-            let item_profile = params.all_profiles.get(item_name).with_context(|| {
-                    let name = self.name().to_string_lossy();
+            let item_profile = self.get(item_name).with_context(|| {
+                    let name = root.to_string_lossy();
                     let inv_par = path.last().map(|p|p.to_string_lossy()).unwrap_or(name.clone());
                     let inv_name = item_name.display();
                     format!("Profile {name} traversal found invalid profile name {inv_name} as a child of {inv_par}")
@@ -107,7 +126,7 @@ impl Profile {
             })?;
 
             // end traversal if it was a duplicate, otherwise add to visited set
-            if !visited.insert(item_name) && !params.allow_duplicates {
+            if !visited.insert(item_name) && !opts.allow_duplicates {
                 continue;
             }
 
@@ -172,24 +191,21 @@ mod tests {
         );
         profiles.insert(RelPathStr::from_str("profile1")?, profile1);
 
-        Ok(profiles)
+        Ok(AllProfiles::new(profiles))
     }
 
     #[test]
     fn test_traverse_full_tree() -> anyhow::Result<()> {
         let profiles = setup_test_profiles()?;
-        let profile1 = profiles
-            .get(&RelPathStr::from_str("profile1")?)
-            .expect("profile1 was here");
+        let pname = RelPathStr::from_str("profile1")?;
 
-        let params = TraverseParams {
+        let opts = TraverseOpts {
             allow_duplicates: false,
-            all_profiles: &profiles,
         };
 
         let mut visited_order = Vec::new();
 
-        profile1.traverse(params, |ctx| {
+        profiles.traverse(&pname, opts, |ctx| {
             visited_order.push(ctx.item.name().to_string_lossy().to_string());
             Ok(())
         })?;

@@ -73,11 +73,11 @@ impl CliContext {
     }
 
     fn load_profiles(config_dir: &AbsPathStr) -> anyhow::Result<AllProfiles> {
-        let mut all_profiles = AllProfiles::new();
+        let mut all_profiles = HashMap::new();
 
         // load nothing if there are no profiles
         if !config_dir.is_dir() {
-            return Ok(all_profiles);
+            return Ok(AllProfiles::new(all_profiles));
         }
 
         // find and load all profiles config files
@@ -102,7 +102,7 @@ impl CliContext {
             Ok(true)
         })?;
 
-        Ok(all_profiles)
+        Ok(AllProfiles::new(all_profiles))
     }
 
     pub fn path(&self, path: &Paths) -> &AbsPathStr {
