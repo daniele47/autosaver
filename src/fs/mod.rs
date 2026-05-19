@@ -1,5 +1,5 @@
 use std::{
-    fs::{self, File, ReadDir},
+    fs::{self, DirEntry, File, ReadDir},
     io::Read,
     path::Component,
 };
@@ -15,7 +15,7 @@ pub mod rel;
 
 #[derive(Debug, Default)]
 pub struct FindCache {
-    stack: Vec<AbsPathStr>,
+    stack: Vec<(AbsPathStr, DirEntry)>,
 }
 impl FindCache {
     fn clear(&mut self) {
@@ -34,18 +34,20 @@ impl AbsPathStr {
     #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
     pub fn list<F>(&self, mut on_each: F) -> anyhow::Result<()>
     where
-        F: FnMut(AbsPathStr) -> anyhow::Result<()>,
+        F: FnMut(AbsPathStr, DirEntry) -> anyhow::Result<()>,
     {
         trace!(directory=%self.display(), "Finding files in directory:");
-        self.list_raw()?
-            .map(|e| anyhow::Ok(AbsPathStr::new_from_pathbuf(e?.path())?))
-            .try_for_each(|e| on_each(e?))
+        self.list_raw()?.try_for_each(|e| {
+            let e = e?;
+            let abs = AbsPathStr::new_from_pathbuf(e.path())?;
+            on_each(abs, e)
+        })
     }
 
     #[instrument(err, level = "trace", skip_all, fields(self = %self.display()))]
     pub fn find_with_cache<F>(&self, mut on_each: F, cache: &mut FindCache) -> anyhow::Result<()>
     where
-        F: FnMut(AbsPathStr) -> anyhow::Result<()>,
+        F: FnMut(AbsPathStr, DirEntry) -> anyhow::Result<()>,
     {
         cache.clear();
         let stack = &mut cache.stack;
@@ -56,25 +58,25 @@ impl AbsPathStr {
             let child_raw = child_raw?;
             let child = AbsPathStr::new_from_pathbuf(child_raw.path())?;
             if child_raw.file_type()?.is_dir() {
-                stack.push(child);
+                stack.push((child, child_raw));
             } else {
-                on_each(child)?;
+                on_each(child, child_raw)?;
             }
             anyhow::Ok(())
         })?;
 
         // DFS exploration
-        while let Some(stack_item) = stack.pop() {
+        while let Some((stack_item, stack_dir)) = stack.pop() {
             // iterate on children
             let mut children = stack_item.list_raw()?;
-            on_each(stack_item)?;
+            on_each(stack_item, stack_dir)?;
             children.try_for_each(|child_raw| {
                 let child_raw = child_raw?;
                 let child = AbsPathStr::new_from_pathbuf(child_raw.path())?;
                 if child_raw.file_type()?.is_dir() {
-                    stack.push(child);
+                    stack.push((child, child_raw));
                 } else {
-                    on_each(child)?;
+                    on_each(child, child_raw)?;
                 }
                 anyhow::Ok(())
             })?;
@@ -85,7 +87,7 @@ impl AbsPathStr {
 
     pub fn find<F>(&self, on_each: F) -> anyhow::Result<()>
     where
-        F: FnMut(AbsPathStr) -> anyhow::Result<()>,
+        F: FnMut(AbsPathStr, DirEntry) -> anyhow::Result<()>,
     {
         self.find_with_cache(on_each, &mut Default::default())
     }

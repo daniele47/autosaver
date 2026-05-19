@@ -9,7 +9,7 @@ fn main() -> anyhow::Result<()> {
     let abs = AbsPathStr::from_str("/home")?;
     let time = Instant::now();
     let mut count = 0;
-    abs.find(|_| {
+    abs.find(|_, _| {
         count += 1;
         if count % 1024 == 0 {
             println!("{count}");
