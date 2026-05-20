@@ -17,13 +17,21 @@ impl PathStr {
     pub fn new_from_pathbuf(path: PathBuf) -> anyhow::Result<Self> {
         // check path contains invalid components
         if !Intern::<PathBuf>::is_interned(&path) {
+            let mut components = vec![];
             for component in path.components() {
-                if component == Component::ParentDir {
-                    bail!("Path contains parent directory: {}", path.display());
-                } else if component == Component::CurDir {
-                    bail!("Path contains current directory: {}", path.display());
+                match component {
+                    Component::CurDir => {
+                        bail!("Path contains current directory: {}", path.display())
+                    }
+                    Component::ParentDir => {
+                        bail!("Path contains parent directory: {}", path.display())
+                    }
+                    component => components.push(component),
                 }
             }
+            return Ok(Self {
+                path: Intern::new(PathBuf::from_iter(components)),
+            });
         }
         Ok(Self {
             path: Intern::new(path),
