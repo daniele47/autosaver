@@ -72,6 +72,10 @@ impl CliContext {
     fn load_vt_profile(config_dir: &AbsPathStr, path: &AbsPathStr) -> anyhow::Result<Composite> {
         let mut comp_entries = vec![];
 
+        if !path.is_dir() {
+            return Ok(Composite::new(comp_entries));
+        }
+
         path.list(|ctx| {
             let ftype = ctx.entry.file_type()?;
             let fname = ctx.entry.file_name();
@@ -107,63 +111,61 @@ impl CliContext {
         let mut all_profiles = HashMap::new();
 
         // load nothing if there are no profiles
-        if !config_dir.is_dir() {
-            return Ok(AllProfiles::new(all_profiles));
+        if config_dir.is_dir() {
+            // find and load all profiles config files
+            config_dir.find(|ctx| {
+                let ftype = ctx.entry.file_type()?;
+                let fname = ctx.entry.file_name();
+                let fname = fname.to_string_lossy();
+                let conf_rel = ctx.path.to_rel(config_dir)?;
+                let conf_str = conf_rel.to_string_lossy();
+                let profile;
+
+                // ignore dotfiles in config directory
+                if fname.starts_with(".") {
+                    return Ok(false);
+                }
+
+                // virtual directory parsing
+                if ftype.is_dir() {
+                    let comp = Self::load_vt_profile(config_dir, &ctx.path)?;
+                    profile = Profile::new(
+                        conf_rel.clone(),
+                        conf_rel.clone(),
+                        ProfileKind::Composite(comp),
+                    );
+                }
+                // normal profile parsing
+                else if let Some(pname) = conf_str.strip_suffix(".conf") {
+                    profile = Profile::parse_config(&ctx.path.read_file()?, pname)?;
+                }
+                // otherwise do nothing
+                else {
+                    return Ok(true);
+                }
+
+                // insert profile
+                if let Some(old) = all_profiles.insert(conf_rel, profile) {
+                    let old_name = old.name().display();
+                    bail!(format!("Profile {old_name} is loaded multiple times"));
+                }
+
+                Ok(true)
+            })?;
         }
 
-        // find and load all profiles config files
-        config_dir.find(|ctx| {
-            let ftype = ctx.entry.file_type()?;
-            let fname = ctx.entry.file_name();
-            let fname = fname.to_string_lossy();
-            let conf_rel = ctx.path.to_rel(config_dir)?;
-            let conf_str = conf_rel.to_string_lossy();
-            let profile;
-
-            // ignore dotfiles in config directory
-            if fname.starts_with(".") {
-                return Ok(false);
-            }
-
-            // virtual directory parsing
-            if ftype.is_dir() {
-                let comp = Self::load_vt_profile(config_dir, &ctx.path)?;
-                profile = Profile::new(
-                    conf_rel.clone(),
-                    conf_rel.clone(),
-                    ProfileKind::Composite(comp),
-                );
-            }
-            // normal profile parsing
-            else if let Some(pname) = conf_str.strip_suffix(".conf") {
-                profile = Profile::parse_config(&ctx.path.read_file()?, pname)?;
-            }
-            // otherwise do nothing
-            else {
-                return Ok(true);
-            }
-
-            // insert profile
-            if let Some(old) = all_profiles.insert(conf_rel, profile) {
-                let old_name = old.name().display();
-                bail!(format!("Profile {old_name} is loaded multiple times"));
-            }
-
-            // add all virtual profile
-            let all_rel = RelPathStr::from_str("all")?;
-            let comp = Self::load_vt_profile(config_dir, config_dir)?;
-            let profile = Profile::new(
-                all_rel.clone(),
-                all_rel.clone(),
-                ProfileKind::Composite(comp),
-            );
-            if let Some(old) = all_profiles.insert(all_rel, profile) {
-                let old_name = old.name().display();
-                bail!(format!("Profile {old_name} is loaded multiple times"));
-            }
-
-            Ok(true)
-        })?;
+        // add all virtual profile
+        let all_rel = RelPathStr::from_str("all")?;
+        let comp = Self::load_vt_profile(config_dir, config_dir)?;
+        let profile = Profile::new(
+            all_rel.clone(),
+            all_rel.clone(),
+            ProfileKind::Composite(comp),
+        );
+        if let Some(old) = all_profiles.insert(all_rel, profile) {
+            let old_name = old.name().display();
+            bail!(format!("Profile {old_name} is loaded multiple times"));
+        }
 
         Ok(AllProfiles::new(all_profiles))
     }
