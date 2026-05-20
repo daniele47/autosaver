@@ -5,7 +5,7 @@ impl Cli {
         match self.cmd {
             CliCmd::Tree { no_dedup } => {
                 let ctx = CliContext::new(&self.home, &self.root)?;
-                let _ = (no_dedup, ctx);
+                println!("{no_dedup} {:?}", &ctx.curr_profile(&self.profile));
                 todo!("IMPLEMENT TREE COMMAND!");
             }
             _ => unreachable!("Tree command should be tree"),
