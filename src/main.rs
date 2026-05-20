@@ -7,7 +7,7 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
 
     // run application
-    cli.run()?;
+    cli.run_cmd()?;
 
     Ok(())
 }

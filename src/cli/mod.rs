@@ -1,10 +1,8 @@
 use clap::{Parser, Subcommand};
 
-use crate::{
-    cli::ctx::CliContext,
-    fs::{abs::AbsPathStr, rel::RelPathStr},
-};
+use crate::fs::{abs::AbsPathStr, rel::RelPathStr};
 
+pub mod act;
 pub mod ctx;
 
 #[derive(Parser, Debug, Clone, PartialEq, Eq)]
@@ -50,16 +48,11 @@ pub enum CliCmd {
     /// Run init scripts
     Run,
     /// Show dependency tree of profiles
-    Tree,
+    Tree {
+        /// Show duplicates too
+        #[arg(short = 'd', long)]
+        no_dedup: bool,
+    },
     /// Clear untracked files in backup directories
     Clear,
-}
-
-impl Cli {
-    pub fn run(&self) -> anyhow::Result<()> {
-        // init context
-        let _ = CliContext::new(&self.home, &self.root)?;
-
-        Ok(())
-    }
 }
