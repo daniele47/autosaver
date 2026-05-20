@@ -13,6 +13,7 @@ TODO:
     - [ ] `q` to quit entirely (avoiding dirty ctrl+c)
 - [ ] improve error messages
 - [ ] since Allprofile already track the profile name, it's useless to keep in the profile itself too?
+- [ ] consider allowing back `.` in paths (just ignoring them when normalizing paths. thus allow removing `all` profile)
 
 ## v2.0.0
 
