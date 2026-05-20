@@ -145,7 +145,7 @@ impl CliContext {
                 }
 
                 // insert profile
-                if let Some(old) = all_profiles.insert(conf_rel, profile) {
+                if let Some(old) = all_profiles.insert(profile.name().clone(), profile) {
                     let old_name = old.name().display();
                     bail!(format!("Profile {old_name} is loaded multiple times"));
                 }
