@@ -73,10 +73,6 @@ impl AbsPathStr {
     pub fn is_dir(&self) -> bool {
         self.path().is_dir()
     }
-
-    pub fn same_path(&self, other: &Self) -> bool {
-        self.pathstr.same_path(&other.pathstr)
-    }
 }
 
 impl TryFrom<PathStr> for AbsPathStr {

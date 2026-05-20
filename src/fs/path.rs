@@ -56,10 +56,6 @@ impl PathStr {
             .map(|f| Self::new_from_pathbuf(PathBuf::from(f)))
             .with_context(|| format!("Could not get basename of {}", self.display()))?
     }
-
-    pub fn same_path(&self, other: &Self) -> bool {
-        self.path().components() == other.path().components()
-    }
 }
 
 impl TryFrom<String> for PathStr {

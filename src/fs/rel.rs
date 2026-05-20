@@ -60,10 +60,6 @@ impl RelPathStr {
     pub fn basename(&self) -> anyhow::Result<Self> {
         self.pathstr.basename()?.try_into()
     }
-
-    pub fn same_path(&self, other: &Self) -> bool {
-        self.pathstr.same_path(&other.pathstr)
-    }
 }
 
 impl TryFrom<PathStr> for RelPathStr {
