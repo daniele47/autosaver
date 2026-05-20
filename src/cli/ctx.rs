@@ -17,7 +17,6 @@ pub enum Paths {
     Backup,
     Config,
     Run,
-    Default,
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CliContext {
@@ -67,15 +66,11 @@ impl CliContext {
         let config_dir = root_dir.join(&RelPathStr::from_str("config")?)?;
         let run_dir = root_dir.join(&RelPathStr::from_str("run")?)?;
 
-        // files
-        let default_file = root_dir.join(&RelPathStr::from_str(".default")?)?;
-
         paths.insert(Paths::Home, home_dir);
         paths.insert(Paths::Root, root_dir);
         paths.insert(Paths::Backup, backup_dir);
         paths.insert(Paths::Run, run_dir);
         paths.insert(Paths::Config, config_dir);
-        paths.insert(Paths::Default, default_file);
 
         Ok(paths)
     }
@@ -181,24 +176,6 @@ impl CliContext {
         }
 
         Ok(AllProfiles::new(all_profiles))
-    }
-
-    pub fn curr_profile(&self, flag_profile: &Option<RelPathStr>) -> anyhow::Result<RelPathStr> {
-        // get profile from flag
-        if let Some(flag_prof) = flag_profile {
-            Ok(flag_prof.to_owned())
-        }
-        // get profile from default file
-        else if let def_file = self.path(&Paths::Default)
-            && def_file.is_file()
-        {
-            let default_file_str = def_file.read_file()?;
-            Ok(RelPathStr::try_from(default_file_str)?)
-        }
-        // failed to get profile
-        else {
-            bail!("Failed to load profile to use");
-        }
     }
 
     pub fn path(&self, path: &Paths) -> &AbsPathStr {

@@ -40,7 +40,13 @@ pub struct TraverseContext<'a> {
 }
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct TraverseOpts {
-    pub hide_duplicates: bool,
+    hide_duplicates: bool,
+}
+
+impl TraverseOpts {
+    pub fn new(hide_duplicates: bool) -> Self {
+        Self { hide_duplicates }
+    }
 }
 
 impl Profile {

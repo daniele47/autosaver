@@ -22,6 +22,7 @@ TODO:
 - complete rewrite, using 3rd party crates as dependencies
 - added `--log` flag with proper logs
 - added `all` as the default root profile tracking ALL profiles
+- removed `.default` file, just use env var or flag to specify profile (bash script can handle this)
 
 ## v0.18.1 / v1.0.0
 
