@@ -183,6 +183,24 @@ impl CliContext {
         Ok(AllProfiles::new(all_profiles))
     }
 
+    pub fn curr_profile(&self, flag_profile: &Option<RelPathStr>) -> anyhow::Result<RelPathStr> {
+        // get profile from flag
+        if let Some(flag_prof) = flag_profile {
+            Ok(flag_prof.to_owned())
+        }
+        // get profile from default file
+        else if let def_file = self.path(&Paths::Default)
+            && def_file.is_file()
+        {
+            let default_file_str = def_file.read_file()?;
+            Ok(RelPathStr::try_from(default_file_str)?)
+        }
+        // failed to get profile
+        else {
+            bail!("Failed to load profile to use");
+        }
+    }
+
     pub fn path(&self, path: &Paths) -> &AbsPathStr {
         &self.paths[path]
     }
