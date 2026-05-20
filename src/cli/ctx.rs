@@ -69,9 +69,8 @@ impl CliContext {
         Ok(paths)
     }
 
-    fn load_vt_profile(config_dir: &AbsPathStr, path: &AbsPathStr) -> anyhow::Result<Profile> {
+    fn load_vt_profile(config_dir: &AbsPathStr, path: &AbsPathStr) -> anyhow::Result<Composite> {
         let mut comp_entries = vec![];
-        let conf_rel = path.to_rel(config_dir)?;
 
         path.list(|ctx| {
             let ftype = ctx.entry.file_type()?;
@@ -101,13 +100,7 @@ impl CliContext {
             Ok(())
         })?;
 
-        let comp = Composite::new(comp_entries);
-        let profile = Profile::new(
-            conf_rel.clone(),
-            conf_rel.clone(),
-            ProfileKind::Composite(comp),
-        );
-        Ok(profile)
+        Ok(Composite::new(comp_entries))
     }
 
     fn load_profiles(config_dir: &AbsPathStr) -> anyhow::Result<AllProfiles> {
@@ -134,7 +127,12 @@ impl CliContext {
 
             // virtual directory parsing
             if ftype.is_dir() {
-                profile = Self::load_vt_profile(config_dir, &ctx.path)?;
+                let comp = Self::load_vt_profile(config_dir, &ctx.path)?;
+                profile = Profile::new(
+                    conf_rel.clone(),
+                    conf_rel.clone(),
+                    ProfileKind::Composite(comp),
+                );
             }
             // normal profile parsing
             else if let Some(pname) = conf_str.strip_suffix(".conf") {
@@ -147,6 +145,19 @@ impl CliContext {
 
             // insert profile
             if let Some(old) = all_profiles.insert(conf_rel, profile) {
+                let old_name = old.name().display();
+                bail!(format!("Profile {old_name} is loaded multiple times"));
+            }
+
+            // add all virtual profile
+            let all_rel = RelPathStr::from_str("all")?;
+            let comp = Self::load_vt_profile(config_dir, config_dir)?;
+            let profile = Profile::new(
+                all_rel.clone(),
+                all_rel.clone(),
+                ProfileKind::Composite(comp),
+            );
+            if let Some(old) = all_profiles.insert(all_rel, profile) {
                 let old_name = old.name().display();
                 bail!(format!("Profile {old_name} is loaded multiple times"));
             }

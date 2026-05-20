@@ -11,8 +11,6 @@ TODO:
     - [ ] `e` to edit the file?
     - [ ] `d` to delete the file?
     - [ ] `q` to quit entirely (avoiding dirty ctrl+c)
-- [ ] `all` profile reserved for ALL profiles! (`config/all.conf` needs to be an error)
-- [ ] error if `profile.conf` and `profile/` both exist, as they would be competing!
 - [ ] improve error messages
 - [ ] since Allprofile already track the profile name, it's useless to keep in the profile itself too?
 
@@ -22,6 +20,7 @@ TODO:
 
 - complete rewrite, using 3rd party crates as dependencies
 - added `--log` flag with proper logs
+- added `all` as the default root profile tracking ALL profiles
 
 ## v0.18.1 / v1.0.0
 
