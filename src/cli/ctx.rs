@@ -17,6 +17,7 @@ pub enum Paths {
     Backup,
     Config,
     Run,
+    Default,
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CliContext {
@@ -66,11 +67,15 @@ impl CliContext {
         let config_dir = root_dir.join(&RelPathStr::from_str("config")?)?;
         let run_dir = root_dir.join(&RelPathStr::from_str("run")?)?;
 
+        // files
+        let default_file = root_dir.join(&RelPathStr::from_str(".default")?)?;
+
         paths.insert(Paths::Home, home_dir);
         paths.insert(Paths::Root, root_dir);
         paths.insert(Paths::Backup, backup_dir);
         paths.insert(Paths::Run, run_dir);
         paths.insert(Paths::Config, config_dir);
+        paths.insert(Paths::Default, default_file);
 
         Ok(paths)
     }
