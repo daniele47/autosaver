@@ -3,6 +3,8 @@ use crate::{
     prof::TraverseOpts,
 };
 
+const _: [&str; 4] = ["│   ", "    ", "├── ", "└── "];
+
 impl Cli {
     pub fn action_tree(&self) -> anyhow::Result<()> {
         match self.cmd {
