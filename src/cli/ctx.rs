@@ -21,14 +21,20 @@ pub enum Paths {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CliContext {
     paths: HashMap<Paths, AbsPathStr>,
+    root_profile: RelPathStr,
     profiles: AllProfiles,
 }
 
 impl CliContext {
     pub fn new(home: &Option<AbsPathStr>, root: &Option<AbsPathStr>) -> anyhow::Result<Self> {
         let paths = Self::load_paths(home, root)?;
-        let profiles = Self::load_profiles(&paths[&Paths::Config])?;
-        Ok(Self { paths, profiles })
+        let root_profile = RelPathStr::from_str("all")?;
+        let profiles = Self::load_profiles(&paths[&Paths::Config], &root_profile)?;
+        Ok(Self {
+            paths,
+            root_profile,
+            profiles,
+        })
     }
 
     fn load_paths(
@@ -107,7 +113,10 @@ impl CliContext {
         Ok(Composite::new(comp_entries))
     }
 
-    fn load_profiles(config_dir: &AbsPathStr) -> anyhow::Result<AllProfiles> {
+    fn load_profiles(
+        config_dir: &AbsPathStr,
+        root_profile: &RelPathStr,
+    ) -> anyhow::Result<AllProfiles> {
         let mut all_profiles = HashMap::new();
 
         // load nothing if there are no profiles
@@ -155,14 +164,13 @@ impl CliContext {
         }
 
         // add all virtual profile
-        let all_rel = RelPathStr::from_str("all")?;
         let comp = Self::load_vt_profile(config_dir, config_dir)?;
         let profile = Profile::new(
-            all_rel.clone(),
-            all_rel.clone(),
+            root_profile.clone(),
+            root_profile.clone(),
             ProfileKind::Composite(comp),
         );
-        if let Some(old) = all_profiles.insert(all_rel, profile) {
+        if let Some(old) = all_profiles.insert(root_profile.clone(), profile) {
             let old_name = old.name().display();
             bail!(format!("Profile {old_name} is loaded multiple times"));
         }
@@ -172,6 +180,10 @@ impl CliContext {
 
     pub fn path(&self, path: &Paths) -> &AbsPathStr {
         &self.paths[path]
+    }
+
+    pub fn root_profile(&self) -> &RelPathStr {
+        &self.root_profile
     }
 
     pub fn profiles(&self) -> &AllProfiles {
