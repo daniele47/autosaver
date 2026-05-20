@@ -4,7 +4,7 @@ All notable changes to this project will be documented here
 
 TODO:
 - [ ] save/restore should allow also deleting files from the invalid side, with a --dangerous flag for restore to allow deleting files from home!
-- [ ] more powerful prompts (maybe with this i could remove the -d/-s/... flag? or maybe keep both, maybe both be useful!):
+- [ ] prompt handler for more powerful prompts that has a list of possible actions, and allows specifying which to allow/not to (pow of 2 enum?):
     - [ ] `N` to skip entire profile
     - [ ] `d` to show diff
     - [ ] `s` to show file/script in its entirety
@@ -12,8 +12,10 @@ TODO:
     - [ ] `d` to delete the file?
     - [ ] `q` to quit entirely (avoiding dirty ctrl+c)
 - [ ] improve error messages
-- [ ] since Allprofile already track the profile name, it's useless to keep in the profile itself too?
-- [ ] consider allowing back `.` in paths (just ignoring them when normalizing paths. thus allow removing `all` profile)
+- (NOPE) since Allprofile already track the profile name, it's useless to keep in the profile itself too?
+- (NOPE) consider allowing back `.` in paths (just ignoring them when normalizing paths. thus allow removing `all` profile)
+- (NOPE) add `path absolute|relative` in all configs, where absolute is what i currently do, whilst relative uses the config current 
+- [ ] write a output handler that wraps around `write!(stdout|stderr)` for simplicity and easy reuse
 
 ## v2.0.0
 
