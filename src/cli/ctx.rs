@@ -1,10 +1,13 @@
 use std::{collections::HashMap, env, str::FromStr};
 
-use anyhow::Context;
+use anyhow::{Context, bail};
 
 use crate::{
     fs::{abs::AbsPathStr, rel::RelPathStr},
-    prof::{AllProfiles, Profile},
+    prof::{
+        AllProfiles, Profile, ProfileKind,
+        composite::{Composite, CompositeEntry},
+    },
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -66,6 +69,47 @@ impl CliContext {
         Ok(paths)
     }
 
+    fn load_vt_profile(config_dir: &AbsPathStr, path: &AbsPathStr) -> anyhow::Result<Profile> {
+        let mut comp_entries = vec![];
+        let conf_rel = path.to_rel(config_dir)?;
+
+        path.list(|ctx| {
+            let ftype = ctx.entry.file_type()?;
+            let fname = ctx.entry.file_name();
+            let fname = fname.to_string_lossy();
+            let conf_rel = ctx.path.to_rel(config_dir)?;
+            let conf_str = conf_rel.to_string_lossy();
+            let comp_entry;
+
+            // skip dotfiles
+            if fname.starts_with(".") {
+                return Ok(());
+            }
+
+            // load child
+            if ftype.is_dir() {
+                comp_entry = CompositeEntry::new(conf_rel);
+            } else if let Some(pname) = conf_str.strip_suffix(".conf") {
+                comp_entry = CompositeEntry::new(RelPathStr::from_str(pname)?);
+            } else {
+                return Ok(());
+            }
+
+            // add child
+            comp_entries.push(comp_entry);
+
+            Ok(())
+        })?;
+
+        let comp = Composite::new(comp_entries);
+        let profile = Profile::new(
+            conf_rel.clone(),
+            conf_rel.clone(),
+            ProfileKind::Composite(comp),
+        );
+        Ok(profile)
+    }
+
     fn load_profiles(config_dir: &AbsPathStr) -> anyhow::Result<AllProfiles> {
         let mut all_profiles = HashMap::new();
 
@@ -76,20 +120,35 @@ impl CliContext {
 
         // find and load all profiles config files
         config_dir.find(|ctx| {
+            let ftype = ctx.entry.file_type()?;
             let fname = ctx.entry.file_name();
             let fname = fname.to_string_lossy();
             let conf_rel = ctx.path.to_rel(config_dir)?;
             let conf_str = conf_rel.to_string_lossy();
+            let profile;
 
             // ignore dotfiles in config directory
             if fname.starts_with(".") {
                 return Ok(false);
             }
 
+            // virtual directory parsing
+            if ftype.is_dir() {
+                profile = Self::load_vt_profile(config_dir, &ctx.path)?;
+            }
             // normal profile parsing
-            if let Some(pname) = conf_str.strip_suffix(".conf") {
-                let profile = Profile::parse_config(&ctx.path.read_file()?, pname)?;
-                all_profiles.insert(conf_rel, profile);
+            else if let Some(pname) = conf_str.strip_suffix(".conf") {
+                profile = Profile::parse_config(&ctx.path.read_file()?, pname)?;
+            }
+            // otherwise do nothing
+            else {
+                return Ok(true);
+            }
+
+            // insert profile
+            if let Some(old) = all_profiles.insert(conf_rel, profile) {
+                let old_name = old.name().display();
+                bail!(format!("Profile {old_name} is loaded multiple times"));
             }
 
             Ok(true)

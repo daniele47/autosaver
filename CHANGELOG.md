@@ -14,6 +14,7 @@ TODO:
 - [ ] `all` profile reserved for ALL profiles! (`config/all.conf` needs to be an error)
 - [ ] error if `profile.conf` and `profile/` both exist, as they would be competing!
 - [ ] improve error messages
+- [ ] since Allprofile already track the profile name, it's useless to keep in the profile itself too?
 
 ## v2.0.0
 
