@@ -10,7 +10,7 @@ impl Cli {
                 let ctx = CliContext::new(&self.home, &self.root)?;
                 let trav_opts = TraverseOpts::new(no_dedup);
                 ctx.profiles().traverse(&self.profile, trav_opts, |ctx| {
-                    println!("{:?}", ctx.item);
+                    println!("{}", ctx.item.name().display());
                     Ok(())
                 })
             }

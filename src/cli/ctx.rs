@@ -78,10 +78,6 @@ impl CliContext {
     fn load_vt_profile(config_dir: &AbsPathStr, path: &AbsPathStr) -> anyhow::Result<Composite> {
         let mut comp_entries = vec![];
 
-        if !path.is_dir() {
-            return Ok(Composite::new(comp_entries));
-        }
-
         path.list(|ctx| {
             let ftype = ctx.entry.file_type()?;
             let fname = ctx.entry.file_name();

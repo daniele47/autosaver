@@ -113,12 +113,16 @@ impl AllProfiles {
             }
 
             // load profile
-            let item_profile = self.get(item_name).with_context(|| {
+            let item_profile = if let Some(last) = path.last() {
+                self.get(item_name).with_context(|| {
                     let name = root.to_string_lossy();
-                    let inv_par = path.last().map(|p|p.to_string_lossy()).unwrap_or(name.clone());
+                    let inv_par = last.display();
                     let inv_name = item_name.display();
                     format!("Profile {name} traversal found invalid profile name {inv_name} as a child of {inv_par}")
-                })?;
+                })
+            } else {
+                self.get(item_name)
+            }?;
 
             // act on profile
             on_elem(TraverseContext {
