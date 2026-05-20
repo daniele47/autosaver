@@ -15,15 +15,15 @@ pub struct Cli {
     cmd: CliCmd,
 
     /// Specify which profile to use
-    #[arg(short, long, env = "AUTOSAVER_PROFILE", global = true)]
+    #[arg(short, long, env = "AUTOSAVER_PROFILE")]
     profile: RelPathStr,
 
     /// Specify a different home directory to use
-    #[arg(long, env = "AUTOSAVER_HOME", global = true)]
+    #[arg(long, env = "AUTOSAVER_HOME")]
     home: Option<AbsPathStr>,
 
     /// Specify a different root directory to use
-    #[arg(long, env = "AUTOSAVER_ROOT", global = true)]
+    #[arg(long, env = "AUTOSAVER_ROOT")]
     root: Option<AbsPathStr>,
 
     /// Auto-answer yes to all prompts
