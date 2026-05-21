@@ -16,6 +16,7 @@ TODO:
 - (NOPE?) consider allowing back `.` in paths (just ignoring them when normalizing paths. thus allow removing `all` profile)
 - (NOPE?) add `path absolute|relative` in all configs, where absolute is what i currently do, whilst relative uses the config current 
 - (NOPE?) add `aliases` to all profiles, allowing 1 extra unique name for them! (`common/cli/neovim` could be aliased to `neovim` for example!)
+- [ ] add `--verbose`, or maybe even an itial prompt conferming HOME, ROOT, PROFILE are correct? or even just showing them? It could also print more things? IDK
 
 ## v2.0.0
 
@@ -27,7 +28,7 @@ TODO:
 
 ### Changes
 
-- removed `.default` file, just use env var or flag to specify profile (bash script can handle this)
+- replaced `.default` loaded by rust, with a `.env` script loaded from the bash wrapper
 
 ### Patches
 
