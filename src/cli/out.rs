@@ -29,3 +29,11 @@ macro_rules! errln {
         let _ = writeln!(std::io::stderr(), $($arg)*);
     }};
 }
+
+#[macro_export]
+macro_rules! verbose {
+    ($($arg:tt)*) => {{
+        $crate::err!("verbose: ");
+        $crate::errln!($($arg)*);
+    }};
+}

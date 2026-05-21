@@ -1,16 +1,34 @@
-use crate::cli::Cli;
+use crate::{
+    cli::{
+        Cli,
+        ctx::{CliContext, Paths},
+    },
+    verbose,
+};
 
 pub mod tree;
 
 impl Cli {
     pub fn run_cmd(&self) -> anyhow::Result<()> {
+        let ctx = CliContext::new(&self.home, &self.root)?;
+
+        // verbose output
+        if self.verbose {
+            verbose!("flags: {self:?}");
+            verbose!("Home directory: {}", ctx.path(&Paths::Home).display());
+            verbose!("Root directory: {}", ctx.path(&Paths::Root).display());
+            verbose!("Backup directory: {}", ctx.path(&Paths::Backup).display());
+            verbose!("Config directory: {}", ctx.path(&Paths::Config).display());
+            verbose!("Run directory: {}", ctx.path(&Paths::Run).display());
+        }
+
         match self.cmd {
             super::CliCmd::List => todo!(),
             super::CliCmd::Save => todo!(),
             super::CliCmd::Restore => todo!(),
             super::CliCmd::Delete => todo!(),
             super::CliCmd::Run => todo!(),
-            super::CliCmd::Tree { .. } => self.action_tree(),
+            super::CliCmd::Tree { .. } => self.action_tree(&ctx),
             super::CliCmd::Clear => todo!(),
         }
     }

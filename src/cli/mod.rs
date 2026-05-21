@@ -27,6 +27,10 @@ pub struct Cli {
     #[arg(long, env = "AUTOSAVER_ROOT")]
     root: Option<AbsPathStr>,
 
+    /// Show verbose output
+    #[arg(short, long, global = true)]
+    verbose: bool,
+
     /// Auto-answer yes to all prompts
     #[arg(short = 'y', long, global = true, conflicts_with = "assume_no")]
     assume_yes: bool,

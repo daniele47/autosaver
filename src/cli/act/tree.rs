@@ -9,10 +9,9 @@ use crate::{
 const TREE: [&str; 4] = ["│   ", "    ", "├── ", "└── "];
 
 impl Cli {
-    pub fn action_tree(&self) -> anyhow::Result<()> {
+    pub fn action_tree(&self, ctx: &CliContext) -> anyhow::Result<()> {
         match self.cmd {
             CliCmd::Tree { no_dedup, show_id } => {
-                let ctx = CliContext::new(&self.home, &self.root)?;
                 let trav_opts = TraverseOpts::new(no_dedup);
                 let curr_prof = ctx.curr_prof(&self.profile);
                 let mut are_last = Vec::<bool>::new();
