@@ -161,11 +161,7 @@ impl CliContext {
             // virtual directory parsing
             if ftype.is_dir() {
                 let comp = Self::load_vt_profile(config_dir, &ctx.path)?;
-                profile = Profile::new(
-                    conf_rel.clone(),
-                    conf_rel.clone(),
-                    ProfileKind::Composite(comp),
-                );
+                profile = Profile::new(conf_rel.clone(), conf_rel, ProfileKind::Composite(comp));
             }
             // normal profile parsing
             else if let Some(pname) = conf_str.strip_suffix(".conf") {
