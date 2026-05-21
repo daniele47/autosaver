@@ -1,21 +1,11 @@
 #!/bin/bash
 
-### WRAPPER BASH SCRIPT TO DOWNLOAD AND RUN RUST BINARY ###
+### WRAPPER BASH SCRIPT TO DOWNLOAD OR COMPILE THE RUST BINARY ###
 
 set -e
 
-# setup defaults for all environment variables
-export AUTOSAVER_HOME="${AUTOSAVER_HOME:-$HOME}"
-export AUTOSAVER_ROOT="${AUTOSAVER_ROOT:-$(dirname "$(realpath "${BASH_SOURCE[0]}")")}"
-
-# source `.env` file if found
-ENV_FILE="$AUTOSAVER_ROOT/.env"
-if [[ -f "$ENV_FILE" ]]; then
-    source "$ENV_FILE"
-fi
-
 # local paths
-LOCAL_BIN_PATH_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/autosaver"
+LOCAL_BIN_PATH_DIR="${XDG_BIN_HOME:-$HOME/.local/bin}"
 LOCAL_BIN_PATH="$LOCAL_BIN_PATH_DIR/autosaver"
 # remote url
 REMOTE_GIT_REPO="https://github.com/daniele47/autosaver"
@@ -34,8 +24,9 @@ if [[ -v UNINSTALL ]]; then
         echo "Autosaver was already uninstalled!"
     else
         echo "(1/1) Uninstalling autosaver by deleting the cache directory..."
-        rm -rf "$LOCAL_BIN_PATH_DIR"
         echo "Autosaver was succesffully uninstalled!"
+        rm "$LOCAL_BIN_PATH"
+        rmdir "$LOCAL_BIN_PATH_DIR" || true
     fi
     exit 0
 elif [[ -v BUILD ]]; then
@@ -87,7 +78,6 @@ elif [[ -v BUILD ]]; then
     # nice update/install msg
     echo -n "Autosaver compiled: "
     "$LOCAL_BIN_PATH" --version
-    echo -e "--------------------------------------------------------------------------------\n"
 elif [[ ! -f "$LOCAL_BIN_PATH" || -v INSTALL ]]; then
     # previous binary version
     OLD_VERSION="$($LOCAL_BIN_PATH --version 2>/dev/null | tr -d '\n ')"
@@ -123,7 +113,8 @@ elif [[ ! -f "$LOCAL_BIN_PATH" || -v INSTALL ]]; then
     # download archived binary
     echo "(1/4) Downloading latest archive release from '$REMOTE_RELEASE_URL' ..."
     url="$REMOTE_RELEASE_URL"
-    output=$LOCAL_BIN_PATH_DIR/archive.tar.gz""
+    tmpdir="$(mktemp -d)"
+    output=$tmpdir/archive.tar.gz""
     if command -v curl &>/dev/null; then
         curl -L --fail --show-error --progress-bar --output "$output" "$url"
     elif command -v wget &>/dev/null; then
@@ -157,13 +148,13 @@ elif [[ ! -f "$LOCAL_BIN_PATH" || -v INSTALL ]]; then
     # cleanup operations
     echo
     echo "(4/4) Cleanup temporary files..."
-    rm "$output"
+    rm -rf "$tmpdir"
 
     # nice update/install msg
     echo -n "Autosaver installed/updated: "
     echo -en "$OLD_VERSION ---> " && "$LOCAL_BIN_PATH" --version
-    echo -e "--------------------------------------------------------------------------------\n"
+else
+    # already installed binary
+    echo -n "Autosaver already installed: "
+    "$LOCAL_BIN_PATH" --version
 fi
-
-# run binary
-"$LOCAL_BIN_PATH" "$@"
