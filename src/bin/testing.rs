@@ -1,12 +1,7 @@
-use std::env;
-
-use anyhow::Context;
-use autosaver::{cli::ctx::CliContext, fs::abs::AbsPathStr};
+use autosaver::cli::ctx::CliContext;
 
 fn main() -> anyhow::Result<()> {
-    let home = AbsPathStr::new_from_pathbuf(env::home_dir().context("err")?)?;
-    let root = AbsPathStr::new_from_pathbuf(env::current_dir()?)?;
-    let ctx = CliContext::new(&Some(home), &Some(root), &None)?;
+    let ctx = CliContext::new(&None, &None, &None)?;
 
     ctx.profiles
         .traverse(&ctx.root_profile, Default::default(), |ctx| {

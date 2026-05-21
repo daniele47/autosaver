@@ -1,10 +1,10 @@
-use std::time::Instant;
+use std::{path::PathBuf, time::Instant};
 
 use clap::{Parser, Subcommand};
 
 use crate::{
     cli::ctx::{CliContext, Paths},
-    fs::{abs::AbsPathStr, rel::RelPathStr},
+    fs::rel::RelPathStr,
     verbose,
 };
 
@@ -27,11 +27,11 @@ pub struct Cli {
 
     /// Specify a different home directory to use
     #[arg(long, env = "AUTOSAVER_HOME")]
-    home: Option<AbsPathStr>,
+    home: Option<PathBuf>,
 
     /// Specify a different root directory to use
     #[arg(long, env = "AUTOSAVER_ROOT")]
-    root: Option<AbsPathStr>,
+    root: Option<PathBuf>,
 
     /// Show verbose output
     #[arg(short, long, global = true)]

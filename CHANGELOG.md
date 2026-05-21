@@ -17,7 +17,7 @@ TODO:
 - (NOPE?) add `path absolute|relative` in all configs, where absolute is what i currently do, whilst relative uses the config current 
 - (NOPE?) add `aliases` to all profiles, allowing 1 extra unique name for them! (`common/cli/neovim` could be aliased to `neovim` for example!)
 - [ ] consider if env vars are enough, or if i need a `.default` file back or smt (i trend toward just rely on env vars)
-- [ ] just allow also relpath `--home|--root` (just internally convert to abs instantly, using current dir as base)
+- [ ] improve `AllProfiles`: key are exactly value.name(), no need to have that be a clone!
 
 ## v2.0.0
 
@@ -27,6 +27,7 @@ TODO:
 - added `--log` flag with proper logs
 - added `all` as the default root profile tracking ALL profiles
 - added `--verbose` printing extra useful informaton
+- added `--home|--root` flags to specify different root and home directories (defaults: $HOME, current dir)
 
 ### Changes
 

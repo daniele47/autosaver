@@ -1,4 +1,4 @@
-use std::{collections::HashMap, env, str::FromStr};
+use std::{collections::HashMap, env, path::PathBuf, str::FromStr};
 
 use anyhow::{Context, bail};
 use owo_colors::Style;
@@ -34,8 +34,8 @@ impl CliContext {
     pub const TREE_DEDUP: Style = Style::new().yellow();
 
     pub fn new(
-        home: &Option<AbsPathStr>,
-        root: &Option<AbsPathStr>,
+        home: &Option<PathBuf>,
+        root: &Option<PathBuf>,
         flag_prof: &Option<RelPathStr>,
     ) -> anyhow::Result<Self> {
         let paths = Self::load_paths(home, root)?;
@@ -51,28 +51,32 @@ impl CliContext {
     }
 
     fn load_paths(
-        home: &Option<AbsPathStr>,
-        root: &Option<AbsPathStr>,
+        home: &Option<PathBuf>,
+        root: &Option<PathBuf>,
     ) -> anyhow::Result<HashMap<Paths, AbsPathStr>> {
         let mut paths = HashMap::new();
 
         // load home directory
         let home_dir;
         if let Some(home) = home {
-            home_dir = home.clone();
+            home_dir = home.canonicalize().with_context(|| {
+                format!("Home path could not be canonicalized: {}", home.display())
+            })?;
         } else {
-            let home = env::home_dir().context("Failure getting home directory")?;
-            home_dir = AbsPathStr::new_from_pathbuf(home).context("Invalid home directory")?;
+            home_dir = env::home_dir().context("Failure getting home directory")?;
         }
+        let home_dir = AbsPathStr::new_from_pathbuf(home_dir)?;
 
         // load root directory
         let root_dir;
         if let Some(root) = root {
-            root_dir = root.clone();
+            root_dir = root.canonicalize().with_context(|| {
+                format!("Root path could not be canonicalized: {}", root.display())
+            })?;
         } else {
-            let root = env::current_dir().context("Failure getting root directory")?;
-            root_dir = AbsPathStr::new_from_pathbuf(root).context("Invalid root directory")?;
+            root_dir = env::current_dir().context("Failure getting root directory")?;
         }
+        let root_dir = AbsPathStr::new_from_pathbuf(root_dir)?;
 
         // other dirs
         let backup_dir = root_dir.join(&RelPathStr::from_str("backup")?)?;
