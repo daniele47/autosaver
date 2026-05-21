@@ -12,12 +12,12 @@ TODO:
     - [ ] `d` to delete the file?
     - [ ] `q` to quit entirely (avoiding dirty ctrl+c)
 - [ ] improve error messages
-- (NOPE?) since Allprofile already track the profile name, it's useless to keep in the profile itself too?
-- (NOPE?) consider allowing back `.` in paths (just ignoring them when normalizing paths. thus allow removing `all` profile)
-- (NOPE?) add `path absolute|relative` in all configs, where absolute is what i currently do, whilst relative uses the config current 
-- (NOPE?) add `aliases` to all profiles, allowing 1 extra unique name for them! (`common/cli/neovim` could be aliased to `neovim` for example!)
 - [ ] consider if env vars are enough, or if i need a `.default` file back or smt (i trend toward just rely on env vars)
 - [ ] improve `AllProfiles`: key are exactly value.name(), no need to have that be a clone!
+- [ ] consider whetever to allow `\*` option line to actually indicate ALL files/profiles???
+- [ ] consider what to do with `id`, if they are ok as is, 
+    - [ ] if they should be forced flattened or leave all the freedom
+    - [ ] if they should be enforced to be unique too or leave freedom again
 
 ## v2.0.0
 
