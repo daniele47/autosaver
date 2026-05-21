@@ -11,7 +11,7 @@ const TREE: [&str; 4] = ["│   ", "    ", "├── ", "└── "];
 impl Cli {
     pub fn action_tree(&self) -> anyhow::Result<()> {
         match self.cmd {
-            CliCmd::Tree { no_dedup } => {
+            CliCmd::Tree { no_dedup, show_id } => {
                 let ctx = CliContext::new(&self.home, &self.root)?;
                 let trav_opts = TraverseOpts::new(no_dedup);
                 let mut are_last = Vec::<bool>::new();
@@ -27,11 +27,11 @@ impl Cli {
                     }
                     for item in are_last.iter().take(len).skip(1) {
                         let line_start = if *item { TREE[1] } else { TREE[0] };
-                        out!("{}", line_start.style(CliContext::TREE_INDENT));
+                        out!("{line_start}");
                     }
                     if len > 0 {
                         let line_last = if is_last { TREE[3] } else { TREE[2] };
-                        out!("{}", line_last.style(CliContext::TREE_INDENT));
+                        out!("{line_last}");
                     }
                     // render profile name
                     let prof_style = match ctx.item.kind() {
@@ -40,6 +40,10 @@ impl Cli {
                         ProfileKind::Runner(_) => CliContext::TREE_RUNNER,
                     };
                     out!("{}", ctx.item.name().display().style(prof_style));
+                    // show profile id
+                    if show_id && !matches!(ctx.item.kind(), ProfileKind::Composite(_)) {
+                        out!(" ({})", ctx.item.id().display());
+                    }
                     // render dedup symbol
                     if !no_dedup && ctx.is_dup {
                         out!(" {}", "(*)".style(CliContext::TREE_DEDUP));

@@ -50,9 +50,13 @@ pub enum CliCmd {
     Run,
     /// Show dependency tree of profiles
     Tree {
-        /// Show duplicates too
+        /// Do no deduplicate profiles
         #[arg(short = 'd', long)]
         no_dedup: bool,
+
+        /// Show the id related to each profile
+        #[arg(short = 'i', long)]
+        show_id: bool,
     },
     /// Clear untracked files in backup directories
     Clear,

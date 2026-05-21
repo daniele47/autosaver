@@ -15,7 +15,6 @@ TODO:
 - (NOPE?) since Allprofile already track the profile name, it's useless to keep in the profile itself too?
 - (NOPE?) consider allowing back `.` in paths (just ignoring them when normalizing paths. thus allow removing `all` profile)
 - (NOPE?) add `path absolute|relative` in all configs, where absolute is what i currently do, whilst relative uses the config current 
-- [ ] add `--id|-i` to `tree` to show also the id
 - [ ] add `aliases` to all profiles, allowing 1 extra unique name for them! (`common/cli/neovim` could be aliased to `neovim` for example!)
 
 ## v2.0.0
