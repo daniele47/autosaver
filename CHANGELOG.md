@@ -12,10 +12,9 @@ TODO:
     - [ ] `d` to delete the file?
     - [ ] `q` to quit entirely (avoiding dirty ctrl+c)
 - [ ] improve error messages
-- (NOPE) since Allprofile already track the profile name, it's useless to keep in the profile itself too?
-- (NOPE) consider allowing back `.` in paths (just ignoring them when normalizing paths. thus allow removing `all` profile)
-- (NOPE) add `path absolute|relative` in all configs, where absolute is what i currently do, whilst relative uses the config current 
-- [ ] write a output handler that wraps around `write!(stdout|stderr)` for simplicity and easy reuse
+- (NOPE?) since Allprofile already track the profile name, it's useless to keep in the profile itself too?
+- (NOPE?) consider allowing back `.` in paths (just ignoring them when normalizing paths. thus allow removing `all` profile)
+- (NOPE?) add `path absolute|relative` in all configs, where absolute is what i currently do, whilst relative uses the config current 
 
 ## v2.0.0
 

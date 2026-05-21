@@ -4,6 +4,7 @@ use crate::fs::{abs::AbsPathStr, rel::RelPathStr};
 
 pub mod act;
 pub mod ctx;
+pub mod out;
 
 #[derive(Parser, Debug, Clone, PartialEq, Eq)]
 #[command(version)]
