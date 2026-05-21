@@ -130,15 +130,8 @@ NOTES:
 
 ## How to use
 
-- just copy `autosaver` bash script in the directory you want to use to save dotfiles in
+```sh
+curl -fsSL https://raw.githubusercontent.com/daniele47/autosaver/refs/tags/installer-script/install.sh | bash -s
+```
 
-The first time the script is run, it will download the rust autocompiled binary by and hosted on `github`, and it will
-store it in the `cache` directory, properly following `xdg-base` specifications. 
-
-NOTE:
-- run the bash script to install the rust binary and completions if missing
-- run the bash script with `INSTALL= ./autosaver` to force an update of binary and completions
-- run the bash script with `INSTALL=[VERSION] ./autosaver` to force an installation of a precise version
-- run the bash script with `UNINSTALL= ./autosaver` to remove all things installed by the program 
-
-NOTE: Just run `./autosaver --help` to get list of commands, flags and environment variables
+or manually download a binary from [github](https://github.com/daniele47/autosaver/releases)

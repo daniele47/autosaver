@@ -18,8 +18,9 @@ TODO:
 - (NOPE?) add `aliases` to all profiles, allowing 1 extra unique name for them! (`common/cli/neovim` could be aliased to `neovim` for example!)
 - [ ] bash wrapper is very slow: find a way to remove it, and allow directly using the rust binary instead:
     - [x] install bash binary in `~/.local/bin/autosaver`
-    - [ ] remove runner code from bash script, leave it as a simple `build/download/install` script instead
+    - [x] remove runner code from bash script, leave it as a simple `build/download/install` script instead
     - [ ] consider if env vars are enough, or if i need a `.default` file back or smt (i trend toward just rely on env vars)
+    - [x] update readme to give a nice `curl | bash` command + fix readme
 - [ ] just allow also relpath `--home|--root` (just internally convert to abs instantly, using current dir as base)
 
 ## v2.0.0
@@ -35,6 +36,7 @@ TODO:
 
 - replaced `.default` loaded by rust, with a `.env` script loaded from the bash wrapper
 - `--profile` defaults to `all` if missing!
+- removed bash wrapper script, replaced with a single install script
 
 ### Patches
 
