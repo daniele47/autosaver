@@ -199,4 +199,8 @@ impl CliContext {
     pub fn profiles(&self) -> &AllProfiles {
         &self.profiles
     }
+
+    pub fn curr_prof<'a>(&'a self, flag_prof: &'a Option<RelPathStr>) -> &'a RelPathStr {
+        flag_prof.as_ref().unwrap_or(&self.root_profile)
+    }
 }

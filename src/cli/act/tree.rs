@@ -14,8 +14,9 @@ impl Cli {
             CliCmd::Tree { no_dedup, show_id } => {
                 let ctx = CliContext::new(&self.home, &self.root)?;
                 let trav_opts = TraverseOpts::new(no_dedup);
+                let curr_prof = ctx.curr_prof(&self.profile);
                 let mut are_last = Vec::<bool>::new();
-                ctx.profiles().traverse(&self.profile, trav_opts, |ctx| {
+                ctx.profiles().traverse(curr_prof, trav_opts, |ctx| {
                     let len = ctx.path.len();
 
                     // render indent lines

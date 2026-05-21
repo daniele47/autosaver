@@ -29,6 +29,7 @@ TODO:
 ### Changes
 
 - replaced `.default` loaded by rust, with a `.env` script loaded from the bash wrapper
+- `--profile` defaults to `all` if missing!
 
 ### Patches
 

@@ -17,7 +17,7 @@ pub struct Cli {
 
     /// Specify which profile to use
     #[arg(short, long, env = "AUTOSAVER_PROFILE")]
-    profile: RelPathStr,
+    profile: Option<RelPathStr>,
 
     /// Specify a different home directory to use
     #[arg(long, env = "AUTOSAVER_HOME")]
