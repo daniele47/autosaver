@@ -131,13 +131,8 @@ impl CliContext {
 
         // load only empty all profile if config dir is missing
         if !config_dir.is_dir() {
-            let profile = Profile::new(
-                root_profile.clone(),
-                root_profile.clone(),
-                ProfileKind::Composite(Composite::new(vec![])),
-            );
-            all_profiles.insert(root_profile.clone(), profile);
-            return Ok(AllProfiles::new(all_profiles));
+            let config_dir = config_dir.display();
+            bail!("Configuration directory is missing at {config_dir}");
         }
 
         // add all virtual profile
