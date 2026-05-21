@@ -21,10 +21,10 @@ pub enum Paths {
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CliContext {
-    paths: HashMap<Paths, AbsPathStr>,
-    root_profile: RelPathStr,
-    profiles: AllProfiles,
-    curr_profile: RelPathStr,
+    pub paths: HashMap<Paths, AbsPathStr>,
+    pub root_profile: RelPathStr,
+    pub profiles: AllProfiles,
+    pub curr_profile: RelPathStr,
 }
 
 impl CliContext {
@@ -186,21 +186,5 @@ impl CliContext {
         })?;
 
         Ok(AllProfiles::new(all_profiles))
-    }
-
-    pub fn path(&self, path: &Paths) -> &AbsPathStr {
-        &self.paths[path]
-    }
-
-    pub fn root_profile(&self) -> &RelPathStr {
-        &self.root_profile
-    }
-
-    pub fn profiles(&self) -> &AllProfiles {
-        &self.profiles
-    }
-
-    pub fn curr_prof(&self) -> &RelPathStr {
-        &self.curr_profile
     }
 }

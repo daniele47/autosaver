@@ -80,12 +80,12 @@ impl Cli {
         // verbose output
         if self.verbose {
             verbose!("Configs parsed in {}s", start.elapsed().as_secs_f64());
-            verbose!("Current profile: {}", ctx.curr_prof().display());
-            verbose!("Home directory: {}", ctx.path(&Paths::Home).display());
-            verbose!("Root directory: {}", ctx.path(&Paths::Root).display());
-            verbose!("Backup directory: {}", ctx.path(&Paths::Backup).display());
-            verbose!("Config directory: {}", ctx.path(&Paths::Config).display());
-            verbose!("Run directory: {}", ctx.path(&Paths::Run).display());
+            verbose!("Current profile: {}", ctx.curr_profile.display());
+            verbose!("Home directory: {}", ctx.paths[&Paths::Home].display());
+            verbose!("Root directory: {}", ctx.paths[&Paths::Root].display());
+            verbose!("Backup directory: {}", ctx.paths[&Paths::Backup].display());
+            verbose!("Config directory: {}", ctx.paths[&Paths::Config].display());
+            verbose!("Run directory: {}", ctx.paths[&Paths::Run].display());
         }
         let start = Instant::now();
 
