@@ -4,15 +4,15 @@
 
 set -e
 
+# setup defaults for all environment variables
+export AUTOSAVER_HOME="${AUTOSAVER_HOME:-$HOME}"
+export AUTOSAVER_ROOT="${AUTOSAVER_ROOT:-$(dirname "$(realpath "${BASH_SOURCE[0]}")")}"
+
 # source `.env` file if found
 ENV_FILE="$AUTOSAVER_ROOT/.env"
 if [[ -f "$ENV_FILE" ]]; then
     source "$ENV_FILE"
 fi
-
-# setup defaults for all environment variables
-export AUTOSAVER_HOME="${AUTOSAVER_HOME:-$HOME}"
-export AUTOSAVER_ROOT="${AUTOSAVER_ROOT:-$(dirname "$(realpath "${BASH_SOURCE[0]}")")}"
 
 # local paths
 LOCAL_BIN_PATH_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/autosaver"
