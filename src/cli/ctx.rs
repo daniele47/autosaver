@@ -1,6 +1,7 @@
 use std::{collections::HashMap, env, str::FromStr};
 
 use anyhow::{Context, bail};
+use owo_colors::Style;
 
 use crate::{
     fs::{abs::AbsPathStr, rel::RelPathStr},
@@ -26,6 +27,12 @@ pub struct CliContext {
 }
 
 impl CliContext {
+    pub const TREE_INDENT: Style = Style::new();
+    pub const TREE_COMPOSITE: Style = Style::new();
+    pub const TREE_RUNNER: Style = Style::new().bright_green();
+    pub const TREE_MODULE: Style = Style::new().bright_blue();
+    pub const TREE_DEDUP: Style = Style::new().yellow();
+
     pub fn new(home: &Option<AbsPathStr>, root: &Option<AbsPathStr>) -> anyhow::Result<Self> {
         let paths = Self::load_paths(home, root)?;
         let root_profile = RelPathStr::from_str("all")?;
