@@ -6,35 +6,29 @@ use std::{
 };
 
 use anyhow::{Context, bail};
-use internment::Intern;
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct PathStr {
-    path: Intern<PathBuf>,
+    path: PathBuf,
 }
 
 impl PathStr {
     pub fn new_from_pathbuf(path: PathBuf) -> anyhow::Result<Self> {
         // check path contains invalid components
-        if !Intern::<PathBuf>::is_interned(&path) {
-            let mut components = vec![];
-            for component in path.components() {
-                match component {
-                    Component::CurDir => {
-                        bail!("Path contains current directory: {}", path.display())
-                    }
-                    Component::ParentDir => {
-                        bail!("Path contains parent directory: {}", path.display())
-                    }
-                    component => components.push(component),
+        let mut components = vec![];
+        for component in path.components() {
+            match component {
+                Component::CurDir => {
+                    bail!("Path contains current directory: {}", path.display())
                 }
+                Component::ParentDir => {
+                    bail!("Path contains parent directory: {}", path.display())
+                }
+                component => components.push(component),
             }
-            return Ok(Self {
-                path: Intern::new(PathBuf::from_iter(components)),
-            });
         }
         Ok(Self {
-            path: Intern::new(path),
+            path: PathBuf::from_iter(components),
         })
     }
 
