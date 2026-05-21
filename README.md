@@ -131,7 +131,7 @@ NOTES:
 ## How to use
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/daniele47/autosaver/refs/tags/installer-script/install.sh | bash -s
+curl -fsSL https://raw.githubusercontent.com/daniele47/autosaver/refs/heads/main/install.sh | bash -s
 ```
 
 or manually download a binary from [github](https://github.com/daniele47/autosaver/releases)
