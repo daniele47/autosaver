@@ -38,9 +38,9 @@ impl<'a> RawProfile<'a> {
             let line = line.trim();
             if let Some(opt) = line.strip_prefix("/!").map(str::trim) {
                 // specific shared options
-                if let Some(kind_str) = opt.strip_prefix("kind ").map(str::trim) {
+                if let Some(kind_str) = opt.strip_prefix("type ").map(str::trim) {
                     if !kind.is_empty() {
-                        bail!(Profile::err_dup(name, "kind", i));
+                        bail!(Profile::err_dup(name, "type", i));
                     }
                     kind = kind_str;
                 } else if let Some(id_str) = opt.strip_prefix("id ").map(str::trim) {
