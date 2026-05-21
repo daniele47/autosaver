@@ -16,6 +16,10 @@ TODO:
 - (NOPE?) consider allowing back `.` in paths (just ignoring them when normalizing paths. thus allow removing `all` profile)
 - (NOPE?) add `path absolute|relative` in all configs, where absolute is what i currently do, whilst relative uses the config current 
 - (NOPE?) add `aliases` to all profiles, allowing 1 extra unique name for them! (`common/cli/neovim` could be aliased to `neovim` for example!)
+- [ ] bash wrapper is very slow: find a way to remove it, and allow directly using the rust binary instead:
+    - [ ] install bash binary in `~/.local/bin/autosaver`
+    - [ ] remove runner code from bash script, leave it as a simple `build/download/install` script instead
+    - [ ] consider if env vars are enough, or if i need a `.default` file back or smt (i trend toward just rely on env vars)
 
 ## v2.0.0
 
