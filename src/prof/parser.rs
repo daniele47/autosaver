@@ -200,7 +200,7 @@ mod tests {
     #[test]
     fn test_parse_composite_profile() -> anyhow::Result<()> {
         let config = r#"
-            /! kind composite
+            /! type composite
             /! id profiles_my_composite
             path_to_file1.txt
             path_to_file2.txt
@@ -231,7 +231,7 @@ mod tests {
     #[test]
     fn test_parse_module_profile() -> anyhow::Result<()> {
         let config = r#"
-            /! kind module
+            /! type module
             /! id profile_my_module
             /! policy track
             src_main.rs
@@ -270,7 +270,7 @@ mod tests {
     #[test]
     fn test_parse_runner_profile() -> anyhow::Result<()> {
         let config = r#"
-            /! kind runner
+            /! type runner
             /! id profiles_my_runner
             /! policy run
             script1.sh

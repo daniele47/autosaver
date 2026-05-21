@@ -1,8 +1,14 @@
+use std::time::Instant;
+
 use clap::{Parser, Subcommand};
 
-use crate::fs::{abs::AbsPathStr, rel::RelPathStr};
+use crate::{
+    cli::ctx::{CliContext, Paths},
+    fs::{abs::AbsPathStr, rel::RelPathStr},
+    verbose,
+};
 
-pub mod act;
+pub mod act_tree;
 pub mod ctx;
 pub mod out;
 
@@ -64,4 +70,40 @@ pub enum CliCmd {
     },
     /// Clear untracked files in backup directories
     Clear,
+}
+
+impl Cli {
+    pub fn run_cmd(&self) -> anyhow::Result<()> {
+        let start = Instant::now();
+        let ctx = CliContext::new(&self.home, &self.root, &self.profile)?;
+
+        // verbose output
+        if self.verbose {
+            verbose!("Configs parsed in {}s", start.elapsed().as_secs_f64());
+            verbose!("Current profile: {}", ctx.curr_prof().display());
+            verbose!("Home directory: {}", ctx.path(&Paths::Home).display());
+            verbose!("Root directory: {}", ctx.path(&Paths::Root).display());
+            verbose!("Backup directory: {}", ctx.path(&Paths::Backup).display());
+            verbose!("Config directory: {}", ctx.path(&Paths::Config).display());
+            verbose!("Run directory: {}", ctx.path(&Paths::Run).display());
+        }
+        let start = Instant::now();
+
+        match self.cmd {
+            CliCmd::List => todo!(),
+            CliCmd::Save => todo!(),
+            CliCmd::Restore => todo!(),
+            CliCmd::Delete => todo!(),
+            CliCmd::Run => todo!(),
+            CliCmd::Tree { .. } => self.action_tree(&ctx),
+            CliCmd::Clear => todo!(),
+        }?;
+
+        // show run time on verbose output
+        if self.verbose {
+            verbose!("Command run in {}s", start.elapsed().as_secs_f64());
+        }
+
+        Ok(())
+    }
 }
