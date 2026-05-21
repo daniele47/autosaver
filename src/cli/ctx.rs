@@ -28,10 +28,10 @@ pub struct CliContext {
 }
 
 impl CliContext {
-    pub(super) const TREE_COMPOSITE: Style = Style::new();
-    pub(super) const TREE_RUNNER: Style = Style::new().bright_green();
-    pub(super) const TREE_MODULE: Style = Style::new().bright_blue();
-    pub(super) const TREE_DEDUP: Style = Style::new().yellow();
+    pub const TREE_COMPOSITE: Style = Style::new();
+    pub const TREE_RUNNER: Style = Style::new().bright_green();
+    pub const TREE_MODULE: Style = Style::new().bright_blue();
+    pub const TREE_DEDUP: Style = Style::new().yellow();
 
     pub fn new(
         home: &Option<AbsPathStr>,
