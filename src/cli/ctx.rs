@@ -81,7 +81,11 @@ impl CliContext {
         Ok(paths)
     }
 
-    fn load_vt_profile(config_dir: &AbsPathStr, path: &AbsPathStr) -> anyhow::Result<Composite> {
+    fn load_vt_profile(
+        config_dir: &AbsPathStr,
+        path: &AbsPathStr,
+        name: RelPathStr,
+    ) -> anyhow::Result<Profile> {
         let mut comp_entries = vec![];
 
         path.list(|ctx| {
@@ -112,7 +116,11 @@ impl CliContext {
             Ok(())
         })?;
 
-        Ok(Composite::new(comp_entries))
+        Ok(Profile::new(
+            name.clone(),
+            name,
+            ProfileKind::Composite(Composite::new(comp_entries)),
+        ))
     }
 
     fn load_profiles(
@@ -133,15 +141,10 @@ impl CliContext {
         }
 
         // add all virtual profile
-        let comp = Self::load_vt_profile(config_dir, config_dir)?;
-        let profile = Profile::new(
-            root_profile.clone(),
-            root_profile.clone(),
-            ProfileKind::Composite(comp),
-        );
+        let profile = Self::load_vt_profile(config_dir, config_dir, root_profile.clone())?;
         if let Some(old) = all_profiles.insert(root_profile.clone(), profile) {
             let old_name = old.name().display();
-            bail!(format!("Profile {old_name} is loaded multiple times"));
+            bail!(format!("Profile {old_name} is reserved for root profile"));
         }
 
         // find and load all profiles config files
@@ -160,8 +163,7 @@ impl CliContext {
 
             // virtual directory parsing
             if ftype.is_dir() {
-                let comp = Self::load_vt_profile(config_dir, &ctx.path)?;
-                profile = Profile::new(conf_rel.clone(), conf_rel, ProfileKind::Composite(comp));
+                profile = Self::load_vt_profile(config_dir, &ctx.path, conf_rel)?;
             }
             // normal profile parsing
             else if let Some(pname) = conf_str.strip_suffix(".conf") {
