@@ -84,10 +84,6 @@ impl CliContext {
     fn load_vt_profile(config_dir: &AbsPathStr, path: &AbsPathStr) -> anyhow::Result<Composite> {
         let mut comp_entries = vec![];
 
-        if !path.is_dir() {
-            return Ok(Composite::new(comp_entries));
-        }
-
         path.list(|ctx| {
             let ftype = ctx.entry.file_type()?;
             let fname = ctx.entry.file_name();
@@ -125,6 +121,17 @@ impl CliContext {
     ) -> anyhow::Result<AllProfiles> {
         let mut all_profiles = HashMap::new();
 
+        // load only empty all profile if config dir is missing
+        if !config_dir.is_dir() {
+            let profile = Profile::new(
+                root_profile.clone(),
+                root_profile.clone(),
+                ProfileKind::Composite(Composite::new(vec![])),
+            );
+            all_profiles.insert(root_profile.clone(), profile);
+            return Ok(AllProfiles::new(all_profiles));
+        }
+
         // add all virtual profile
         let comp = Self::load_vt_profile(config_dir, config_dir)?;
         let profile = Profile::new(
@@ -135,11 +142,6 @@ impl CliContext {
         if let Some(old) = all_profiles.insert(root_profile.clone(), profile) {
             let old_name = old.name().display();
             bail!(format!("Profile {old_name} is loaded multiple times"));
-        }
-
-        // load only empty all profile if config dir is missing
-        if !config_dir.is_dir() {
-            return Ok(AllProfiles::new(all_profiles));
         }
 
         // find and load all profiles config files
