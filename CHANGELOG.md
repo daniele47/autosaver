@@ -25,7 +25,14 @@ TODO:
 - complete rewrite, using 3rd party crates as dependencies
 - added `--log` flag with proper logs
 - added `all` as the default root profile tracking ALL profiles
+
+### Changes
+
 - removed `.default` file, just use env var or flag to specify profile (bash script can handle this)
+
+### Patches
+
+- add uniqueness checks for `kind` and `id` lines in config files (as those make no sense to have repeated)
 
 ## v0.18.1 / v1.0.0
 

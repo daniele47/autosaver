@@ -30,16 +30,23 @@ impl<'a> RawProfile<'a> {
     fn parse_config(config: &'a str, name: &'a str) -> anyhow::Result<Self> {
         let mut lines = Vec::new();
         let mut kind = "";
-        let mut id = name;
+        let mut id = "";
 
         for (i, line) in config.lines().enumerate() {
             // option lines
+            let i = i + 1;
             let line = line.trim();
             if let Some(opt) = line.strip_prefix("/!").map(str::trim) {
                 // specific shared options
                 if let Some(kind_str) = opt.strip_prefix("kind ").map(str::trim) {
+                    if !kind.is_empty() {
+                        bail!(Profile::err_dup(name, "kind", i));
+                    }
                     kind = kind_str;
                 } else if let Some(id_str) = opt.strip_prefix("id ").map(str::trim) {
+                    if !id.is_empty() {
+                        bail!(Profile::err_dup(name, "id", i));
+                    }
                     id = id_str;
                 }
                 // fallback to storing not shared options
@@ -55,8 +62,9 @@ impl<'a> RawProfile<'a> {
 
         if kind.is_empty() {
             bail!("Option 'kind' is missing from profile {name}");
-        } else if id.is_empty() {
-            bail!("Option 'id' is missing from profile {name}");
+        }
+        if id.is_empty() {
+            id = name
         }
 
         Ok(Self {
@@ -171,13 +179,16 @@ impl Profile {
     fn err_opt(name: &str, opt: &str, i: usize, kind: &str) -> anyhow::Error {
         let mut opt_split = opt.split_whitespace();
         let opt1 = opt_split.next().unwrap_or("");
-        anyhow!("Invalid option '{opt1}' for {kind} profile {name} at line {i}")
+        anyhow!("Option '{opt1}' for {kind} profile {name} at line {i} is invalid")
     }
     fn err_val(name: &str, opt: &str, i: usize, kind: &str) -> anyhow::Error {
         let mut opt_split = opt.split_whitespace();
         let opt1 = opt_split.next().unwrap_or("");
         let opt2 = opt_split.next().unwrap_or("");
-        anyhow!("Option '{opt1}' for {kind} profile {name} at line {i} has invalid value '{opt2}'")
+        anyhow!("Option'{opt1}' for {kind} profile {name} at line {i} has invalid value '{opt2}'")
+    }
+    fn err_dup(name: &str, opt: &str, i: usize) -> anyhow::Error {
+        anyhow!("Option '{opt}' for profile {name} at line {i} is duplicated")
     }
 }
 
