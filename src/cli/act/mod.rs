@@ -10,11 +10,11 @@ pub mod tree;
 
 impl Cli {
     pub fn run_cmd(&self) -> anyhow::Result<()> {
-        let ctx = CliContext::new(&self.home, &self.root)?;
+        let ctx = CliContext::new(&self.home, &self.root, &self.profile)?;
 
         // verbose output
         if self.verbose {
-            verbose!("flags: {self:?}");
+            verbose!("Current profile: {}", ctx.curr_prof().display());
             verbose!("Home directory: {}", ctx.path(&Paths::Home).display());
             verbose!("Root directory: {}", ctx.path(&Paths::Root).display());
             verbose!("Backup directory: {}", ctx.path(&Paths::Backup).display());

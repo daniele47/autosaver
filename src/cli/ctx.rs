@@ -24,6 +24,7 @@ pub struct CliContext {
     paths: HashMap<Paths, AbsPathStr>,
     root_profile: RelPathStr,
     profiles: AllProfiles,
+    curr_profile: RelPathStr,
 }
 
 impl CliContext {
@@ -32,14 +33,20 @@ impl CliContext {
     pub(super) const TREE_MODULE: Style = Style::new().bright_blue();
     pub(super) const TREE_DEDUP: Style = Style::new().yellow();
 
-    pub fn new(home: &Option<AbsPathStr>, root: &Option<AbsPathStr>) -> anyhow::Result<Self> {
+    pub fn new(
+        home: &Option<AbsPathStr>,
+        root: &Option<AbsPathStr>,
+        flag_prof: &Option<RelPathStr>,
+    ) -> anyhow::Result<Self> {
         let paths = Self::load_paths(home, root)?;
         let root_profile = RelPathStr::from_str("all")?;
         let profiles = Self::load_profiles(&paths[&Paths::Config], &root_profile)?;
+        let curr_profile = flag_prof.as_ref().unwrap_or(&root_profile).clone();
         Ok(Self {
             paths,
             root_profile,
             profiles,
+            curr_profile,
         })
     }
 
@@ -193,7 +200,7 @@ impl CliContext {
         &self.profiles
     }
 
-    pub fn curr_prof<'a>(&'a self, flag_prof: &'a Option<RelPathStr>) -> &'a RelPathStr {
-        flag_prof.as_ref().unwrap_or(&self.root_profile)
+    pub fn curr_prof(&self) -> &RelPathStr {
+        &self.curr_profile
     }
 }
