@@ -1,4 +1,9 @@
-use std::{collections::HashMap, env, path::PathBuf, str::FromStr};
+use std::{
+    collections::{HashMap, hash_map::Entry},
+    env,
+    path::PathBuf,
+    str::FromStr,
+};
 
 use anyhow::{Context, bail};
 use owo_colors::Style;
@@ -41,7 +46,7 @@ impl CliContext {
         let paths = Self::load_paths(home, root)?;
         let root_profile = RelPathStr::from_str("all")?;
         let profiles = Self::load_profiles(&paths[&Paths::Config], &root_profile)?;
-        let curr_profile = flag_prof.as_ref().unwrap_or(&root_profile).clone();
+        let curr_profile = flag_prof.as_ref().unwrap_or(&root_profile).to_owned();
         Ok(Self {
             paths,
             root_profile,
@@ -92,11 +97,7 @@ impl CliContext {
         Ok(paths)
     }
 
-    fn load_vt_profile(
-        config_dir: &AbsPathStr,
-        path: &AbsPathStr,
-        name: RelPathStr,
-    ) -> anyhow::Result<Profile> {
+    fn load_vt_profile(config_dir: &AbsPathStr, path: &AbsPathStr) -> anyhow::Result<Profile> {
         let mut comp_entries = vec![];
 
         path.list(|ctx| {
@@ -128,7 +129,7 @@ impl CliContext {
         })?;
 
         let composite = ProfileKind::Composite(Composite::new(comp_entries));
-        Ok(Profile::new(name, None, composite))
+        Ok(Profile::new(None, composite))
     }
 
     fn load_profiles(
@@ -144,11 +145,8 @@ impl CliContext {
         }
 
         // add all virtual profile
-        let profile = Self::load_vt_profile(config_dir, config_dir, root_profile.clone())?;
-        if let Some(old) = all_profiles.insert(root_profile.clone(), profile) {
-            let old_name = old.name().display();
-            bail!(format!("Profile {old_name} is reserved for root profile"));
-        }
+        let profile = Self::load_vt_profile(config_dir, config_dir)?;
+        all_profiles.insert(root_profile.to_owned(), profile);
 
         // find and load all profiles config files
         config_dir.find(|ctx| {
@@ -166,7 +164,7 @@ impl CliContext {
 
             // virtual directory parsing
             if ftype.is_dir() {
-                profile = Self::load_vt_profile(config_dir, &ctx.path, conf_rel)?;
+                profile = Self::load_vt_profile(config_dir, &ctx.path)?;
             }
             // normal profile parsing
             else if let Some(pname) = conf_str.strip_suffix(".conf") {
@@ -178,9 +176,14 @@ impl CliContext {
             }
 
             // insert profile
-            if let Some(old) = all_profiles.insert(profile.name().clone(), profile) {
-                let old_name = old.name().display();
-                bail!(format!("Profile {old_name} is loaded multiple times"));
+            match all_profiles.entry(conf_rel) {
+                Entry::Vacant(entry) => {
+                    entry.insert(profile);
+                }
+                Entry::Occupied(entry) => {
+                    let old_name = entry.key().display();
+                    bail!(format!("Profile {old_name} is loaded multiple times"));
+                }
             }
 
             Ok(true)

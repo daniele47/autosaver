@@ -21,7 +21,6 @@ pub enum ProfileKind {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Profile {
-    name: RelPathStr,
     id: Option<RelPathStr>,
     kind: ProfileKind,
 }
@@ -33,6 +32,7 @@ pub struct AllProfiles {
 // structs to make traverse function work properly
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TraverseContext<'a> {
+    pub name: &'a RelPathStr,
     pub item: &'a Profile,
     pub path: &'a [&'a RelPathStr],
     pub stack: &'a [(&'a RelPathStr, bool)],
@@ -50,16 +50,12 @@ impl TraverseOpts {
 }
 
 impl Profile {
-    pub fn new(name: RelPathStr, id: Option<RelPathStr>, kind: ProfileKind) -> Self {
-        Self { name, id, kind }
+    pub fn new(id: Option<RelPathStr>, kind: ProfileKind) -> Self {
+        Self { id, kind }
     }
 
-    pub fn name(&self) -> &RelPathStr {
-        &self.name
-    }
-
-    pub fn id(&self) -> &RelPathStr {
-        self.id.as_ref().unwrap_or(&self.name)
+    pub fn id(&self) -> &Option<RelPathStr> {
+        &self.id
     }
 
     pub fn kind(&self) -> &ProfileKind {
@@ -126,6 +122,7 @@ impl AllProfiles {
 
             // act on profile
             on_elem(TraverseContext {
+                name: item_name,
                 item: item_profile,
                 path: &path,
                 stack: &stack,
@@ -162,16 +159,11 @@ mod tests {
         let mut profiles = HashMap::new();
 
         // Leaf module
-        let module1 = Profile::new(
-            RelPathStr::from_str("module1")?,
-            None,
-            ProfileKind::Module(Module::new(vec![])),
-        );
+        let module1 = Profile::new(None, ProfileKind::Module(Module::new(vec![])));
         profiles.insert(RelPathStr::from_str("module1")?, module1);
 
         // profile3 depends on module1
         let profile3 = Profile::new(
-            RelPathStr::from_str("profile3")?,
             None,
             ProfileKind::Composite(Composite::new(vec![CompositeEntry::new(
                 RelPathStr::from_str("module1")?,
@@ -180,16 +172,11 @@ mod tests {
         profiles.insert(RelPathStr::from_str("profile3")?, profile3);
 
         // profile2 is a leaf (no dependencies)
-        let profile2 = Profile::new(
-            RelPathStr::from_str("profile2")?,
-            None,
-            ProfileKind::Module(Module::new(vec![])),
-        );
+        let profile2 = Profile::new(None, ProfileKind::Module(Module::new(vec![])));
         profiles.insert(RelPathStr::from_str("profile2")?, profile2);
 
         // profile1 depends on profile2 and profile3
         let profile1 = Profile::new(
-            RelPathStr::from_str("profile1")?,
             None,
             ProfileKind::Composite(Composite::new(vec![
                 CompositeEntry::new(RelPathStr::from_str("profile3")?),
@@ -209,7 +196,7 @@ mod tests {
         let mut visited_order = Vec::new();
 
         profiles.traverse(&pname, Default::default(), |ctx| {
-            visited_order.push(ctx.item.name().to_string_lossy().to_string());
+            visited_order.push(ctx.name.to_string_lossy().to_string());
             Ok(())
         })?;
 

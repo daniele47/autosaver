@@ -38,10 +38,10 @@ impl Cli {
                         ProfileKind::Module(_) => CliContext::TREE_MODULE,
                         ProfileKind::Runner(_) => CliContext::TREE_RUNNER,
                     };
-                    out!("{}", ctx.item.name().display().style(prof_style));
+                    out!("{}", ctx.name.display().style(prof_style));
                     // show profile id
-                    if show_id && !matches!(ctx.item.kind(), ProfileKind::Composite(_)) {
-                        out!(" ({})", ctx.item.id().display());
+                    if show_id && let Some(id) = ctx.item.id() {
+                        out!(" ({})", id.display());
                     }
                     // render dedup symbol
                     if !no_dedup && ctx.is_dup {
