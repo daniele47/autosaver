@@ -13,7 +13,6 @@ TODO:
     - [ ] `q` to quit entirely (avoiding dirty ctrl+c)
 - [ ] improve error messages
 - [ ] consider if env vars are enough, or if i need a `.default` file back or smt (i trend toward just rely on env vars)
-- [ ] improve `AllProfiles`: key are exactly value.name(), no need to have that be a clone!
 - [ ] consider whetever to allow `\*` option line to actually indicate ALL files/profiles???
 - [ ] consider what to do with `id`, if they are ok as is, 
     - [ ] if they should be forced flattened or leave all the freedom
