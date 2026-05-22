@@ -6,7 +6,6 @@ Copy-based dotfiles tracking cli, written in rust
 
 ```
 $AUTOSAVER_ROOT/
-├── .default
 ├── config/
 │   ├── profile1.conf
 │   └── profile2.conf
@@ -22,11 +21,6 @@ The entire system is built with one basic concept: profiles. Everything is a pro
 
 To create a new profile, just create a `config/<profile_name>.conf` file and then the 
 cli will automatically detect that as the configuration for the `<profile_name>` profile.
-
-## Configuration files
-
-- `.default`: file can be created, and the first line will be read, and treated as the profile to be
-              used, if profile name is not passed in any other way!
 
 ## Profiles
 

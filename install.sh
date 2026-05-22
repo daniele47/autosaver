@@ -1,6 +1,15 @@
 #!/bin/bash
 
 ### WRAPPER BASH SCRIPT TO DOWNLOAD OR COMPILE THE RUST BINARY ###
+#
+# This script will install the autosaver binary at ~/.local/bin/autosaver, which should put in PATH
+#
+# Environment variables:
+# - XDG_BIN_HOME=<PATH> : specify a different location where to install the binary to
+#  <<< possible exclusive actions >>>
+#   - UNINSTALL=          : uninstall the binary (at XDG_BIN_HOME path, if specified)
+#   - BUILD=[<GIT_REF>]   : compile from the specified git_ref, or from current repo if missing
+#   - INSTALL=[<VERSION>] : install the binary with the specified version, or latest otherwise
 
 set -e
 
