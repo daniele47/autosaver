@@ -18,6 +18,7 @@ TODO:
 - [ ] consider what to do with `id`, if they are ok as is, 
     - [ ] if they should be forced flattened or leave all the freedom
     - [ ] if they should be enforced to be unique too or leave freedom again
+    - [ ] also: composite `id` are not the best. should they just be empty instead?
 
 ## v2.0.0
 
