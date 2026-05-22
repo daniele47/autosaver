@@ -22,7 +22,7 @@ pub enum ProfileKind {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Profile {
     name: RelPathStr,
-    id: RelPathStr,
+    id: Option<RelPathStr>,
     kind: ProfileKind,
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -50,7 +50,7 @@ impl TraverseOpts {
 }
 
 impl Profile {
-    pub fn new(name: RelPathStr, id: RelPathStr, kind: ProfileKind) -> Self {
+    pub fn new(name: RelPathStr, id: Option<RelPathStr>, kind: ProfileKind) -> Self {
         Self { name, id, kind }
     }
 
@@ -59,7 +59,7 @@ impl Profile {
     }
 
     pub fn id(&self) -> &RelPathStr {
-        &self.id
+        self.id.as_ref().unwrap_or(&self.name)
     }
 
     pub fn kind(&self) -> &ProfileKind {
@@ -164,7 +164,7 @@ mod tests {
         // Leaf module
         let module1 = Profile::new(
             RelPathStr::from_str("module1")?,
-            RelPathStr::from_str("module1")?,
+            None,
             ProfileKind::Module(Module::new(vec![])),
         );
         profiles.insert(RelPathStr::from_str("module1")?, module1);
@@ -172,7 +172,7 @@ mod tests {
         // profile3 depends on module1
         let profile3 = Profile::new(
             RelPathStr::from_str("profile3")?,
-            RelPathStr::from_str("profile3")?,
+            None,
             ProfileKind::Composite(Composite::new(vec![CompositeEntry::new(
                 RelPathStr::from_str("module1")?,
             )])),
@@ -182,7 +182,7 @@ mod tests {
         // profile2 is a leaf (no dependencies)
         let profile2 = Profile::new(
             RelPathStr::from_str("profile2")?,
-            RelPathStr::from_str("profile2")?,
+            None,
             ProfileKind::Module(Module::new(vec![])),
         );
         profiles.insert(RelPathStr::from_str("profile2")?, profile2);
@@ -190,7 +190,7 @@ mod tests {
         // profile1 depends on profile2 and profile3
         let profile1 = Profile::new(
             RelPathStr::from_str("profile1")?,
-            RelPathStr::from_str("profile1")?,
+            None,
             ProfileKind::Composite(Composite::new(vec![
                 CompositeEntry::new(RelPathStr::from_str("profile3")?),
                 CompositeEntry::new(RelPathStr::from_str("profile2")?),

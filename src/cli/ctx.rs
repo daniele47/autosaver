@@ -127,11 +127,8 @@ impl CliContext {
             Ok(())
         })?;
 
-        Ok(Profile::new(
-            name.clone(),
-            name,
-            ProfileKind::Composite(Composite::new(comp_entries)),
-        ))
+        let composite = ProfileKind::Composite(Composite::new(comp_entries));
+        Ok(Profile::new(name, None, composite))
     }
 
     fn load_profiles(

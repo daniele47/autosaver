@@ -23,14 +23,14 @@ struct RawProfile<'a> {
     lines: Vec<RawProfileLine<'a>>,
     kind: &'a str,
     name: &'a str,
-    id: &'a str,
+    id: Option<&'a str>,
 }
 
 impl<'a> RawProfile<'a> {
     fn parse_config(config: &'a str, name: &'a str) -> anyhow::Result<Self> {
         let mut lines = Vec::new();
         let mut kind = "";
-        let mut id = "";
+        let mut id = None;
 
         for (i, line) in config.lines().enumerate() {
             // option lines
@@ -44,10 +44,10 @@ impl<'a> RawProfile<'a> {
                     }
                     kind = kind_str;
                 } else if let Some(id_str) = opt.strip_prefix("id ").map(str::trim) {
-                    if !id.is_empty() {
+                    if id.is_some() {
                         bail!(Profile::err_dup(name, "id", i));
                     }
-                    id = id_str;
+                    id = Some(id_str);
                 }
                 // fallback to storing not shared options
                 else {
@@ -62,9 +62,6 @@ impl<'a> RawProfile<'a> {
 
         if kind.is_empty() {
             bail!("Option 'kind' is missing from profile {name}");
-        }
-        if id.is_empty() {
-            id = name
         }
 
         Ok(Self {
@@ -107,7 +104,7 @@ impl Profile {
             }
         }
         let name = RelPathStr::from_str(raw.name)?;
-        let id = RelPathStr::from_str(raw.id)?;
+        let id = raw.id.map(RelPathStr::from_str).transpose()?;
         let kind = ProfileKind::Composite(Composite::new(entries));
         Ok(Profile::new(name, id, kind))
     }
@@ -137,7 +134,7 @@ impl Profile {
             }
         }
         let name = RelPathStr::from_str(raw.name)?;
-        let id = RelPathStr::from_str(raw.id)?;
+        let id = raw.id.map(RelPathStr::from_str).transpose()?;
         let kind = ProfileKind::Module(Module::new(entries));
         Ok(Profile::new(name, id, kind))
     }
@@ -166,7 +163,7 @@ impl Profile {
             }
         }
         let name = RelPathStr::from_str(raw.name)?;
-        let id = RelPathStr::from_str(raw.id)?;
+        let id = raw.id.map(RelPathStr::from_str).transpose()?;
         let kind = ProfileKind::Runner(Runner::new(entries));
         Ok(Profile::new(name, id, kind))
     }
