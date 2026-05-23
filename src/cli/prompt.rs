@@ -1,6 +1,7 @@
-use crate::{inputln, outln, outnow};
+use crate::{cli::ctx::CliContext, inputln, outln, outnow};
 
 use bitflags::bitflags;
+use owo_colors::OwoColorize;
 
 bitflags! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -77,7 +78,7 @@ impl Prompt {
 
     pub fn prompt(&mut self, msg: &str) -> PromptFlags {
         loop {
-            outnow!("{msg} [{}] ", self.fmt);
+            outnow!("{} [{}] ", msg.style(CliContext::PROMPT_MSG), self.fmt);
             let input = inputln!(&mut self.buf);
             if let Some(input) = Self::parse_flag(input) {
                 return input;

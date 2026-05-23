@@ -36,7 +36,8 @@ impl CliContext {
     pub const TREE_COMPOSITE: Style = Style::new();
     pub const TREE_RUNNER: Style = Style::new().bright_green();
     pub const TREE_MODULE: Style = Style::new().bright_blue();
-    pub const TREE_DEDUP: Style = Style::new().yellow();
+    pub const TREE_DEDUP: Style = Style::new().bright_yellow();
+    pub const PROMPT_MSG: Style = Style::new().bright_yellow().bold().underline();
 
     pub fn new(
         home: &Option<PathBuf>,
