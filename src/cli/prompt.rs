@@ -161,25 +161,27 @@ impl Prompt {
         assert_eq!(paths.len(), 2);
         let old_text = paths[0].read_file();
         let new_text = paths[1].read_file();
-        if let Ok(old_text) = &old_text {
-            if let Ok(new_text) = &new_text {
-                let diff = TextDiff::from_lines(old_text, new_text);
-                for change in diff.iter_all_changes() {
-                    match change.tag() {
-                        ChangeTag::Delete => {
-                            out!("{} {change}", "-".style(CliContext::DIFF_DELETED))
-                        }
-                        ChangeTag::Insert => {
-                            out!("{} {change}", "+".style(CliContext::DIFF_INSERTED))
-                        }
-                        ChangeTag::Equal => out!("  {change}"),
-                    };
-                }
-            } else if let Err(err) = &new_text {
-                warning!("{}", err)
+
+        if let (Ok(old_text), Ok(new_text)) = (&old_text, &new_text) {
+            let diff = TextDiff::from_lines(old_text, new_text);
+            for change in diff.iter_all_changes() {
+                match change.tag() {
+                    ChangeTag::Delete => {
+                        out!("{} {change}", "-".style(CliContext::DIFF_DELETED))
+                    }
+                    ChangeTag::Insert => {
+                        out!("{} {change}", "+".style(CliContext::DIFF_INSERTED))
+                    }
+                    ChangeTag::Equal => out!("  {change}"),
+                };
             }
-        } else if let Err(err) = &old_text {
-            warning!("{}", err)
+        } else {
+            if let Err(e) = old_text {
+                warning!("{}", e)
+            }
+            if let Err(e) = new_text {
+                warning!("{}", e)
+            }
         }
     }
 }
