@@ -134,14 +134,13 @@ impl Prompt {
         }
     }
     pub fn on_edit(&self, paths: &[&AbsPathStr]) {
-        assert_eq!(paths.len(), 1);
         match std::env::var("EDITOR").ok() {
             Some(editor_cmd) => {
-                let status = std::process::Command::new(&editor_cmd)
-                    .arg(paths[0].path())
+                let cmd = std::process::Command::new(&editor_cmd)
+                    .args(paths.iter().map(|p| p.path()))
                     .status();
 
-                match status {
+                match cmd {
                     Ok(exit_status) if exit_status.success() => {}
                     Ok(exit_status) => {
                         let code = exit_status.code().unwrap_or(-1);
@@ -154,10 +153,13 @@ impl Prompt {
         }
     }
     pub fn on_show(&self, paths: &[&AbsPathStr]) {
-        assert_eq!(paths.len(), 1);
-        match paths[0].read_file() {
-            Ok(text) => outnow!("{text}"),
-            Err(e) => warning!("{e}"),
+        for path in paths {
+            let header = format!("@@ {} @@", path.display());
+            outln!("{}", header.style(CliContext::SHOW_HEADER));
+            match path.read_file() {
+                Ok(text) => outnow!("{text}"),
+                Err(e) => warning!("{e}"),
+            }
         }
     }
     pub fn on_diff(&self, paths: &[&AbsPathStr]) {

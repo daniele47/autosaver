@@ -41,6 +41,7 @@ impl CliContext {
     pub const DIFF_DELETED: Style = Style::new().red();
     pub const DIFF_INSERTED: Style = Style::new().green();
     pub const DIFF_HEADER: Style = Style::new().cyan();
+    pub const SHOW_HEADER: Style = Style::new().cyan();
 
     pub fn new(
         home: &Option<PathBuf>,
