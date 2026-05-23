@@ -59,11 +59,11 @@ impl Prompt {
         const FLAG_LIST: &[(PromptFlags, &str)] = &[
             (PromptFlags::DIFF, "d"),
             (PromptFlags::EDIT, "e"),
-            (PromptFlags::SHOW, "s"),
-            (PromptFlags::QUIT, "q"),
-            (PromptFlags::YES, "y"),
-            (PromptFlags::NO, "n"),
             (PromptFlags::HELP, "h"),
+            (PromptFlags::NO, "n"),
+            (PromptFlags::QUIT, "q"),
+            (PromptFlags::SHOW, "s"),
+            (PromptFlags::YES, "y"),
         ];
         let mut res = [""; 7];
         let mut count = 0;
@@ -84,6 +84,46 @@ impl Prompt {
                 return input;
             }
             outln!("Invalid flag passed. Please retry...")
+        }
+    }
+
+    pub fn handled_prompt(&mut self, msg: &str) -> Option<PromptFlags> {
+        let prompt_flag = self.prompt(msg);
+        match prompt_flag {
+            i if i.contains(PromptFlags::NO) => self.on_no(),
+            i if i.contains(PromptFlags::QUIT) => self.on_quit(),
+            i if i.contains(PromptFlags::HELP) => self.on_help(),
+            _ => return Some(prompt_flag),
+        }
+        None
+    }
+
+    pub fn on_no(&self) {}
+    pub fn on_quit(&self) -> ! {
+        std::process::exit(0)
+    }
+    pub fn on_help(&self) {
+        let f = self.flags;
+        if f.contains(PromptFlags::DIFF) {
+            outln!("[D]iff : show the diff between the files");
+        }
+        if f.contains(PromptFlags::EDIT) {
+            outln!("[E]dit : edit the file with the $EDITOR");
+        }
+        if f.contains(PromptFlags::HELP) {
+            outln!("[H]elp : show the current help message");
+        }
+        if f.contains(PromptFlags::NO) {
+            outln!("[N]o   : answer no to the prompt");
+        }
+        if f.contains(PromptFlags::QUIT) {
+            outln!("[Q]uit : quit the program entirely");
+        }
+        if f.contains(PromptFlags::SHOW) {
+            outln!("[S]how : show the file in question");
+        }
+        if f.contains(PromptFlags::YES) {
+            outln!("[Y]es  : answer yes to the prompt");
         }
     }
 }
