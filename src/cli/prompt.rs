@@ -88,7 +88,7 @@ impl Prompt {
         }
     }
 
-    pub fn handled_prompt(&mut self, msg: &str, paths: &[&AbsPathStr]) -> Option<PromptFlags> {
+    pub fn handled_prompt(&mut self, msg: &str, paths: &[&AbsPathStr], action: impl FnOnce()) {
         let prompt_flag = self.prompt(msg);
         match prompt_flag {
             i if i.contains(PromptFlags::NO) => self.on_no(),
@@ -97,12 +97,15 @@ impl Prompt {
             i if i.contains(PromptFlags::DIFF) => self.on_diff(paths),
             i if i.contains(PromptFlags::EDIT) => self.on_edit(paths),
             i if i.contains(PromptFlags::SHOW) => self.on_show(paths),
-            _ => return Some(prompt_flag),
+            i if i.contains(PromptFlags::YES) => self.on_yes(action),
+            _ => unimplemented!("Prompt flag not handled"),
         }
-        None
     }
 
     pub fn on_no(&self) {}
+    pub fn on_yes(&self, action: impl FnOnce()) {
+        action();
+    }
     pub fn on_quit(&self) -> ! {
         std::process::exit(0)
     }
