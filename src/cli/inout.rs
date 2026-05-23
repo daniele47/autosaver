@@ -51,8 +51,6 @@ macro_rules! errln {
 #[macro_export]
 macro_rules! inputln {
     ($buf:expr) => {{
-        use std::io::Write;
-        std::io::stdout().flush().unwrap();
         $buf.clear();
         std::io::stdin().read_line($buf).unwrap();
         $buf.trim()

@@ -1,74 +1,85 @@
-use std::ops::{BitOr, BitOrAssign};
+use crate::{inputln, outln, outnow};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum PromptFlag {
-    Yes = 1 << 0,
-    No = 1 << 1,
-    Edit = 1 << 2,
-    Quit = 1 << 3,
-    Diff = 1 << 4,
-    Show = 1 << 5,
+use bitflags::bitflags;
+
+bitflags! {
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    pub struct PromptFlags: u32 {
+        /// Answer yes
+        const YES = 1 << 0;
+        /// Answer no
+        const NO = 1 << 1;
+        /// Show the diff of 2 files
+        const DIFF = 1 << 2;
+        /// Open a tui editor on the file
+        const EDIT = 1 << 3;
+        /// Show entire file
+        const SHOW = 1 << 4;
+        /// Quit program entirely
+        const QUIT = 1 << 5;
+        /// Show help for the prompt
+        const HELP = 1 << 6;
+    }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct PromptFlags {
-    flags: u32,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Prompt {
-    allowed_flags: PromptFlags,
+    flags: PromptFlags,
+    fmt: String,
+    buf: String,
 }
 
-impl PromptFlags {
-    fn new(flags: u32) -> Self {
-        Self { flags }
+impl Prompt {
+    pub fn new(flags: PromptFlags) -> Self {
+        Self {
+            flags,
+            fmt: Self::ordered_flags(&flags),
+            buf: String::new(),
+        }
     }
 
-    pub fn empty() -> Self {
-        Self::new(0)
+    fn parse_flag(input: &str) -> Option<PromptFlags> {
+        match input {
+            "y" => Some(PromptFlags::YES),
+            "n" => Some(PromptFlags::NO),
+            "d" => Some(PromptFlags::DIFF),
+            "e" => Some(PromptFlags::EDIT),
+            "s" => Some(PromptFlags::SHOW),
+            "q" => Some(PromptFlags::QUIT),
+            "h" => Some(PromptFlags::HELP),
+            _ => None,
+        }
     }
 
-    fn contains(&self, flag: PromptFlag) -> bool {
-        (self.flags & flag as u32) != 0
+    fn ordered_flags(flags: &PromptFlags) -> String {
+        const FLAG_LIST: &[(PromptFlags, &str)] = &[
+            (PromptFlags::DIFF, "d"),
+            (PromptFlags::EDIT, "e"),
+            (PromptFlags::SHOW, "s"),
+            (PromptFlags::QUIT, "q"),
+            (PromptFlags::YES, "y"),
+            (PromptFlags::NO, "n"),
+            (PromptFlags::HELP, "h"),
+        ];
+        let mut res = [""; 7];
+        let mut count = 0;
+        for (flag, ch) in FLAG_LIST {
+            if flags.contains(*flag) {
+                res[count] = ch;
+                count += 1;
+            }
+        }
+        res[..count].join("/")
     }
-}
 
-impl From<PromptFlag> for PromptFlags {
-    fn from(value: PromptFlag) -> Self {
-        Self::new(value as u32)
-    }
-}
-
-impl BitOr for PromptFlags {
-    type Output = Self;
-
-    fn bitor(self, rhs: Self) -> Self::Output {
-        Self::new(self.flags | rhs.flags)
-    }
-}
-impl BitOr<PromptFlag> for PromptFlags {
-    type Output = Self;
-
-    fn bitor(self, rhs: PromptFlag) -> Self::Output {
-        self | PromptFlags::from(rhs)
-    }
-}
-impl BitOr<PromptFlags> for PromptFlag {
-    type Output = PromptFlags;
-
-    fn bitor(self, rhs: PromptFlags) -> Self::Output {
-        PromptFlags::from(self) | rhs
-    }
-}
-
-impl BitOrAssign for PromptFlags {
-    fn bitor_assign(&mut self, rhs: Self) {
-        *self = *self | rhs;
-    }
-}
-impl BitOrAssign<PromptFlag> for PromptFlags {
-    fn bitor_assign(&mut self, rhs: PromptFlag) {
-        *self = *self | rhs;
+    pub fn prompt(&mut self, msg: &str) -> PromptFlags {
+        loop {
+            outnow!("{msg} [{}]", self.fmt);
+            let input = inputln!(&mut self.buf);
+            if let Some(input) = Self::parse_flag(input) {
+                return input;
+            }
+            outln!("Invalid flag passed. Please retry...")
+        }
     }
 }

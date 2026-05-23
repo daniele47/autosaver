@@ -63,6 +63,7 @@ name = "autosaver"
 version = "1.1.0-dev"
 dependencies = [
  "anyhow",
+ "bitflags",
  "clap",
  "owo-colors",
 ]
