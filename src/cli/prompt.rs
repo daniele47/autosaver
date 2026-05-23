@@ -9,16 +9,19 @@ bitflags! {
         const YES = 1 << 0;
         /// Answer no
         const NO = 1 << 1;
-        /// Show the diff of 2 files
-        const DIFF = 1 << 2;
-        /// Open a tui editor on the file
-        const EDIT = 1 << 3;
-        /// Show entire file
-        const SHOW = 1 << 4;
         /// Quit program entirely
-        const QUIT = 1 << 5;
+        const QUIT = 1 << 2;
         /// Show help for the prompt
-        const HELP = 1 << 6;
+        const HELP = 1 << 3;
+        /// Show the diff of 2 files
+        const DIFF = 1 << 4;
+        /// Open a tui editor on the file
+        const EDIT = 1 << 5;
+        /// Show entire file
+        const SHOW = 1 << 6;
+
+        /// Combination of flags that are always ok to have
+        const BASIC = 0b1111;
     }
 }
 
@@ -74,7 +77,7 @@ impl Prompt {
 
     pub fn prompt(&mut self, msg: &str) -> PromptFlags {
         loop {
-            outnow!("{msg} [{}]", self.fmt);
+            outnow!("{msg} [{}] ", self.fmt);
             let input = inputln!(&mut self.buf);
             if let Some(input) = Self::parse_flag(input) {
                 return input;
