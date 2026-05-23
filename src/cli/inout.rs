@@ -9,7 +9,8 @@ macro_rules! out {
 #[macro_export]
 macro_rules! outnow {
     ($($arg:tt)*) => {{
-        $crate::out($($arg)*);
+        use std::io::Write;
+        let _ = write!(std::io::stdout(), $($arg)*);
         let _ = std::io::stdout().flush();
     }};
 }
@@ -33,7 +34,8 @@ macro_rules! err {
 #[macro_export]
 macro_rules! errnow {
     ($($arg:tt)*) => {{
-        $crate::err($($arg)*);
+        use std::io::Write;
+        let _ = write!(std::io::stderr(), $($arg)*);
         let _ = std::io::stderr().flush();
     }};
 }
@@ -48,13 +50,13 @@ macro_rules! errln {
 
 #[macro_export]
 macro_rules! inputln {
-    ($buf:expr) => {
+    ($buf:expr) => {{
         use std::io::Write;
         std::io::stdout().flush().unwrap();
         $buf.clear();
         std::io::stdin().read_line($buf).unwrap();
-        $buf.trim().to_string()
-    };
+        $buf.trim()
+    }};
 }
 
 #[macro_export]
