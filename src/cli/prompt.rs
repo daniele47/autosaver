@@ -129,8 +129,28 @@ impl Prompt {
             outln!("[Y]es  : answer yes to the prompt");
         }
     }
-    pub fn on_edit(&self, ______file: &AbsPathStr) {
-        unimplemented!("on_edit")
+    pub fn on_edit(&self, file: &AbsPathStr) {
+        let editor = std::env::var("EDITOR").ok();
+
+        match editor {
+            Some(editor_cmd) => {
+                let status = std::process::Command::new(&editor_cmd)
+                    .arg(file.path())
+                    .status();
+
+                match status {
+                    Ok(exit_status) if exit_status.success() => {
+                        outln!("Successfully edited {}", file.display());
+                    }
+                    Ok(exit_status) => {
+                        let code = exit_status.code().unwrap_or(-1);
+                        outln!("Failed to edit '{editor_cmd}' exited with error code: {code}");
+                    }
+                    Err(e) => outln!("Failed to launch '{}': {}", editor_cmd, e),
+                }
+            }
+            None => outln!("No editor found! Set $EDITOR to the desired editor"),
+        }
     }
     pub fn on_show(&self, ______file: &AbsPathStr) {
         unimplemented!("on_show")

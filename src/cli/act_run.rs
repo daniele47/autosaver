@@ -6,10 +6,10 @@ use crate::{
 impl Cli {
     pub fn action_run(&self, ctx: &CliContext) -> anyhow::Result<()> {
         match self.cmd {
-            CliCmd::Run {} => {
+            CliCmd::Run => {
                 let trav_opts = TraverseOpts::default();
-                ctx.profiles.traverse(&ctx.curr_profile, trav_opts, |ctx| {
-                    let i = {};
+                ctx.profiles.traverse(&ctx.curr_profile, trav_opts, |_ctx| {
+                    {};
                     Ok(())
                 })
             }
