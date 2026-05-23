@@ -1,5 +1,5 @@
 use anyhow::Result;
-use autosaver::cli::Cli;
+use autosaver::{cli::Cli, error};
 use clap::Parser;
 
 fn main() -> Result<()> {
@@ -7,7 +7,9 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
 
     // run application
-    cli.run_cmd()?;
+    if let Err(err) = cli.run_cmd() {
+        error!("{err}");
+    }
 
     Ok(())
 }

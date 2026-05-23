@@ -64,3 +64,19 @@ macro_rules! verbose {
         $crate::errln!($($arg)*);
     }};
 }
+
+#[macro_export]
+macro_rules! error {
+    ($($arg:tt)*) => {{
+        $crate::err!("error: ");
+        $crate::errln!($($arg)*);
+    }};
+}
+
+#[macro_export]
+macro_rules! warning {
+    ($($arg:tt)*) => {{
+        $crate::err!("warning: ");
+        $crate::errln!($($arg)*);
+    }};
+}

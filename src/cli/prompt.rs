@@ -1,4 +1,4 @@
-use crate::{cli::ctx::CliContext, fs::abs::AbsPathStr, inputln, outln, outnow};
+use crate::{cli::ctx::CliContext, fs::abs::AbsPathStr, inputln, outln, outnow, warning};
 
 use bitflags::bitflags;
 use owo_colors::OwoColorize;
@@ -139,17 +139,15 @@ impl Prompt {
                     .status();
 
                 match status {
-                    Ok(exit_status) if exit_status.success() => {
-                        outln!("Successfully edited {}", file.display());
-                    }
+                    Ok(exit_status) if exit_status.success() => {}
                     Ok(exit_status) => {
                         let code = exit_status.code().unwrap_or(-1);
-                        outln!("Failed to edit '{editor_cmd}' exited with error code: {code}");
+                        warning!("Failed to edit '{editor_cmd}' exited with error code: {code}");
                     }
-                    Err(e) => outln!("Failed to launch '{}': {}", editor_cmd, e),
+                    Err(e) => warning!("Failed to launch '{}': {}", editor_cmd, e),
                 }
             }
-            None => outln!("No editor found! Set $EDITOR to the desired editor"),
+            None => warning!("No editor found! Set EDITOR environment variable"),
         }
     }
     pub fn on_show(&self, ______file: &AbsPathStr) {
