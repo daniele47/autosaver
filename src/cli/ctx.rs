@@ -34,9 +34,9 @@ pub struct CliContext {
 
 impl CliContext {
     pub const TREE_COMPOSITE: Style = Style::new();
-    pub const TREE_RUNNER: Style = Style::new().bright_green();
+    pub const TREE_RUNNER: Style = Style::new().green();
     pub const TREE_MODULE: Style = Style::new().bright_blue();
-    pub const TREE_DEDUP: Style = Style::new().bright_yellow();
+    pub const TREE_DEDUP: Style = Style::new().yellow();
     pub const PROMPT_MSG: Style = Style::new().bright_yellow().bold().underline();
 
     pub fn new(
@@ -154,7 +154,7 @@ impl CliContext {
             let ftype = ctx.entry.file_type()?;
             let fname = ctx.entry.file_name();
             let fname = fname.to_string_lossy();
-            let conf_rel = ctx.path.to_rel(config_dir)?;
+            let mut conf_rel = ctx.path.to_rel(config_dir)?;
             let conf_str = conf_rel.to_string_lossy();
             let profile;
 
@@ -170,6 +170,7 @@ impl CliContext {
             // normal profile parsing
             else if let Some(pname) = conf_str.strip_suffix(".conf") {
                 profile = Profile::parse_config(&ctx.path.read_file()?, pname)?;
+                conf_rel = RelPathStr::from_str(pname)?;
             }
             // otherwise do nothing
             else {
