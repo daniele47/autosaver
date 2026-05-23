@@ -10,7 +10,7 @@ use crate::{
 
 pub mod act_tree;
 pub mod ctx;
-pub mod out;
+pub mod inout;
 pub mod prompt;
 
 #[derive(Parser, Debug, Clone, PartialEq, Eq)]
