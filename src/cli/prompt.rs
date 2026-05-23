@@ -164,12 +164,15 @@ impl Prompt {
             if let Ok(new_text) = &new_text {
                 let diff = TextDiff::from_lines(old_text, new_text);
                 for change in diff.iter_all_changes() {
-                    let sign = match change.tag() {
-                        ChangeTag::Delete => "-",
-                        ChangeTag::Insert => "+",
-                        ChangeTag::Equal => " ",
+                    match change.tag() {
+                        ChangeTag::Delete => {
+                            outln!("{} {change}", "-".style(CliContext::DIFF_DELETED))
+                        }
+                        ChangeTag::Insert => {
+                            outln!("{} {change}", "+".style(CliContext::DIFF_INSERTED))
+                        }
+                        ChangeTag::Equal => outln!("  {change}"),
                     };
-                    print!("{} {}", sign, change);
                 }
             } else if let Err(err) = &new_text {
                 warning!("{}", err)
