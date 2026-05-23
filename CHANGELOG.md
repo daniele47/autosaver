@@ -12,6 +12,7 @@ TODO:
     - [ ] `d` to delete the file?
     - [ ] `q` to quit entirely (avoiding dirty ctrl+c)
 - [ ] improve error messages
+- [ ] optimize space seeing if any struct can be compacted in size
 - [ ] consider if env vars are enough, or if i need a `.default` file back or smt (i trend toward just rely on env vars)
 - [ ] consider whetever to allow `\*` option line to actually indicate ALL files/profiles???
 - [ ] consider what to do with `id`, if they are ok as is, 
