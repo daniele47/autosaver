@@ -2,6 +2,7 @@ use crate::{cli::ctx::CliContext, fs::abs::AbsPathStr, inputln, outln, outnow, w
 
 use bitflags::bitflags;
 use owo_colors::OwoColorize;
+use similar::{ChangeTag, TextDiff};
 
 bitflags! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -156,7 +157,25 @@ impl Prompt {
             Err(e) => warning!("{e}"),
         }
     }
-    pub fn on_diff(&self, ______old: &AbsPathStr, ______new: &AbsPathStr) {
-        unimplemented!("on_diff")
+    pub fn on_diff(&self, old: &AbsPathStr, new: &AbsPathStr) {
+        let old_text = old.read_file();
+        let new_text = new.read_file();
+        if let Ok(old_text) = &old_text {
+            if let Ok(new_text) = &new_text {
+                let diff = TextDiff::from_lines(old_text, new_text);
+                for change in diff.iter_all_changes() {
+                    let sign = match change.tag() {
+                        ChangeTag::Delete => "-",
+                        ChangeTag::Insert => "+",
+                        ChangeTag::Equal => " ",
+                    };
+                    print!("{} {}", sign, change);
+                }
+            } else if let Err(err) = &new_text {
+                warning!("{}", err)
+            }
+        } else if let Err(err) = &old_text {
+            warning!("{}", err)
+        }
     }
 }
