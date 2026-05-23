@@ -8,6 +8,10 @@ macro_rules! out {
 
 #[macro_export]
 macro_rules! outnow {
+    () => {{
+        use std::io::Write;
+        let _ = std::io::stdout().flush();
+    }};
     ($($arg:tt)*) => {{
         use std::io::Write;
         let _ = write!(std::io::stdout(), $($arg)*);
@@ -33,6 +37,10 @@ macro_rules! err {
 
 #[macro_export]
 macro_rules! errnow {
+    () => {{
+        use std::io::Write;
+        let _ = std::io::stderr().flush();
+    }};
     ($($arg:tt)*) => {{
         use std::io::Write;
         let _ = write!(std::io::stderr(), $($arg)*);

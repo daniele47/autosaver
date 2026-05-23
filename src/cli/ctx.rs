@@ -40,6 +40,7 @@ impl CliContext {
     pub const PROMPT_MSG: Style = Style::new().bright_yellow().bold().underline();
     pub const DIFF_DELETED: Style = Style::new().red();
     pub const DIFF_INSERTED: Style = Style::new().green();
+    pub const DIFF_HEADER: Style = Style::new().cyan();
 
     pub fn new(
         home: &Option<PathBuf>,

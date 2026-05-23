@@ -164,17 +164,43 @@ impl Prompt {
 
         if let (Ok(old_text), Ok(new_text)) = (&old_text, &new_text) {
             let diff = TextDiff::from_lines(old_text, new_text);
-            for change in diff.iter_all_changes() {
-                match change.tag() {
-                    ChangeTag::Delete => {
-                        out!("{} {change}", "-".style(CliContext::DIFF_DELETED))
+            let groups = diff.grouped_ops(3);
+
+            for group in groups {
+                // Calculate line ranges for this hunk
+                if let Some(first_op) = group.first()
+                    && let Some(last_op) = group.last()
+                {
+                    let old_start = first_op.old_range().start + 1;
+                    let old_end = last_op.old_range().end;
+                    let old_len = old_end - old_start + 1;
+                    let new_start = first_op.new_range().start + 1;
+                    let new_end = last_op.new_range().end;
+                    let new_len = new_end - new_start + 1;
+
+                    // Print the hunk header
+                    let str = format!(
+                        "@@ -{},{} +{},{} @@",
+                        old_start, old_len, new_start, new_len
+                    );
+                    outln!("{}", str.style(CliContext::DIFF_HEADER));
+                }
+
+                for op in group {
+                    for change in diff.iter_changes(&op) {
+                        match change.tag() {
+                            ChangeTag::Delete => {
+                                out!("{} {change}", "-".style(CliContext::DIFF_DELETED))
+                            }
+                            ChangeTag::Insert => {
+                                out!("{} {change}", "+".style(CliContext::DIFF_INSERTED))
+                            }
+                            ChangeTag::Equal => out!("  {change}"),
+                        };
                     }
-                    ChangeTag::Insert => {
-                        out!("{} {change}", "+".style(CliContext::DIFF_INSERTED))
-                    }
-                    ChangeTag::Equal => out!("  {change}"),
-                };
+                }
             }
+            outnow!(); // force a safety flush
         } else {
             if let Err(e) = old_text {
                 warning!("{}", e)
