@@ -150,8 +150,11 @@ impl Prompt {
             None => warning!("No editor found! Set EDITOR environment variable"),
         }
     }
-    pub fn on_show(&self, ______file: &AbsPathStr) {
-        unimplemented!("on_show")
+    pub fn on_show(&self, file: &AbsPathStr) {
+        match file.read_file() {
+            Ok(text) => outnow!("{text}"),
+            Err(e) => warning!("{e}"),
+        }
     }
     pub fn on_diff(&self, ______old: &AbsPathStr, ______new: &AbsPathStr) {
         unimplemented!("on_diff")
