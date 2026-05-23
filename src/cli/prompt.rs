@@ -1,4 +1,4 @@
-use crate::{cli::ctx::CliContext, inputln, outln, outnow};
+use crate::{cli::ctx::CliContext, fs::abs::AbsPathStr, inputln, outln, outnow};
 
 use bitflags::bitflags;
 use owo_colors::OwoColorize;
@@ -87,12 +87,15 @@ impl Prompt {
         }
     }
 
-    pub fn handled_prompt(&mut self, msg: &str) -> Option<PromptFlags> {
+    pub fn handled_prompt(&mut self, msg: &str, paths: &[&AbsPathStr]) -> Option<PromptFlags> {
         let prompt_flag = self.prompt(msg);
         match prompt_flag {
             i if i.contains(PromptFlags::NO) => self.on_no(),
             i if i.contains(PromptFlags::QUIT) => self.on_quit(),
             i if i.contains(PromptFlags::HELP) => self.on_help(),
+            i if i.contains(PromptFlags::DIFF) => self.on_diff(paths[0], paths[1]),
+            i if i.contains(PromptFlags::EDIT) => self.on_edit(paths[0]),
+            i if i.contains(PromptFlags::SHOW) => self.on_show(paths[0]),
             _ => return Some(prompt_flag),
         }
         None
@@ -125,5 +128,14 @@ impl Prompt {
         if f.contains(PromptFlags::YES) {
             outln!("[Y]es  : answer yes to the prompt");
         }
+    }
+    pub fn on_edit(&self, ______file: &AbsPathStr) {
+        unimplemented!("on_edit")
+    }
+    pub fn on_show(&self, ______file: &AbsPathStr) {
+        unimplemented!("on_show")
+    }
+    pub fn on_diff(&self, ______old: &AbsPathStr, ______new: &AbsPathStr) {
+        unimplemented!("on_diff")
     }
 }
