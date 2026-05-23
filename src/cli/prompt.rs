@@ -1,4 +1,4 @@
-use crate::{cli::ctx::CliContext, fs::abs::AbsPathStr, inputln, outln, outnow, warning};
+use crate::{cli::ctx::CliContext, fs::abs::AbsPathStr, inputln, out, outln, outnow, warning};
 
 use bitflags::bitflags;
 use owo_colors::OwoColorize;
@@ -94,9 +94,9 @@ impl Prompt {
             i if i.contains(PromptFlags::NO) => self.on_no(),
             i if i.contains(PromptFlags::QUIT) => self.on_quit(),
             i if i.contains(PromptFlags::HELP) => self.on_help(),
-            i if i.contains(PromptFlags::DIFF) => self.on_diff(paths[0], paths[1]),
-            i if i.contains(PromptFlags::EDIT) => self.on_edit(paths[0]),
-            i if i.contains(PromptFlags::SHOW) => self.on_show(paths[0]),
+            i if i.contains(PromptFlags::DIFF) => self.on_diff(paths),
+            i if i.contains(PromptFlags::EDIT) => self.on_edit(paths),
+            i if i.contains(PromptFlags::SHOW) => self.on_show(paths),
             _ => return Some(prompt_flag),
         }
         None
@@ -130,13 +130,12 @@ impl Prompt {
             outln!("[Y]es  : answer yes to the prompt");
         }
     }
-    pub fn on_edit(&self, file: &AbsPathStr) {
-        let editor = std::env::var("EDITOR").ok();
-
-        match editor {
+    pub fn on_edit(&self, paths: &[&AbsPathStr]) {
+        assert_eq!(paths.len(), 1);
+        match std::env::var("EDITOR").ok() {
             Some(editor_cmd) => {
                 let status = std::process::Command::new(&editor_cmd)
-                    .arg(file.path())
+                    .arg(paths[0].path())
                     .status();
 
                 match status {
@@ -151,27 +150,29 @@ impl Prompt {
             None => warning!("No editor found! Set EDITOR environment variable"),
         }
     }
-    pub fn on_show(&self, file: &AbsPathStr) {
-        match file.read_file() {
+    pub fn on_show(&self, paths: &[&AbsPathStr]) {
+        assert_eq!(paths.len(), 1);
+        match paths[0].read_file() {
             Ok(text) => outnow!("{text}"),
             Err(e) => warning!("{e}"),
         }
     }
-    pub fn on_diff(&self, old: &AbsPathStr, new: &AbsPathStr) {
-        let old_text = old.read_file();
-        let new_text = new.read_file();
+    pub fn on_diff(&self, paths: &[&AbsPathStr]) {
+        assert_eq!(paths.len(), 2);
+        let old_text = paths[0].read_file();
+        let new_text = paths[1].read_file();
         if let Ok(old_text) = &old_text {
             if let Ok(new_text) = &new_text {
                 let diff = TextDiff::from_lines(old_text, new_text);
                 for change in diff.iter_all_changes() {
                     match change.tag() {
                         ChangeTag::Delete => {
-                            outln!("{} {change}", "-".style(CliContext::DIFF_DELETED))
+                            out!("{} {change}", "-".style(CliContext::DIFF_DELETED))
                         }
                         ChangeTag::Insert => {
-                            outln!("{} {change}", "+".style(CliContext::DIFF_INSERTED))
+                            out!("{} {change}", "+".style(CliContext::DIFF_INSERTED))
                         }
-                        ChangeTag::Equal => outln!("  {change}"),
+                        ChangeTag::Equal => out!("  {change}"),
                     };
                 }
             } else if let Err(err) = &new_text {
