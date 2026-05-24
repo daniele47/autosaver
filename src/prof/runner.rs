@@ -57,7 +57,8 @@ impl Runner {
         let mut res: Vec<AbsPathStr> = vec![];
 
         for entry in self.entries() {
-            entry.path().to_abs(dir)?.all_files(|p| {
+            let all_files_ord = entry.path().to_abs(dir)?.all_files_ord()?;
+            all_files_ord.into_iter().try_for_each(|p| {
                 if all.contains_key(&p) {
                     let p = p.display();
                     bail!(format!("Path '{p}' was already found in an other profile"));

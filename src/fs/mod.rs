@@ -1,4 +1,5 @@
 use std::{
+    collections::BTreeSet,
     fs::{self, DirEntry, File, ReadDir},
     io::Read,
     path::Component,
@@ -103,6 +104,15 @@ impl AbsPathStr {
             })?;
         }
         Ok(())
+    }
+
+    pub fn all_files_ord(self) -> anyhow::Result<BTreeSet<AbsPathStr>> {
+        let mut res = BTreeSet::new();
+        self.all_files(|p| {
+            res.insert(p);
+            Ok(())
+        })?;
+        Ok(res)
     }
 
     pub fn purge_path_opts(&self, allow_recursive_delete: bool) -> anyhow::Result<()> {
