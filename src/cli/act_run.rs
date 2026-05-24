@@ -7,7 +7,7 @@ use crate::{
     cli::{
         Cli, CliCmd,
         ctx::{CliContext, Paths},
-        prompt::{Prompt, PromptAnswer},
+        prompt::{Prompt, PromptAnswer, PromptFlags},
     },
     outln,
     prof::{ProfileKind, TraverseOpts, runner::RunnerPolicy},
@@ -20,7 +20,10 @@ impl Cli {
                 let run_dir = &ctx.paths[&Paths::Run];
                 let mut all = HashMap::new();
                 let trav_opts = TraverseOpts::default();
-                let mut prompt = Prompt::new(PromptAnswer::all() & !PromptAnswer::DIFF);
+                let mut prompt = Prompt::new(
+                    PromptAnswer::all() & !PromptAnswer::DIFF,
+                    PromptFlags::new(self.assume_no, self.assume_no, false),
+                );
 
                 // traverse all runner profiles
                 ctx.profiles.traverse(&ctx.curr_profile, trav_opts, |ctx| {

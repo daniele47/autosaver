@@ -24,18 +24,37 @@ bitflags! {
     }
 }
 
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct PromptFlags {
+    answer_no: bool,
+    answer_yes: bool,
+    skip_prompt: bool,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Prompt {
-    allow_answers: PromptAnswer,
+    allowed_answers: PromptAnswer,
+    flags: PromptFlags,
     fmt: String,
     buf: String,
 }
 
-impl Prompt {
-    pub fn new(allow_answers: PromptAnswer) -> Self {
+impl PromptFlags {
+    pub fn new(answer_no: bool, answer_yes: bool, skip_prompt: bool) -> Self {
         Self {
-            allow_answers,
-            fmt: Self::ordered_answers(&allow_answers),
+            answer_no,
+            answer_yes,
+            skip_prompt,
+        }
+    }
+}
+
+impl Prompt {
+    pub fn new(allowed_answers: PromptAnswer, flags: PromptFlags) -> Self {
+        Self {
+            allowed_answers,
+            flags,
+            fmt: Self::ordered_answers(&allowed_answers),
             buf: String::new(),
         }
     }
@@ -80,7 +99,7 @@ impl Prompt {
         loop {
             outnow!("{} [{}] ", msg.style(CliContext::PROMPT_MSG), self.fmt);
             let input = inputln!(&mut self.buf);
-            if let Some(input) = Self::parse_answer(input, self.allow_answers) {
+            if let Some(input) = Self::parse_answer(input, self.allowed_answers) {
                 return input;
             }
             outln!("Invalid answer '{input}'. Please retry...")
@@ -129,7 +148,7 @@ impl Prompt {
         std::process::exit(0)
     }
     pub fn on_help(&self) {
-        let f = self.allow_answers;
+        let f = self.allowed_answers;
         if f.contains(PromptAnswer::DIFF) {
             outln!("[D]iff : show the diff between the files");
         }

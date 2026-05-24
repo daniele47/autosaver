@@ -26,6 +26,7 @@ TODO:
       such that 2 different profiles cannot operate on the same file in the same operation
 - [ ] prompt must also handle answer_yes, answer_no, skip_prompt,... flags
 - [ ] finish up `run` command
+- [ ] make sure light and dark theme both are decent
 
 ## v2.0.0
 
