@@ -6,7 +6,7 @@ use similar::{ChangeTag, TextDiff};
 
 bitflags! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-    pub struct PromptFlags: u32 {
+    pub struct PromptAnswer: u32 {
         /// Answer yes
         const YES = 1 << 0;
         /// Answer no
@@ -21,57 +21,54 @@ bitflags! {
         const EDIT = 1 << 5;
         /// Show entire file
         const SHOW = 1 << 6;
-
-        /// Combination of flags that are always ok to have
-        const BASIC = 0b1111;
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Prompt {
-    flags: PromptFlags,
+    allow_answers: PromptAnswer,
     fmt: String,
     buf: String,
 }
 
 impl Prompt {
-    pub fn new(flags: PromptFlags) -> Self {
+    pub fn new(allow_answers: PromptAnswer) -> Self {
         Self {
-            flags,
-            fmt: Self::ordered_flags(&flags),
+            allow_answers,
+            fmt: Self::ordered_answers(&allow_answers),
             buf: String::new(),
         }
     }
 
-    fn parse_flag(input: &str, allowed: PromptFlags) -> Option<PromptFlags> {
+    fn parse_answer(input: &str, allowed: PromptAnswer) -> Option<PromptAnswer> {
         match input {
-            "y" => Some(PromptFlags::YES),
-            "n" | "" => Some(PromptFlags::NO),
-            "d" => Some(PromptFlags::DIFF),
-            "e" => Some(PromptFlags::EDIT),
-            "s" => Some(PromptFlags::SHOW),
-            "q" => Some(PromptFlags::QUIT),
-            "h" => Some(PromptFlags::HELP),
+            "y" => Some(PromptAnswer::YES),
+            "n" | "" => Some(PromptAnswer::NO),
+            "d" => Some(PromptAnswer::DIFF),
+            "e" => Some(PromptAnswer::EDIT),
+            "s" => Some(PromptAnswer::SHOW),
+            "q" => Some(PromptAnswer::QUIT),
+            "h" => Some(PromptAnswer::HELP),
             _ => None,
         }
         .map(|f| f & allowed)
         .and_then(|f| if f.is_empty() { None } else { Some(f) })
     }
 
-    fn ordered_flags(flags: &PromptFlags) -> String {
-        const FLAG_LIST: &[(PromptFlags, &str)] = &[
-            (PromptFlags::DIFF, "d"),
-            (PromptFlags::EDIT, "e"),
-            (PromptFlags::HELP, "h"),
-            (PromptFlags::NO, "n"),
-            (PromptFlags::QUIT, "q"),
-            (PromptFlags::SHOW, "s"),
-            (PromptFlags::YES, "y"),
+    fn ordered_answers(answers: &PromptAnswer) -> String {
+        const ANSWER_LIST: &[(PromptAnswer, &str)] = &[
+            (PromptAnswer::DIFF, "d"),
+            (PromptAnswer::EDIT, "e"),
+            (PromptAnswer::HELP, "h"),
+            (PromptAnswer::NO, "n"),
+            (PromptAnswer::QUIT, "q"),
+            (PromptAnswer::SHOW, "s"),
+            (PromptAnswer::YES, "y"),
         ];
         let mut res = [""; 7];
         let mut count = 0;
-        for (flag, ch) in FLAG_LIST {
-            if flags.contains(*flag) {
+        for (answer, ch) in ANSWER_LIST {
+            if answers.contains(*answer) {
                 res[count] = ch;
                 count += 1;
             }
@@ -79,14 +76,14 @@ impl Prompt {
         res[..count].join("/")
     }
 
-    pub fn prompt(&mut self, msg: &str) -> PromptFlags {
+    pub fn prompt(&mut self, msg: &str) -> PromptAnswer {
         loop {
             outnow!("{} [{}] ", msg.style(CliContext::PROMPT_MSG), self.fmt);
             let input = inputln!(&mut self.buf);
-            if let Some(input) = Self::parse_flag(input, self.flags) {
+            if let Some(input) = Self::parse_answer(input, self.allow_answers) {
                 return input;
             }
-            outln!("Invalid flag passed. Please retry...")
+            outln!("Invalid answer '{input}'. Please retry...")
         }
     }
 
@@ -99,22 +96,24 @@ impl Prompt {
     where
         T: FnOnce() -> anyhow::Result<()>,
     {
-        let mut prompt_flag = self.prompt(msg);
-        while !prompt_flag.contains(PromptFlags::YES) && !prompt_flag.contains(PromptFlags::NO) {
-            match prompt_flag {
-                i if i.contains(PromptFlags::QUIT) => self.on_quit(),
-                i if i.contains(PromptFlags::HELP) => self.on_help(),
-                i if i.contains(PromptFlags::DIFF) => self.on_diff(paths),
-                i if i.contains(PromptFlags::EDIT) => self.on_edit(paths),
-                i if i.contains(PromptFlags::SHOW) => self.on_show(paths),
-                _ => unimplemented!("Prompt flag not handled"),
+        let mut prompt_answer = self.prompt(msg);
+        while !prompt_answer.contains(PromptAnswer::YES)
+            && !prompt_answer.contains(PromptAnswer::NO)
+        {
+            match prompt_answer {
+                i if i.contains(PromptAnswer::QUIT) => self.on_quit(),
+                i if i.contains(PromptAnswer::HELP) => self.on_help(),
+                i if i.contains(PromptAnswer::DIFF) => self.on_diff(paths),
+                i if i.contains(PromptAnswer::EDIT) => self.on_edit(paths),
+                i if i.contains(PromptAnswer::SHOW) => self.on_show(paths),
+                _ => unimplemented!("Prompt answer not handled"),
             };
-            prompt_flag = self.prompt(msg);
+            prompt_answer = self.prompt(msg);
         }
-        match prompt_flag {
-            i if i.contains(PromptFlags::YES) => self.on_yes(action)?,
-            i if i.contains(PromptFlags::NO) => self.on_no(),
-            _ => unimplemented!("Prompt flag not handled"),
+        match prompt_answer {
+            i if i.contains(PromptAnswer::YES) => self.on_yes(action)?,
+            i if i.contains(PromptAnswer::NO) => self.on_no(),
+            _ => unimplemented!("Prompt answer not handled"),
         }
         Ok(())
     }
@@ -130,26 +129,26 @@ impl Prompt {
         std::process::exit(0)
     }
     pub fn on_help(&self) {
-        let f = self.flags;
-        if f.contains(PromptFlags::DIFF) {
+        let f = self.allow_answers;
+        if f.contains(PromptAnswer::DIFF) {
             outln!("[D]iff : show the diff between the files");
         }
-        if f.contains(PromptFlags::EDIT) {
+        if f.contains(PromptAnswer::EDIT) {
             outln!("[E]dit : edit the file with the $EDITOR");
         }
-        if f.contains(PromptFlags::HELP) {
+        if f.contains(PromptAnswer::HELP) {
             outln!("[H]elp : show the current help message");
         }
-        if f.contains(PromptFlags::NO) {
+        if f.contains(PromptAnswer::NO) {
             outln!("[N]o   : answer no to the prompt");
         }
-        if f.contains(PromptFlags::QUIT) {
+        if f.contains(PromptAnswer::QUIT) {
             outln!("[Q]uit : quit the program entirely");
         }
-        if f.contains(PromptFlags::SHOW) {
+        if f.contains(PromptAnswer::SHOW) {
             outln!("[S]how : show the file in question");
         }
-        if f.contains(PromptFlags::YES) {
+        if f.contains(PromptAnswer::YES) {
             outln!("[Y]es  : answer yes to the prompt");
         }
     }
