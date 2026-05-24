@@ -58,6 +58,10 @@ impl Profile {
         &self.id
     }
 
+    pub fn id_or<'a>(&'a self, name: &'a RelPathStr) -> &'a RelPathStr {
+        self.id.as_ref().unwrap_or(name)
+    }
+
     pub fn kind(&self) -> &ProfileKind {
         &self.kind
     }

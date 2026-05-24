@@ -64,7 +64,7 @@ impl Runner {
                 }
                 match here.entry(p) {
                     Entry::Occupied(mut e) => {
-                        if (*e.get() as u64) < entry.policy as u64 {
+                        if (entry.policy as u64) < (*e.get() as u64) {
                             e.insert(entry.policy);
                         }
                     }

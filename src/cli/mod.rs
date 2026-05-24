@@ -96,7 +96,7 @@ impl Cli {
             CliCmd::Save => todo!(),
             CliCmd::Restore => todo!(),
             CliCmd::Delete => todo!(),
-            CliCmd::Run => todo!(),
+            CliCmd::Run => self.action_run(&ctx),
             CliCmd::Tree { .. } => self.action_tree(&ctx),
             CliCmd::Clear => todo!(),
         }?;
