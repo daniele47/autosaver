@@ -13,29 +13,12 @@ pub mod path;
 pub mod rel;
 
 #[derive(Debug)]
-pub struct FindCache {
-    stack: Vec<FindCtx>,
-}
-#[derive(Debug)]
 pub struct FindCtx {
     pub path: AbsPathStr,
     pub entry: DirEntry,
     pub depth: usize,
 }
 
-impl FindCache {
-    pub fn new() -> Self {
-        Self { stack: vec![] }
-    }
-    fn clear(&mut self) {
-        self.stack.clear();
-    }
-}
-impl Default for FindCache {
-    fn default() -> Self {
-        Self::new()
-    }
-}
 impl FindCtx {
     pub fn new(path: AbsPathStr, entry: DirEntry, depth: usize) -> Self {
         Self { path, entry, depth }
@@ -61,12 +44,11 @@ impl AbsPathStr {
         })
     }
 
-    pub fn find_with_cache<F>(&self, mut on_each: F, cache: &mut FindCache) -> anyhow::Result<()>
+    pub fn find<F>(&self, mut on_each: F) -> anyhow::Result<()>
     where
         F: FnMut(FindCtx) -> anyhow::Result<bool>,
     {
-        cache.clear();
-        let stack = &mut cache.stack;
+        let mut stack: Vec<FindCtx> = vec![];
         let mut root_traversed = false;
         let mut children;
         let mut depth;
@@ -103,13 +85,6 @@ impl AbsPathStr {
         }
 
         Ok(())
-    }
-
-    pub fn find<F>(&self, on_each: F) -> anyhow::Result<()>
-    where
-        F: FnMut(FindCtx) -> anyhow::Result<bool>,
-    {
-        self.find_with_cache(on_each, &mut Default::default())
     }
 
     pub fn purge_path_opts(&self, allow_recursive_delete: bool) -> anyhow::Result<()> {
