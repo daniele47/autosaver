@@ -89,12 +89,18 @@ impl AbsPathStr {
 
     pub fn all_files<F>(self, mut on_each: F) -> anyhow::Result<()>
     where
-        F: FnMut(Self) -> anyhow::Result<bool>,
+        F: FnMut(Self) -> anyhow::Result<()>,
     {
         if self.is_file() {
             on_each(self)?;
         } else if self.is_dir() {
-            self.find(|ctx| on_each(ctx.path))?;
+            self.find(|ctx| {
+                let ftype = ctx.entry.file_type()?;
+                if ftype.is_file() || (ftype.is_symlink() && ftype.is_file()) {
+                    on_each(ctx.path)?;
+                }
+                Ok(true)
+            })?;
         }
         Ok(())
     }
