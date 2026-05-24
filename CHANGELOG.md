@@ -24,6 +24,8 @@ TODO:
         - [ ] part 2: handle symlinks too, via a flag (BUT check if ANYTHING inside the symlink is tracked as the criteria!)
 - [ ] have both runner profiles and module profiles properly track in an hashset already found abspath/relpath (idk, think about it)
       such that 2 different profiles cannot operate on the same file in the same operation
+- [ ] prompt must also handle answer_yes, answer_no, skip_prompt,... flags
+- [ ] finish up `run` command
 
 ## v2.0.0
 
