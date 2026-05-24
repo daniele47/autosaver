@@ -77,7 +77,7 @@ macro_rules! verbose {
 macro_rules! error {
     ($($arg:tt)*) => {{
         use owo_colors::OwoColorize;
-        $crate::err!("{}", "error: ".red());
+        $crate::err!("{}", "error: ".red().bold());
         $crate::errln!($($arg)*);
     }};
 }
@@ -86,7 +86,7 @@ macro_rules! error {
 macro_rules! warning {
     ($($arg:tt)*) => {{
         use owo_colors::OwoColorize;
-        $crate::err!("{}", "warning: ".yellow());
+        $crate::err!("{}", "warning: ".yellow().bold());
         $crate::errln!($($arg)*);
     }};
 }
