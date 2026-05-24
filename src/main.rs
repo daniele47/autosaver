@@ -1,10 +1,12 @@
 use std::process::exit;
 
-use anyhow::Result;
-use autosaver::{cli::Cli, errnow, error, outnow};
+use autosaver::{
+    cli::{Cli, error::EarlyQuit},
+    errnow, error, outnow,
+};
 use clap::Parser;
 
-fn main() -> Result<()> {
+fn main() {
     // parse cmdline
     let cli = Cli::parse();
 
@@ -16,10 +18,14 @@ fn main() -> Result<()> {
     errnow!();
 
     // handle error
-    if let Err(err) = run_res {
-        error!("{err:?}");
-        exit(1);
-    }
+    let code = match run_res {
+        Ok(_) => 0,
+        Err(err) if err.downcast_ref::<EarlyQuit>().is_some() => 0,
+        Err(err) => {
+            error!("{err:?}");
+            1
+        }
+    };
 
-    Ok(())
+    exit(code)
 }

@@ -1,5 +1,10 @@
-use crate::{cli::ctx::CliContext, fs::abs::AbsPathStr, inputln, out, outln, outnow, warning};
+use crate::{
+    cli::{ctx::CliContext, error::EarlyQuit},
+    fs::abs::AbsPathStr,
+    inputln, out, outln, outnow, warning,
+};
 
+use anyhow::bail;
 use bitflags::bitflags;
 use owo_colors::OwoColorize;
 use similar::{ChangeTag, TextDiff};
@@ -131,7 +136,7 @@ impl Prompt {
             && !prompt_answer.contains(PromptAnswer::NO)
         {
             match prompt_answer {
-                i if i.contains(PromptAnswer::QUIT) => self.on_quit(),
+                i if i.contains(PromptAnswer::QUIT) => self.on_quit()?,
                 i if i.contains(PromptAnswer::HELP) => self.on_help(),
                 i if i.contains(PromptAnswer::DIFF) => self.on_diff(paths),
                 i if i.contains(PromptAnswer::EDIT) => self.on_edit(paths),
@@ -155,8 +160,8 @@ impl Prompt {
     {
         action()
     }
-    pub fn on_quit(&self) -> ! {
-        std::process::exit(0)
+    pub fn on_quit(&self) -> anyhow::Result<()> {
+        bail!(EarlyQuit)
     }
     pub fn on_help(&self) {
         let f = self.allowed_answers;

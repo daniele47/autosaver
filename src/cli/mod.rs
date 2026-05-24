@@ -11,6 +11,7 @@ use crate::{
 pub mod act_run;
 pub mod act_tree;
 pub mod ctx;
+pub mod error;
 pub mod inout;
 pub mod prompt;
 

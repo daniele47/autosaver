@@ -11,7 +11,7 @@ TODO:
 - [ ] have `clean` operation:
     - [ ] there are no untracked files in `backup|run` dirs
         - [ ] part 2: handle symlinks too, via a flag (BUT check if ANYTHING inside the symlink is tracked as the criteria!)
-- [ ] have both runner profiles and module profiles properly track in an hashset already found abspath/relpath (idk, think about it)
+- (WIP) have both runner profiles and module profiles properly track in an hashset already found abspath/relpath (idk, think about it)
       such that 2 different profiles cannot operate on the same file in the same operation
 
 ## v2.0.0
