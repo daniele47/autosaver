@@ -39,12 +39,16 @@ pub struct Cli {
     #[arg(short, long, global = true)]
     verbose: bool,
 
+    /// Skip all prompts entirely and list files
+    #[arg(short = 'l', long, global = true, conflicts_with_all = ["assume_no", "assume_yes"])]
+    list: bool,
+
     /// Auto-answer yes to all prompts
-    #[arg(short = 'y', long, global = true, conflicts_with = "assume_no")]
+    #[arg(short = 'y', long, global = true, conflicts_with_all = ["assume_no", "list"])]
     assume_yes: bool,
 
     /// Auto-answer no to all prompts
-    #[arg(short = 'n', long, global = true, conflicts_with = "assume_yes")]
+    #[arg(short = 'n', long, global = true, conflicts_with_all = ["list", "assume_yes"])]
     assume_no: bool,
 }
 

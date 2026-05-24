@@ -17,7 +17,7 @@ fn main() -> Result<()> {
 
     // handle error
     if let Err(err) = run_res {
-        error!("{err}");
+        error!("{err:?}");
         exit(1);
     }
 

@@ -22,7 +22,7 @@ impl Cli {
                 let trav_opts = TraverseOpts::default();
                 let mut prompt = Prompt::new(
                     PromptAnswer::all() & !PromptAnswer::DIFF,
-                    PromptFlags::new(self.assume_no, self.assume_no, false),
+                    PromptFlags::new(self.assume_no, self.assume_no, self.list),
                 );
 
                 // traverse all runner profiles
