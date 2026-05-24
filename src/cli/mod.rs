@@ -28,11 +28,11 @@ pub struct Cli {
     profile: Option<RelPathStr>,
 
     /// Specify a different home directory to use
-    #[arg(long, env = "AUTOSAVER_HOME")]
+    #[arg(short = 'H', long, env = "AUTOSAVER_HOME")]
     home: Option<PathBuf>,
 
     /// Specify a different root directory to use
-    #[arg(long, env = "AUTOSAVER_ROOT")]
+    #[arg(short = 'R', long, env = "AUTOSAVER_ROOT")]
     root: Option<PathBuf>,
 
     /// Show verbose output

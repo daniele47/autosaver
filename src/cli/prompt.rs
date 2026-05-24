@@ -97,7 +97,18 @@ impl Prompt {
 
     pub fn prompt(&mut self, msg: &str) -> PromptAnswer {
         loop {
+            if self.flags.skip_prompt {
+                return PromptAnswer::NO;
+            }
             outnow!("{} [{}] ", msg.style(CliContext::PROMPT_MSG), self.fmt);
+            if self.flags.answer_no {
+                outln!("n");
+                return PromptAnswer::NO;
+            }
+            if self.flags.answer_yes {
+                outln!("y");
+                return PromptAnswer::YES;
+            }
             let input = inputln!(&mut self.buf);
             if let Some(input) = Self::parse_answer(input, self.allowed_answers) {
                 return input;
