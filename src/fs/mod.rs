@@ -87,6 +87,18 @@ impl AbsPathStr {
         Ok(())
     }
 
+    pub fn all_files<F>(self, mut on_each: F) -> anyhow::Result<()>
+    where
+        F: FnMut(Self) -> anyhow::Result<bool>,
+    {
+        if self.is_file() {
+            on_each(self)?;
+        } else if self.is_dir() {
+            self.find(|ctx| on_each(ctx.path))?;
+        }
+        Ok(())
+    }
+
     pub fn purge_path_opts(&self, allow_recursive_delete: bool) -> anyhow::Result<()> {
         // skip if path not exist
         if self.path().symlink_metadata().is_err() {
