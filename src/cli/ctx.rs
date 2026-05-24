@@ -37,7 +37,8 @@ impl CliContext {
     pub const TREE_RUNNER: Style = Style::new().green();
     pub const TREE_MODULE: Style = Style::new().bright_blue();
     pub const TREE_DEDUP: Style = Style::new().yellow();
-    pub const PROMPT_MSG: Style = Style::new().bright_yellow().bold().underline();
+    pub const PROMPT_MSG: Style = Style::new().white().underline();
+    pub const OUTPUT_PATH: Style = Style::new().bright_blue();
     pub const DIFF_DELETED: Style = Style::new().red();
     pub const DIFF_INSERTED: Style = Style::new().green();
     pub const DIFF_HEADER: Style = Style::new().cyan();

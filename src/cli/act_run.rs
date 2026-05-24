@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use owo_colors::OwoColorize;
+
 use crate::{
     cli::{
         Cli, CliCmd,
@@ -19,30 +21,27 @@ impl Cli {
                 let trav_opts = TraverseOpts::default();
                 let mut prompt = Prompt::new(PromptFlags::all() & !PromptFlags::DIFF);
 
-                // traverse all profiles
+                // traverse all runner profiles
                 ctx.profiles.traverse(&ctx.curr_profile, trav_opts, |ctx| {
-                    match ctx.item.kind() {
-                        ProfileKind::Runner(runner) => {
-                            // act only on runner profiles
-                            let run_dir = run_dir.join(ctx.item.id_or(ctx.name))?;
-                            runner.resolve(&run_dir, &mut all, |path, policy| {
-                                // filter entries with skip policy
-                                if policy == RunnerPolicy::Skip {
-                                    return Ok(());
-                                }
+                    if let ProfileKind::Runner(runner) = ctx.item.kind() {
+                        let this_run_dir = run_dir.join(ctx.item.id_or(ctx.name))?;
+                        runner.resolve(&this_run_dir, &mut all, |path, policy| {
+                            // filter entries with skip policy
+                            if policy == RunnerPolicy::Skip {
+                                return Ok(());
+                            }
 
-                                // prompt user
-                                outln!("{}", path.display());
-                                let msg = "Do you really want to run the script?";
-                                let paths = &[&path];
-                                prompt.handled_prompt(msg, paths, || {
-                                    let _ = "TODO";
-                                    Ok(())
-                                })?;
+                            // prompt user
+                            let relpath = path.to_rel(run_dir)?;
+                            outln!("{}", relpath.display().style(CliContext::OUTPUT_PATH));
+                            let msg = "Do you really want to run the script?";
+                            let paths = &[&path];
+                            prompt.handled_prompt(msg, paths, || {
+                                let _ = "TODO";
                                 Ok(())
                             })?;
-                        }
-                        _ => {}
+                            Ok(())
+                        })?;
                     }
                     Ok(())
                 })
