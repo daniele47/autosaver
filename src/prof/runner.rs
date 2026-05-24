@@ -48,10 +48,10 @@ impl Runner {
         &self,
         dir: &AbsPathStr,
         all: &mut HashMap<AbsPathStr, RunnerPolicy>,
-        on_each: T,
+        mut on_each: T,
     ) -> anyhow::Result<()>
     where
-        T: Fn(AbsPathStr, RunnerPolicy) -> anyhow::Result<()>,
+        T: FnMut(AbsPathStr, RunnerPolicy) -> anyhow::Result<()>,
     {
         let mut here: HashMap<AbsPathStr, RunnerPolicy> = HashMap::new();
         let mut res: Vec<AbsPathStr> = vec![];

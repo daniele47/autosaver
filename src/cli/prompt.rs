@@ -46,7 +46,7 @@ impl Prompt {
     fn parse_flag(input: &str) -> Option<PromptFlags> {
         match input {
             "y" => Some(PromptFlags::YES),
-            "n" => Some(PromptFlags::NO),
+            "n" | "" => Some(PromptFlags::NO),
             "d" => Some(PromptFlags::DIFF),
             "e" => Some(PromptFlags::EDIT),
             "s" => Some(PromptFlags::SHOW),
@@ -88,23 +88,41 @@ impl Prompt {
         }
     }
 
-    pub fn handled_prompt(&mut self, msg: &str, paths: &[&AbsPathStr], action: impl FnOnce()) {
-        let prompt_flag = self.prompt(msg);
+    pub fn handled_prompt<T>(
+        &mut self,
+        msg: &str,
+        paths: &[&AbsPathStr],
+        action: T,
+    ) -> anyhow::Result<()>
+    where
+        T: FnOnce() -> anyhow::Result<()>,
+    {
+        let mut prompt_flag = self.prompt(msg);
+        while !prompt_flag.contains(PromptFlags::YES) && !prompt_flag.contains(PromptFlags::NO) {
+            match prompt_flag {
+                i if i.contains(PromptFlags::QUIT) => self.on_quit(),
+                i if i.contains(PromptFlags::HELP) => self.on_help(),
+                i if i.contains(PromptFlags::DIFF) => self.on_diff(paths),
+                i if i.contains(PromptFlags::EDIT) => self.on_edit(paths),
+                i if i.contains(PromptFlags::SHOW) => self.on_show(paths),
+                _ => unimplemented!("Prompt flag not handled"),
+            };
+            prompt_flag = self.prompt(msg);
+        }
         match prompt_flag {
+            i if i.contains(PromptFlags::YES) => self.on_yes(action)?,
             i if i.contains(PromptFlags::NO) => self.on_no(),
-            i if i.contains(PromptFlags::QUIT) => self.on_quit(),
-            i if i.contains(PromptFlags::HELP) => self.on_help(),
-            i if i.contains(PromptFlags::DIFF) => self.on_diff(paths),
-            i if i.contains(PromptFlags::EDIT) => self.on_edit(paths),
-            i if i.contains(PromptFlags::SHOW) => self.on_show(paths),
-            i if i.contains(PromptFlags::YES) => self.on_yes(action),
             _ => unimplemented!("Prompt flag not handled"),
         }
+        Ok(())
     }
 
     pub fn on_no(&self) {}
-    pub fn on_yes(&self, action: impl FnOnce()) {
-        action();
+    pub fn on_yes<T>(&self, action: T) -> anyhow::Result<()>
+    where
+        T: FnOnce() -> anyhow::Result<()>,
+    {
+        action()
     }
     pub fn on_quit(&self) -> ! {
         std::process::exit(0)
