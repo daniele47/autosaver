@@ -64,7 +64,11 @@ pub enum CliCmd {
     /// Delete tracked dotfiles
     Delete,
     /// Run init scripts
-    Run,
+    Run {
+        /// Allow prompt to be interactive by enabling stdin
+        #[arg(short = 'i', long)]
+        interactive: bool,
+    },
     /// Show dependency tree of profiles
     Tree {
         /// Do no deduplicate profiles
@@ -101,7 +105,7 @@ impl Cli {
             CliCmd::Save => todo!(),
             CliCmd::Restore => todo!(),
             CliCmd::Delete => todo!(),
-            CliCmd::Run => self.action_run(&ctx),
+            CliCmd::Run { .. } => self.action_run(&ctx),
             CliCmd::Tree { .. } => self.action_tree(&ctx),
             CliCmd::Clear => todo!(),
         }?;

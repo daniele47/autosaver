@@ -1,4 +1,7 @@
-use std::{collections::HashMap, process::Command};
+use std::{
+    collections::HashMap,
+    process::{Command, Stdio},
+};
 
 use anyhow::{Context, bail};
 use owo_colors::OwoColorize;
@@ -16,7 +19,7 @@ use crate::{
 impl Cli {
     pub fn action_run(&self, ctx: &CliContext) -> anyhow::Result<()> {
         match self.cmd {
-            CliCmd::Run => {
+            CliCmd::Run { interactive } => {
                 let run_dir = &ctx.paths[&Paths::Run];
                 let mut all = HashMap::new();
                 let trav_opts = TraverseOpts::default();
@@ -42,6 +45,11 @@ impl Cli {
                             let paths = &[&path];
                             let action = || {
                                 if let exit_status = Command::new(path.path())
+                                    .stdin(if interactive {
+                                        Stdio::inherit()
+                                    } else {
+                                        Stdio::null()
+                                    })
                                     .status()
                                     .context("Script failed to run")?
                                     .code()

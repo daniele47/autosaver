@@ -14,6 +14,7 @@ TODO:
 - (WIP) have both runner profiles and module profiles properly track in an hashset already found abspath/relpath (idk, think about it)
       such that 2 different profiles cannot operate on the same file in the same operation
 - [ ] add output for profile when entering a new profile in traversal
+- [ ] add option in `runner` profiles: `/! interactive` that would allow running that script alone in interactive mode
 
 ## v2.0.0
 
@@ -26,6 +27,7 @@ TODO:
 - added `--home|--root` flags to specify different root and home directories (defaults: $HOME, current dir)
 - added `--list|-l` to not even show prompts (basically it's -n BUT nicer)
 - added very powerful prompt handler
+- added `--interactive|-i` flag for `run` command to allow stdin when running init scripts
 
 ### Changes
 
