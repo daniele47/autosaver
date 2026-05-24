@@ -4,29 +4,15 @@ All notable changes to this project will be documented here
 
 TODO:
 - [ ] save/restore should allow also deleting files from the invalid side, with a --dangerous flag for restore to allow deleting files from home!
-- [ ] prompt handler for more powerful prompts that has a list of possible actions, and allows specifying which to allow/not to (pow of 2 enum?):
-    - [ ] `N` to skip entire profile
-    - [ ] `d` to show diff
-    - [ ] `s` to show file/script in its entirety
-    - [ ] `e` to edit the file?
-    - [ ] `d` to delete the file?
-    - [ ] `q` to quit entirely (avoiding dirty ctrl+c)
 - [ ] improve error messages
 - [ ] optimize space seeing if any struct can be compacted in size
-- [ ] consider if env vars are enough, or if i need a `.default` file back or smt (i trend toward just rely on env vars)
+- [ ] make sure light and dark theme both are decent
 - [ ] consider whetever to allow `\*` option line to actually indicate ALL files/profiles???
-- [ ] consider what to do with `id`, if they are ok as is, 
-    - [ ] if they should be forced flattened or leave all the freedom
-    - [ ] if they should be enforced to be unique too or leave freedom again
-    - [x] `id` are optional (this allows avoding useless duplication! if empty, gets `name` instead!)
 - [ ] have `clean` operation:
     - [ ] there are no untracked files in `backup|run` dirs
         - [ ] part 2: handle symlinks too, via a flag (BUT check if ANYTHING inside the symlink is tracked as the criteria!)
 - [ ] have both runner profiles and module profiles properly track in an hashset already found abspath/relpath (idk, think about it)
       such that 2 different profiles cannot operate on the same file in the same operation
-- [ ] prompt must also handle answer_yes, answer_no, skip_prompt,... flags
-- [ ] finish up `run` command
-- [ ] make sure light and dark theme both are decent
 
 ## v2.0.0
 
@@ -37,6 +23,8 @@ TODO:
 - added `all` as the default root profile tracking ALL profiles
 - added `--verbose` printing extra useful informaton
 - added `--home|--root` flags to specify different root and home directories (defaults: $HOME, current dir)
+- added `--list|-l` to not even show prompts (basically it's -n BUT nicer)
+- added very powerful prompt handler
 
 ### Changes
 
