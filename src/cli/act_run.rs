@@ -1,5 +1,6 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, process::Command};
 
+use anyhow::{Context, bail};
 use owo_colors::OwoColorize;
 
 use crate::{
@@ -36,10 +37,25 @@ impl Cli {
                             outln!("{}", relpath.display().style(CliContext::OUTPUT_PATH));
                             let msg = "Do you really want to run the script?";
                             let paths = &[&path];
-                            prompt.handled_prompt(msg, paths, || {
-                                let _ = "TODO";
+                            let action = || {
+                                if let exit_status = Command::new(path.path())
+                                    .status()
+                                    .context("Script failed to run")?
+                                    .code()
+                                    && exit_status != Some(0)
+                                {
+                                    if let Some(status) = exit_status {
+                                        bail!(format!("Script failed with status code {status}"))
+                                    } else {
+                                        bail!("Script was terminated by a signal")
+                                    }
+                                }
+
                                 Ok(())
-                            })?;
+                            };
+
+                            // handle flags
+                            prompt.handled_prompt(msg, paths, action)?;
                             Ok(())
                         })?;
                     }
