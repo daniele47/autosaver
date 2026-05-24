@@ -43,7 +43,7 @@ impl Prompt {
         }
     }
 
-    fn parse_flag(input: &str) -> Option<PromptFlags> {
+    fn parse_flag(input: &str, allowed: PromptFlags) -> Option<PromptFlags> {
         match input {
             "y" => Some(PromptFlags::YES),
             "n" | "" => Some(PromptFlags::NO),
@@ -54,6 +54,8 @@ impl Prompt {
             "h" => Some(PromptFlags::HELP),
             _ => None,
         }
+        .map(|f| f & allowed)
+        .and_then(|f| if f.is_empty() { None } else { Some(f) })
     }
 
     fn ordered_flags(flags: &PromptFlags) -> String {
@@ -81,7 +83,7 @@ impl Prompt {
         loop {
             outnow!("{} [{}] ", msg.style(CliContext::PROMPT_MSG), self.fmt);
             let input = inputln!(&mut self.buf);
-            if let Some(input) = Self::parse_flag(input) {
+            if let Some(input) = Self::parse_flag(input, self.flags) {
                 return input;
             }
             outln!("Invalid flag passed. Please retry...")
@@ -162,7 +164,7 @@ impl Prompt {
                     Ok(exit_status) if exit_status.success() => {}
                     Ok(exit_status) => {
                         let code = exit_status.code().unwrap_or(-1);
-                        warning!("Failed to edit '{editor_cmd}' exited with error code: {code}");
+                        warning!("Editor '{editor_cmd}' exited with error code: {code}");
                     }
                     Err(e) => warning!("Failed to launch '{}': {}", editor_cmd, e),
                 }
