@@ -1,4 +1,7 @@
-use std::process::{Command, Stdio};
+use std::{
+    collections::HashSet,
+    process::{Command, Stdio},
+};
 
 use anyhow::{Context, bail};
 
@@ -8,6 +11,7 @@ use crate::{
         ctx::{CliContext, Paths},
         prompt::{Prompt, PromptAnswer, PromptFlags},
     },
+    fs::abs::AbsPathStr,
     prof::{ProfileKind, TraverseOpts, runner::RunnerPolicy},
 };
 
@@ -17,6 +21,7 @@ impl Cli {
             CliCmd::Run { interactive } => {
                 let run_dir = &ctx.paths[&Paths::Run];
                 let trav_opts = TraverseOpts::default();
+                let mut paths = HashSet::<AbsPathStr>::new();
                 let mut prompt = Prompt::new(
                     PromptAnswer::all() & !PromptAnswer::DIFF,
                     PromptFlags::new(self.assume_no, self.assume_yes, self.list),
@@ -35,6 +40,14 @@ impl Cli {
 
                             // prompt user
                             let relpath = path.to_rel(run_dir)?;
+
+                            // check path was not found yet
+                            if !paths.insert(path.clone()) {
+                                let p = path.to_rel(run_dir)?;
+                                let p = p.display();
+                                bail!("Script '{p}' was already run previously");
+                            }
+
                             CliContext::output_path(&relpath, CliContext::OUTPUT_PATH);
                             let msg = "Do you really want to run the script?";
                             let paths = &[&path];
