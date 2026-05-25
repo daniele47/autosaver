@@ -1,4 +1,4 @@
-use std::collections::{HashMap, hash_map::Entry};
+use indexmap::{IndexMap, map::Entry};
 
 use crate::fs::{abs::AbsPathStr, rel::RelPathStr};
 
@@ -46,20 +46,18 @@ impl Runner {
     where
         T: FnMut(AbsPathStr, RunnerPolicy) -> anyhow::Result<()>,
     {
-        let mut here: HashMap<AbsPathStr, RunnerPolicy> = HashMap::new();
-        let mut res: Vec<AbsPathStr> = vec![];
+        let mut elems: IndexMap<AbsPathStr, RunnerPolicy> = IndexMap::new();
 
         for entry in self.entries() {
             let all_files_ord = entry.path().to_abs(dir)?.all_files_ord()?;
             all_files_ord.into_iter().try_for_each(|p| {
-                match here.entry(p) {
+                match elems.entry(p) {
                     Entry::Occupied(mut e) => {
                         if (entry.policy as u64) < (*e.get() as u64) {
                             e.insert(entry.policy);
                         }
                     }
                     Entry::Vacant(e) => {
-                        res.push(e.key().to_owned());
                         e.insert(entry.policy);
                     }
                 }
@@ -68,9 +66,8 @@ impl Runner {
         }
 
         // run on each and move paths from vec into all hashmap
-        for elem in res {
-            let policy = here[&elem];
-            on_each(elem, policy)?;
+        for elem in elems {
+            on_each(elem.0, elem.1)?;
         }
 
         Ok(())
