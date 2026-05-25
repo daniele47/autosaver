@@ -32,9 +32,9 @@ impl Cli {
                     if let ProfileKind::Runner(runner) = ctx.item.kind() {
                         CliContext::output_profile(ctx.name, CliContext::OUTPUT_PROFILE);
                         let this_run_dir = run_dir.join(ctx.item.id_or(ctx.name))?;
-                        runner.resolve(&this_run_dir, |path, policy| {
+                        runner.resolve(&this_run_dir, |path, entry| {
                             // filter entries with skip policy
-                            if policy == RunnerPolicy::Skip {
+                            if *entry.policy() == RunnerPolicy::Skip {
                                 return Ok(());
                             }
 

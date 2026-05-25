@@ -44,21 +44,21 @@ impl Runner {
 
     pub fn resolve<T>(&self, dir: &AbsPathStr, mut on_each: T) -> anyhow::Result<()>
     where
-        T: FnMut(AbsPathStr, RunnerPolicy) -> anyhow::Result<()>,
+        T: FnMut(AbsPathStr, &RunnerEntry) -> anyhow::Result<()>,
     {
-        let mut elems: IndexMap<AbsPathStr, RunnerPolicy> = IndexMap::new();
+        let mut elems: IndexMap<AbsPathStr, &RunnerEntry> = IndexMap::new();
 
         for entry in self.entries() {
             let all_files_ord = entry.path().to_abs(dir)?.all_files_ord()?;
             all_files_ord.into_iter().try_for_each(|p| {
                 match elems.entry(p) {
                     Entry::Occupied(mut e) => {
-                        if (entry.policy as u64) < (*e.get() as u64) {
-                            e.insert(entry.policy);
+                        if (entry.policy as u64) < (*e.get().policy() as u64) {
+                            e.insert(entry);
                         }
                     }
                     Entry::Vacant(e) => {
-                        e.insert(entry.policy);
+                        e.insert(entry);
                     }
                 }
                 anyhow::Ok(())
