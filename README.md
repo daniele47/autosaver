@@ -77,7 +77,7 @@ The scripts are search from the `run/<profile_id>` directory
     - `policy` : specify the policy for all the files after it
         - `skip` : ignore the script
         - `run`  : run the script
-    - `stdin` `on|off` : hints about enabling stdin (requires `-i` flag to actually enable stdin!)
+    - `stdin` `on|off` : hints about enabling stdin
 
 - `data lines`: 
     - each data line is a relative path of the script to track
