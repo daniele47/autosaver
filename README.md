@@ -2,25 +2,29 @@
 
 Copy-based dotfiles tracking cli, written in rust
 
+## How to install and use
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/daniele47/autosaver/refs/heads/main/install.sh | bash -s
+```
+
+or manually download a binary from the [github repository](https://github.com/daniele47/autosaver/releases)
+
 ## How it works
 
-```
-$AUTOSAVER_ROOT/
-├── config/
-│   ├── profile1.conf
-│   └── profile2.conf
-├── backup/
-│   └── profile1/
-└── run/
-    └── profile2/
-```
-
-It is a rust based cli program to easily handle dotfiles on a system.
+This is a rust based cli program to easily handle dotfiles on a system.
 
 The entire system is built with one basic concept: profiles. Everything is a profile!
 
-To create a new profile, just create a `config/<profile_name>.conf` file and then the 
-cli will automatically detect that as the configuration for the `<profile_name>` profile.
+Profiles can be created by adding a new file in the `config` directory, with the `.conf` extension.
+Such profiles will be automatically loaded as their path relative to the `config` directory, stripped
+of the `.conf` extension.
+So `config/neovim.conf` will be loaded as `neovim` profile.
+
+Profiles, also, don't need to be files directly in the `config` directory. They can also be nested!
+So `config/cli/tmux.conf` will be loaded as the `cli/tmux` profile.
+
+<!-- TODO: REWRITE AFTER -->
 
 ## Profiles
 
@@ -122,10 +126,3 @@ NOTES:
 - an hacky workaround is to allow environment variables to customize init behaviour, or in cases, such 
     as getting root permissions, just do it with a wrapper bash script that keeps it cached!
 
-## How to use
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/daniele47/autosaver/refs/heads/main/install.sh | bash -s
-```
-
-or manually download a binary from the [github repository](https://github.com/daniele47/autosaver/releases)
