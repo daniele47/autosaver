@@ -52,7 +52,11 @@ impl Cli {
                             CliContext::output_path(&relpath, CliContext::OUTPUT_PATH);
 
                             // handle flags
-                            let msg = "Do you really want to run the script?";
+                            let msg = if interactive {
+                                "Do you really want to run the script interactively?"
+                            } else {
+                                "Do you really want to run the script?"
+                            };
                             let paths = &[&path];
                             let action = || {
                                 if let exit_status = Command::new(path.path())
