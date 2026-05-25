@@ -58,7 +58,7 @@ impl Prompt {
     pub fn new(allowed_answers: PromptAnswer, flags: PromptFlags) -> Self {
         let allowed_answers = allowed_answers | PromptAnswer::YES | PromptAnswer::NO;
         Self {
-            allowed_answers: allowed_answers,
+            allowed_answers,
             flags,
             fmt: Self::ordered_answers(&allowed_answers),
             buf: String::new(),
