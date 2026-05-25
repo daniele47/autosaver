@@ -140,6 +140,7 @@ impl Profile {
     fn parse_runner(raw: RawProfile) -> anyhow::Result<Self> {
         let mut entries = vec![];
         let mut policy = RunnerPolicy::Run;
+        let mut stdin = false;
         let kind = "runner";
         for line in raw.lines {
             match line {
@@ -151,11 +152,18 @@ impl Profile {
                             _ => bail!(Self::err_val(raw.name, opt, i, kind)),
                         }
                     }
+                    opt_set if let Some(opt_val) = opt_set.strip_prefix("stdin") => {
+                        match opt_val.trim() {
+                            "on" => stdin = true,
+                            "off" => stdin = false,
+                            _ => bail!(Self::err_val(raw.name, opt, i, kind)),
+                        }
+                    }
                     _ => bail!(Self::err_opt(raw.name, opt, i, kind)),
                 },
                 RawProfileLine::Data(data, i) => {
                     let data = Self::data_ctx(raw.name, data, i, kind)?;
-                    let entry = RunnerEntry::new(data, policy);
+                    let entry = RunnerEntry::new(data, policy, stdin);
                     entries.push(entry);
                 }
             }

@@ -13,12 +13,13 @@ use crate::{
     },
     fs::abs::AbsPathStr,
     prof::{ProfileKind, TraverseOpts, runner::RunnerPolicy},
+    warning,
 };
 
 impl Cli {
     pub fn action_run(&self, ctx: &CliContext) -> anyhow::Result<()> {
         match self.cmd {
-            CliCmd::Run { interactive } => {
+            CliCmd::Run { stdin } => {
                 let run_dir = &ctx.paths[&Paths::Run];
                 let trav_opts = TraverseOpts::default();
                 let mut all_paths = HashSet::<AbsPathStr>::new();
@@ -52,15 +53,20 @@ impl Cli {
                             CliContext::output_path(&relpath, CliContext::OUTPUT_PATH);
 
                             // handle flags
-                            let msg = if interactive {
-                                "Do you really want to run the script interactively?"
+                            let msg = if entry.stdin() {
+                                if stdin {
+                                    "Do you really want to run the script with stdin enabled?"
+                                } else {
+                                    warning!("Script requires stdin to run");
+                                    return Ok(());
+                                }
                             } else {
                                 "Do you really want to run the script?"
                             };
                             let paths = &[&path];
                             let action = || {
                                 if let exit_status = Command::new(path.path())
-                                    .stdin(if interactive {
+                                    .stdin(if stdin {
                                         Stdio::inherit()
                                     } else {
                                         Stdio::null()

@@ -60,9 +60,9 @@ pub enum CliCmd {
     Delete,
     /// Run init scripts
     Run {
-        /// Allow prompt to be interactive by enabling stdin
+        /// Enable stdin in scripts that hint their need for it
         #[arg(short = 'i', long)]
-        interactive: bool,
+        stdin: bool,
     },
     /// Show dependency tree of profiles
     Tree {

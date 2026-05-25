@@ -12,6 +12,7 @@ pub enum RunnerPolicy {
 pub struct RunnerEntry {
     path: RelPathStr,
     policy: RunnerPolicy,
+    stdin: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -20,8 +21,12 @@ pub struct Runner {
 }
 
 impl RunnerEntry {
-    pub fn new(path: RelPathStr, policy: RunnerPolicy) -> Self {
-        Self { path, policy }
+    pub fn new(path: RelPathStr, policy: RunnerPolicy, stdin: bool) -> Self {
+        Self {
+            path,
+            policy,
+            stdin,
+        }
     }
 
     pub fn path(&self) -> &RelPathStr {
@@ -30,6 +35,10 @@ impl RunnerEntry {
 
     pub fn policy(&self) -> &RunnerPolicy {
         &self.policy
+    }
+
+    pub fn stdin(&self) -> bool {
+        self.stdin
     }
 }
 
