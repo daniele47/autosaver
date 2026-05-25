@@ -21,7 +21,7 @@ impl Cli {
             CliCmd::Run { interactive } => {
                 let run_dir = &ctx.paths[&Paths::Run];
                 let trav_opts = TraverseOpts::default();
-                let mut paths = HashSet::<AbsPathStr>::new();
+                let mut all_paths = HashSet::<AbsPathStr>::new();
                 let mut prompt = Prompt::new(
                     PromptAnswer::all() & !PromptAnswer::DIFF,
                     PromptFlags::new(self.assume_no, self.assume_yes, self.list),
@@ -42,13 +42,16 @@ impl Cli {
                             let relpath = path.to_rel(run_dir)?;
 
                             // check path was not found yet
-                            if !paths.insert(path.clone()) {
+                            if all_paths.contains(&path) {
                                 let p = path.to_rel(run_dir)?;
                                 let p = p.display();
                                 bail!("Script '{p}' was already run previously");
                             }
 
+                            // output path
                             CliContext::output_path(&relpath, CliContext::OUTPUT_PATH);
+
+                            // handle flags
                             let msg = "Do you really want to run the script?";
                             let paths = &[&path];
                             let action = || {
@@ -72,9 +75,11 @@ impl Cli {
 
                                 Ok(())
                             };
-
-                            // handle flags
                             prompt.handled_prompt(msg, paths, action)?;
+
+                            // insert path to all paths
+                            all_paths.insert(path);
+
                             Ok(())
                         })?;
                     }
