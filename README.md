@@ -24,39 +24,34 @@ So `config/neovim.conf` will be loaded as `neovim` profile.
 Profiles, also, don't need to be files directly in the `config` directory. They can also be nested!
 So `config/cli/tmux.conf` will be loaded as the `cli/tmux` profile.
 
+## Configuration files
+
+All profiles share some basic properties:
+- all lines starting with `//` are `comments` and completely ignored
+- all lines starting with `/!` are `option lines`, and can be used to change various settings
+- all other lines starting with `/` are reserved for future use, thus currently ignored
+- all other lines are `data lines`, aka the actual entries of the profile itself
+
+NOTE:
+- all profiles share the `kind` and `id` options:
+    - `type` is required, and specifies the profile type
+    - `id` is optional and is used to locate the resources associated with the profile
+
+### Composite Profile
+
+This profile simply acts as a profile aggregrator, and can be used to run command on multiple profiles.
+It can be created via `type composite` option line, or by creating a directory which will be automagically
+treated as a composite profile aggregrating the files and directories directly in it.
+
+- `option lines`: no additional option lines!
+
+- `data lines`: each data line is exactly the name of an other profile
+
+### Module Profile
+
+This profile is the one actually allowing to track dotfiles on the system.
+
 <!-- TODO: REWRITE AFTER -->
-
-## Profiles
-
-### Composite 
-
-This is a profile that list other profiles. It can list ALL types of profiles, even other
-composite profiles, and it will make commands run on the profiles listed. 
-
-There are no limitations on including composite profiles in other composite profiles, but
-there are the following rules:
-- profiles are resolved in the order they are listed in the config file
-- duplicated are ignored, and only the first entry of duplicates is ever considered
-- if composite profile include composite profile that include themselves in any way (aka,
-    any sort of cyclic dependency is create), the cli will detect it and quit with an error
-
-A composite profile configuration file looks like this:
-
-```
-/! type composite
-
-// this is a comment
-
-profile1
-profile2
-```
-This profile will contain the profile1 and profile2, and when any action is run on it, it will
-actually run on `profile1` and `profile2`
-
-Note: profiles can be nested! putting a profile `config/dir/profile.txt` will properly function!
-Also: now config directories if specified as profiles, will include all profiles inside the directory!
-
-### Module
 
 This is a profile to track dotfiles. It can list file paths relative to the $AUTOSAVER_HOME directory, and it is 
 used in `list`, `save`, `restore`, `rmhome`, `rhbackup` commands to confront the files on the home and in the 
