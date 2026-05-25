@@ -1,7 +1,4 @@
-use std::{
-    collections::HashMap,
-    process::{Command, Stdio},
-};
+use std::process::{Command, Stdio};
 
 use anyhow::{Context, bail};
 use owo_colors::OwoColorize;
@@ -21,7 +18,6 @@ impl Cli {
         match self.cmd {
             CliCmd::Run { interactive } => {
                 let run_dir = &ctx.paths[&Paths::Run];
-                let mut all = HashMap::new();
                 let trav_opts = TraverseOpts::default();
                 let mut prompt = Prompt::new(
                     PromptAnswer::all() & !PromptAnswer::DIFF,
@@ -32,7 +28,7 @@ impl Cli {
                 ctx.profiles.traverse(&ctx.curr_profile, trav_opts, |ctx| {
                     if let ProfileKind::Runner(runner) = ctx.item.kind() {
                         let this_run_dir = run_dir.join(ctx.item.id_or(ctx.name))?;
-                        runner.resolve(&this_run_dir, &mut all, |path, policy| {
+                        runner.resolve(&this_run_dir, |path, policy| {
                             // filter entries with skip policy
                             if policy == RunnerPolicy::Skip {
                                 return Ok(());

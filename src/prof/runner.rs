@@ -1,7 +1,5 @@
 use std::collections::{HashMap, hash_map::Entry};
 
-use anyhow::bail;
-
 use crate::fs::{abs::AbsPathStr, rel::RelPathStr};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -44,12 +42,7 @@ impl Runner {
         &self.entries
     }
 
-    pub fn resolve<T>(
-        &self,
-        dir: &AbsPathStr,
-        all: &mut HashMap<AbsPathStr, RunnerPolicy>,
-        mut on_each: T,
-    ) -> anyhow::Result<()>
+    pub fn resolve<T>(&self, dir: &AbsPathStr, mut on_each: T) -> anyhow::Result<()>
     where
         T: FnMut(AbsPathStr, RunnerPolicy) -> anyhow::Result<()>,
     {
@@ -59,10 +52,6 @@ impl Runner {
         for entry in self.entries() {
             let all_files_ord = entry.path().to_abs(dir)?.all_files_ord()?;
             all_files_ord.into_iter().try_for_each(|p| {
-                if all.contains_key(&p) {
-                    let p = p.display();
-                    bail!(format!("Path '{p}' was already found in an other profile"));
-                }
                 match here.entry(p) {
                     Entry::Occupied(mut e) => {
                         if (entry.policy as u64) < (*e.get() as u64) {
@@ -74,14 +63,13 @@ impl Runner {
                         e.insert(entry.policy);
                     }
                 }
-                Ok(())
+                anyhow::Ok(())
             })?;
         }
 
         // run on each and move paths from vec into all hashmap
-        all.extend(here);
         for elem in res {
-            let policy = all[&elem];
+            let policy = here[&elem];
             on_each(elem, policy)?;
         }
 
