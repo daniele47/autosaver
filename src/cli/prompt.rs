@@ -105,7 +105,10 @@ impl Prompt {
             if self.flags.skip_prompt {
                 return PromptAnswer::NO;
             }
-            outnow!("{} [{}] ", msg.style(CliContext::PROMPT_MSG), self.fmt);
+            let msg = msg.style(CliContext::PROMPT_MSG);
+            let choises = format!("[{}]", self.fmt);
+            let choises = choises.style(CliContext::PROMPT_CHOICES);
+            outnow!("{msg} {choises} ",);
             if self.flags.answer_no {
                 outln!("n");
                 return PromptAnswer::NO;

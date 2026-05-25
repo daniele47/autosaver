@@ -1,7 +1,6 @@
 use std::process::{Command, Stdio};
 
 use anyhow::{Context, bail};
-use owo_colors::OwoColorize;
 
 use crate::{
     cli::{
@@ -9,7 +8,6 @@ use crate::{
         ctx::{CliContext, Paths},
         prompt::{Prompt, PromptAnswer, PromptFlags},
     },
-    outln,
     prof::{ProfileKind, TraverseOpts, runner::RunnerPolicy},
 };
 
@@ -27,6 +25,7 @@ impl Cli {
                 // traverse all runner profiles
                 ctx.profiles.traverse(&ctx.curr_profile, trav_opts, |ctx| {
                     if let ProfileKind::Runner(runner) = ctx.item.kind() {
+                        CliContext::output_profile(ctx.name, CliContext::OUTPUT_PROFILE);
                         let this_run_dir = run_dir.join(ctx.item.id_or(ctx.name))?;
                         runner.resolve(&this_run_dir, |path, policy| {
                             // filter entries with skip policy
@@ -36,7 +35,7 @@ impl Cli {
 
                             // prompt user
                             let relpath = path.to_rel(run_dir)?;
-                            outln!("{}", relpath.display().style(CliContext::OUTPUT_PATH));
+                            CliContext::output_path(&relpath, CliContext::OUTPUT_PATH);
                             let msg = "Do you really want to run the script?";
                             let paths = &[&path];
                             let action = || {
