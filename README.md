@@ -24,6 +24,10 @@ So `config/neovim.conf` will be loaded as `neovim` profile.
 Profiles, also, don't need to be files directly in the `config` directory. They can also be nested!
 So `config/cli/tmux.conf` will be loaded as the `cli/tmux` profile.
 
+NOTES for future reference:
+    - `HOME`: is the user home directory, unless specified otherwise
+    - `ROOT`: is the dotfiles directory, in which `config`, `backup`, `run` directories are located 
+
 ## Configuration files
 
 All profiles share some basic properties:
@@ -32,92 +36,47 @@ All profiles share some basic properties:
 - all other lines starting with `/` are reserved for future use, thus currently ignored
 - all other lines are `data lines`, aka the actual entries of the profile itself
 
-NOTE:
-- all profiles share the `kind` and `id` options:
-    - `type` is required, and specifies the profile type
-    - `id` is optional and is used to locate the resources associated with the profile
-
 ### Composite Profile
 
 This profile simply acts as a profile aggregrator, and can be used to run command on multiple profiles.
 It can be created via `type composite` option line, or by creating a directory which will be automagically
 treated as a composite profile aggregrating the files and directories directly in it.
 
-- `option lines`: no additional option lines!
+- `option lines`:
+    - `kind`: must be `composite`
 
-- `data lines`: each data line is exactly the name of an other profile
+- `data lines`: 
+    - each data line is exactly the name of an other profile
 
 ### Module Profile
 
-This profile is the one actually allowing to track dotfiles on the system.
+This profile is the one actually allowing to track dotfiles on the system. 
+This profile is just a list of paths, each with a priority. Note that directories actually resolve
+to all the file in them instead, thus all operations happen on files only.
+The saved files will end up in the `backup/<profile_id>` directory
 
-<!-- TODO: REWRITE AFTER -->
+- `option lines`:
+    - `kind`   : must be `module`
+    - `id`     : identifies the backup directory
+    - `policy` : specify the policy for all the files after it
+        - `ignore`  : always ignore path
+        - `notdiff` : do not show by default if `HOME` and `ROOT` version just differ
+        - `always`  : always show path
 
-This is a profile to track dotfiles. It can list file paths relative to the $AUTOSAVER_HOME directory, and it is 
-used in `list`, `save`, `restore`, `rmhome`, `rhbackup` commands to confront the files on the home and in the 
-backup directory, and if the two differs, they can be updated based on the command specified.
+- `data lines`: 
+    - each data line is a relative path of the dotfiles to track in the `HOME`
 
-Module entries can have a `policy` with priority matching the following order:
-- `ignore`: force ignore the specified path, overriding all other policies
-- `notdiff`: do not show the path in commands if it differs between the two versions
-- `always` \[DEFAULT\]: always show the path, if the two versions do not match
+### Module Runner
 
-A Module profile configuration file looks like this:
-```
-/! type module
-/! id neovim
+This profile is to save and easily run various init or any other kind of script.
+The scripts are search from the `run/<profile_id>` directory
 
-// this is a comment
-// NOTE: directories do not require an ending slash!
+- `option lines`:
+    - `kind`   : must be `runner`
+    - `id`     : identifies the run directory
+    - `policy` : specify the policy for all the files after it
+        - `skip` : ignore the script
+        - `run`  : run the script
 
-.config/nvim
-
-/! policy notdiff
-
-.config/htop
-
-/! policy ignore
-
-.config/nvim/lazy-lock.json
-```
-This profile will:
-- use `backup/neovim` as the backup directory
-- track all files found recursively in `$AUTOSAVER_HOME/.config/nvim/` and in `$AUTOSAVER_ROOT/backup/.config/nvim` files with `always` policy
-- track all files found recursively in `$AUTOSAVER_HOME/.config/htop/` and in `$AUTOSAVER_ROOT/backup/.config/htop` files with `notdiff` policy
-- ignore `.config/nvim/lazy-lock.json` file that was included with the first line (`ignore` policy)
-
-### Runner
-
-This is a profile to list scripts from the `run` directory, that will be executed in order with the `run` command.
-
-Runner entries can have a `policy` with priority matching the following order:
-- `skip`: do not run the scripts at the specified path
-- `run`: \[DEFAULT\]: run the scripts at the specified path
-
-A runner profile configuration file looks like this:
-```
-/! type runner
-/! id kde-init
-
-// this is a comment
-// NOTE: directories do not require an ending slash!
-
-init_script.sh
-kde-init/
-
-/! policy skip
-
-kde-init/data
-
-```
-This profile will:
-- use the `run/kde-init` as the run directory (as specified by `id`)
-- run the `init_script.sh` script
-- run all the files found in `kde-init/` path
-- will skip all scripts in `kde-init/data` path
-
-NOTES: 
-- scripts DO NOT ALLOW STDIN! This is intentional, as interactive init scripts are a bad idea!
-- an hacky workaround is to allow environment variables to customize init behaviour, or in cases, such 
-    as getting root permissions, just do it with a wrapper bash script that keeps it cached!
-
+- `data lines`: 
+    - each data line is a relative path of the script to track

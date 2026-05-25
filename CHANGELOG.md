@@ -5,7 +5,6 @@ All notable changes to this project will be documented here
 TODO:
 - [ ] save/restore should allow also deleting files from the invalid side, with a --dangerous flag for restore to allow deleting files from home!
 - [ ] improve error messages
-- [ ] improve the readme to properly list all options in the config files
 - [ ] optimize space seeing if any struct can be compacted in size
 - [ ] make sure light and dark theme both are decent
 - [ ] consider whetever to allow `\*` option line to actually indicate ALL files/profiles???
