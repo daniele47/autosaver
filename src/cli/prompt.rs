@@ -56,8 +56,9 @@ impl PromptFlags {
 
 impl Prompt {
     pub fn new(allowed_answers: PromptAnswer, flags: PromptFlags) -> Self {
+        let allowed_answers = allowed_answers | PromptAnswer::YES | PromptAnswer::NO;
         Self {
-            allowed_answers,
+            allowed_answers: allowed_answers,
             flags,
             fmt: Self::ordered_answers(&allowed_answers),
             buf: String::new(),
@@ -191,6 +192,7 @@ impl Prompt {
         }
     }
     pub fn on_edit(&self, paths: &[&AbsPathStr]) {
+        assert!(!paths.is_empty());
         match std::env::var("EDITOR").ok() {
             Some(editor_cmd) => {
                 let cmd = std::process::Command::new(&editor_cmd)
