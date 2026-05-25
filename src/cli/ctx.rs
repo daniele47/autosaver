@@ -149,6 +149,7 @@ impl CliContext {
             Ok(())
         })?;
 
+        comp_entries.sort_unstable_by(|a, b| a.child().cmp(b.child()));
         let composite = ProfileKind::Composite(Composite::new(comp_entries));
         Ok(Profile::new(None, composite))
     }
