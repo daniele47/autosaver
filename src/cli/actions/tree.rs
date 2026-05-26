@@ -51,7 +51,7 @@ impl Cli {
                     Ok(())
                 })
             }
-            _ => unreachable!("Tree command should be tree"),
+            _ => unreachable!("Mismatching command"),
         }
     }
 }

@@ -33,7 +33,7 @@ impl Cli {
                     if let ProfileKind::Runner(runner) = ctx.item.kind() {
                         CliContext::output_profile(ctx.name, CliContext::OUTPUT_PROFILE);
                         let this_run_dir = run_dir.join(ctx.item.id_or(ctx.name))?;
-                        runner.resolve(&this_run_dir, |path, entry| {
+                        for (path, entry) in runner.resolve(&this_run_dir)? {
                             // filter entries with skip policy
                             if *entry.policy() == RunnerPolicy::Skip {
                                 return Ok(());
@@ -89,14 +89,12 @@ impl Cli {
 
                             // insert path to all paths
                             all_paths.insert(path);
-
-                            Ok(())
-                        })?;
+                        }
                     }
                     Ok(())
                 })
             }
-            _ => unreachable!("Tree command should be tree"),
+            _ => unreachable!("Mismatching command"),
         }
     }
 }

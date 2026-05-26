@@ -51,10 +51,7 @@ impl Runner {
         &self.entries
     }
 
-    pub fn resolve<T>(&self, dir: &AbsPathStr, mut on_each: T) -> anyhow::Result<()>
-    where
-        T: FnMut(AbsPathStr, &RunnerEntry) -> anyhow::Result<()>,
-    {
+    pub fn resolve(&self, dir: &AbsPathStr) -> anyhow::Result<IndexMap<AbsPathStr, &RunnerEntry>> {
         let mut elems: IndexMap<AbsPathStr, &RunnerEntry> = IndexMap::new();
 
         for entry in self.entries() {
@@ -74,11 +71,6 @@ impl Runner {
             })?;
         }
 
-        // run on each and move paths from vec into all hashmap
-        for elem in elems {
-            on_each(elem.0, elem.1)?;
-        }
-
-        Ok(())
+        Ok(elems)
     }
 }
