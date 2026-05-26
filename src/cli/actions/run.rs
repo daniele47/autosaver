@@ -4,6 +4,7 @@ use std::{
 };
 
 use anyhow::{Context, bail};
+use indexmap::{IndexMap, map::Entry};
 
 use crate::{
     cli::{
@@ -12,9 +13,38 @@ use crate::{
         prompt::{Prompt, PromptAnswer, PromptFlags},
     },
     fs::abs::AbsPathStr,
-    prof::{ProfileKind, TraverseOpts, runner::RunnerPolicy},
+    prof::{
+        ProfileKind, TraverseOpts,
+        runner::{Runner, RunnerEntry, RunnerPolicy},
+    },
     warning,
 };
+
+fn resolve<'a>(
+    runner: &'a Runner,
+    dir: &AbsPathStr,
+) -> anyhow::Result<IndexMap<AbsPathStr, &'a RunnerEntry>> {
+    let mut elems: IndexMap<AbsPathStr, &RunnerEntry> = IndexMap::new();
+
+    for entry in runner.entries() {
+        let all_files_ord = entry.path().to_abs(dir)?.all_files_ord()?;
+        all_files_ord.into_iter().try_for_each(|p| {
+            match elems.entry(p) {
+                Entry::Occupied(mut e) => {
+                    if (*entry.policy() as u64) < (*e.get().policy() as u64) {
+                        e.insert(entry);
+                    }
+                }
+                Entry::Vacant(e) => {
+                    e.insert(entry);
+                }
+            }
+            anyhow::Ok(())
+        })?;
+    }
+
+    Ok(elems)
+}
 
 impl Cli {
     pub fn action_run(&self, ctx: &CliContext) -> anyhow::Result<()> {
@@ -33,7 +63,7 @@ impl Cli {
                     if let ProfileKind::Runner(runner) = ctx.item.kind() {
                         CliContext::output_profile(ctx.name, CliContext::OUTPUT_PROFILE);
                         let this_run_dir = run_dir.join(ctx.item.id_or(ctx.name))?;
-                        for (path, entry) in runner.resolve(&this_run_dir)? {
+                        for (path, entry) in resolve(runner, &this_run_dir)? {
                             // filter entries with skip policy
                             if *entry.policy() == RunnerPolicy::Skip {
                                 return Ok(());

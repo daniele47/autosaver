@@ -1,6 +1,4 @@
-use indexmap::{IndexMap, map::Entry};
-
-use crate::fs::{abs::AbsPathStr, rel::RelPathStr};
+use crate::fs::rel::RelPathStr;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RunnerPolicy {
@@ -49,28 +47,5 @@ impl Runner {
 
     pub fn entries(&self) -> &[RunnerEntry] {
         &self.entries
-    }
-
-    pub fn resolve(&self, dir: &AbsPathStr) -> anyhow::Result<IndexMap<AbsPathStr, &RunnerEntry>> {
-        let mut elems: IndexMap<AbsPathStr, &RunnerEntry> = IndexMap::new();
-
-        for entry in self.entries() {
-            let all_files_ord = entry.path().to_abs(dir)?.all_files_ord()?;
-            all_files_ord.into_iter().try_for_each(|p| {
-                match elems.entry(p) {
-                    Entry::Occupied(mut e) => {
-                        if (entry.policy as u64) < (*e.get().policy() as u64) {
-                            e.insert(entry);
-                        }
-                    }
-                    Entry::Vacant(e) => {
-                        e.insert(entry);
-                    }
-                }
-                anyhow::Ok(())
-            })?;
-        }
-
-        Ok(elems)
     }
 }
