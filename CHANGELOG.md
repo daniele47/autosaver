@@ -12,6 +12,7 @@ TODO:
     - [ ] there are no untracked files in `backup|run` dirs
         - [ ] part 2: handle symlinks too, via a flag (BUT check if ANYTHING inside the symlink is tracked as the criteria!)
 - [ ] have module profiles track in an hashset already found paths such that 2 different profiles cannot operate on the same file
+- [ ] add a `PERF` env and print various time measured for various parts of the code! (use `verbose!` macro, as `--verbose` was removed!)
 
 ## v2.0.0
 
@@ -20,7 +21,6 @@ TODO:
 - complete rewrite, using 3rd party crates as dependencies
 - added `--log` flag with proper logs
 - added `all` as the default root profile tracking ALL profiles
-- added `--verbose` printing extra useful informaton
 - added `--home|--root` flags to specify different root and home directories (defaults: $HOME, current dir)
 - added `--list|-l` to not even show prompts (basically it's -n BUT nicer)
 - added very powerful prompt handler

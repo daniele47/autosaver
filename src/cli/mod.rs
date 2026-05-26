@@ -31,10 +31,6 @@ pub struct Cli {
     #[arg(short = 'R', long, env = "AUTOSAVER_ROOT", global = true)]
     root: Option<PathBuf>,
 
-    /// Show verbose output
-    #[arg(short, long, global = true)]
-    verbose: bool,
-
     /// Skip all prompts entirely and list files
     #[arg(short = 'l', long, global = true, conflicts_with_all = ["assume_no", "assume_yes"])]
     list: bool,
