@@ -41,7 +41,6 @@ pub struct Prompt {
     allowed_answers: PromptAnswer,
     flags: PromptFlags,
     fmt: String,
-    buf: String,
 }
 
 impl PromptFlags {
@@ -61,7 +60,6 @@ impl Prompt {
             allowed_answers,
             flags,
             fmt: Self::ordered_answers(&allowed_answers),
-            buf: String::new(),
         }
     }
 
@@ -101,7 +99,7 @@ impl Prompt {
         res[..count].join("/")
     }
 
-    pub fn prompt(&mut self, msg: &str) -> PromptAnswer {
+    pub fn prompt(&self, msg: &str) -> PromptAnswer {
         loop {
             if self.flags.skip_prompt {
                 return PromptAnswer::NO;
@@ -118,7 +116,8 @@ impl Prompt {
                 outln!("y");
                 return PromptAnswer::YES;
             }
-            let input = inputln!(&mut self.buf);
+            let mut input = String::new();
+            let input = inputln!(&mut input);
             if let Some(input) = Self::parse_answer(input, self.allowed_answers) {
                 return input;
             }
@@ -127,7 +126,7 @@ impl Prompt {
     }
 
     pub fn handled_prompt<T>(
-        &mut self,
+        &self,
         msg: &str,
         paths: &[&AbsPathStr],
         action: T,

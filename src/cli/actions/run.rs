@@ -53,7 +53,7 @@ impl Cli {
                 let run_dir = &ctx.paths[&Paths::Run];
                 let trav_opts = TraverseOpts::default();
                 let mut all_paths = HashSet::<AbsPathStr>::new();
-                let mut prompt = Prompt::new(
+                let prompt = Prompt::new(
                     PromptAnswer::all() & !PromptAnswer::DIFF,
                     PromptFlags::new(self.assume_no, self.assume_yes, self.list),
                 );

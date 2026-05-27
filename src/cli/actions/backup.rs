@@ -1,11 +1,18 @@
-use std::collections::BTreeSet;
+use std::collections::{BTreeSet, HashSet};
 
 use indexmap::{IndexMap, map::Entry};
 
 use crate::{
-    cli::{Cli, ctx::CliContext},
+    cli::{
+        Cli,
+        ctx::{CliContext, Paths},
+        prompt::{Prompt, PromptAnswer, PromptFlags},
+    },
     fs::{abs::AbsPathStr, rel::RelPathStr},
-    prof::module::{Module, ModuleEntry},
+    prof::{
+        TraverseOpts,
+        module::{Module, ModuleEntry},
+    },
 };
 
 fn resolve<'a>(
@@ -46,6 +53,14 @@ fn resolve<'a>(
 
 impl Cli {
     pub fn action_backup(&self, ctx: &CliContext) -> anyhow::Result<()> {
+        let backup_dir = &ctx.paths[&Paths::Backup];
+        let trav_opts = TraverseOpts::default();
+        let mut all_paths = HashSet::<RelPathStr>::new();
+        let prompt = Prompt::new(
+            PromptAnswer::all(),
+            PromptFlags::new(self.assume_no, self.assume_yes, self.list),
+        );
+
         Ok(())
     }
 }
