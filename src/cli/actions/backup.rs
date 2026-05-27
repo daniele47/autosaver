@@ -10,7 +10,7 @@ use crate::{
     },
     fs::{abs::AbsPathStr, rel::RelPathStr},
     prof::{
-        TraverseOpts,
+        ProfileKind, TraverseOpts,
         module::{Module, ModuleEntry},
     },
 };
@@ -53,6 +53,7 @@ fn resolve<'a>(
 
 impl Cli {
     pub fn action_backup(&self, ctx: &CliContext) -> anyhow::Result<()> {
+        let home_dir = &ctx.paths[&Paths::Home];
         let backup_dir = &ctx.paths[&Paths::Backup];
         let trav_opts = TraverseOpts::default();
         let mut all_paths = HashSet::<RelPathStr>::new();
@@ -60,6 +61,19 @@ impl Cli {
             PromptAnswer::all(),
             PromptFlags::new(self.assume_no, self.assume_yes, self.list),
         );
+
+        //
+        ctx.profiles.traverse(&ctx.curr_profile, trav_opts, |ctx| {
+            if let ProfileKind::Module(module) = ctx.item.kind() {
+                CliContext::output_profile(ctx.name, CliContext::OUTPUT_PROFILE);
+                let this_backup_dir = backup_dir.join(ctx.item.id_or(ctx.name))?;
+                for (path, entry) in resolve(module, &[&home_dir, &this_backup_dir])? {
+                    // TODO
+                    println!("{}", path.display());
+                }
+            }
+            Ok(())
+        })?;
 
         Ok(())
     }
