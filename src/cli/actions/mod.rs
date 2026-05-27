@@ -1,5 +1,6 @@
 use crate::cli::{Cli, CliCmd, ctx::CliContext};
 
+pub mod backup;
 pub mod run;
 pub mod tree;
 
@@ -8,10 +9,9 @@ impl Cli {
         let ctx = CliContext::new(&self.home, &self.root, &self.profile)?;
 
         match self.cmd {
-            CliCmd::List => todo!(),
-            CliCmd::Save => todo!(),
-            CliCmd::Restore => todo!(),
-            CliCmd::Delete => todo!(),
+            CliCmd::List | CliCmd::Save | CliCmd::Restore | CliCmd::Delete => {
+                self.action_backup(&ctx)
+            }
             CliCmd::Run { .. } => self.action_run(&ctx),
             CliCmd::Tree { .. } => self.action_tree(&ctx),
             CliCmd::Clear => todo!(),
