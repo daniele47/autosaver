@@ -38,7 +38,7 @@ pub struct PromptFlags {
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub struct PromptOpts {
-    newline: bool,
+    disable_newline: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -50,8 +50,8 @@ pub struct Prompt {
 }
 
 impl PromptOpts {
-    pub fn new(newline: bool) -> Self {
-        Self { newline }
+    pub fn new(disable_newline: bool) -> Self {
+        Self { disable_newline }
     }
 }
 
@@ -113,11 +113,9 @@ impl Prompt {
     }
 
     pub fn prompt(&self, msg: &str) -> PromptAnswer {
-        let answer;
         loop {
             if self.flags.skip_prompt {
-                answer = PromptAnswer::NO;
-                break;
+                return PromptAnswer::NO;
             }
             let msg = msg.style(CliContext::PROMPT_MSG);
             let choises = format!("[{}]", self.fmt);
@@ -125,26 +123,19 @@ impl Prompt {
             outnow!("{msg} {choises} ",);
             if self.flags.answer_no {
                 outln!("n");
-                answer = PromptAnswer::NO;
-                break;
+                return PromptAnswer::NO;
             }
             if self.flags.answer_yes {
                 outln!("y");
-                answer = PromptAnswer::YES;
-                break;
+                return PromptAnswer::YES;
             }
             let mut input = String::new();
             let input = inputln!(&mut input);
             if let Some(input) = Self::parse_answer(input, self.allowed_answers) {
-                answer = input;
-                break;
+                return input;
             }
             outln!("Invalid answer '{input}'. Please retry...")
         }
-        if self.opts.newline {
-            outln!();
-        }
-        answer
     }
 
     pub fn handled_prompt<T>(
@@ -195,10 +186,14 @@ impl Prompt {
             answers &= !PromptAnswer::DIFF;
         }
         if self.allowed_answers != answers {
-            Self::new(answers, self.flags, self.opts).handled_prompt(msg, paths, action)
+            Self::new(answers, self.flags, self.opts).handled_prompt(msg, paths, action)?;
         } else {
-            self.handled_prompt(msg, paths, action)
+            self.handled_prompt(msg, paths, action)?;
         }
+        if !self.opts.disable_newline {
+            outln!()
+        }
+        Ok(())
     }
 
     pub fn on_no(&self) {}
