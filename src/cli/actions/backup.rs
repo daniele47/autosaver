@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use indexmap::IndexMap;
+use indexmap::{IndexMap, map::Entry};
 
 use crate::{
     cli::{
@@ -18,9 +18,27 @@ use crate::{
 type Entries<'a> = IndexMap<RelPathStr, (&'a ModuleEntry, [Option<AbsPathStr>; 2])>;
 
 fn resolve<'a>(runner: &'a Module, dirs: &[&AbsPathStr; 2]) -> anyhow::Result<Entries<'a>> {
-    let entries = <Entries>::new();
+    let mut entries = <Entries>::new();
     for entry in runner.entries() {
-        println!("{dirs:?} {entry:?}");
+        for (i, dir) in dirs.iter().enumerate() {
+            for p in entry.path().to_abs(dir)?.all_files_ord()? {
+                let rp = p.to_rel(dir)?;
+                match entries.entry(rp) {
+                    Entry::Vacant(e) => {
+                        let mut val = (entry, [None, None]);
+                        val.1[i] = Some(p);
+                        e.insert(val);
+                    }
+                    Entry::Occupied(mut e) => {
+                        if e.get().1[i].as_ref().is_none_or(|_| {
+                            (*entry.policy() as u64) < (*(e.get()).0.policy() as u64)
+                        }) {
+                            e.get_mut().1[i] = Some(p);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     Ok(entries)
