@@ -156,6 +156,29 @@ impl Prompt {
         Ok(())
     }
 
+    pub fn handled_prompt_available<T>(
+        &self,
+        msg: &str,
+        paths: &[&AbsPathStr],
+        action: T,
+    ) -> anyhow::Result<()>
+    where
+        T: FnOnce() -> anyhow::Result<()>,
+    {
+        let mut answers = self.allowed_answers;
+        if paths.is_empty() {
+            answers &= !(PromptAnswer::EDIT | PromptAnswer::SHOW);
+        }
+        if paths.len() != 2 {
+            answers &= !PromptAnswer::DIFF;
+        }
+        if self.allowed_answers != answers {
+            Self::new(answers, self.flags.clone()).handled_prompt(msg, paths, action)
+        } else {
+            self.handled_prompt(msg, paths, action)
+        }
+    }
+
     pub fn on_no(&self) {}
     pub fn on_yes<T>(&self, action: T) -> anyhow::Result<()>
     where
@@ -211,6 +234,7 @@ impl Prompt {
         }
     }
     pub fn on_show(&self, paths: &[&AbsPathStr]) {
+        assert!(!paths.is_empty());
         for path in paths {
             let header = format!("@@ {} @@", path.display());
             outln!("{}", header.style(CliContext::SHOW_HEADER));

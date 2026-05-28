@@ -51,10 +51,9 @@ impl Cli {
         let backup_dir = &ctx.paths[&Paths::Backup];
         let trav_opts = TraverseOpts::default();
         let mut all_paths = HashSet::<RelPathStr>::new();
-        let prompt = Prompt::new(
-            PromptAnswer::all(),
-            PromptFlags::new(self.assume_no, self.assume_yes, self.list),
-        );
+        let prompt_answer = PromptAnswer::all();
+        let prompt_flags = PromptFlags::new(self.assume_no, self.assume_yes, self.list);
+        let prompt = Prompt::new(prompt_answer, prompt_flags);
 
         // traverse profiles
         ctx.profiles.traverse(&ctx.curr_profile, trav_opts, |ctx| {
@@ -77,10 +76,8 @@ impl Cli {
                     CliContext::output_path(&path, CliContext::OUTPUT_PATH);
 
                     // prompt user
-                    let msg = "TODO?";
-                    let paths = &[];
-                    let action = || Ok(());
-                    prompt.handled_prompt(msg, paths, action)?;
+                    // TODO: prompting user logic handling all possible commands
+                    prompt.handled_prompt_available("TEST?", &[], || Ok(()))?;
 
                     // insert path to all paths
                     all_paths.insert(path);
