@@ -25,10 +25,11 @@ fn resolve<'a>(
     dir: &AbsPathStr,
 ) -> anyhow::Result<IndexMap<AbsPathStr, &'a RunnerEntry>> {
     let mut elems: IndexMap<AbsPathStr, &RunnerEntry> = IndexMap::new();
+    let mut all = vec![];
 
     for entry in runner.entries() {
-        let all_files_ord = entry.path().to_abs(dir)?.all_files_ord()?;
-        all_files_ord.into_iter().try_for_each(|p| {
+        entry.path().to_abs(dir)?.all_files_ord(&mut all)?;
+        for p in all.drain(..) {
             match elems.entry(p) {
                 Entry::Occupied(mut e) => {
                     if (*entry.policy() as u64) < (*e.get().policy() as u64) {
@@ -39,8 +40,8 @@ fn resolve<'a>(
                     e.insert(entry);
                 }
             }
-            anyhow::Ok(())
-        })?;
+        }
+        all.clear();
     }
 
     Ok(elems)
