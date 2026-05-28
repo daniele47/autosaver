@@ -56,7 +56,7 @@ impl Cli {
             PromptFlags::new(self.assume_no, self.assume_yes, self.list),
         );
 
-        //
+        // traverse profiles
         ctx.profiles.traverse(&ctx.curr_profile, trav_opts, |ctx| {
             if let ProfileKind::Module(module) = ctx.item.kind() {
                 CliContext::output_profile(ctx.name, CliContext::OUTPUT_PROFILE);
