@@ -70,7 +70,7 @@ impl Cli {
                     // check path was not found yet
                     if all_paths.contains(&path) {
                         let p = path.display();
-                        bail!("Script '{p}' was already run previously");
+                        bail!("Path '{p}' was already found previously");
                     }
 
                     // output path
