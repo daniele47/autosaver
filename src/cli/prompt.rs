@@ -166,6 +166,9 @@ impl Prompt {
             i if i.contains(PromptAnswer::NO) => self.on_no(),
             _ => unimplemented!("Prompt answer not handled"),
         }
+        if !self.opts.disable_newline {
+            outln!()
+        }
         Ok(())
     }
 
@@ -186,14 +189,10 @@ impl Prompt {
             answers &= !PromptAnswer::DIFF;
         }
         if self.allowed_answers != answers {
-            Self::new(answers, self.flags, self.opts).handled_prompt(msg, paths, action)?;
+            Self::new(answers, self.flags, self.opts).handled_prompt(msg, paths, action)
         } else {
-            self.handled_prompt(msg, paths, action)?;
+            self.handled_prompt(msg, paths, action)
         }
-        if !self.opts.disable_newline {
-            outln!()
-        }
-        Ok(())
     }
 
     pub fn on_no(&self) {}
