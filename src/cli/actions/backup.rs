@@ -7,7 +7,7 @@ use crate::{
     cli::{
         Cli,
         ctx::{CliContext, Paths},
-        prompt::{Prompt, PromptAnswer, PromptFlags, PromptOpts},
+        prompt::{Prompt, PromptAnswer, PromptFlags},
     },
     fs::{abs::AbsPathStr, rel::RelPathStr},
     prof::{
@@ -54,7 +54,6 @@ impl Cli {
         let prompt = Prompt::new(
             PromptAnswer::all(),
             PromptFlags::new(self.assume_no, self.assume_yes, self.list),
-            PromptOpts::default(),
         );
 
         // traverse profiles

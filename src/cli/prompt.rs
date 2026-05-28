@@ -36,23 +36,11 @@ pub struct PromptFlags {
     skip_prompt: bool,
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
-pub struct PromptOpts {
-    disable_newline: bool,
-}
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Prompt {
     allowed_answers: PromptAnswer,
     flags: PromptFlags,
-    opts: PromptOpts,
     fmt: String,
-}
-
-impl PromptOpts {
-    pub fn new(disable_newline: bool) -> Self {
-        Self { disable_newline }
-    }
 }
 
 impl PromptFlags {
@@ -66,12 +54,11 @@ impl PromptFlags {
 }
 
 impl Prompt {
-    pub fn new(allowed_answers: PromptAnswer, flags: PromptFlags, opts: PromptOpts) -> Self {
+    pub fn new(allowed_answers: PromptAnswer, flags: PromptFlags) -> Self {
         let allowed_answers = allowed_answers | PromptAnswer::YES | PromptAnswer::NO;
         Self {
             allowed_answers,
             flags,
-            opts,
             fmt: Self::ordered_answers(&allowed_answers),
         }
     }
@@ -166,7 +153,7 @@ impl Prompt {
             i if i.contains(PromptAnswer::NO) => self.on_no(),
             _ => unimplemented!("Prompt answer not handled"),
         }
-        if !self.opts.disable_newline {
+        if !self.flags.skip_prompt {
             outln!()
         }
         Ok(())
@@ -189,7 +176,7 @@ impl Prompt {
             answers &= !PromptAnswer::DIFF;
         }
         if self.allowed_answers != answers {
-            Self::new(answers, self.flags, self.opts).handled_prompt(msg, paths, action)
+            Self::new(answers, self.flags).handled_prompt(msg, paths, action)
         } else {
             self.handled_prompt(msg, paths, action)
         }

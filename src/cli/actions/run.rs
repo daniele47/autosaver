@@ -10,7 +10,7 @@ use crate::{
     cli::{
         Cli, CliCmd,
         ctx::{CliContext, Paths},
-        prompt::{Prompt, PromptAnswer, PromptFlags, PromptOpts},
+        prompt::{Prompt, PromptAnswer, PromptFlags},
     },
     fs::abs::AbsPathStr,
     prof::{
@@ -52,7 +52,6 @@ impl Cli {
                 let prompt = Prompt::new(
                     PromptAnswer::all() & !PromptAnswer::DIFF,
                     PromptFlags::new(self.assume_no, self.assume_yes, self.list),
-                    PromptOpts::default(),
                 );
 
                 // traverse all runner profiles
