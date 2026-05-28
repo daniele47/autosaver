@@ -24,9 +24,8 @@ fn resolve<'a>(
     runner: &'a Runner,
     dir: &AbsPathStr,
     entries: &mut IndexMap<AbsPathStr, *const RunnerEntry>,
+    mut all: &mut Vec<AbsPathStr>,
 ) -> anyhow::Result<()> {
-    let mut all = vec![];
-
     for entry in runner.entries() {
         entry.path().to_abs(dir)?.all_files_ord(&mut all)?;
         for p in all.drain(..) {
@@ -55,6 +54,7 @@ impl Cli {
                 let trav_opts = TraverseOpts::default();
                 let mut all_paths = HashSet::<AbsPathStr>::new();
                 let mut entries = IndexMap::new();
+                let mut all = Vec::new();
                 let prompt = Prompt::new(
                     PromptAnswer::all() & !PromptAnswer::DIFF,
                     PromptFlags::new(self.assume_no, self.assume_yes, self.list),
@@ -65,7 +65,7 @@ impl Cli {
                     if let ProfileKind::Runner(runner) = ctx.item.kind() {
                         CliContext::output_profile(ctx.name, CliContext::OUTPUT_PROFILE);
                         let this_run_dir = run_dir.join(ctx.item.id_or(ctx.name))?;
-                        resolve(runner, &this_run_dir, &mut entries)?;
+                        resolve(runner, &this_run_dir, &mut entries, &mut all)?;
                         for (path, entry) in entries.drain(..) {
                             let entry = unsafe { &*entry };
                             // filter entries with skip policy
