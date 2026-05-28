@@ -39,13 +39,20 @@ pub struct TraverseContext<'a> {
     pub is_dup: bool,
 }
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub enum TraverseDupPolicy {
+    Include,
+    Shallow,
+    #[default]
+    Exclude,
+}
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct TraverseOpts {
-    hide_duplicates: bool,
+    dups: TraverseDupPolicy,
 }
 
 impl TraverseOpts {
-    pub fn new(hide_duplicates: bool) -> Self {
-        Self { hide_duplicates }
+    pub fn new(dups: TraverseDupPolicy) -> Self {
+        Self { dups }
     }
 }
 
@@ -124,17 +131,18 @@ impl AllProfiles {
                 self.get(item_name)
             }?;
 
-            // act on profile
-            on_elem(TraverseContext {
-                name: item_name,
-                item: item_profile,
-                path: &path,
-                stack: &stack,
-                is_dup: visited.contains(&item_name),
-            })?;
-
-            // end traversal if it was a duplicate, otherwise add to visited set
-            if !visited.insert(item_name) && !opts.hide_duplicates {
+            // act depending on duplicated policy
+            let is_dup = !visited.insert(item_name);
+            if !is_dup || opts.dups != TraverseDupPolicy::Exclude {
+                on_elem(TraverseContext {
+                    name: item_name,
+                    item: item_profile,
+                    path: &path,
+                    stack: &stack,
+                    is_dup,
+                })?;
+            }
+            if is_dup && opts.dups != TraverseDupPolicy::Include {
                 continue;
             }
 

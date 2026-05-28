@@ -3,7 +3,7 @@ use owo_colors::OwoColorize;
 use crate::{
     cli::{Cli, CliCmd, ctx::CliContext},
     out, outln,
-    prof::{ProfileKind, TraverseOpts},
+    prof::{ProfileKind, TraverseDupPolicy, TraverseOpts},
 };
 
 const TREE: [&str; 4] = ["│   ", "    ", "├── ", "└── "];
@@ -12,7 +12,12 @@ impl Cli {
     pub fn action_tree(&self, ctx: &CliContext) -> anyhow::Result<()> {
         match self.cmd {
             CliCmd::Tree { no_dedup, show_id } => {
-                let trav_opts = TraverseOpts::new(no_dedup);
+                let trav_opts = if no_dedup {
+                    TraverseDupPolicy::Include
+                } else {
+                    TraverseDupPolicy::Shallow
+                };
+                let trav_opts = TraverseOpts::new(trav_opts);
                 let mut are_last = Vec::<bool>::new();
                 ctx.profiles.traverse(&ctx.curr_profile, trav_opts, |ctx| {
                     let len = ctx.path.len();
