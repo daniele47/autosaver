@@ -65,9 +65,6 @@ impl Cli {
                                 return Ok(());
                             }
 
-                            // prompt user
-                            let relpath = path.to_rel(run_dir)?;
-
                             // check path was not found yet
                             if all_paths.contains(&path) {
                                 let p = path.to_rel(run_dir)?;
@@ -76,9 +73,10 @@ impl Cli {
                             }
 
                             // output path
+                            let relpath = path.to_rel(run_dir)?;
                             CliContext::output_path(&relpath, CliContext::OUTPUT_PATH);
 
-                            // handle flags
+                            // prompt user
                             let msg = if entry.stdin() {
                                 if stdin {
                                     "Do you really want to run the script with stdin enabled?"
