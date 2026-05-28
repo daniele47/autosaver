@@ -23,27 +23,23 @@ use crate::{
 fn resolve<'a>(
     runner: &'a Runner,
     dir: &AbsPathStr,
-    entries: &mut IndexMap<AbsPathStr, *const RunnerEntry>,
-    mut all: &mut Vec<AbsPathStr>,
-) -> anyhow::Result<()> {
+) -> anyhow::Result<IndexMap<AbsPathStr, &'a RunnerEntry>> {
+    let mut entries = IndexMap::<AbsPathStr, &'a RunnerEntry>::new();
     for entry in runner.entries() {
-        entry.path().to_abs(dir)?.all_files_ord(&mut all)?;
-        for p in all.drain(..) {
+        for p in entry.path().to_abs(dir)?.all_files_ord()? {
             match entries.entry(p) {
-                Entry::Occupied(mut e) => unsafe {
-                    if (*entry.policy() as u64) < (*(**e.get()).policy() as u64) {
+                Entry::Occupied(mut e) => {
+                    if (*entry.policy() as u64) < (*(e.get()).policy() as u64) {
                         e.insert(entry);
                     }
-                },
+                }
                 Entry::Vacant(e) => {
                     e.insert(entry);
                 }
             }
         }
-        all.clear();
     }
-
-    Ok(())
+    Ok(entries)
 }
 
 impl Cli {
@@ -53,8 +49,6 @@ impl Cli {
                 let run_dir = &ctx.paths[&Paths::Run];
                 let trav_opts = TraverseOpts::default();
                 let mut all_paths = HashSet::<AbsPathStr>::new();
-                let mut entries = IndexMap::new();
-                let mut all = Vec::new();
                 let prompt = Prompt::new(
                     PromptAnswer::all() & !PromptAnswer::DIFF,
                     PromptFlags::new(self.assume_no, self.assume_yes, self.list),
@@ -65,9 +59,7 @@ impl Cli {
                     if let ProfileKind::Runner(runner) = ctx.item.kind() {
                         CliContext::output_profile(ctx.name, CliContext::OUTPUT_PROFILE);
                         let this_run_dir = run_dir.join(ctx.item.id_or(ctx.name))?;
-                        resolve(runner, &this_run_dir, &mut entries, &mut all)?;
-                        for (path, entry) in entries.drain(..) {
-                            let entry = unsafe { &*entry };
+                        for (path, entry) in resolve(runner, &this_run_dir)? {
                             // filter entries with skip policy
                             if *entry.policy() == RunnerPolicy::Skip {
                                 return Ok(());

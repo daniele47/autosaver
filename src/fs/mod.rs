@@ -105,13 +105,14 @@ impl AbsPathStr {
         Ok(())
     }
 
-    pub fn all_files_ord(self, ord_files: &mut Vec<AbsPathStr>) -> anyhow::Result<()> {
+    pub fn all_files_ord(self) -> anyhow::Result<Vec<AbsPathStr>> {
+        let mut ord_files = Vec::new();
         self.all_files(|p| {
             ord_files.push(p);
             Ok(())
         })?;
         ord_files.sort_unstable();
-        Ok(())
+        Ok(ord_files)
     }
 
     pub fn purge_path_opts(&self, allow_recursive_delete: bool) -> anyhow::Result<()> {

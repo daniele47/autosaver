@@ -1,6 +1,6 @@
-use std::collections::{BTreeSet, HashSet};
+use std::collections::HashSet;
 
-use indexmap::{IndexMap, map::Entry};
+use indexmap::IndexMap;
 
 use crate::{
     cli::{
@@ -15,40 +15,15 @@ use crate::{
     },
 };
 
-fn resolve<'a>(
-    runner: &'a Module,
-    dirs: &[&AbsPathStr],
-) -> anyhow::Result<IndexMap<RelPathStr, &'a ModuleEntry>> {
-    let mut elems: IndexMap<RelPathStr, &ModuleEntry> = IndexMap::new();
+type Entries<'a> = IndexMap<RelPathStr, (&'a ModuleEntry, [Option<AbsPathStr>; 2])>;
 
+fn resolve<'a>(runner: &'a Module, dirs: &[&AbsPathStr; 2]) -> anyhow::Result<Entries<'a>> {
+    let entries = <Entries>::new();
     for entry in runner.entries() {
-        let mut all_files_ord = BTreeSet::default();
-        for dir in dirs {
-            // all_files_ord.extend(
-            //     entry
-            //         .path()
-            //         .to_abs(dir)?
-            //         .all_files_ord()?
-            //         .iter()
-            //         .map(|p| p.to_rel(dir).expect("abs path cannot to relative")),
-            // );
-        }
-        all_files_ord.into_iter().try_for_each(|p| {
-            match elems.entry(p) {
-                Entry::Occupied(mut e) => {
-                    if (*entry.policy() as u64) < (*e.get().policy() as u64) {
-                        e.insert(entry);
-                    }
-                }
-                Entry::Vacant(e) => {
-                    e.insert(entry);
-                }
-            }
-            anyhow::Ok(())
-        })?;
+        println!("{dirs:?} {entry:?}");
     }
 
-    Ok(elems)
+    Ok(entries)
 }
 
 impl Cli {
@@ -56,7 +31,7 @@ impl Cli {
         let home_dir = &ctx.paths[&Paths::Home];
         let backup_dir = &ctx.paths[&Paths::Backup];
         let trav_opts = TraverseOpts::default();
-        let mut all_paths = HashSet::<RelPathStr>::new();
+        let all_paths = HashSet::<RelPathStr>::new();
         let prompt = Prompt::new(
             PromptAnswer::all(),
             PromptFlags::new(self.assume_no, self.assume_yes, self.list),
@@ -67,9 +42,9 @@ impl Cli {
             if let ProfileKind::Module(module) = ctx.item.kind() {
                 CliContext::output_profile(ctx.name, CliContext::OUTPUT_PROFILE);
                 let this_backup_dir = backup_dir.join(ctx.item.id_or(ctx.name))?;
-                for (path, entry) in resolve(module, &[&home_dir, &this_backup_dir])? {
+                for (path, entry) in resolve(module, &[home_dir, &this_backup_dir])? {
                     // TODO
-                    println!("{}", path.display());
+                    println!("{path:?} {entry:?} {all_paths:?} {prompt:?}");
                 }
             }
             Ok(())
