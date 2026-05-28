@@ -7,7 +7,7 @@ use crate::{
     cli::{
         Cli,
         ctx::{CliContext, Paths},
-        prompt::{Prompt, PromptAnswer, PromptFlags},
+        prompt::{Prompt, PromptAnswer, PromptFlags, PromptOpts},
     },
     fs::{abs::AbsPathStr, rel::RelPathStr},
     prof::{
@@ -51,9 +51,11 @@ impl Cli {
         let backup_dir = &ctx.paths[&Paths::Backup];
         let trav_opts = TraverseOpts::default();
         let mut all_paths = HashSet::<RelPathStr>::new();
-        let prompt_answer = PromptAnswer::all();
-        let prompt_flags = PromptFlags::new(self.assume_no, self.assume_yes, self.list);
-        let prompt = Prompt::new(prompt_answer, prompt_flags);
+        let prompt = Prompt::new(
+            PromptAnswer::all(),
+            PromptFlags::new(self.assume_no, self.assume_yes, self.list),
+            PromptOpts::default(),
+        );
 
         // traverse profiles
         ctx.profiles.traverse(&ctx.curr_profile, trav_opts, |ctx| {

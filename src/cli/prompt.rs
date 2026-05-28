@@ -29,18 +29,30 @@ bitflags! {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub struct PromptFlags {
     answer_no: bool,
     answer_yes: bool,
     skip_prompt: bool,
 }
 
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub struct PromptOpts {
+    newline: bool,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Prompt {
     allowed_answers: PromptAnswer,
     flags: PromptFlags,
+    opts: PromptOpts,
     fmt: String,
+}
+
+impl PromptOpts {
+    pub fn new(newline: bool) -> Self {
+        Self { newline }
+    }
 }
 
 impl PromptFlags {
@@ -54,11 +66,12 @@ impl PromptFlags {
 }
 
 impl Prompt {
-    pub fn new(allowed_answers: PromptAnswer, flags: PromptFlags) -> Self {
+    pub fn new(allowed_answers: PromptAnswer, flags: PromptFlags, opts: PromptOpts) -> Self {
         let allowed_answers = allowed_answers | PromptAnswer::YES | PromptAnswer::NO;
         Self {
             allowed_answers,
             flags,
+            opts,
             fmt: Self::ordered_answers(&allowed_answers),
         }
     }
@@ -100,9 +113,11 @@ impl Prompt {
     }
 
     pub fn prompt(&self, msg: &str) -> PromptAnswer {
+        let answer;
         loop {
             if self.flags.skip_prompt {
-                return PromptAnswer::NO;
+                answer = PromptAnswer::NO;
+                break;
             }
             let msg = msg.style(CliContext::PROMPT_MSG);
             let choises = format!("[{}]", self.fmt);
@@ -110,19 +125,26 @@ impl Prompt {
             outnow!("{msg} {choises} ",);
             if self.flags.answer_no {
                 outln!("n");
-                return PromptAnswer::NO;
+                answer = PromptAnswer::NO;
+                break;
             }
             if self.flags.answer_yes {
                 outln!("y");
-                return PromptAnswer::YES;
+                answer = PromptAnswer::YES;
+                break;
             }
             let mut input = String::new();
             let input = inputln!(&mut input);
             if let Some(input) = Self::parse_answer(input, self.allowed_answers) {
-                return input;
+                answer = input;
+                break;
             }
             outln!("Invalid answer '{input}'. Please retry...")
         }
+        if self.opts.newline {
+            outln!();
+        }
+        answer
     }
 
     pub fn handled_prompt<T>(
@@ -173,7 +195,7 @@ impl Prompt {
             answers &= !PromptAnswer::DIFF;
         }
         if self.allowed_answers != answers {
-            Self::new(answers, self.flags.clone()).handled_prompt(msg, paths, action)
+            Self::new(answers, self.flags, self.opts).handled_prompt(msg, paths, action)
         } else {
             self.handled_prompt(msg, paths, action)
         }
