@@ -1,6 +1,7 @@
 use crate::cli::{Cli, CliCmd, ctx::CliContext};
 
 pub mod backup;
+pub mod clear;
 pub mod run;
 pub mod tree;
 
@@ -15,7 +16,7 @@ impl Cli {
             | CliCmd::Delete { .. } => self.action_backup(&ctx),
             CliCmd::Run { .. } => self.action_run(&ctx),
             CliCmd::Tree { .. } => self.action_tree(&ctx),
-            CliCmd::Clear => todo!(),
+            CliCmd::Clear => self.action_clear(&ctx),
         }?;
 
         Ok(())
