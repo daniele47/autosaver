@@ -2,6 +2,7 @@ use owo_colors::{OwoColorize, Style};
 
 use crate::{fs::rel::RelPathStr, outln};
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct CliColor {
     pub tree_composite: Style,
     pub tree_runner: Style,

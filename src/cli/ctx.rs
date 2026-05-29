@@ -8,6 +8,7 @@ use std::{
 use anyhow::{Context, bail};
 
 use crate::{
+    cli::col::CliColor,
     fs::{abs::AbsPathStr, rel::RelPathStr},
     prof::{
         AllProfiles, Profile, ProfileKind,
@@ -23,12 +24,13 @@ pub enum Paths {
     Config,
     Run,
 }
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct CliContext {
     pub paths: HashMap<Paths, AbsPathStr>,
     pub root_profile: RelPathStr,
     pub profiles: AllProfiles,
     pub curr_profile: RelPathStr,
+    pub col: CliColor,
 }
 
 impl CliContext {
@@ -41,11 +43,13 @@ impl CliContext {
         let root_profile = RelPathStr::from_str("all")?;
         let profiles = Self::load_profiles(&paths[&Paths::Config], &root_profile)?;
         let curr_profile = flag_prof.as_ref().unwrap_or(&root_profile).to_owned();
+        let col = CliColor::default_theme();
         Ok(Self {
             paths,
             root_profile,
             profiles,
             curr_profile,
+            col,
         })
     }
 
