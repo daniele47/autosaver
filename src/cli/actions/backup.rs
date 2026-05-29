@@ -64,7 +64,7 @@ impl Cli {
                 for (path, entry) in resolve(module, &[home_dir, &this_backup_dir])? {
                     // filter entries with skip policy
                     if *entry.0.policy() == ModulePolicy::Ignore {
-                        return Ok(());
+                        continue;
                     }
 
                     // check path was not found yet

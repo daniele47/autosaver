@@ -62,7 +62,7 @@ impl Cli {
                         for (path, entry) in resolve(runner, &this_run_dir)? {
                             // filter entries with skip policy
                             if *entry.policy() == RunnerPolicy::Skip {
-                                return Ok(());
+                                continue;
                             }
 
                             // check path was not found yet
@@ -82,7 +82,7 @@ impl Cli {
                                     "Do you really want to run the script with stdin enabled?"
                                 } else {
                                     warning!("Script requires stdin to run");
-                                    return Ok(());
+                                    continue;
                                 }
                             } else {
                                 "Do you really want to run the script?"
