@@ -107,47 +107,51 @@ impl Cli {
                             CliCmd::List { act_backup }
                             | CliCmd::Save { act_backup, .. }
                             | CliCmd::Restore { act_backup, .. } => match &entry.1 {
-                                // file is missing on either side
-                                [Some(p1), None] | [None, Some(p1)] => {
+                                // file is missing in the backup
+                                [Some(p1), None] => {
                                     CliColor::output_path(&path, ctx.col.output_missing);
-                                    match (&self.cmd, &entry.1[0].is_some()) {
-                                        (CliCmd::Save { .. }, true) => {
+                                    match &self.cmd {
+                                        CliCmd::Save { .. } => {
                                             prompt.handled_prompt_available(
                                                 "Do you really want to create backup file?",
                                                 &[p1],
                                                 || p1.copy_file(&path.to_abs(&this_backup_dir)?),
                                             )?;
                                         }
-                                        (CliCmd::Save { force, .. }, false) => {
-                                            if *force {
-                                                prompt.handled_prompt_available(
-                                                    "Do you really want to delete backup file?",
-                                                    &[p1],
-                                                    || {
-                                                        p1.copy_file(
-                                                            &path.to_abs(&this_backup_dir)?,
-                                                        )
-                                                    },
-                                                )?;
-                                            }
-                                        }
-                                        (CliCmd::Restore { .. }, false) => {
-                                            prompt.handled_prompt_available(
-                                                "Do you really want to create home file?",
-                                                &[p1],
-                                                || p1.copy_file(&path.to_abs(&this_backup_dir)?),
-                                            )?;
-                                        }
-                                        (CliCmd::Restore { force, .. }, true) => {
+                                        CliCmd::Restore { force, .. } => {
                                             if *force {
                                                 prompt.handled_prompt_available(
                                                     "Do you really want to delete home file?",
                                                     &[p1],
-                                                    || p1.copy_file(&path.to_abs(home_dir)?),
+                                                    || p1.purge_path(),
                                                 )?;
                                             }
                                         }
-                                        (CliCmd::List { .. }, _) => {}
+                                        CliCmd::List { .. } => {}
+                                        _ => unreachable!("must either save or restore or list"),
+                                    }
+                                }
+                                // file is missing in home
+                                [None, Some(p1)] => {
+                                    CliColor::output_path(&path, ctx.col.output_missing);
+                                    match &self.cmd {
+                                        CliCmd::Save { force, .. } => {
+                                            if *force {
+                                                prompt.handled_prompt_available(
+                                                    "Do you really want to delete backup file?",
+                                                    &[p1],
+                                                    || p1.purge_path(),
+                                                )?;
+                                            }
+                                        }
+                                        CliCmd::Restore { .. } => {
+                                            prompt.handled_prompt_available(
+                                                "Do you really want to create home file?",
+                                                &[p1],
+                                                || p1.copy_file(&path.to_abs(home_dir)?),
+                                            )?;
+                                        }
+                                        CliCmd::List { .. } => {}
                                         _ => unreachable!("must either save or restore or list"),
                                     }
                                 }
@@ -164,7 +168,7 @@ impl Cli {
                                         prompt.handled_prompt_available(msg, paths, action)?;
                                     } else if matches!(&self.cmd, CliCmd::Restore { .. }) {
                                         let msg = "Do you really want to update home file?";
-                                        let paths = &[p1, p2];
+                                        let paths = &[p2, p1];
                                         let action = || p2.copy_file(p1);
                                         prompt.handled_prompt_available(msg, paths, action)?;
                                     }

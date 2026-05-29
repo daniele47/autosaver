@@ -14,6 +14,7 @@ TODO:
 - [x] create `CliColor` to handle all coloring and output stylization!
     - [ ] add a `theme.conf` file to allow customazing coloring
 - [ ] `ctrl+d` breaks the nice prompts. do something (maybe even disable ctrl+d? idk)
+- [ ] fix `backup` action, which is currently half broken
 
 ## WIP
 
