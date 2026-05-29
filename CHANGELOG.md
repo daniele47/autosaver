@@ -13,6 +13,7 @@ TODO:
         - [ ] part 2: handle symlinks too, via a flag (BUT check if ANYTHING inside the symlink is tracked as the criteria!)
 - [ ] have module profiles track in an hashset already found paths such that 2 different profiles cannot operate on the same file
 - [ ] add a `PERF` env and print various time measured for various parts of the code! (use `verbose!` macro, as `--verbose` was removed!)
+- [ ] add a global flag `--full-path|-f` to show all paths in their entirity instead of relpaths
 
 ## v2.0.0
 

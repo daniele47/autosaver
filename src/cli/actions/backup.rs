@@ -80,12 +80,7 @@ impl Cli {
                             only_original,
                             only_backup,
                         } => {
-                            match entry.1 {
-                                [None, None] => {},
-                                [None, Some(_)] => todo!(),
-                                [Some(_), None] => todo!(),
-                                [Some(_), Some(_)] => todo!(),
-                            }
+                            let mut path_shown = false;
                             if (*only_original || !only_backup)
                                 && let Some(original_file) = &entry.1[0]
                             {
@@ -93,6 +88,7 @@ impl Cli {
                                 let paths = &[original_file];
                                 let action = || original_file.purge_path();
                                 CliContext::output_path(&path, CliContext::OUTPUT_PATH);
+                                path_shown = true;
                                 prompt.handled_prompt_available(msg, paths, action)?;
                             }
                             if (*only_backup || !only_original)
@@ -101,7 +97,9 @@ impl Cli {
                                 let msg = "Do you really want to delete backup file?";
                                 let paths = &[backup_file];
                                 let action = || backup_file.purge_path();
-                                CliContext::output_path(&path, CliContext::OUTPUT_PATH);
+                                if !path_shown {
+                                    CliContext::output_path(&path, CliContext::OUTPUT_PATH);
+                                }
                                 prompt.handled_prompt_available(msg, paths, action)?;
                             }
                         }

@@ -56,7 +56,11 @@ impl CliContext {
     }
 
     pub fn output_path(path: impl AsRef<PathStr>, style: Style) {
-        outln!("{} {}", "-".style(style), path.as_ref().display().style(style));
+        outln!(
+            "{} {}",
+            "-".style(style),
+            path.as_ref().display().style(style)
+        );
     }
 
     pub fn new(
