@@ -116,13 +116,13 @@ impl Cli {
                                         )?;
                                     }
                                     (CliCmd::Save { force, .. }, false) => {
-                                        let warn_msg = "File requires a flag to be deleted from backup directory";
-                                            prompt.handled_prompt_available_warn(
+                                        if *force {
+                                            prompt.handled_prompt_available(
                                             "Do you really want to delete file in the backup folder?",
                                             &[p1],
                                             || p1.copy_file(&path.to_abs(&this_backup_dir)?),
-                                            || if !force {Some(warn_msg)} else {None}
                                         )?;
+                                        }
                                     }
                                     (CliCmd::Restore { .. }, false) => {
                                         prompt.handled_prompt_available(
@@ -132,13 +132,13 @@ impl Cli {
                                         )?;
                                     }
                                     (CliCmd::Restore { force, .. }, true) => {
-                                        let warn_msg = "File requires a flag to be deleted from home directory";
-                                            prompt.handled_prompt_available_warn(
+                                        if *force    {
+                                            prompt.handled_prompt_available(
                                             "Do you really want to delete file in the home folder?",
                                             &[p1],
                                             || p1.copy_file(&path.to_abs(home_dir)?),
-                                            || if !force {Some(warn_msg)} else {None}
                                         )?;
+                                    }
                                     }
                                     (CliCmd::List{..}, _) => {}
                                     _ => unreachable!("must either save or restore or list"),

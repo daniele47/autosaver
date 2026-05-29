@@ -179,27 +179,6 @@ impl Prompt {
         }
     }
 
-    pub fn handled_prompt_available_warn<T, S>(
-        &self,
-        msg: &str,
-        paths: &[&AbsPathStr],
-        action: T,
-        cond_warn: S,
-    ) -> anyhow::Result<()>
-    where
-        T: FnOnce() -> anyhow::Result<()>,
-        S: FnOnce() -> Option<&'static str>,
-    {
-        if self.flags.skip_prompt {
-            return Ok(());
-        }
-        if let Some(str) = cond_warn() {
-            warning!("{str}");
-            return Ok(());
-        }
-        self.handled_prompt_available(msg, paths, action)
-    }
-
     pub fn on_no(&self) {}
     pub fn on_yes<T>(&self, action: T) -> anyhow::Result<()>
     where
