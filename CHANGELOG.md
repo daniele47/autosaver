@@ -11,6 +11,7 @@ TODO:
 - (maybe?) add a `PERF` env and print various time measured for various parts of the code! (use `verbose!` macro, as `--verbose` was removed!)
 - (maybe?) add a global flag `--full-path|-f` to show all paths in their entirity instead of relpaths
 - (maybe?) add a `theme.conf` file to allow customazing coloring
+- [ ] prompt is not fully consistent (make warning/error properly integrated or smt? IDK. might remove the newline? idk)
 
 ## WIP
 
