@@ -5,7 +5,7 @@ use indexmap::{IndexMap, map::Entry};
 
 use crate::{
     cli::{
-        Cli,
+        Cli, CliCmd,
         ctx::{CliContext, Paths},
         prompt::{Prompt, PromptAnswer, PromptFlags},
     },
@@ -73,21 +73,45 @@ impl Cli {
                         bail!("Path '{p}' was already found previously");
                     }
 
-                    // output path
-                    CliContext::output_path(&path, CliContext::OUTPUT_PATH);
-
-                    // prompt user
-                    match entry.1 {
-                        [None, None] => {}
-                        [None, Some(p2)] => {
-                            dbg!(p2, &prompt);
+                    // run action
+                    match &self.cmd {
+                        // delete action
+                        CliCmd::Delete {
+                            only_original,
+                            only_backup,
+                        } => {
+                            match entry.1 {
+                                [None, None] => {},
+                                [None, Some(_)] => todo!(),
+                                [Some(_), None] => todo!(),
+                                [Some(_), Some(_)] => todo!(),
+                            }
+                            if (*only_original || !only_backup)
+                                && let Some(original_file) = &entry.1[0]
+                            {
+                                let msg = "Do you really want to delete original file?";
+                                let paths = &[original_file];
+                                let action = || original_file.purge_path();
+                                CliContext::output_path(&path, CliContext::OUTPUT_PATH);
+                                prompt.handled_prompt_available(msg, paths, action)?;
+                            }
+                            if (*only_backup || !only_original)
+                                && let Some(backup_file) = &entry.1[1]
+                            {
+                                let msg = "Do you really want to delete backup file?";
+                                let paths = &[backup_file];
+                                let action = || backup_file.purge_path();
+                                CliContext::output_path(&path, CliContext::OUTPUT_PATH);
+                                prompt.handled_prompt_available(msg, paths, action)?;
+                            }
                         }
-                        [Some(p1), None] => {
-                            dbg!(p1);
+                        // backup action
+                        CliCmd::List { act_backup }
+                        | CliCmd::Save { act_backup }
+                        | CliCmd::Restore { act_backup } => {
+                            let _ = act_backup;
                         }
-                        [Some(p1), Some(p2)] => {
-                            dbg!(p1, p2);
-                        }
+                        _ => unreachable!("Invalid backup action"),
                     }
 
                     // insert path to all paths

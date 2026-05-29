@@ -9,7 +9,7 @@ use anyhow::{Context, bail};
 use owo_colors::{OwoColorize, Style};
 
 use crate::{
-    fs::{abs::AbsPathStr, rel::RelPathStr},
+    fs::{abs::AbsPathStr, path::PathStr, rel::RelPathStr},
     outln,
     prof::{
         AllProfiles, Profile, ProfileKind,
@@ -55,8 +55,8 @@ impl CliContext {
         );
     }
 
-    pub fn output_path(path: &RelPathStr, style: Style) {
-        outln!("{} {}", "-".style(style), path.display().style(style));
+    pub fn output_path(path: impl AsRef<PathStr>, style: Style) {
+        outln!("{} {}", "-".style(style), path.as_ref().display().style(style));
     }
 
     pub fn new(

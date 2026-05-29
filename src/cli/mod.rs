@@ -64,10 +64,10 @@ pub enum CliCmd {
     /// Delete tracked dotfiles
     Delete {
         /// Show only files only from home directory
-        #[arg(short = 'o', long)]
+        #[arg(short = 'o', long, conflicts_with = "only_backup")]
         only_original: bool,
         /// Show only files from the backup directory
-        #[arg(short = 'b', long)]
+        #[arg(short = 'b', long, conflicts_with = "only_original")]
         only_backup: bool,
     },
     /// Run init scripts

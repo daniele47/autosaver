@@ -96,3 +96,14 @@ impl FromStr for AbsPathStr {
         Self::new(s.into())
     }
 }
+
+impl From<AbsPathStr> for PathStr {
+    fn from(value: AbsPathStr) -> Self {
+        value.pathstr
+    }
+}
+impl AsRef<PathStr> for AbsPathStr {
+    fn as_ref(&self) -> &PathStr {
+        &self.pathstr
+    }
+}
