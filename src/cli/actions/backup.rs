@@ -77,8 +77,18 @@ impl Cli {
                     CliContext::output_path(&path, CliContext::OUTPUT_PATH);
 
                     // prompt user
-                    // TODO: prompting user logic handling all possible commands
-                    prompt.handled_prompt_available("TEST?", &[], || Ok(()))?;
+                    match entry.1 {
+                        [None, None] => {}
+                        [None, Some(p2)] => {
+                            dbg!(p2, &prompt);
+                        }
+                        [Some(p1), None] => {
+                            dbg!(p1);
+                        }
+                        [Some(p1), Some(p2)] => {
+                            dbg!(p1, p2);
+                        }
+                    }
 
                     // insert path to all paths
                     all_paths.insert(path);

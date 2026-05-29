@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use clap::{Parser, Subcommand};
+use clap::{Args, Parser, Subcommand};
 
 use crate::fs::rel::RelPathStr;
 
@@ -47,13 +47,29 @@ pub struct Cli {
 #[derive(Subcommand, Debug, Clone, PartialEq, Eq)]
 pub enum CliCmd {
     /// List changes between home and backup directories
-    List,
+    List {
+        #[command(flatten)]
+        act_backup: CliActBackup,
+    },
     /// Save changes in home directory to the backup
-    Save,
+    Save {
+        #[command(flatten)]
+        act_backup: CliActBackup,
+    },
     /// Restore changes in backup directory to the home
-    Restore,
+    Restore {
+        #[command(flatten)]
+        act_backup: CliActBackup,
+    },
     /// Delete tracked dotfiles
-    Delete,
+    Delete {
+        /// Show only files only from home directory
+        #[arg(short = 'o', long)]
+        only_original: bool,
+        /// Show only files from the backup directory
+        #[arg(short = 'b', long)]
+        only_backup: bool,
+    },
     /// Run init scripts
     Run {
         /// Enable stdin in scripts that hint their need for it
@@ -72,4 +88,19 @@ pub enum CliCmd {
     },
     /// Clear untracked files in backup directories
     Clear,
+}
+
+#[derive(Args, Debug, Clone, PartialEq, Eq)]
+pub struct CliActBackup {
+    /// Include also paths with notdiff policy
+    #[arg(short, long)]
+    all: bool,
+
+    /// Include also paths that do not differ
+    #[arg(short, long)]
+    unmodified: bool,
+
+    /// Show diff between the two file version
+    #[arg(short, long)]
+    diff: bool,
 }

@@ -9,9 +9,10 @@ impl Cli {
         let ctx = CliContext::new(&self.home, &self.root, &self.profile)?;
 
         match self.cmd {
-            CliCmd::List | CliCmd::Save | CliCmd::Restore | CliCmd::Delete => {
-                self.action_backup(&ctx)
-            }
+            CliCmd::List { .. }
+            | CliCmd::Save { .. }
+            | CliCmd::Restore { .. }
+            | CliCmd::Delete { .. } => self.action_backup(&ctx),
             CliCmd::Run { .. } => self.action_run(&ctx),
             CliCmd::Tree { .. } => self.action_tree(&ctx),
             CliCmd::Clear => todo!(),
