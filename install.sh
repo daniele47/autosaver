@@ -61,7 +61,7 @@ elif [[ -v BUILD ]]; then
         echo
         echo "(3/5) Compiling rust project..."
         cd "$tmpdir" || exit 1
-        cargo build --release
+        cargo build
 
         # moving binary into correct place
         echo
@@ -76,7 +76,7 @@ elif [[ -v BUILD ]]; then
         # compile rust binary
         echo "(1/2) Compiling rust project..."
         cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")" || exit 1
-        cargo build --release
+        cargo build
 
         # copying binary into correct place
         echo
