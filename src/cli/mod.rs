@@ -60,6 +60,10 @@ pub enum CliCmd {
     Restore {
         #[command(flatten)]
         act_backup: CliActBackup,
+
+        /// Allow deleting files from home directory
+        #[arg(short, long)]
+        force: bool,
     },
     /// Delete tracked dotfiles
     Delete {
@@ -99,8 +103,4 @@ pub struct CliActBackup {
     /// Include also paths that do not differ
     #[arg(short, long)]
     unmodified: bool,
-
-    /// Show diff between the two file version
-    #[arg(short, long)]
-    diff: bool,
 }
