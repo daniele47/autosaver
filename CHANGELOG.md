@@ -5,15 +5,13 @@ All notable changes to this project will be documented here
 TODO:
 - [ ] save/restore should allow also deleting files from the invalid side, with a --dangerous flag for restore to allow deleting files from home!
 - [ ] improve error messages
-- [ ] optimize space seeing if any struct can be compacted in size
-- [ ] make sure light and dark theme both are decent
-- [ ] consider whetever to allow `\*` option line to actually indicate ALL files/profiles???
+- (NOPE?) consider whetever to allow `\*` option line to actually indicate ALL files/profiles???
 - [ ] have `clean` operation:
     - [ ] there are no untracked files in `backup|run` dirs
-        - [ ] part 2: handle symlinks too, via a flag (BUT check if ANYTHING inside the symlink is tracked as the criteria!)
-- [ ] have module profiles track in an hashset already found paths such that 2 different profiles cannot operate on the same file
-- [ ] add a `PERF` env and print various time measured for various parts of the code! (use `verbose!` macro, as `--verbose` was removed!)
-- [ ] add a global flag `--full-path|-f` to show all paths in their entirity instead of relpaths
+    - [ ] handle symlinks too, via a flag (BUT check if ANYTHING inside the symlink is tracked as the criteria!)
+- (maybe?) add a `PERF` env and print various time measured for various parts of the code! (use `verbose!` macro, as `--verbose` was removed!)
+- (maybe?) add a global flag `--full-path|-f` to show all paths in their entirity instead of relpaths
+- (maybe?) add a `theme.conf` file to allow customazing coloring
 
 ## v2.0.0
 
