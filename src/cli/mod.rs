@@ -55,13 +55,17 @@ pub enum CliCmd {
     Save {
         #[command(flatten)]
         act_backup: CliActBackup,
+
+        /// Allow deleting files in backup directory
+        #[arg(short, long)]
+        force: bool,
     },
     /// Restore changes in backup directory to the home
     Restore {
         #[command(flatten)]
         act_backup: CliActBackup,
 
-        /// Allow deleting files from home directory
+        /// Allow deleting files in home directory
         #[arg(short, long)]
         force: bool,
     },

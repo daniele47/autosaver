@@ -14,6 +14,7 @@ use crate::{
         ProfileKind, TraverseOpts,
         module::{Module, ModuleEntry, ModulePolicy},
     },
+    warning,
 };
 
 type Entries<'a> = IndexMap<RelPathStr, (&'a ModuleEntry, [Option<AbsPathStr>; 2])>;
@@ -84,35 +85,71 @@ impl Cli {
                             if (*only_original || !only_backup)
                                 && let Some(original_file) = &entry.1[0]
                             {
-                                let msg = "Do you really want to delete original file?";
-                                let paths = &[original_file];
-                                let action = || original_file.purge_path();
-                                prompt.handled_prompt_available(msg, paths, action)?;
+                                prompt.handled_prompt_available(
+                                    "Do you really want to delete original file?",
+                                    &[original_file],
+                                    || original_file.purge_path(),
+                                )?;
                             }
                             if (*only_backup || !only_original)
                                 && let Some(backup_file) = &entry.1[1]
                             {
-                                let msg = "Do you really want to delete backup file?";
-                                let paths = &[backup_file];
-                                let action = || backup_file.purge_path();
-                                prompt.handled_prompt_available(msg, paths, action)?;
+                                prompt.handled_prompt_available(
+                                    "Do you really want to delete backup file?",
+                                    &[backup_file],
+                                    || backup_file.purge_path(),
+                                )?;
                             }
                         }
                         // backup action
                         CliCmd::List { act_backup }
-                        | CliCmd::Save { act_backup }
+                        | CliCmd::Save { act_backup, .. }
                         | CliCmd::Restore { act_backup, .. } => match &entry.1 {
+                            // file is missing on either side
                             [Some(p1), None] | [None, Some(p1)] => {
                                 CliContext::output_path(&path, CliContext::OUTPUT_MISSING);
                                 match (&self.cmd, &entry.1[0].is_some()) {
-                                    (CliCmd::Save { .. }, true) => {}
-                                    (CliCmd::Save { .. }, false) => {}
-                                    (CliCmd::Restore { force, .. }, true) => {}
-                                    (CliCmd::Restore { .. }, false) => {}
+                                    (CliCmd::Save { .. }, true) => {
+                                        prompt.handled_prompt_available(
+                                            "Do you really want create file in the backup folder?",
+                                            &[p1],
+                                            || p1.copy_file(&path.to_abs(&this_backup_dir)?),
+                                        )?;
+                                    }
+                                    (CliCmd::Save { force, .. }, false) => {
+                                        if *force {
+                                            prompt.handled_prompt_available(
+                                            "Do you really want delete file in the backup folder?",
+                                            &[p1],
+                                            || p1.copy_file(&path.to_abs(&this_backup_dir)?),
+                                        )?;
+                                        } else {
+                                            warning!("File requires a flag to be deleted from backup directory");
+                                        }
+                                    }
+                                    (CliCmd::Restore { .. }, false) => {
+                                        prompt.handled_prompt_available(
+                                            "Do you really want create file in the home folder?",
+                                            &[p1],
+                                            || p1.copy_file(&path.to_abs(&this_backup_dir)?),
+                                        )?;
+                                    }
+                                    (CliCmd::Restore { force, .. }, true) => {
+                                        if *force {
+                                            prompt.handled_prompt_available(
+                                            "Do you really want delete file in the home folder?",
+                                            &[p1],
+                                            || p1.copy_file(&path.to_abs(home_dir)?),
+                                        )?;
+                                        } else {
+                                            warning!("Files requires a flag to be deleted from home directory");
+                                        }
+                                    }
                                     _ => unreachable!("must either save or restore"),
                                 }
                             }
-                            [Some(p1), Some(p2)] if !p1.files_eq(&p2) => {
+                            // files differ
+                            [Some(p1), Some(p2)] if !p1.files_eq(p2) => {
                                 if *entry.0.policy() == ModulePolicy::NotDiff {
                                     continue;
                                 }
@@ -120,15 +157,16 @@ impl Cli {
                                 if matches!(&self.cmd, CliCmd::Save { .. }) {
                                     let msg = "Do you really want save file to the backup folder?";
                                     let paths = &[p1, p2];
-                                    let action = || p1.copy_file(&p2);
+                                    let action = || p1.copy_file(p2);
                                     prompt.handled_prompt_available(msg, paths, action)?;
                                 } else if matches!(&self.cmd, CliCmd::Restore { .. }) {
                                     let msg = "Do you really want restore file to the home folder?";
                                     let paths = &[p1, p2];
-                                    let action = || p2.copy_file(&p1);
+                                    let action = || p2.copy_file(p1);
                                     prompt.handled_prompt_available(msg, paths, action)?;
                                 }
                             }
+                            // files are equal
                             [Some(_), Some(_)] => {
                                 if act_backup.unmodified {
                                     CliContext::output_path(&path, CliContext::OUTPUT_UNMODIFIED);
