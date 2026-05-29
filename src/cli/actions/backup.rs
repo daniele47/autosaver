@@ -145,7 +145,8 @@ impl Cli {
                                             warning!("Files requires a flag to be deleted from home directory");
                                         }
                                     }
-                                    _ => unreachable!("must either save or restore"),
+                                    (CliCmd::List{..}, _) => {}
+                                    _ => unreachable!("must either save or restore or list"),
                                 }
                             }
                             // files differ

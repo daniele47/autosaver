@@ -12,6 +12,12 @@ TODO:
 - (maybe?) add a global flag `--full-path|-f` to show all paths in their entirity instead of relpaths
 - (maybe?) add a `theme.conf` file to allow customazing coloring
 
+## v2.0.1
+
+### Patches
+
+- fixed crash when using `list` command
+
 ## v2.0.0
 
 ### Features
