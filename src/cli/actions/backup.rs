@@ -55,6 +55,7 @@ impl Cli {
         let prompt = Prompt::new(
             PromptAnswer::all(),
             PromptFlags::new(self.assume_no, self.assume_yes, self.list),
+            &ctx.col,
         );
 
         // traverse profiles

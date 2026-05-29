@@ -12,7 +12,7 @@ TODO:
 - (maybe?) add a `PERF` env and print various time measured for various parts of the code! (use `verbose!` macro, as `--verbose` was removed!)
 - (maybe?) add a global flag `--full-path|-f` to show all paths in their entirity instead of relpaths
 - [x] create `CliColor` to handle all coloring and output stylization!
-    - (maybe?) add a `theme.conf` file to allow customazing coloring
+    - [ ] add a `theme.conf` file to allow customazing coloring
 
 ## WIP
 
@@ -28,6 +28,7 @@ TODO:
 ### Changes
 
 - split colors from context, in view of future color customization
+- infrastructure build to dynamically load theme
 
 ## v2.0.1
 

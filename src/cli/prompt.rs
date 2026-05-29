@@ -36,11 +36,12 @@ pub struct PromptFlags {
     skip_prompt: bool,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Prompt {
+#[derive(Debug, Clone, PartialEq)]
+pub struct Prompt<'a> {
     allowed_answers: PromptAnswer,
     flags: PromptFlags,
     fmt: String,
+    col: &'a CliColor,
 }
 
 impl PromptFlags {
@@ -53,10 +54,11 @@ impl PromptFlags {
     }
 }
 
-impl Prompt {
-    pub fn new(allowed_answers: PromptAnswer, flags: PromptFlags) -> Self {
+impl<'a> Prompt<'a> {
+    pub fn new(allowed_answers: PromptAnswer, flags: PromptFlags, col: &'a CliColor) -> Self {
         let allowed_answers = allowed_answers | PromptAnswer::YES | PromptAnswer::NO;
         Self {
+            col,
             allowed_answers,
             flags,
             fmt: Self::ordered_answers(&allowed_answers),
@@ -104,9 +106,9 @@ impl Prompt {
             if self.flags.skip_prompt {
                 return PromptAnswer::NO;
             }
-            let msg = msg.style(CliColor::PROMPT_MSG);
+            let msg = msg.style(self.col.prompt_msg);
             let choises = format!("[{}]", self.fmt);
-            let choises = choises.style(CliColor::PROMPT_CHOICES);
+            let choises = choises.style(self.col.prompt_choices);
             outnow!("{msg} {choises} ",);
             if self.flags.answer_no {
                 outln!("n");
@@ -173,7 +175,7 @@ impl Prompt {
             answers &= !PromptAnswer::DIFF;
         }
         if self.allowed_answers != answers {
-            Self::new(answers, self.flags).handled_prompt(msg, paths, action)
+            Self::new(answers, self.flags, self.col).handled_prompt(msg, paths, action)
         } else {
             self.handled_prompt(msg, paths, action)
         }
@@ -237,7 +239,7 @@ impl Prompt {
         assert!(!paths.is_empty());
         for path in paths {
             let header = format!("@@ {} @@", path.display());
-            outln!("{}", header.style(CliColor::SHOW_HEADER));
+            outln!("{}", header.style(self.col.show_header));
             match path.read_file() {
                 Ok(text) => outnow!("{text}"),
                 Err(e) => warning!("{e}"),
@@ -270,17 +272,17 @@ impl Prompt {
                         "@@ -{},{} +{},{} @@",
                         old_start, old_len, new_start, new_len
                     );
-                    outln!("{}", str.style(CliColor::DIFF_HEADER));
+                    outln!("{}", str.style(self.col.diff_header));
                 }
 
                 for op in group {
                     for change in diff.iter_changes(&op) {
                         match change.tag() {
                             ChangeTag::Delete => {
-                                out!("{} {change}", "-".style(CliColor::DIFF_DELETED))
+                                out!("{} {change}", "-".style(self.col.diff_deleted))
                             }
                             ChangeTag::Insert => {
-                                out!("{} {change}", "+".style(CliColor::DIFF_INSERTED))
+                                out!("{} {change}", "+".style(self.col.diff_inserted))
                             }
                             ChangeTag::Equal => out!("  {change}"),
                         };
