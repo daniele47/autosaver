@@ -3,7 +3,6 @@
 All notable changes to this project will be documented here
 
 TODO:
-- [ ] save/restore should allow also deleting files from the invalid side, with a --dangerous flag for restore to allow deleting files from home!
 - [ ] improve error messages
 - (NOPE?) consider whetever to allow `\*` option line to actually indicate ALL files/profiles???
 - [ ] have `clean` operation:
@@ -25,6 +24,7 @@ TODO:
 - added very powerful prompt handler
 - added `--stdin|-i` flag for `run` command to allow stdin when running init scripts
 - added option in `runner` profiles: `/! stdin` to hint tht
+- added `--dangerous|-d` flag in `save|restore` to handle deleting files
 
 ### Changes
 
