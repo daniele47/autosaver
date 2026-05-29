@@ -42,6 +42,9 @@ impl CliContext {
     pub const PROMPT_CHOICES: Style = Style::new().bright_black();
     pub const OUTPUT_PROFILE: Style = Style::new().purple();
     pub const OUTPUT_PATH: Style = Style::new().bright_blue();
+    pub const OUTPUT_MISSING: Style = Style::new().red();
+    pub const OUTPUT_DIFF: Style = Style::new().bright_yellow();
+    pub const OUTPUT_UNMODIFIED: Style = Style::new().green();
     pub const DIFF_DELETED: Style = Style::new().red();
     pub const DIFF_INSERTED: Style = Style::new().green();
     pub const DIFF_HEADER: Style = Style::new().cyan();

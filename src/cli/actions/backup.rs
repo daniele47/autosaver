@@ -106,9 +106,37 @@ impl Cli {
                         // backup action
                         CliCmd::List { act_backup }
                         | CliCmd::Save { act_backup }
-                        | CliCmd::Restore { act_backup } => {
-                            let _ = act_backup;
-                        }
+                        | CliCmd::Restore { act_backup } => match entry.1 {
+                            [Some(p1), None] | [None, Some(p1)] => {
+                                CliContext::output_path(&path, CliContext::OUTPUT_MISSING);
+                                if matches!(&self.cmd, CliCmd::Save { .. }) {
+                                } else if matches!(&self.cmd, CliCmd::Restore { .. }) {
+                                }
+                            }
+                            [Some(p1), Some(p2)] if !p1.files_eq(&p2) => {
+                                if *entry.0.policy() == ModulePolicy::NotDiff {
+                                    continue;
+                                }
+                                CliContext::output_path(&path, CliContext::OUTPUT_DIFF);
+                                if matches!(&self.cmd, CliCmd::Save { .. }) {
+                                    let msg = "Do you really want save file to the backup folder?";
+                                    let paths = &[&p1, &p2];
+                                    let action = || p1.copy_file(&p2);
+                                    prompt.handled_prompt_available(msg, paths, action)?;
+                                } else if matches!(&self.cmd, CliCmd::Restore { .. }) {
+                                    let msg = "Do you really want restore file to the home folder?";
+                                    let paths = &[&p1, &p2];
+                                    let action = || p2.copy_file(&p1);
+                                    prompt.handled_prompt_available(msg, paths, action)?;
+                                }
+                            }
+                            [Some(_), Some(_)] => {
+                                if act_backup.unmodified {
+                                    CliContext::output_path(&path, CliContext::OUTPUT_UNMODIFIED);
+                                }
+                            }
+                            _ => unreachable!("Invalid files"),
+                        },
                         _ => unreachable!("Invalid backup action"),
                     }
 
