@@ -5,14 +5,20 @@ All notable changes to this project will be documented here
 TODO:
 - [ ] improve error messages
 - (NOPE?) consider whetever to allow `\*` option line to actually indicate ALL files/profiles???
-- [ ] have `clean` operation:
-    - [ ] there are no untracked files in `backup|run` dirs
-    - [ ] handle symlinks too, via a flag (BUT check if ANYTHING inside the symlink is tracked as the criteria!)
+- [x] have `clean` operation:
+    - [ ] handle empty directories
+    - [ ] handle broken symlinks
+    - [ ] handle paths that escape the root directory?
 - (maybe?) add a `PERF` env and print various time measured for various parts of the code! (use `verbose!` macro, as `--verbose` was removed!)
 - (maybe?) add a global flag `--full-path|-f` to show all paths in their entirity instead of relpaths
-- (maybe?) add a `theme.conf` file to allow customazing coloring
+- create `CliColor` to handle all coloring and output stylization!
+    - (maybe?) add a `theme.conf` file to allow customazing coloring
 
 ## WIP
+
+### Features
+
+- implemented `clear` action
 
 ### Patches
 

@@ -66,6 +66,14 @@ impl AbsPathStr {
         self.pathstr.basename()?.try_into()
     }
 
+    pub fn canonicalize(&self) -> anyhow::Result<Self> {
+        AbsPathStr::new_from_pathbuf(
+            self.path()
+                .canonicalize()
+                .with_context(|| format!("Failed to canonicalize path {}", self.display()))?,
+        )
+    }
+
     pub fn is_file(&self) -> bool {
         self.path().is_file()
     }
