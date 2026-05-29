@@ -5,6 +5,7 @@ use clap::{Args, Parser, Subcommand};
 use crate::fs::rel::RelPathStr;
 
 pub mod actions;
+pub mod col;
 pub mod ctx;
 pub mod error;
 pub mod inout;

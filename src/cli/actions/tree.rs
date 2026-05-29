@@ -1,7 +1,7 @@
 use owo_colors::OwoColorize;
 
 use crate::{
-    cli::{Cli, CliCmd, ctx::CliContext},
+    cli::{Cli, CliCmd, col::CliColor, ctx::CliContext},
     out, outln,
     prof::{ProfileKind, TraverseDupPolicy, TraverseOpts},
 };
@@ -39,9 +39,9 @@ impl Cli {
                     }
                     // render profile name
                     let prof_style = match ctx.item.kind() {
-                        ProfileKind::Composite(_) => CliContext::TREE_COMPOSITE,
-                        ProfileKind::Module(_) => CliContext::TREE_MODULE,
-                        ProfileKind::Runner(_) => CliContext::TREE_RUNNER,
+                        ProfileKind::Composite(_) => CliColor::TREE_COMPOSITE,
+                        ProfileKind::Module(_) => CliColor::TREE_MODULE,
+                        ProfileKind::Runner(_) => CliColor::TREE_RUNNER,
                     };
                     out!("{}", ctx.name.display().style(prof_style));
                     // show profile id
@@ -50,7 +50,7 @@ impl Cli {
                     }
                     // render dedup symbol
                     if !no_dedup && ctx.is_dup {
-                        out!(" {}", "(*)".style(CliContext::TREE_DEDUP));
+                        out!(" {}", "(*)".style(CliColor::TREE_DEDUP));
                     }
                     outln!();
                     Ok(())

@@ -11,7 +11,7 @@ TODO:
     - [ ] handle paths that escape the root directory?
 - (maybe?) add a `PERF` env and print various time measured for various parts of the code! (use `verbose!` macro, as `--verbose` was removed!)
 - (maybe?) add a global flag `--full-path|-f` to show all paths in their entirity instead of relpaths
-- create `CliColor` to handle all coloring and output stylization!
+- [x] create `CliColor` to handle all coloring and output stylization!
     - (maybe?) add a `theme.conf` file to allow customazing coloring
 
 ## WIP
@@ -24,6 +24,10 @@ TODO:
 
 - properly integrated `warning` messages into prompt
 - removed newline from prompt, to make them more consistent
+
+### Changes
+
+- split colors from context, in view of future color customization
 
 ## v2.0.1
 

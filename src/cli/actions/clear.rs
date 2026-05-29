@@ -3,6 +3,7 @@ use indexmap::IndexSet;
 use crate::{
     cli::{
         Cli, CliCmd,
+        col::CliColor,
         ctx::{CliContext, Paths},
         prompt::{Prompt, PromptAnswer, PromptFlags},
     },
@@ -85,7 +86,7 @@ impl Cli {
                         };
                         if !entries.contains(&file) {
                             let relpath = file.to_rel(root_dir)?;
-                            CliContext::output_path(relpath, CliContext::OUTPUT_PATH);
+                            CliColor::output_path(&relpath, CliColor::OUTPUT_PATH);
                             prompt.handled_prompt_available(
                                 "Do you really want to delete untracked file?",
                                 &[&file],

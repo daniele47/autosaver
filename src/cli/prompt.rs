@@ -1,5 +1,5 @@
 use crate::{
-    cli::{ctx::CliContext, error::EarlyQuit},
+    cli::{col::CliColor, error::EarlyQuit},
     fs::abs::AbsPathStr,
     inputln, out, outln, outnow, warning,
 };
@@ -104,9 +104,9 @@ impl Prompt {
             if self.flags.skip_prompt {
                 return PromptAnswer::NO;
             }
-            let msg = msg.style(CliContext::PROMPT_MSG);
+            let msg = msg.style(CliColor::PROMPT_MSG);
             let choises = format!("[{}]", self.fmt);
-            let choises = choises.style(CliContext::PROMPT_CHOICES);
+            let choises = choises.style(CliColor::PROMPT_CHOICES);
             outnow!("{msg} {choises} ",);
             if self.flags.answer_no {
                 outln!("n");
@@ -237,7 +237,7 @@ impl Prompt {
         assert!(!paths.is_empty());
         for path in paths {
             let header = format!("@@ {} @@", path.display());
-            outln!("{}", header.style(CliContext::SHOW_HEADER));
+            outln!("{}", header.style(CliColor::SHOW_HEADER));
             match path.read_file() {
                 Ok(text) => outnow!("{text}"),
                 Err(e) => warning!("{e}"),
@@ -270,17 +270,17 @@ impl Prompt {
                         "@@ -{},{} +{},{} @@",
                         old_start, old_len, new_start, new_len
                     );
-                    outln!("{}", str.style(CliContext::DIFF_HEADER));
+                    outln!("{}", str.style(CliColor::DIFF_HEADER));
                 }
 
                 for op in group {
                     for change in diff.iter_changes(&op) {
                         match change.tag() {
                             ChangeTag::Delete => {
-                                out!("{} {change}", "-".style(CliContext::DIFF_DELETED))
+                                out!("{} {change}", "-".style(CliColor::DIFF_DELETED))
                             }
                             ChangeTag::Insert => {
-                                out!("{} {change}", "+".style(CliContext::DIFF_INSERTED))
+                                out!("{} {change}", "+".style(CliColor::DIFF_INSERTED))
                             }
                             ChangeTag::Equal => out!("  {change}"),
                         };

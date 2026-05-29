@@ -9,6 +9,7 @@ use indexmap::{IndexMap, map::Entry};
 use crate::{
     cli::{
         Cli, CliCmd,
+        col::CliColor,
         ctx::{CliContext, Paths},
         prompt::{Prompt, PromptAnswer, PromptFlags},
     },
@@ -57,7 +58,7 @@ impl Cli {
                 // traverse all runner profiles
                 ctx.profiles.traverse(&ctx.curr_profile, trav_opts, |ctx| {
                     if let ProfileKind::Runner(runner) = ctx.item.kind() {
-                        CliContext::output_profile(ctx.name, CliContext::OUTPUT_PROFILE);
+                        CliColor::output_profile(ctx.name, CliColor::OUTPUT_PROFILE);
                         let this_run_dir = run_dir.join(ctx.item.id_or(ctx.name))?;
                         for (path, entry) in resolve(runner, &this_run_dir)? {
                             // filter entries with skip policy
@@ -74,7 +75,7 @@ impl Cli {
 
                             // output path
                             let relpath = path.to_rel(run_dir)?;
-                            CliContext::output_path(&relpath, CliContext::OUTPUT_PATH);
+                            CliColor::output_path(&relpath, CliColor::OUTPUT_PATH);
 
                             // prompt user
                             let msg = if entry.stdin() {
