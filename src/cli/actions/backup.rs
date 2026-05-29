@@ -80,15 +80,13 @@ impl Cli {
                             only_original,
                             only_backup,
                         } => {
-                            let mut path_shown = false;
+                            CliContext::output_path(&path, CliContext::OUTPUT_PATH);
                             if (*only_original || !only_backup)
                                 && let Some(original_file) = &entry.1[0]
                             {
                                 let msg = "Do you really want to delete original file?";
                                 let paths = &[original_file];
                                 let action = || original_file.purge_path();
-                                CliContext::output_path(&path, CliContext::OUTPUT_PATH);
-                                path_shown = true;
                                 prompt.handled_prompt_available(msg, paths, action)?;
                             }
                             if (*only_backup || !only_original)
@@ -97,20 +95,21 @@ impl Cli {
                                 let msg = "Do you really want to delete backup file?";
                                 let paths = &[backup_file];
                                 let action = || backup_file.purge_path();
-                                if !path_shown {
-                                    CliContext::output_path(&path, CliContext::OUTPUT_PATH);
-                                }
                                 prompt.handled_prompt_available(msg, paths, action)?;
                             }
                         }
                         // backup action
                         CliCmd::List { act_backup }
                         | CliCmd::Save { act_backup }
-                        | CliCmd::Restore { act_backup } => match entry.1 {
+                        | CliCmd::Restore { act_backup, .. } => match &entry.1 {
                             [Some(p1), None] | [None, Some(p1)] => {
                                 CliContext::output_path(&path, CliContext::OUTPUT_MISSING);
-                                if matches!(&self.cmd, CliCmd::Save { .. }) {
-                                } else if matches!(&self.cmd, CliCmd::Restore { .. }) {
+                                match (&self.cmd, &entry.1[0].is_some()) {
+                                    (CliCmd::Save { .. }, true) => {}
+                                    (CliCmd::Save { .. }, false) => {}
+                                    (CliCmd::Restore { force, .. }, true) => {}
+                                    (CliCmd::Restore { .. }, false) => {}
+                                    _ => unreachable!("must either save or restore"),
                                 }
                             }
                             [Some(p1), Some(p2)] if !p1.files_eq(&p2) => {
@@ -120,12 +119,12 @@ impl Cli {
                                 CliContext::output_path(&path, CliContext::OUTPUT_DIFF);
                                 if matches!(&self.cmd, CliCmd::Save { .. }) {
                                     let msg = "Do you really want save file to the backup folder?";
-                                    let paths = &[&p1, &p2];
+                                    let paths = &[p1, p2];
                                     let action = || p1.copy_file(&p2);
                                     prompt.handled_prompt_available(msg, paths, action)?;
                                 } else if matches!(&self.cmd, CliCmd::Restore { .. }) {
                                     let msg = "Do you really want restore file to the home folder?";
-                                    let paths = &[&p1, &p2];
+                                    let paths = &[p1, p2];
                                     let action = || p2.copy_file(&p1);
                                     prompt.handled_prompt_available(msg, paths, action)?;
                                 }
