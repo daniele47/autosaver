@@ -29,7 +29,7 @@ REMOTE_BIN_NAME=""
 # update/uninstall
 if [[ -v UNINSTALL ]]; then
     # uninstall operations
-    if [[ ! -d "$LOCAL_BIN_PATH_DIR" ]]; then
+    if [[ ! -d "$LOCAL_BIN_PATH" ]]; then
         echo "Autosaver was already uninstalled!"
     else
         echo "(1/1) Uninstalling autosaver by deleting the cache directory..."
@@ -66,7 +66,8 @@ elif [[ -v BUILD ]]; then
         # moving binary into correct place
         echo
         echo "(4/5) Installing binary into '$LOCAL_BIN_PATH'..."
-        cp "$tmpdir/.target/release/autosaver" "$LOCAL_BIN_PATH"
+        mkdir -p "$LOCAL_BIN_PATH_DIR"
+        cp "$tmpdir/.target/debug/autosaver" "$LOCAL_BIN_PATH"
 
         # cleanup opeartions
         echo
@@ -81,7 +82,8 @@ elif [[ -v BUILD ]]; then
         # copying binary into correct place
         echo
         echo "(2/2) Installing binary into '$LOCAL_BIN_PATH'..."
-        cp ".target/release/autosaver" "$LOCAL_BIN_PATH"
+        mkdir -p "$LOCAL_BIN_PATH_DIR"
+        cp ".target/debug/autosaver" "$LOCAL_BIN_PATH"
     fi
 
     # nice update/install msg
@@ -106,9 +108,6 @@ elif [[ ! -f "$LOCAL_BIN_PATH" || -v INSTALL ]]; then
         ;;
     *) echo "$PLATFORM is not supported" && exit 1 ;;
     esac
-
-    # delete whatever was already in the cache directory
-    mkdir -p "$LOCAL_BIN_PATH_DIR"
 
     # download operations
     if [[ -n "$INSTALL" ]]; then # use tagged version
@@ -152,6 +151,7 @@ elif [[ ! -f "$LOCAL_BIN_PATH" || -v INSTALL ]]; then
     # decompression operations
     echo
     echo "(3/4) Decompossing downloaded archive..."
+    mkdir -p "$LOCAL_BIN_PATH_DIR"
     tar -xzf "$output" -C "$LOCAL_BIN_PATH_DIR"
 
     # cleanup operations
