@@ -11,7 +11,12 @@ TODO:
 - (maybe?) add a `PERF` env and print various time measured for various parts of the code! (use `verbose!` macro, as `--verbose` was removed!)
 - (maybe?) add a global flag `--full-path|-f` to show all paths in their entirity instead of relpaths
 - (maybe?) add a `theme.conf` file to allow customazing coloring
-- prompt is not ideal: empty new lines do are not added after warnings, need a way to have that too!
+
+## WIP
+
+### Patches
+
+- properly integrated `warning` messages into prompt
 
 ## v2.0.1
 

@@ -14,7 +14,6 @@ use crate::{
         ProfileKind, TraverseOpts,
         module::{Module, ModuleEntry, ModulePolicy},
     },
-    warning,
 };
 
 type Entries<'a> = IndexMap<RelPathStr, (&'a ModuleEntry, [Option<AbsPathStr>; 2])>;
@@ -117,15 +116,13 @@ impl Cli {
                                         )?;
                                     }
                                     (CliCmd::Save { force, .. }, false) => {
-                                        if *force {
-                                            prompt.handled_prompt_available(
+                                        let warn_msg = "File requires a flag to be deleted from backup directory";
+                                            prompt.handled_prompt_available_warn(
                                             "Do you really want delete file in the backup folder?",
                                             &[p1],
                                             || p1.copy_file(&path.to_abs(&this_backup_dir)?),
+                                            || if !force {Some(warn_msg)} else {None}
                                         )?;
-                                        } else {
-                                            warning!("File requires a flag to be deleted from backup directory");
-                                        }
                                     }
                                     (CliCmd::Restore { .. }, false) => {
                                         prompt.handled_prompt_available(
@@ -135,15 +132,13 @@ impl Cli {
                                         )?;
                                     }
                                     (CliCmd::Restore { force, .. }, true) => {
-                                        if *force {
-                                            prompt.handled_prompt_available(
+                                        let warn_msg = "File requires a flag to be deleted from home directory";
+                                            prompt.handled_prompt_available_warn(
                                             "Do you really want delete file in the home folder?",
                                             &[p1],
                                             || p1.copy_file(&path.to_abs(home_dir)?),
+                                            || if !force {Some(warn_msg)} else {None}
                                         )?;
-                                        } else {
-                                            warning!("Files requires a flag to be deleted from home directory");
-                                        }
                                     }
                                     (CliCmd::List{..}, _) => {}
                                     _ => unreachable!("must either save or restore or list"),
