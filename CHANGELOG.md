@@ -13,6 +13,7 @@ TODO:
 - (maybe?) add a global flag `--full-path|-f` to show all paths in their entirity instead of relpaths
 - [x] create `CliColor` to handle all coloring and output stylization!
     - [ ] add a `theme.conf` file to allow customazing coloring
+- [ ] `ctrl+d` breaks the nice prompts. do something (maybe even disable ctrl+d? idk)
 
 ## WIP
 
