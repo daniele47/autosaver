@@ -110,7 +110,7 @@ impl Cli {
                                 match (&self.cmd, &entry.1[0].is_some()) {
                                     (CliCmd::Save { .. }, true) => {
                                         prompt.handled_prompt_available(
-                                            "Do you really want create file in the backup folder?",
+                                            "Do you really want to create file in the backup folder?",
                                             &[p1],
                                             || p1.copy_file(&path.to_abs(&this_backup_dir)?),
                                         )?;
@@ -118,7 +118,7 @@ impl Cli {
                                     (CliCmd::Save { force, .. }, false) => {
                                         let warn_msg = "File requires a flag to be deleted from backup directory";
                                             prompt.handled_prompt_available_warn(
-                                            "Do you really want delete file in the backup folder?",
+                                            "Do you really want to delete file in the backup folder?",
                                             &[p1],
                                             || p1.copy_file(&path.to_abs(&this_backup_dir)?),
                                             || if !force {Some(warn_msg)} else {None}
@@ -126,7 +126,7 @@ impl Cli {
                                     }
                                     (CliCmd::Restore { .. }, false) => {
                                         prompt.handled_prompt_available(
-                                            "Do you really want create file in the home folder?",
+                                            "Do you really want to create file in the home folder?",
                                             &[p1],
                                             || p1.copy_file(&path.to_abs(&this_backup_dir)?),
                                         )?;
@@ -134,7 +134,7 @@ impl Cli {
                                     (CliCmd::Restore { force, .. }, true) => {
                                         let warn_msg = "File requires a flag to be deleted from home directory";
                                             prompt.handled_prompt_available_warn(
-                                            "Do you really want delete file in the home folder?",
+                                            "Do you really want to delete file in the home folder?",
                                             &[p1],
                                             || p1.copy_file(&path.to_abs(home_dir)?),
                                             || if !force {Some(warn_msg)} else {None}
@@ -151,12 +151,12 @@ impl Cli {
                                 }
                                 CliContext::output_path(&path, CliContext::OUTPUT_DIFF);
                                 if matches!(&self.cmd, CliCmd::Save { .. }) {
-                                    let msg = "Do you really want save file to the backup folder?";
+                                    let msg = "Do you really want to save file to the backup folder?";
                                     let paths = &[p1, p2];
                                     let action = || p1.copy_file(p2);
                                     prompt.handled_prompt_available(msg, paths, action)?;
                                 } else if matches!(&self.cmd, CliCmd::Restore { .. }) {
-                                    let msg = "Do you really want restore file to the home folder?";
+                                    let msg = "Do you really want to restore file to the home folder?";
                                     let paths = &[p1, p2];
                                     let action = || p2.copy_file(p1);
                                     prompt.handled_prompt_available(msg, paths, action)?;

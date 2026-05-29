@@ -153,9 +153,6 @@ impl Prompt {
             i if i.contains(PromptAnswer::NO) => self.on_no(),
             _ => unimplemented!("Prompt answer not handled"),
         }
-        if !self.flags.skip_prompt {
-            outln!()
-        }
         Ok(())
     }
 
@@ -197,7 +194,7 @@ impl Prompt {
             return Ok(());
         }
         if let Some(str) = cond_warn() {
-            warning!("{str}\n");
+            warning!("{str}");
             return Ok(());
         }
         self.handled_prompt_available(msg, paths, action)
