@@ -56,68 +56,71 @@ impl Cli {
                 );
 
                 // traverse all runner profiles
-                ctx.profiles.traverse(&ctx.curr_profile, trav_opts, |ctx| {
-                    if let ProfileKind::Runner(runner) = ctx.item.kind() {
-                        CliColor::output_profile(ctx.name, CliColor::OUTPUT_PROFILE);
-                        let this_run_dir = run_dir.join(ctx.item.id_or(ctx.name))?;
-                        for (path, entry) in resolve(runner, &this_run_dir)? {
-                            // filter entries with skip policy
-                            if *entry.policy() == RunnerPolicy::Skip {
-                                continue;
-                            }
-
-                            // check path was not found yet
-                            if all_paths.contains(&path) {
-                                let p = path.to_rel(run_dir)?;
-                                let p = p.display();
-                                bail!("Script '{p}' was already run previously");
-                            }
-
-                            // output path
-                            let relpath = path.to_rel(run_dir)?;
-                            CliColor::output_path(&relpath, CliColor::OUTPUT_PATH);
-
-                            // prompt user
-                            let msg = if entry.stdin() {
-                                if stdin {
-                                    "Do you really want to run the script with stdin enabled?"
-                                } else {
-                                    warning!("Script requires stdin to run");
+                ctx.profiles
+                    .traverse(&ctx.curr_profile, trav_opts, |trav_ctx| {
+                        if let ProfileKind::Runner(runner) = trav_ctx.item.kind() {
+                            CliColor::output_profile(trav_ctx.name, ctx.col.output_profile);
+                            let this_run_dir = run_dir.join(trav_ctx.item.id_or(trav_ctx.name))?;
+                            for (path, entry) in resolve(runner, &this_run_dir)? {
+                                // filter entries with skip policy
+                                if *entry.policy() == RunnerPolicy::Skip {
                                     continue;
                                 }
-                            } else {
-                                "Do you really want to run the script?"
-                            };
-                            let paths = &[&path];
-                            let action = || {
-                                if let exit_status = Command::new(path.path())
-                                    .stdin(if stdin {
-                                        Stdio::inherit()
-                                    } else {
-                                        Stdio::null()
-                                    })
-                                    .status()
-                                    .context("Script failed to run")?
-                                    .code()
-                                    && exit_status != Some(0)
-                                {
-                                    if let Some(status) = exit_status {
-                                        bail!(format!("Script failed with status code {status}"))
-                                    } else {
-                                        bail!("Script was terminated by a signal")
-                                    }
+
+                                // check path was not found yet
+                                if all_paths.contains(&path) {
+                                    let p = path.to_rel(run_dir)?;
+                                    let p = p.display();
+                                    bail!("Script '{p}' was already run previously");
                                 }
 
-                                Ok(())
-                            };
-                            prompt.handled_prompt_available(msg, paths, action)?;
+                                // output path
+                                let relpath = path.to_rel(run_dir)?;
+                                CliColor::output_path(&relpath, ctx.col.output_path);
 
-                            // insert path to all paths
-                            all_paths.insert(path);
+                                // prompt user
+                                let msg = if entry.stdin() {
+                                    if stdin {
+                                        "Do you really want to run the script with stdin enabled?"
+                                    } else {
+                                        warning!("Script requires stdin to run");
+                                        continue;
+                                    }
+                                } else {
+                                    "Do you really want to run the script?"
+                                };
+                                let paths = &[&path];
+                                let action = || {
+                                    if let exit_status = Command::new(path.path())
+                                        .stdin(if stdin {
+                                            Stdio::inherit()
+                                        } else {
+                                            Stdio::null()
+                                        })
+                                        .status()
+                                        .context("Script failed to run")?
+                                        .code()
+                                        && exit_status != Some(0)
+                                    {
+                                        if let Some(status) = exit_status {
+                                            bail!(format!(
+                                                "Script failed with status code {status}"
+                                            ))
+                                        } else {
+                                            bail!("Script was terminated by a signal")
+                                        }
+                                    }
+
+                                    Ok(())
+                                };
+                                prompt.handled_prompt_available(msg, paths, action)?;
+
+                                // insert path to all paths
+                                all_paths.insert(path);
+                            }
                         }
-                    }
-                    Ok(())
-                })
+                        Ok(())
+                    })
             }
             _ => unreachable!("Mismatching command"),
         }

@@ -58,128 +58,133 @@ impl Cli {
         );
 
         // traverse profiles
-        ctx.profiles.traverse(&ctx.curr_profile, trav_opts, |ctx| {
-            if let ProfileKind::Module(module) = ctx.item.kind() {
-                CliColor::output_profile(ctx.name, CliColor::OUTPUT_PROFILE);
-                let this_backup_dir = backup_dir.join(ctx.item.id_or(ctx.name))?;
-                for (path, entry) in resolve(module, &[home_dir, &this_backup_dir])? {
-                    // filter entries with skip policy
-                    if *entry.0.policy() == ModulePolicy::Ignore {
-                        continue;
-                    }
-
-                    // check path was not found yet
-                    if all_paths.contains(&path) {
-                        let p = path.display();
-                        bail!("Path '{p}' was already found previously");
-                    }
-
-                    // run action
-                    match &self.cmd {
-                        // delete action
-                        CliCmd::Delete {
-                            only_original,
-                            only_backup,
-                        } => {
-                            CliColor::output_path(&path, CliColor::OUTPUT_PATH);
-                            if (*only_original || !only_backup)
-                                && let Some(original_file) = &entry.1[0]
-                            {
-                                prompt.handled_prompt_available(
-                                    "Do you really want to delete home file?",
-                                    &[original_file],
-                                    || original_file.purge_path(),
-                                )?;
-                            }
-                            if (*only_backup || !only_original)
-                                && let Some(backup_file) = &entry.1[1]
-                            {
-                                prompt.handled_prompt_available(
-                                    "Do you really want to delete backup file?",
-                                    &[backup_file],
-                                    || backup_file.purge_path(),
-                                )?;
-                            }
+        ctx.profiles
+            .traverse(&ctx.curr_profile, trav_opts, |trav_ctx| {
+                if let ProfileKind::Module(module) = trav_ctx.item.kind() {
+                    CliColor::output_profile(trav_ctx.name, ctx.col.output_profile);
+                    let this_backup_dir = backup_dir.join(trav_ctx.item.id_or(trav_ctx.name))?;
+                    for (path, entry) in resolve(module, &[home_dir, &this_backup_dir])? {
+                        // filter entries with skip policy
+                        if *entry.0.policy() == ModulePolicy::Ignore {
+                            continue;
                         }
-                        // backup action
-                        CliCmd::List { act_backup }
-                        | CliCmd::Save { act_backup, .. }
-                        | CliCmd::Restore { act_backup, .. } => match &entry.1 {
-                            // file is missing on either side
-                            [Some(p1), None] | [None, Some(p1)] => {
-                                CliColor::output_path(&path, CliColor::OUTPUT_MISSING);
-                                match (&self.cmd, &entry.1[0].is_some()) {
-                                    (CliCmd::Save { .. }, true) => {
-                                        prompt.handled_prompt_available(
-                                            "Do you really want to create backup file?",
-                                            &[p1],
-                                            || p1.copy_file(&path.to_abs(&this_backup_dir)?),
-                                        )?;
-                                    }
-                                    (CliCmd::Save { force, .. }, false) => {
-                                        if *force {
+
+                        // check path was not found yet
+                        if all_paths.contains(&path) {
+                            let p = path.display();
+                            bail!("Path '{p}' was already found previously");
+                        }
+
+                        // run action
+                        match &self.cmd {
+                            // delete action
+                            CliCmd::Delete {
+                                only_original,
+                                only_backup,
+                            } => {
+                                CliColor::output_path(&path, ctx.col.output_path);
+                                if (*only_original || !only_backup)
+                                    && let Some(original_file) = &entry.1[0]
+                                {
+                                    prompt.handled_prompt_available(
+                                        "Do you really want to delete home file?",
+                                        &[original_file],
+                                        || original_file.purge_path(),
+                                    )?;
+                                }
+                                if (*only_backup || !only_original)
+                                    && let Some(backup_file) = &entry.1[1]
+                                {
+                                    prompt.handled_prompt_available(
+                                        "Do you really want to delete backup file?",
+                                        &[backup_file],
+                                        || backup_file.purge_path(),
+                                    )?;
+                                }
+                            }
+                            // backup action
+                            CliCmd::List { act_backup }
+                            | CliCmd::Save { act_backup, .. }
+                            | CliCmd::Restore { act_backup, .. } => match &entry.1 {
+                                // file is missing on either side
+                                [Some(p1), None] | [None, Some(p1)] => {
+                                    CliColor::output_path(&path, ctx.col.output_missing);
+                                    match (&self.cmd, &entry.1[0].is_some()) {
+                                        (CliCmd::Save { .. }, true) => {
                                             prompt.handled_prompt_available(
-                                                "Do you really want to delete backup file?",
+                                                "Do you really want to create backup file?",
                                                 &[p1],
                                                 || p1.copy_file(&path.to_abs(&this_backup_dir)?),
                                             )?;
                                         }
-                                    }
-                                    (CliCmd::Restore { .. }, false) => {
-                                        prompt.handled_prompt_available(
-                                            "Do you really want to create home file?",
-                                            &[p1],
-                                            || p1.copy_file(&path.to_abs(&this_backup_dir)?),
-                                        )?;
-                                    }
-                                    (CliCmd::Restore { force, .. }, true) => {
-                                        if *force {
+                                        (CliCmd::Save { force, .. }, false) => {
+                                            if *force {
+                                                prompt.handled_prompt_available(
+                                                    "Do you really want to delete backup file?",
+                                                    &[p1],
+                                                    || {
+                                                        p1.copy_file(
+                                                            &path.to_abs(&this_backup_dir)?,
+                                                        )
+                                                    },
+                                                )?;
+                                            }
+                                        }
+                                        (CliCmd::Restore { .. }, false) => {
                                             prompt.handled_prompt_available(
-                                                "Do you really want to delete home file?",
+                                                "Do you really want to create home file?",
                                                 &[p1],
-                                                || p1.copy_file(&path.to_abs(home_dir)?),
+                                                || p1.copy_file(&path.to_abs(&this_backup_dir)?),
                                             )?;
                                         }
+                                        (CliCmd::Restore { force, .. }, true) => {
+                                            if *force {
+                                                prompt.handled_prompt_available(
+                                                    "Do you really want to delete home file?",
+                                                    &[p1],
+                                                    || p1.copy_file(&path.to_abs(home_dir)?),
+                                                )?;
+                                            }
+                                        }
+                                        (CliCmd::List { .. }, _) => {}
+                                        _ => unreachable!("must either save or restore or list"),
                                     }
-                                    (CliCmd::List { .. }, _) => {}
-                                    _ => unreachable!("must either save or restore or list"),
                                 }
-                            }
-                            // files differ
-                            [Some(p1), Some(p2)] if !p1.files_eq(p2) => {
-                                if *entry.0.policy() == ModulePolicy::NotDiff {
-                                    continue;
+                                // files differ
+                                [Some(p1), Some(p2)] if !p1.files_eq(p2) => {
+                                    if *entry.0.policy() == ModulePolicy::NotDiff {
+                                        continue;
+                                    }
+                                    CliColor::output_path(&path, ctx.col.output_diff);
+                                    if matches!(&self.cmd, CliCmd::Save { .. }) {
+                                        let msg = "Do you really want to update backup file?";
+                                        let paths = &[p1, p2];
+                                        let action = || p1.copy_file(p2);
+                                        prompt.handled_prompt_available(msg, paths, action)?;
+                                    } else if matches!(&self.cmd, CliCmd::Restore { .. }) {
+                                        let msg = "Do you really want to update home file?";
+                                        let paths = &[p1, p2];
+                                        let action = || p2.copy_file(p1);
+                                        prompt.handled_prompt_available(msg, paths, action)?;
+                                    }
                                 }
-                                CliColor::output_path(&path, CliColor::OUTPUT_DIFF);
-                                if matches!(&self.cmd, CliCmd::Save { .. }) {
-                                    let msg = "Do you really want to update backup file?";
-                                    let paths = &[p1, p2];
-                                    let action = || p1.copy_file(p2);
-                                    prompt.handled_prompt_available(msg, paths, action)?;
-                                } else if matches!(&self.cmd, CliCmd::Restore { .. }) {
-                                    let msg = "Do you really want to update home file?";
-                                    let paths = &[p1, p2];
-                                    let action = || p2.copy_file(p1);
-                                    prompt.handled_prompt_available(msg, paths, action)?;
+                                // files are equal
+                                [Some(_), Some(_)] => {
+                                    if act_backup.unmodified {
+                                        CliColor::output_path(&path, ctx.col.output_unmodified);
+                                    }
                                 }
-                            }
-                            // files are equal
-                            [Some(_), Some(_)] => {
-                                if act_backup.unmodified {
-                                    CliColor::output_path(&path, CliColor::OUTPUT_UNMODIFIED);
-                                }
-                            }
-                            _ => unreachable!("Invalid files"),
-                        },
-                        _ => unreachable!("Invalid backup action"),
-                    }
+                                _ => unreachable!("Invalid files"),
+                            },
+                            _ => unreachable!("Invalid backup action"),
+                        }
 
-                    // insert path to all paths
-                    all_paths.insert(path);
+                        // insert path to all paths
+                        all_paths.insert(path);
+                    }
                 }
-            }
-            Ok(())
-        })?;
+                Ok(())
+            })?;
 
         Ok(())
     }
