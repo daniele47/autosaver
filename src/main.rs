@@ -1,14 +1,12 @@
-use std::process::exit;
-
 use autosaver::{
-    cli::{Cli, error::EarlyQuit},
+    cli::{Cli, error::EarlyQuit, perf::perf},
     errnow, error, outnow,
 };
 use clap::Parser;
 
 fn main() {
     // parse cmdline
-    let cli = Cli::parse();
+    let cli = perf("Parsed cli flags in", Cli::parse);
 
     // run application
     let run_res = cli.run_cmd();
@@ -27,5 +25,5 @@ fn main() {
         }
     };
 
-    exit(code)
+    std::process::exit(code)
 }

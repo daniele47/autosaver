@@ -9,13 +9,18 @@ TODO:
     - [ ] handle empty directories
     - [ ] handle broken symlinks
     - [ ] handle paths that escape the root directory?
-- (maybe?) add a `PERF` env and print various time measured for various parts of the code! (use `verbose!` macro, as `--verbose` was removed!)
 - (maybe?) add a global flag `--full-path|-f` to show all paths in their entirity instead of relpaths
 - [x] create `CliColor` to handle all coloring and output stylization!
     - [ ] add a `theme.conf` file to allow customazing coloring
 - [x] fix `backup` action, which is currently half broken
     - [ ] TEST THIS A BIT FOR SAFETY!
 - [ ] decide if it's ok that deleting files means that symlinks to files are deleted too (unlike symlinks to dir which do not get deleted)
+
+## v2.2.0
+
+### Features
+
+- added `PERF` env variable, to see various performance times
 
 ## v2.1.0
 

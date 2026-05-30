@@ -9,6 +9,7 @@ pub mod col;
 pub mod ctx;
 pub mod error;
 pub mod inout;
+pub mod perf;
 pub mod prompt;
 
 #[derive(Parser, Debug, Clone, PartialEq, Eq)]

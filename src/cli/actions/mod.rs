@@ -1,4 +1,4 @@
-use crate::cli::{Cli, CliCmd, ctx::CliContext};
+use crate::cli::{Cli, CliCmd, ctx::CliContext, perf::perf};
 
 pub mod backup;
 pub mod clear;
@@ -7,9 +7,11 @@ pub mod tree;
 
 impl Cli {
     pub fn run_cmd(&self) -> anyhow::Result<()> {
-        let ctx = CliContext::new(&self.home, &self.root, &self.profile)?;
+        let ctx = perf("Configs parsed in", || {
+            CliContext::new(&self.home, &self.root, &self.profile)
+        })?;
 
-        match self.cmd {
+        perf("Command run in", || match self.cmd {
             CliCmd::List { .. }
             | CliCmd::Save { .. }
             | CliCmd::Restore { .. }
@@ -17,7 +19,7 @@ impl Cli {
             CliCmd::Run { .. } => self.action_run(&ctx),
             CliCmd::Tree { .. } => self.action_tree(&ctx),
             CliCmd::Clear => self.action_clear(&ctx),
-        }?;
+        })?;
 
         Ok(())
     }
