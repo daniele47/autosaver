@@ -164,12 +164,12 @@ impl Cli {
                                     CliColor::output_path(&path, ctx.col.output_diff);
                                     if matches!(&self.cmd, CliCmd::Save { .. }) {
                                         let msg = "Do you really want to update backup file?";
-                                        let paths = &[p1, p2];
+                                        let paths = &[p2, p1];
                                         let action = || p1.copy_file(p2);
                                         prompt.handled_prompt_available(msg, paths, action)?;
                                     } else if matches!(&self.cmd, CliCmd::Restore { .. }) {
                                         let msg = "Do you really want to update home file?";
-                                        let paths = &[p2, p1];
+                                        let paths = &[p1, p2];
                                         let action = || p2.copy_file(p1);
                                         prompt.handled_prompt_available(msg, paths, action)?;
                                     }
