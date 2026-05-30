@@ -14,7 +14,9 @@ TODO:
 - [x] create `CliColor` to handle all coloring and output stylization!
     - [ ] add a `theme.conf` file to allow customazing coloring
 - [ ] `ctrl+d` breaks the nice prompts. do something (maybe even disable ctrl+d? idk)
-- [ ] fix `backup` action, which is currently half broken
+- [x] fix `backup` action, which is currently half broken
+    - [ ] TEST THIS A BIT FOR SAFETY!
+- [ ] decide if it's ok that deleting files means that symlinks to files are deleted too (unlike symlinks to dir which do not get deleted)
 
 ## WIP
 
@@ -26,6 +28,7 @@ TODO:
 
 - properly integrated `warning` messages into prompt
 - removed newline from prompt, to make them more consistent
+- make `clear` and `backup` function properly
 
 ### Changes
 

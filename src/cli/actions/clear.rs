@@ -62,7 +62,7 @@ impl Cli {
                 );
 
                 // traverse all leaf profiles
-                ctx.profiles.traverse(&ctx.curr_profile, trav_opts, |ctx| {
+                ctx.profiles.traverse(&ctx.root_profile, trav_opts, |ctx| {
                     match ctx.item.kind() {
                         ProfileKind::Module(module) => {
                             let this_backup_dir = backup_dir.join(ctx.item.id_or(ctx.name))?;
