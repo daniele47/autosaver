@@ -5,11 +5,13 @@ use autosaver::{
 use clap::Parser;
 
 fn main() {
-    // parse cmdline
-    let cli = perf("Parsed cli flags in", Cli::parse);
+    let run_res = perf("- Executed entire program in", || {
+        // parse cmdline
+        let cli = perf("  - Parsed cli flags in", Cli::parse);
 
-    // run application
-    let run_res = cli.run_cmd();
+        // run application
+        perf("  - Executed command in", || cli.run_cmd())
+    });
 
     // assure output streams are flushed
     outnow!();

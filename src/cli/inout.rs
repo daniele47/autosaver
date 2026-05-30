@@ -66,9 +66,9 @@ macro_rules! inputln {
 }
 
 #[macro_export]
-macro_rules! verbose {
+macro_rules! performance {
     ($($arg:tt)*) => {{
-        $crate::err!("verbose: ");
+        $crate::err!("perf: ");
         $crate::errln!($($arg)*);
     }};
 }

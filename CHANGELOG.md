@@ -14,9 +14,13 @@ TODO:
     - [ ] add a `theme.conf` file to allow customazing coloring
 - [ ] decide if it's ok that deleting files means that symlinks to files are deleted too (unlike symlinks to dir which do not get deleted)
 
-## WIP
+## v2.2.2
 
-### v2.2.1
+### Changes
+
+- improved `PERF` performance output to be nicer and more comprehensive
+
+## v2.2.1
 
 ### Changes
 
