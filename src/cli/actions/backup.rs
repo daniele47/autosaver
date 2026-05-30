@@ -187,7 +187,7 @@ impl Cli {
                         }
 
                         // insert path to all paths
-                        if !self.list {
+                        if !self.list && !matches!(self.cmd, CliCmd::List { .. }) {
                             all_paths.insert(path);
                         }
                     }
