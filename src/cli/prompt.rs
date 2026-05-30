@@ -118,9 +118,11 @@ impl<'a> Prompt<'a> {
                 outln!("y");
                 return PromptAnswer::YES;
             }
-            let mut input = String::new();
-            let input = inputln!(&mut input);
-            if let Some(input) = Self::parse_answer(input, self.allowed_answers) {
+            let input = inputln!();
+            if !input.ends_with("\n") {
+                outln!();
+            }
+            if let Some(input) = Self::parse_answer(input.trim(), self.allowed_answers) {
                 return input;
             }
             outln!("Invalid answer '{input}'. Please retry...")

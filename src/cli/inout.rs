@@ -58,10 +58,10 @@ macro_rules! errln {
 
 #[macro_export]
 macro_rules! inputln {
-    ($buf:expr) => {{
-        $buf.clear();
-        std::io::stdin().read_line($buf).unwrap();
-        $buf.trim()
+    () => {{
+        let mut input = String::new();
+        std::io::stdin().read_line(&mut input).unwrap();
+        input
     }};
 }
 
