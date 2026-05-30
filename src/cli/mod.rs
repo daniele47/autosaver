@@ -16,18 +16,15 @@ pub mod prompt;
 #[command(version)]
 #[command(infer_subcommands = true)]
 #[command(disable_help_subcommand = true)]
+#[command(after_help = "\
+Environment variables:
+  PERF     Show performance of various sections of the cli
+  EDITOR   Editor to open when editing files via the prompt
+")]
 #[command(about = "A simple dotfiles manager that doesn't pollute the system", long_about = None)]
 pub struct Cli {
     #[command(subcommand)]
     cmd: CliCmd,
-
-    /// Show performance of various sections of the cli
-    #[arg(env = "PERF")]
-    _perf: Option<String>,
-
-    /// Editor to open when editing files via the prompt
-    #[arg(env = "EDITOR")]
-    _editor: Option<String>,
 
     /// Specify which profile to use
     #[arg(short, long, env = "AUTOSAVER_PROFILE", global = true)]
