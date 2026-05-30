@@ -9,7 +9,7 @@
 #  <<< possible exclusive actions >>>
 #   - UNINSTALL=          : uninstall the binary (at XDG_BIN_HOME path, if specified)
 #   - BUILD=[<GIT_REF>]   : compile from the specified git_ref, or from current repo if missing
-#   - INSTALL=[<VERSION>] : install the binary with the specified version, or latest otherwise
+#   - INSTALL=[<VERSION>] : install the binary with the specified version, or latest otherwise (default)
 
 set -e
 
@@ -89,7 +89,7 @@ elif [[ -v BUILD ]]; then
     # nice update/install msg
     echo -n "Autosaver compiled: "
     "$LOCAL_BIN_PATH" --version
-elif [[ ! -f "$LOCAL_BIN_PATH" || -v INSTALL ]]; then
+else
     # previous binary version
     OLD_VERSION="$($LOCAL_BIN_PATH --version 2>/dev/null | tr -d '\n ')"
     [[ -z "$OLD_VERSION" ]] && OLD_VERSION="\e[1;31mmissing\e[m"
@@ -162,8 +162,4 @@ elif [[ ! -f "$LOCAL_BIN_PATH" || -v INSTALL ]]; then
     # nice update/install msg
     echo -n "Autosaver installed/updated: "
     echo -en "$OLD_VERSION ---> " && "$LOCAL_BIN_PATH" --version
-else
-    # already installed binary
-    echo -n "Autosaver already installed: "
-    "$LOCAL_BIN_PATH" --version
 fi
