@@ -19,6 +19,7 @@ TODO:
 ### Changes
 
 - improved `PERF` performance output to be nicer and more comprehensive
+- documented various useful environment variables hackily using clap
 
 ## v2.2.1
 

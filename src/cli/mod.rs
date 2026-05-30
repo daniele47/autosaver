@@ -21,6 +21,14 @@ pub struct Cli {
     #[command(subcommand)]
     cmd: CliCmd,
 
+    /// Show performance of various sections of the cli
+    #[arg(env = "PERF")]
+    _perf: Option<String>,
+
+    /// Editor to open when editing files via the prompt
+    #[arg(env = "EDITOR")]
+    _editor: Option<String>,
+
     /// Specify which profile to use
     #[arg(short, long, env = "AUTOSAVER_PROFILE", global = true)]
     profile: Option<RelPathStr>,
