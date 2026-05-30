@@ -3,20 +3,20 @@
 All notable changes to this project will be documented here
 
 TODO:
-- [ ] improve error messages
+- (maybe?) add a global flag `--full-path|-f` to show all paths in their entirity instead of relpaths
 - (NOPE?) consider whetever to allow `\*` option line to actually indicate ALL files/profiles???
+- [ ] improve error messages
 - [x] have `clean` operation:
     - [ ] handle empty directories
     - [ ] handle broken symlinks
     - [ ] handle paths that escape the root directory?
-- (maybe?) add a global flag `--full-path|-f` to show all paths in their entirity instead of relpaths
 - [x] create `CliColor` to handle all coloring and output stylization!
     - [ ] add a `theme.conf` file to allow customazing coloring
-- [x] fix `backup` action, which is currently half broken
-    - [ ] TEST THIS A BIT FOR SAFETY!
 - [ ] decide if it's ok that deleting files means that symlinks to files are deleted too (unlike symlinks to dir which do not get deleted)
 
 ## WIP
+
+### v2.2.1
 
 ### Changes
 
