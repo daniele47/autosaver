@@ -33,7 +33,7 @@ pub struct Cli {
     #[arg(short = 'R', long, env = "AUTOSAVER_ROOT", global = true)]
     root: Option<PathBuf>,
 
-    /// Skip all prompts entirely and list files
+    /// Skip all prompts and checks entirely and list files
     #[arg(short = 'l', long, global = true, conflicts_with_all = ["assume_no", "assume_yes"])]
     list: bool,
 

@@ -117,7 +117,9 @@ impl Cli {
                                 prompt.handled_prompt_available(msg, paths, action)?;
 
                                 // insert path to all paths
-                                all_paths.insert(path);
+                                if !self.list {
+                                    all_paths.insert(path);
+                                }
                             }
                         }
                         Ok(())
