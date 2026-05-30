@@ -17,7 +17,7 @@ TODO:
     - [ ] TEST THIS A BIT FOR SAFETY!
 - [ ] decide if it's ok that deleting files means that symlinks to files are deleted too (unlike symlinks to dir which do not get deleted)
 
-## WIP
+## v2.1.0
 
 ### Features
 
