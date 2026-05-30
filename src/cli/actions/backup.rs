@@ -158,7 +158,8 @@ impl Cli {
                                 }
                                 // files differ
                                 [Some(p1), Some(p2)] if !p1.files_eq(p2) => {
-                                    if *entry.0.policy() == ModulePolicy::NotDiff {
+                                    if *entry.0.policy() == ModulePolicy::NotDiff && !act_backup.all
+                                    {
                                         continue;
                                     }
                                     CliColor::output_path(&path, ctx.col.output_diff);
