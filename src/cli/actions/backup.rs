@@ -32,10 +32,11 @@ fn resolve<'a>(runner: &'a Module, dirs: &[&AbsPathStr; 2]) -> anyhow::Result<En
                         e.insert(val);
                     }
                     Entry::Occupied(mut e) => {
-                        if e.get().1[i].as_ref().is_none_or(|_| {
-                            (*entry.policy() as u64) < (*(e.get()).0.policy() as u64)
-                        }) {
+                        if e.get().1[i].is_none() {
                             e.get_mut().1[i] = Some(p);
+                        }
+                        if (*entry.policy() as u64) < (*(e.get()).0.policy() as u64) {
+                            e.get_mut().0 = entry;
                         }
                     }
                 }
