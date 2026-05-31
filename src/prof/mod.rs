@@ -4,7 +4,11 @@ use anyhow::{Context, bail};
 
 use crate::{
     fs::rel::RelPathStr,
-    prof::{composite::Composite, module::Module, runner::Runner},
+    prof::{
+        composite::{Composite, CompositeEntry},
+        module::Module,
+        runner::Runner,
+    },
 };
 
 pub mod composite;
@@ -45,17 +49,6 @@ pub enum TraverseDupPolicy {
     #[default]
     Exclude,
 }
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct TraverseOpts<'a> {
-    dups: TraverseDupPolicy,
-    ignore: &'a [RelPathStr],
-}
-
-impl<'a> TraverseOpts<'a> {
-    pub fn new(dups: TraverseDupPolicy, ignore: &'a [RelPathStr]) -> Self {
-        Self { dups, ignore }
-    }
-}
 
 impl Profile {
     pub fn new(id: Option<RelPathStr>, kind: ProfileKind) -> Self {
@@ -86,15 +79,21 @@ impl AllProfiles {
             .with_context(|| format!("Missing profile: {}", name.display()))
     }
 
-    pub fn traverse<S>(
+    pub fn traverse(
         &self,
         root: &RelPathStr,
-        opts: TraverseOpts,
-        mut on_elem: S,
-    ) -> anyhow::Result<()>
-    where
-        S: FnMut(TraverseContext) -> anyhow::Result<()>,
-    {
+        on_elem: impl FnMut(TraverseContext) -> anyhow::Result<()>,
+    ) -> anyhow::Result<()> {
+        self.traverse_opts(root, TraverseDupPolicy::default(), |_| true, on_elem)
+    }
+
+    pub fn traverse_opts(
+        &self,
+        root: &RelPathStr,
+        dups_policy: TraverseDupPolicy,
+        ignore_elem: impl Fn(&CompositeEntry) -> bool,
+        mut on_elem: impl FnMut(TraverseContext) -> anyhow::Result<()>,
+    ) -> anyhow::Result<()> {
         let mut visited = HashSet::<&RelPathStr>::new();
         let mut path = Vec::<&RelPathStr>::new();
         let mut stack = Vec::<(&RelPathStr, bool)>::new();
@@ -134,7 +133,7 @@ impl AllProfiles {
 
             // act depending on duplicated policy
             let is_dup = !visited.insert(item_name);
-            if !is_dup || opts.dups != TraverseDupPolicy::Exclude {
+            if !is_dup || dups_policy != TraverseDupPolicy::Exclude {
                 on_elem(TraverseContext {
                     name: item_name,
                     item: item_profile,
@@ -143,7 +142,7 @@ impl AllProfiles {
                     is_dup,
                 })?;
             }
-            if is_dup && opts.dups != TraverseDupPolicy::Include {
+            if is_dup && dups_policy != TraverseDupPolicy::Include {
                 continue;
             }
 
@@ -151,12 +150,7 @@ impl AllProfiles {
             if let ProfileKind::Composite(composite) = item_profile.kind() {
                 path.push(item_name);
                 stack.push((item_name, true));
-                for child in composite
-                    .entries()
-                    .iter()
-                    .filter(|i| !opts.ignore.contains(i.child()))
-                    .rev()
-                {
+                for child in composite.entries().iter().filter(|i| ignore_elem(i)).rev() {
                     stack.push((child.child(), false));
                 }
             }
@@ -213,7 +207,7 @@ mod tests {
 
         let mut visited_order = Vec::new();
 
-        profiles.traverse(&pname, Default::default(), |ctx| {
+        profiles.traverse(&pname, |ctx| {
             visited_order.push(ctx.name.to_string_lossy().to_string());
             Ok(())
         })?;

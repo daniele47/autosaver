@@ -3,7 +3,7 @@ use owo_colors::OwoColorize;
 use crate::{
     cli::{Cli, CliCmd, ctx::CliContext},
     out, outln,
-    prof::{ProfileKind, TraverseDupPolicy, TraverseOpts},
+    prof::{ProfileKind, TraverseDupPolicy},
 };
 
 const TREE: [&str; 4] = ["│   ", "    ", "├── ", "└── "];
@@ -16,15 +16,17 @@ impl Cli {
                 show_id,
                 ignore,
             } => {
-                let trav_opts = if *no_dedup {
+                let trav_dups = if *no_dedup {
                     TraverseDupPolicy::Include
                 } else {
                     TraverseDupPolicy::Shallow
                 };
-                let trav_opts = TraverseOpts::new(trav_opts, ignore);
                 let mut are_last = Vec::<bool>::new();
-                ctx.profiles
-                    .traverse(&ctx.curr_profile, trav_opts, |trav_ctx| {
+                ctx.profiles.traverse_opts(
+                    &ctx.curr_profile,
+                    trav_dups,
+                    |e| !ignore.contains(e.child()),
+                    |trav_ctx| {
                         let len = trav_ctx.path.len();
 
                         // render indent lines
@@ -59,7 +61,8 @@ impl Cli {
                         }
                         outln!();
                         Ok(())
-                    })
+                    },
+                )
             }
             _ => unreachable!("Mismatching command"),
         }

@@ -7,7 +7,7 @@ use crate::{
         prompt::{Prompt, PromptAnswer, PromptFlags},
     },
     fs::abs::AbsPathStr,
-    prof::{ProfileKind, TraverseOpts, module::Module, runner::Runner},
+    prof::{ProfileKind, module::Module, runner::Runner},
 };
 
 fn resolve_runner(
@@ -52,7 +52,6 @@ impl Cli {
                 let run_dir = &ctx.paths[&Paths::Run];
                 let backup_dir = &ctx.paths[&Paths::Backup];
                 let root_dir = &ctx.paths[&Paths::Root];
-                let trav_opts = TraverseOpts::default();
                 let mut entries = IndexSet::new();
                 let prompt = Prompt::new(
                     PromptAnswer::all() & !PromptAnswer::DIFF,
@@ -61,7 +60,7 @@ impl Cli {
                 );
 
                 // traverse all leaf profiles
-                ctx.profiles.traverse(&ctx.root_profile, trav_opts, |ctx| {
+                ctx.profiles.traverse(&ctx.root_profile, |ctx| {
                     match ctx.item.kind() {
                         ProfileKind::Module(module) => {
                             let this_backup_dir = backup_dir.join(ctx.item.id_or(ctx.name))?;
