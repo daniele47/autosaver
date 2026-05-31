@@ -6,34 +6,17 @@ use crate::{
         ctx::{CliContext, Paths},
         prompt::{Prompt, PromptAnswer, PromptFlags},
     },
-    fs::abs::AbsPathStr,
-    prof::{ProfileKind, module::Module, runner::Runner},
+    fs::{abs::AbsPathStr, rel::RelPathStr},
+    prof::{ProfileKind, module::ModuleEntry, runner::RunnerEntry},
 };
 
-fn resolve_runner(
-    runner: &Runner,
+fn resolve<'a>(
+    relpaths: impl Iterator<Item = &'a RelPathStr>,
     dir: &AbsPathStr,
     entries: &mut IndexSet<AbsPathStr>,
 ) -> anyhow::Result<()> {
-    for entry in runner.entries() {
-        for p in entry.path().to_abs(dir)?.all_files_ord()? {
-            let p = if p.is_file() {
-                p.canonicalize()?
-            } else {
-                continue;
-            };
-            entries.insert(p);
-        }
-    }
-    Ok(())
-}
-fn resolve_module(
-    module: &Module,
-    dir: &AbsPathStr,
-    entries: &mut IndexSet<AbsPathStr>,
-) -> anyhow::Result<()> {
-    for entry in module.entries() {
-        for p in entry.path().to_abs(dir)?.all_files_ord()? {
+    for path in relpaths {
+        for p in path.to_abs(dir)?.all_files_ord()? {
             let p = if p.is_file() {
                 p.canonicalize()?
             } else {
@@ -64,11 +47,13 @@ impl Cli {
                     match ctx.item.kind() {
                         ProfileKind::Module(module) => {
                             let this_backup_dir = backup_dir.join(ctx.item.id_or(ctx.name))?;
-                            resolve_module(module, &this_backup_dir, &mut entries)?;
+                            let relpaths = module.entries().iter().map(ModuleEntry::path);
+                            resolve(relpaths, &this_backup_dir, &mut entries)?;
                         }
                         ProfileKind::Runner(runner) => {
                             let this_runner_dir = run_dir.join(ctx.item.id_or(ctx.name))?;
-                            resolve_runner(runner, &this_runner_dir, &mut entries)?;
+                            let relpaths = runner.entries().iter().map(RunnerEntry::path);
+                            resolve(relpaths, &this_runner_dir, &mut entries)?;
                         }
                         _ => {}
                     }

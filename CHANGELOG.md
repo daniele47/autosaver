@@ -3,9 +3,9 @@
 All notable changes to this project will be documented here
 
 TODO:
-- [ ] see if code can be optimized further
 
 IDEAS:
+- (uhm?) see if code can be optimized further (fstat calls are the price here, and i already improved code massively)
 - (NOPE?) consider whetever to allow `\*` option line to actually indicate ALL files/profiles???
 - [x] have `clean` operation:
     - (NOPE?) handle empty directories                  -> just use `find` command
