@@ -38,9 +38,9 @@ impl<'a> RawProfile<'a> {
             let line = line.trim();
             if let Some(opt) = line.strip_prefix("/!").map(str::trim) {
                 // specific shared options
-                if let Some(kind_str) = opt.strip_prefix("type ").map(str::trim) {
+                if let Some(kind_str) = opt.strip_prefix("kind ").map(str::trim) {
                     if !kind.is_empty() {
-                        bail!(Profile::err_dup(name, "type", i));
+                        bail!(Profile::err_dup(name, "kind", i));
                     }
                     kind = kind_str;
                 } else if let Some(id_str) = opt.strip_prefix("id ").map(str::trim) {
@@ -61,7 +61,7 @@ impl<'a> RawProfile<'a> {
         }
 
         if kind.is_empty() {
-            bail!("Option 'kind' is missing from profile {name}");
+            bail!("Option 'kind' is missing from profile '{name}'");
         }
 
         Ok(Self {
@@ -81,7 +81,7 @@ impl Profile {
             "module" => Self::parse_module(raw),
             "runner" => Self::parse_runner(raw),
             _ => bail!(
-                "Unknown kind option for profile {}: '{}'",
+                "Unknown 'kind' option for profile '{}': '{}'",
                 raw.name,
                 raw.kind,
             ),
@@ -202,7 +202,7 @@ mod tests {
     #[test]
     fn test_parse_composite_profile() -> anyhow::Result<()> {
         let config = r#"
-            /! type composite
+            /! kind composite
             /! id profiles_my_composite
             path_to_file1.txt
             path_to_file2.txt
@@ -235,7 +235,7 @@ mod tests {
     #[test]
     fn test_parse_module_profile() -> anyhow::Result<()> {
         let config = r#"
-            /! type module
+            /! kind module
             /! id profile_my_module
             /! policy track
             src_main.rs
@@ -276,7 +276,7 @@ mod tests {
     #[test]
     fn test_parse_runner_profile() -> anyhow::Result<()> {
         let config = r#"
-            /! type runner
+            /! kind runner
             /! id profiles_my_runner
             /! policy run
             script1.sh

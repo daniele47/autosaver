@@ -39,7 +39,7 @@ All profiles share some basic properties:
 ### Composite Profile
 
 This profile simply acts as a profile aggregrator, and can be used to run command on multiple profiles.
-It can be created via `type composite` option line, or by creating a directory which will be automagically
+It can be created via `kind composite` option line, or by creating a directory which will be automagically
 treated as a composite profile aggregrating the files and directories directly in it.
 
 - `option lines`:
