@@ -95,6 +95,10 @@ pub enum CliCmd {
         /// Show the id related to each profile
         #[arg(short = 'i', long)]
         show_id: bool,
+
+        /// Ignore one or more profiles, if repeated
+        #[arg(short = 'I', long, value_name = "PROFILE")]
+        ignore: Vec<RelPathStr>,
     },
     /// Clear untracked files in backup directories
     Clear,

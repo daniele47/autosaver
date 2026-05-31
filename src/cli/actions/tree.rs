@@ -10,9 +10,13 @@ const TREE: [&str; 4] = ["│   ", "    ", "├── ", "└── "];
 
 impl Cli {
     pub fn action_tree(&self, ctx: &CliContext) -> anyhow::Result<()> {
-        match self.cmd {
-            CliCmd::Tree { no_dedup, show_id } => {
-                let trav_opts = if no_dedup {
+        match &self.cmd {
+            CliCmd::Tree {
+                no_dedup,
+                show_id,
+                ignore,
+            } => {
+                let trav_opts = if *no_dedup {
                     TraverseDupPolicy::Include
                 } else {
                     TraverseDupPolicy::Shallow
@@ -21,6 +25,11 @@ impl Cli {
                 let mut are_last = Vec::<bool>::new();
                 ctx.profiles
                     .traverse(&ctx.curr_profile, trav_opts, |trav_ctx| {
+                        if ignore.contains(trav_ctx.name)
+                            || trav_ctx.path.iter().any(|p| ignore.contains(p))
+                        {
+                            return Ok(());
+                        }
                         let len = trav_ctx.path.len();
 
                         // render indent lines
@@ -46,7 +55,7 @@ impl Cli {
                         };
                         out!("{}", trav_ctx.name.display().style(prof_style));
                         // show profile id
-                        if show_id && let Some(id) = trav_ctx.item.id() {
+                        if *show_id && let Some(id) = trav_ctx.item.id() {
                             out!(" ({})", id.display());
                         }
                         // render dedup symbol

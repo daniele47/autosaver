@@ -6,6 +6,7 @@ TODO:
 - [ ] improve error messages
 - [ ] see if code can be optimized further
     - [ ] remove `load_vt_profile` function, and just load dirs whilst loading real configs
+- [ ] make `traverse` method return a bool to allow more efficiently recursive skip, so `-I` in tree can be more efficient
 
 IDEAS:
 - (NOPE?) consider whetever to allow `\*` option line to actually indicate ALL files/profiles???
@@ -16,6 +17,12 @@ IDEAS:
 - [x] create `CliColor` to handle all coloring and output stylization!
     - (uhm?) provide some default colorschemes and a flag/env var to pick one precisely
 - (uhm?) decide if it's ok that deleting files means that symlinks to files are deleted too (unlike symlinks to dir which do not get deleted)
+
+## v2.4.0
+
+### Features
+
+- added `-I|--ignore` flag for `tree` command to ignore profiles recursively
 
 ## v2.3.0
 
