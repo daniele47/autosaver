@@ -167,7 +167,8 @@ impl CliContext {
                 .or_default()
                 .push(CompositeEntry::new(vt_names[j].clone()));
         }
-        for (name, entries) in all_entries {
+        for (name, mut entries) in all_entries {
+            entries.sort_unstable_by(|a, b| a.child().cmp(b.child()));
             let profile = Profile::new(None, ProfileKind::Composite(Composite::new(entries)));
             match all_profiles.entry(name) {
                 Entry::Vacant(v) => {
