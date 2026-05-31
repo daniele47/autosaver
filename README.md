@@ -81,3 +81,8 @@ The scripts are search from the `run/<profile_id>` directory
 
 - `data lines`: 
     - each data line is a relative path of the script to track
+
+## Environment variables not specified in help text
+
+- `PERF`  : prints the performance of various sections of the code
+- `EDITOR`: to pick the editor used with `e` answer in prompts

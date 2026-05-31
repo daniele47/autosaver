@@ -1,6 +1,9 @@
 use owo_colors::{OwoColorize, Style};
 
-use crate::{fs::rel::RelPathStr, outln};
+use crate::{
+    fs::{path::PathStr, rel::RelPathStr},
+    outln,
+};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct CliColor {
@@ -50,7 +53,8 @@ impl CliColor {
         );
     }
 
-    pub fn output_path(path: &RelPathStr, style: Style) {
+    pub fn output_path(path: impl AsRef<PathStr>, style: Style) {
+        let path = path.as_ref();
         outln!("{} {}", "-".style(style), path.display().style(style));
     }
 }

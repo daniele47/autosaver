@@ -16,11 +16,6 @@ pub mod prompt;
 #[command(version)]
 #[command(infer_subcommands = true)]
 #[command(disable_help_subcommand = true)]
-#[command(after_help = "\
-Environment variables:
-  PERF     Show performance of various sections of the cli
-  EDITOR   Editor to open when editing files via the prompt
-")]
 #[command(about = "A simple dotfiles manager that doesn't pollute the system", long_about = None)]
 pub struct Cli {
     #[command(subcommand)]
