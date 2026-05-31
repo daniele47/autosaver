@@ -15,6 +15,12 @@ IDEAS:
     - (uhm?) provide some default colorschemes and a flag/env var to pick one precisely
 - (uhm?) decide if it's ok that deleting files means that symlinks to files are deleted too (unlike symlinks to dir which do not get deleted)
 
+## v2.4.2
+
+### Changes
+
+- easier to read `PERF=` output
+
 ## v2.4.1
 
 ### Patches

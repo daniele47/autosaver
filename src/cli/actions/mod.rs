@@ -7,11 +7,11 @@ pub mod tree;
 
 impl Cli {
     pub fn run_cmd(&self) -> anyhow::Result<()> {
-        let ctx = perf("    - Configs parsed in", || {
+        let ctx = perf("    - Configs parsed -->", || {
             CliContext::new(&self.home, &self.root, &self.profile)
         })?;
 
-        perf("    - Command run in", || match self.cmd {
+        perf("    - Command run    -->", || match self.cmd {
             CliCmd::List { .. }
             | CliCmd::Save { .. }
             | CliCmd::Restore { .. }
