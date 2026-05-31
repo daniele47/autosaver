@@ -63,7 +63,7 @@ impl Cli {
         ctx.profiles
             .traverse(&ctx.curr_profile, trav_opts, |trav_ctx| {
                 if let ProfileKind::Module(module) = trav_ctx.item.kind() {
-                    CliColor::output_profile(trav_ctx.name, ctx.col.output_profile);
+                    CliColor::output_profile(trav_ctx.name);
                     let this_backup_dir = backup_dir.join(trav_ctx.item.id_or(trav_ctx.name))?;
                     for (path, entry) in resolve(module, &[home_dir, &this_backup_dir])? {
                         // filter entries with skip policy

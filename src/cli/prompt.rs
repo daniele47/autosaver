@@ -26,6 +26,8 @@ bitflags! {
         const EDIT = 1 << 5;
         /// Show entire file
         const SHOW = 1 << 6;
+        /// Show full paths of all files
+        const FULL = 1 << 7;
     }
 }
 
@@ -67,13 +69,14 @@ impl<'a> Prompt<'a> {
 
     fn parse_answer(input: &str, allowed: PromptAnswer) -> Option<PromptAnswer> {
         match input {
-            "y" => Some(PromptAnswer::YES),
-            "n" | "" => Some(PromptAnswer::NO),
             "d" => Some(PromptAnswer::DIFF),
             "e" => Some(PromptAnswer::EDIT),
-            "s" => Some(PromptAnswer::SHOW),
-            "q" => Some(PromptAnswer::QUIT),
+            "f" => Some(PromptAnswer::FULL),
             "h" => Some(PromptAnswer::HELP),
+            "n" | "" => Some(PromptAnswer::NO),
+            "q" => Some(PromptAnswer::QUIT),
+            "s" => Some(PromptAnswer::SHOW),
+            "y" => Some(PromptAnswer::YES),
             _ => None,
         }
         .map(|f| f & allowed)
@@ -84,13 +87,14 @@ impl<'a> Prompt<'a> {
         const ANSWER_LIST: &[(PromptAnswer, &str)] = &[
             (PromptAnswer::DIFF, "d"),
             (PromptAnswer::EDIT, "e"),
+            (PromptAnswer::FULL, "f"),
             (PromptAnswer::HELP, "h"),
             (PromptAnswer::NO, "n"),
             (PromptAnswer::QUIT, "q"),
             (PromptAnswer::SHOW, "s"),
             (PromptAnswer::YES, "y"),
         ];
-        let mut res = [""; 7];
+        let mut res = [""; ANSWER_LIST.len()];
         let mut count = 0;
         for (answer, ch) in ANSWER_LIST {
             if answers.contains(*answer) {
@@ -148,6 +152,7 @@ impl<'a> Prompt<'a> {
                 i if i.contains(PromptAnswer::DIFF) => self.on_diff(paths),
                 i if i.contains(PromptAnswer::EDIT) => self.on_edit(paths),
                 i if i.contains(PromptAnswer::SHOW) => self.on_show(paths),
+                i if i.contains(PromptAnswer::FULL) => self.on_full(paths),
                 _ => unimplemented!("Prompt answer not handled"),
             };
             prompt_answer = self.prompt(msg);
@@ -193,6 +198,11 @@ impl<'a> Prompt<'a> {
     pub fn on_quit(&self) -> anyhow::Result<()> {
         bail!(EarlyQuit)
     }
+    pub fn on_full(&self, paths: &[&AbsPathStr]) {
+        for path in paths {
+            outln!("{}", path.display());
+        }
+    }
     pub fn on_help(&self) {
         let f = self.allowed_answers;
         if f.contains(PromptAnswer::DIFF) {
@@ -200,6 +210,9 @@ impl<'a> Prompt<'a> {
         }
         if f.contains(PromptAnswer::EDIT) {
             outln!("[E]dit : edit the file with the $EDITOR");
+        }
+        if f.contains(PromptAnswer::FULL) {
+            outln!("[F]ull : show all the full paths");
         }
         if f.contains(PromptAnswer::HELP) {
             outln!("[H]elp : show the current help message");

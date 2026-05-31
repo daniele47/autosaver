@@ -45,12 +45,11 @@ impl CliColor {
         }
     }
 
-    pub fn output_profile(profile: &RelPathStr, style: Style) {
-        outln!(
-            "{} {} {0}",
-            "***".style(style),
-            profile.display().style(style)
-        );
+    pub fn output_profile(profile: &RelPathStr) {
+        let style = Self::default_theme().output_profile;
+        let profile = profile.display();
+        let profile = profile.style(style);
+        outln!("{} {profile} {0}", "***".style(style));
     }
 
     pub fn output_path(path: impl AsRef<PathStr>, style: Style) {

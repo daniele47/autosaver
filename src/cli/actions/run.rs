@@ -60,7 +60,7 @@ impl Cli {
                 ctx.profiles
                     .traverse(&ctx.curr_profile, trav_opts, |trav_ctx| {
                         if let ProfileKind::Runner(runner) = trav_ctx.item.kind() {
-                            CliColor::output_profile(trav_ctx.name, ctx.col.output_profile);
+                            CliColor::output_profile(trav_ctx.name);
                             let this_run_dir = run_dir.join(trav_ctx.item.id_or(trav_ctx.name))?;
                             for (path, entry) in resolve(runner, &this_run_dir)? {
                                 // filter entries with skip policy

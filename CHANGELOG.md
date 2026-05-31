@@ -3,22 +3,30 @@
 All notable changes to this project will be documented here
 
 TODO:
-- (maybe?) add a global flag `--full-path|-f` to show all paths in their entirity instead of relpaths
-- (NOPE?) consider whetever to allow `\*` option line to actually indicate ALL files/profiles???
 - [ ] improve error messages
-- [x] have `clean` operation:
-    - [ ] handle empty directories
-    - [ ] handle broken symlinks
-    - [ ] handle paths that escape the root directory?
-- [x] create `CliColor` to handle all coloring and output stylization!
-    - [ ] add a `theme.conf` file to allow customazing coloring
-- [ ] decide if it's ok that deleting files means that symlinks to files are deleted too (unlike symlinks to dir which do not get deleted)
+- [ ] see if code can be optimized further
+- [ ] make color store functions as closures, so they can be changed dynamically too
 
-## v2.2.5
+IDEAS:
+- (NOPE?) consider whetever to allow `\*` option line to actually indicate ALL files/profiles???
+- [x] have `clean` operation:
+    - (NOPE?) handle empty directories                  -> just use `find` command
+    - (NOPE?) handle broken symlinks                    -> just use `find` command
+    - [x] handle paths that escape the root directory   -> they already cause an error (by trying to get relpath)!
+- [x] create `CliColor` to handle all coloring and output stylization!
+    - (uhm?) provide some default colorschemes and a flag/env var to pick one precisely
+- (uhm?) decide if it's ok that deleting files means that symlinks to files are deleted too (unlike symlinks to dir which do not get deleted)
+
+## v2.3.0
+
+### Features
+
+- added `f` prompt answer that simply prints all full paths involved in the prompt
 
 ### Changes
 
 - added prompts for unmodified files too (such that actions can be performed on them too!)
+- removed env variables section in help msg that felt out of place
 
 ## v2.2.4
 
