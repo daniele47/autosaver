@@ -200,7 +200,7 @@ impl<'a> Prompt<'a> {
     }
     pub fn on_full(&self, paths: &[&AbsPathStr]) {
         for path in paths {
-            outln!("{}", path.display());
+            outln!("- {}", path.display());
         }
     }
     pub fn on_help(&self) {

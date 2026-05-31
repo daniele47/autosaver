@@ -31,7 +31,7 @@ impl CliColor {
             tree_runner: Style::new().green(),
             tree_module: Style::new().bright_blue(),
             tree_dedup: Style::new().yellow(),
-            prompt_msg: Style::new().italic(),
+            prompt_msg: Style::new().italic().bright_black().underline(),
             prompt_choices: Style::new().bright_black(),
             output_profile: Style::new().purple(),
             output_path: Style::new().bright_blue(),
