@@ -19,7 +19,7 @@ impl AbsPathStr {
         // check path is relative
         if !path.path().is_absolute() {
             let p = path.path().display();
-            bail!("Path is not absolute: {p}");
+            bail!("Path is not absolute: '{p}'");
         } else {
             Ok(Self { pathstr: path })
         }
@@ -57,7 +57,7 @@ impl AbsPathStr {
         let stripped = self.path().strip_prefix(base.path()).with_context(|| {
             let p = self.display();
             let b = base.display();
-            format!("Could not get relative path for {p} with base {b}")
+            format!("Could not get relative path for '{p}' with base '{b}'")
         })?;
         RelPathStr::new_from_pathbuf(stripped.into())
     }
@@ -70,7 +70,7 @@ impl AbsPathStr {
         AbsPathStr::new_from_pathbuf(
             self.path()
                 .canonicalize()
-                .with_context(|| format!("Failed to canonicalize path {}", self.display()))?,
+                .with_context(|| format!("Failed to canonicalize path: '{}'", self.display()))?,
         )
     }
 

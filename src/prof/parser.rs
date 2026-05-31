@@ -175,22 +175,23 @@ impl Profile {
 
     // packaged error messages
     fn data_ctx(name: &str, data: &str, i: usize, kind: &str) -> anyhow::Result<RelPathStr> {
-        RelPathStr::from_str(data)
-            .with_context(|| format!("Invalid data '{data}' for {kind} profile {name} at line {i}"))
+        RelPathStr::from_str(data).with_context(|| {
+            format!("Invalid data '{data}' for {kind} profile '{name}' (line {i})")
+        })
     }
     fn err_opt(name: &str, opt: &str, i: usize, kind: &str) -> anyhow::Error {
         let mut opt_split = opt.split_whitespace();
         let opt1 = opt_split.next().unwrap_or("");
-        anyhow!("Option '{opt1}' for {kind} profile {name} at line {i} is invalid")
+        anyhow!("Option '{opt1}' for {kind} profile '{name}' (line {i}) is invalid")
     }
     fn err_val(name: &str, opt: &str, i: usize, kind: &str) -> anyhow::Error {
         let mut opt_split = opt.split_whitespace();
         let opt1 = opt_split.next().unwrap_or("");
         let opt2 = opt_split.next().unwrap_or("");
-        anyhow!("Option'{opt1}' for {kind} profile {name} at line {i} has invalid value '{opt2}'")
+        anyhow!("Option'{opt1}' for {kind} profile '{name}' (line {i}) has invalid value '{opt2}'")
     }
     fn err_dup(name: &str, opt: &str, i: usize) -> anyhow::Error {
-        anyhow!("Option '{opt}' for profile {name} at line {i} is duplicated")
+        anyhow!("Option '{opt}' for profile '{name}' (line {i}) is duplicated")
     }
 }
 

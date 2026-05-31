@@ -64,7 +64,7 @@ impl CliContext {
         let home_dir;
         if let Some(home) = home {
             home_dir = home.canonicalize().with_context(|| {
-                format!("Home path could not be canonicalized: {}", home.display())
+                format!("Home path could not be canonicalized: '{}'", home.display())
             })?;
         } else {
             home_dir = env::home_dir().context("Failure getting home directory")?;
@@ -75,7 +75,7 @@ impl CliContext {
         let root_dir;
         if let Some(root) = root {
             root_dir = root.canonicalize().with_context(|| {
-                format!("Root path could not be canonicalized: {}", root.display())
+                format!("Root path could not be canonicalized: '{}'", root.display())
             })?;
         } else {
             root_dir = env::current_dir().context("Failure getting root directory")?;
@@ -107,7 +107,7 @@ impl CliContext {
         // error if config directory is missing
         if !config_dir.is_dir() {
             let config_dir = config_dir.display();
-            bail!("Configuration directory is missing at {config_dir}");
+            bail!("Configuration directory is missing at '{config_dir}'");
         }
 
         // find and load all profiles config files

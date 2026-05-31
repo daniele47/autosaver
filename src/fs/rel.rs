@@ -19,7 +19,7 @@ impl RelPathStr {
         // check path is relative
         if !path.path().is_relative() {
             let p = path.path().display();
-            bail!("Path is not relative: {p}");
+            bail!("Path is not relative: '{p}'");
         } else {
             Ok(Self { pathstr: path })
         }

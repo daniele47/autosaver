@@ -76,7 +76,7 @@ impl AllProfiles {
     pub fn get(&self, name: &RelPathStr) -> anyhow::Result<&Profile> {
         self.profiles
             .get(name)
-            .with_context(|| format!("Missing profile: {}", name.display()))
+            .with_context(|| format!("Missing profile: '{}'", name.display()))
     }
 
     pub fn traverse(
@@ -112,11 +112,11 @@ impl AllProfiles {
                 let cycle = &path[pos..]
                     .iter()
                     .chain(path.get(pos))
-                    .map(|s| s.to_string_lossy())
+                    .map(|s| format!("'{}'", s.display()))
                     .collect::<Vec<_>>()
                     .join(" --> ");
                 let name = root.display();
-                bail!(format!("Profile {name} has a dependency cycle: {cycle}"));
+                bail!(format!("Profile '{name}' has a dependency cycle: {cycle}"));
             }
 
             // load profile
@@ -125,7 +125,7 @@ impl AllProfiles {
                     let name = root.to_string_lossy();
                     let inv_par = last.display();
                     let inv_name = item_name.display();
-                    format!("Profile {name} traversal found invalid profile name {inv_name} as a child of {inv_par}")
+                    format!("Profile '{name}' traversal found invalid profile name '{inv_name}' as a child of '{inv_par}'")
                 })
             } else {
                 self.get(item_name)

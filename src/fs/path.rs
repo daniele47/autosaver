@@ -19,10 +19,10 @@ impl PathStr {
         for component in path.components() {
             match component {
                 Component::CurDir => {
-                    bail!("Path contains current directory: {}", path.display())
+                    bail!("Path contains current directory: '{}'", path.display())
                 }
                 Component::ParentDir => {
-                    bail!("Path contains parent directory: {}", path.display())
+                    bail!("Path contains parent directory: '{}'", path.display())
                 }
                 component => components.push(component),
             }
@@ -56,7 +56,7 @@ impl PathStr {
         self.path()
             .file_name()
             .map(|f| Self::new_from_pathbuf(PathBuf::from(f)))
-            .with_context(|| format!("Could not get basename of {}", self.display()))?
+            .with_context(|| format!("Could not get basename of '{}'", self.display()))?
     }
 }
 

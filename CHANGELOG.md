@@ -3,7 +3,6 @@
 All notable changes to this project will be documented here
 
 TODO:
-- [ ] improve error messages
 - [ ] see if code can be optimized further
 
 IDEAS:
@@ -23,6 +22,7 @@ IDEAS:
 - fixed `all` profile not loading correctly
 - disabled configurations starting with `.` as that often breaks
 - changed `type` to `kind` in config files
+- improved error messages
 
 ## v2.4.0
 

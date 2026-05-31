@@ -29,7 +29,7 @@ impl AbsPathStr {
     fn list_raw(&self) -> anyhow::Result<ReadDir> {
         fs::read_dir(self.path()).with_context(|| {
             let p = self.display();
-            format!("Could not list files in directory {p}")
+            format!("Could not list files in directory: '{p}'")
         })
     }
 
@@ -125,14 +125,14 @@ impl AbsPathStr {
         if self.path().symlink_metadata().is_ok_and(|f| f.is_symlink()) {
             fs::remove_file(self.path()).with_context(|| {
                 let p = self.display();
-                format!("Could not delete symlink: {p}")
+                format!("Could not delete symlink: '{p}'")
             })?;
         }
         // purge file
         else if self.is_file() {
             fs::remove_file(self.path()).with_context(|| {
                 let p = self.display();
-                format!("Could not delete file: {p}")
+                format!("Could not delete file: '{p}'")
             })?;
         }
         // purge directory
@@ -140,19 +140,19 @@ impl AbsPathStr {
             if allow_recursive_delete {
                 fs::remove_dir_all(self.path()).with_context(|| {
                     let p = self.display();
-                    format!("Could not delete directory recursively: {p}")
+                    format!("Could not delete directory recursively: '{p}'")
                 })?;
             } else {
                 fs::remove_dir(self.path()).with_context(|| {
                     let p = self.display();
-                    format!("Could not delete directory: {p}")
+                    format!("Could not delete directory: '{p}'")
                 })?;
             }
         }
         // fail if it was something else
         else {
             let p = self.display();
-            bail!("Could not delete path: {p}");
+            bail!("Could not delete path: '{p}'");
         }
 
         // delete empty parent directories
@@ -181,18 +181,18 @@ impl AbsPathStr {
             Some(Component::Normal(_))
         ) {
             let p = self.display();
-            bail!("Path cannot be created as a file: {p}")
+            bail!("Path cannot be created as a file: '{p}'")
         }
 
         // create parent dirs
         if let Some(parent) = self.path().parent() {
             fs::create_dir_all(parent).with_context(|| {
                 let p = parent.display();
-                format!("Failed to create directory: {p}")
+                format!("Failed to create directory: '{p}'")
             })?;
         } else {
             let p = self.display();
-            bail!("Could not create parent directories: {p}");
+            bail!("Could not create parent directories: '{p}'");
         }
 
         // create file
@@ -207,11 +207,11 @@ impl AbsPathStr {
     pub fn read_file(&self) -> anyhow::Result<String> {
         if !self.is_file() {
             let p = self.display();
-            bail!("Cannot read a path that is not a file: {p}");
+            bail!("Cannot read a path that is not a file: '{p}'");
         }
         fs::read_to_string(self.path()).with_context(|| {
             let p = self.display();
-            format!("Could not read file: {p}")
+            format!("Could not read file: '{p}'")
         })
     }
 
@@ -220,7 +220,7 @@ impl AbsPathStr {
         fs::copy(self.path(), dst.path()).with_context(|| {
             let p = self.display();
             let t = dst.display();
-            format!("Failed to copy from {p} to {t}")
+            format!("Failed to copy from '{p}' to '{t}'")
         })?;
         Ok(())
     }
