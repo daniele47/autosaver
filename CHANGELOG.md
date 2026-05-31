@@ -5,7 +5,6 @@ All notable changes to this project will be documented here
 TODO:
 - [ ] improve error messages
 - [ ] see if code can be optimized further
-    - [ ] remove `load_vt_profile` function, and just load dirs whilst loading real configs
 
 IDEAS:
 - (NOPE?) consider whetever to allow `\*` option line to actually indicate ALL files/profiles???
@@ -22,6 +21,10 @@ IDEAS:
 ### Features
 
 - added `-I|--ignore` flag for `tree` command to ignore profiles recursively
+
+### Optimization
+
+- configs load almost twice as fast, by avoiding querying for files inside directories twice
 
 ## v2.3.0
 

@@ -6,6 +6,7 @@ use std::{
 };
 
 use anyhow::{Context, bail};
+use indexmap::IndexSet;
 
 use crate::{
     cli::col::CliColor,
@@ -95,99 +96,98 @@ impl CliContext {
         Ok(paths)
     }
 
-    fn load_vt_profile(config_dir: &AbsPathStr, path: &AbsPathStr) -> anyhow::Result<Profile> {
-        let mut comp_entries = vec![];
-
-        path.list(|ctx| {
-            let ftype = ctx.entry.file_type()?;
-            let fname = ctx.entry.file_name();
-            let fname = fname.to_string_lossy();
-            let conf_rel = ctx.path.to_rel(config_dir)?;
-            let conf_str = conf_rel.to_string_lossy();
-            let comp_entry;
-
-            // skip dotfiles
-            if fname.starts_with(".") {
-                return Ok(());
-            }
-
-            // load child
-            if ftype.is_dir() {
-                comp_entry = CompositeEntry::new(conf_rel);
-            } else if let Some(pname) = conf_str.strip_suffix(".conf") {
-                comp_entry = CompositeEntry::new(RelPathStr::from_str(pname)?);
-            } else {
-                return Ok(());
-            }
-
-            // add child
-            comp_entries.push(comp_entry);
-
-            Ok(())
-        })?;
-
-        comp_entries.sort_unstable_by(|a, b| a.child().cmp(b.child()));
-        let composite = ProfileKind::Composite(Composite::new(comp_entries));
-        Ok(Profile::new(None, composite))
-    }
-
     fn load_profiles(
         config_dir: &AbsPathStr,
         root_profile: &RelPathStr,
     ) -> anyhow::Result<AllProfiles> {
-        let mut all_profiles = HashMap::new();
+        let mut vt_names = IndexSet::new();
+        let mut vt_profiles = vec![];
+        let mut vt_entries = vec![];
 
-        // load only empty all profile if config dir is missing
+        // error if config directory is missing
         if !config_dir.is_dir() {
             let config_dir = config_dir.display();
             bail!("Configuration directory is missing at {config_dir}");
         }
 
-        // add all virtual profile
-        let profile = Self::load_vt_profile(config_dir, config_dir)?;
-        all_profiles.insert(root_profile.to_owned(), profile);
-
         // find and load all profiles config files
         config_dir.find(|ctx| {
             let ftype = ctx.entry.file_type()?;
-            let fname = ctx.entry.file_name();
-            let fname = fname.to_string_lossy();
-            let mut conf_rel = ctx.path.to_rel(config_dir)?;
-            let conf_str = conf_rel.to_string_lossy();
-            let profile;
-
-            // ignore dotfiles in config directory
-            if fname.starts_with(".") {
-                return Ok(false);
-            }
+            let conf_rel = ctx.path.to_rel(config_dir)?;
 
             // virtual directory parsing
             if ftype.is_dir() {
-                profile = Self::load_vt_profile(config_dir, &ctx.path)?;
+                // insert profile
+                let (index_this, _) = vt_names.insert_full(conf_rel);
+
+                // insert parent profile
+                let parent = &vt_names[index_this].path().parent().expect("no parent");
+                let parent = RelPathStr::new_from_pathbuf(PathBuf::from(parent))?;
+                let (index_parent, _) = vt_names.insert_full(parent);
+                vt_entries.push((index_parent, index_this));
             }
             // normal profile parsing
-            else if let Some(pname) = conf_str.strip_suffix(".conf") {
-                profile = Profile::parse_config(&ctx.path.read_file()?, pname)?;
-                conf_rel = RelPathStr::from_str(pname)?;
+            else if ftype.is_file()
+                && let Some(pname) = conf_rel.to_string_lossy().strip_suffix(".conf")
+            {
+                // parse profile
+                let (index_this, _) = vt_names.insert_full(RelPathStr::from_str(pname)?);
+                let profile = Profile::parse_config(&ctx.path.read_file()?, pname)?;
+                vt_profiles.push((index_this, profile));
+
+                // insert parent profile
+                let parent = &vt_names[index_this].path().parent().expect("no parent");
+                let parent = RelPathStr::new_from_pathbuf(PathBuf::from(parent))?;
+                let (index_parent, _) = vt_names.insert_full(parent);
+                vt_entries.push((index_parent, index_this));
             }
             // otherwise do nothing
             else {
                 return Ok(true);
             }
 
-            // insert profile
-            match all_profiles.entry(conf_rel) {
-                Entry::Vacant(entry) => {
-                    entry.insert(profile);
-                }
-                Entry::Occupied(entry) => {
-                    let old_name = entry.key().display();
-                    bail!(format!("Profile {old_name} is loaded multiple times"));
-                }
-            }
-
             Ok(true)
         })?;
+
+        // put all profiles togheter
+        let mut all_profiles = HashMap::new();
+        let mut all_entries = HashMap::<RelPathStr, Vec<CompositeEntry>>::new();
+        for (i, prof) in vt_profiles {
+            all_profiles.insert(vt_names[i].clone(), prof);
+        }
+        for (i, j) in vt_entries {
+            all_entries
+                .entry(vt_names[i].clone())
+                .or_default()
+                .push(CompositeEntry::new(vt_names[j].clone()));
+        }
+        for (name, entries) in all_entries {
+            let profile = Profile::new(None, ProfileKind::Composite(Composite::new(entries)));
+            match all_profiles.entry(name) {
+                Entry::Vacant(v) => {
+                    v.insert(profile);
+                }
+                Entry::Occupied(o) => {
+                    let name = o.key().display();
+                    bail!("Profile named '{name}' is both a directory and a config file");
+                }
+            }
+        }
+
+        // handle root profile
+        if let Some(value) = all_profiles.remove(&RelPathStr::from_str("")?) {
+            let rp = root_profile.to_owned();
+            if all_profiles.insert(rp, value).is_some() {
+                let name = root_profile.display();
+                bail!("Profile name '{name}' is reserved for root profile");
+            }
+        }
+
+        // handle no root profile
+        if !all_profiles.contains_key(root_profile) {
+            let profile = Profile::new(None, ProfileKind::Composite(Composite::new(vec![])));
+            all_profiles.insert(root_profile.to_owned(), profile);
+        }
 
         Ok(AllProfiles::new(all_profiles))
     }
