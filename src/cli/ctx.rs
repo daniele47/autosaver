@@ -176,17 +176,24 @@ impl CliContext {
 
         // handle root profile
         if let Some(value) = all_profiles.remove(&RelPathStr::from_str("")?) {
-            let rp = root_profile.to_owned();
-            if all_profiles.insert(rp, value).is_some() {
+            if all_profiles.contains_key(root_profile) {
                 let name = root_profile.display();
                 bail!("Profile name '{name}' is reserved for root profile");
             }
+            all_profiles.insert(root_profile.to_owned(), value);
+        } else {
+            if !all_profiles.contains_key(root_profile) {
+                let profile = Profile::new(None, ProfileKind::Composite(Composite::new(vec![])));
+                all_profiles.insert(root_profile.to_owned(), profile);
+            }
         }
 
-        // handle no root profile
-        if !all_profiles.contains_key(root_profile) {
-            let profile = Profile::new(None, ProfileKind::Composite(Composite::new(vec![])));
-            all_profiles.insert(root_profile.to_owned(), profile);
+        // handle empty directories
+        for profile in vt_names {
+            if !all_profiles.contains_key(&profile) {
+                let profile = Profile::new(None, ProfileKind::Composite(Composite::new(vec![])));
+                all_profiles.insert(root_profile.to_owned(), profile);
+            }
         }
 
         Ok(AllProfiles::new(all_profiles))
