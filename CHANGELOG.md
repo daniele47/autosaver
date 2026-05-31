@@ -20,7 +20,7 @@ IDEAS:
 
 ### Patches
 
-- [WIP] fixed `all` profile not loading correctly
+- fixed `all` profile not loading correctly
 - disabled configurations starting with `.` as that often breaks
 - changed `type` to `kind` in config files
 

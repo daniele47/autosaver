@@ -179,13 +179,26 @@ impl CliContext {
                 }
             }
         }
-
-        // handle empty directories
-        for profile in vt_names.iter().chain([root_profile.to_owned()].iter()) {
-            if !all_profiles.contains_key(&profile) {
+        for pname in vt_names {
+            if !all_profiles.contains_key(&pname) {
                 let profile = Profile::new(None, ProfileKind::Composite(Composite::new(vec![])));
-                all_profiles.insert(root_profile.to_owned(), profile);
+                all_profiles.insert(pname, profile);
             }
+        }
+
+        // handle root profile
+        if all_profiles.contains_key(root_profile) {
+            let name = root_profile.display();
+            bail!("Profile name '{name}' is reserved for root profile");
+        }
+        if let Some(value) = all_profiles.remove(&RelPathStr::from_str("")?) {
+            all_profiles.insert(root_profile.to_owned(), value);
+        }
+
+        // handle empty config dir
+        if !all_profiles.contains_key(root_profile) {
+            let profile = Profile::new(None, ProfileKind::Composite(Composite::new(vec![])));
+            all_profiles.insert(root_profile.to_owned(), profile);
         }
 
         Ok(AllProfiles::new(all_profiles))
