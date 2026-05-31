@@ -92,7 +92,7 @@ impl AllProfiles {
         mut on_elem: S,
     ) -> anyhow::Result<()>
     where
-        S: FnMut(TraverseContext) -> anyhow::Result<()>,
+        S: FnMut(TraverseContext) -> anyhow::Result<bool>,
     {
         let mut visited = HashSet::<&RelPathStr>::new();
         let mut path = Vec::<&RelPathStr>::new();
@@ -133,14 +133,16 @@ impl AllProfiles {
 
             // act depending on duplicated policy
             let is_dup = !visited.insert(item_name);
-            if !is_dup || opts.dups != TraverseDupPolicy::Exclude {
-                on_elem(TraverseContext {
+            if (!is_dup || opts.dups != TraverseDupPolicy::Exclude)
+                && !on_elem(TraverseContext {
                     name: item_name,
                     item: item_profile,
                     path: &path,
                     stack: &stack,
                     is_dup,
-                })?;
+                })?
+            {
+                continue;
             }
             if is_dup && opts.dups != TraverseDupPolicy::Include {
                 continue;
@@ -209,7 +211,7 @@ mod tests {
 
         profiles.traverse(&pname, Default::default(), |ctx| {
             visited_order.push(ctx.name.to_string_lossy().to_string());
-            Ok(())
+            Ok(true)
         })?;
 
         assert_eq!(

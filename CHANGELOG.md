@@ -6,7 +6,6 @@ TODO:
 - [ ] improve error messages
 - [ ] see if code can be optimized further
     - [ ] remove `load_vt_profile` function, and just load dirs whilst loading real configs
-- [ ] make `traverse` method return a bool to allow more efficiently recursive skip, so `-I` in tree can be more efficient
 
 IDEAS:
 - (NOPE?) consider whetever to allow `\*` option line to actually indicate ALL files/profiles???

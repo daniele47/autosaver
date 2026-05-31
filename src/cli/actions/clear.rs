@@ -73,7 +73,7 @@ impl Cli {
                         }
                         _ => {}
                     }
-                    Ok(())
+                    Ok(true)
                 })?;
 
                 // compare found files with those tracked

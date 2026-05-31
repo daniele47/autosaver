@@ -121,7 +121,7 @@ impl Cli {
                                 }
                             }
                         }
-                        Ok(())
+                        Ok(true)
                     })
             }
             _ => unreachable!("Mismatching command"),

@@ -25,10 +25,8 @@ impl Cli {
                 let mut are_last = Vec::<bool>::new();
                 ctx.profiles
                     .traverse(&ctx.curr_profile, trav_opts, |trav_ctx| {
-                        if ignore.contains(trav_ctx.name)
-                            || trav_ctx.path.iter().any(|p| ignore.contains(p))
-                        {
-                            return Ok(());
+                        if ignore.contains(trav_ctx.name) {
+                            return Ok(false);
                         }
                         let len = trav_ctx.path.len();
 
@@ -63,7 +61,7 @@ impl Cli {
                             out!(" {}", "(*)".style(ctx.col.tree_dedup));
                         }
                         outln!();
-                        Ok(())
+                        Ok(true)
                     })
             }
             _ => unreachable!("Mismatching command"),
