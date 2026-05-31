@@ -180,10 +180,9 @@ impl CliContext {
             }
         }
         for pname in vt_names {
-            if !all_profiles.contains_key(&pname) {
-                let profile = Profile::new(None, ProfileKind::Composite(Composite::new(vec![])));
-                all_profiles.insert(pname, profile);
-            }
+            all_profiles.entry(pname).or_insert_with(|| {
+                Profile::new(None, ProfileKind::Composite(Composite::new(vec![])))
+            });
         }
 
         // handle root profile
