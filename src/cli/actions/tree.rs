@@ -21,13 +21,10 @@ impl Cli {
                 } else {
                     TraverseDupPolicy::Shallow
                 };
-                let trav_opts = TraverseOpts::new(trav_opts);
+                let trav_opts = TraverseOpts::new(trav_opts, ignore);
                 let mut are_last = Vec::<bool>::new();
                 ctx.profiles
                     .traverse(&ctx.curr_profile, trav_opts, |trav_ctx| {
-                        if ignore.contains(trav_ctx.name) {
-                            return Ok(false);
-                        }
                         let len = trav_ctx.path.len();
 
                         // render indent lines
@@ -61,7 +58,7 @@ impl Cli {
                             out!(" {}", "(*)".style(ctx.col.tree_dedup));
                         }
                         outln!();
-                        Ok(true)
+                        Ok(())
                     })
             }
             _ => unreachable!("Mismatching command"),

@@ -46,13 +46,14 @@ pub enum TraverseDupPolicy {
     Exclude,
 }
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct TraverseOpts {
+pub struct TraverseOpts<'a> {
     dups: TraverseDupPolicy,
+    ignore: &'a [RelPathStr],
 }
 
-impl TraverseOpts {
-    pub fn new(dups: TraverseDupPolicy) -> Self {
-        Self { dups }
+impl<'a> TraverseOpts<'a> {
+    pub fn new(dups: TraverseDupPolicy, ignore: &'a [RelPathStr]) -> Self {
+        Self { dups, ignore }
     }
 }
 
@@ -92,7 +93,7 @@ impl AllProfiles {
         mut on_elem: S,
     ) -> anyhow::Result<()>
     where
-        S: FnMut(TraverseContext) -> anyhow::Result<bool>,
+        S: FnMut(TraverseContext) -> anyhow::Result<()>,
     {
         let mut visited = HashSet::<&RelPathStr>::new();
         let mut path = Vec::<&RelPathStr>::new();
@@ -133,16 +134,14 @@ impl AllProfiles {
 
             // act depending on duplicated policy
             let is_dup = !visited.insert(item_name);
-            if (!is_dup || opts.dups != TraverseDupPolicy::Exclude)
-                && !on_elem(TraverseContext {
+            if !is_dup || opts.dups != TraverseDupPolicy::Exclude {
+                on_elem(TraverseContext {
                     name: item_name,
                     item: item_profile,
                     path: &path,
                     stack: &stack,
                     is_dup,
-                })?
-            {
-                continue;
+                })?;
             }
             if is_dup && opts.dups != TraverseDupPolicy::Include {
                 continue;
@@ -152,7 +151,12 @@ impl AllProfiles {
             if let ProfileKind::Composite(composite) = item_profile.kind() {
                 path.push(item_name);
                 stack.push((item_name, true));
-                for child in composite.entries().iter().rev() {
+                for child in composite
+                    .entries()
+                    .iter()
+                    .filter(|i| !opts.ignore.contains(i.child()))
+                    .rev()
+                {
                     stack.push((child.child(), false));
                 }
             }
@@ -211,7 +215,7 @@ mod tests {
 
         profiles.traverse(&pname, Default::default(), |ctx| {
             visited_order.push(ctx.name.to_string_lossy().to_string());
-            Ok(true)
+            Ok(())
         })?;
 
         assert_eq!(

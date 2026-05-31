@@ -202,7 +202,7 @@ impl Cli {
                         }
                     }
                 }
-                Ok(true)
+                Ok(())
             })?;
 
         Ok(())
