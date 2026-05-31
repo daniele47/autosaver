@@ -14,6 +14,12 @@ TODO:
     - [ ] add a `theme.conf` file to allow customazing coloring
 - [ ] decide if it's ok that deleting files means that symlinks to files are deleted too (unlike symlinks to dir which do not get deleted)
 
+## v2.2.5
+
+### Changes
+
+- added prompts for unmodified files too (such that actions can be performed on them too!)
+
 ## v2.2.4
 
 ### Changes

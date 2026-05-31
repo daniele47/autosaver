@@ -176,9 +176,20 @@ impl Cli {
                                     }
                                 }
                                 // files are equal
-                                [Some(_), Some(_)] => {
+                                [Some(p1), Some(p2)] => {
                                     if act_backup.unmodified {
                                         CliColor::output_path(&path, ctx.col.output_unmodified);
+                                        let msg = "Nothing to be done. Type y/n to continue...";
+                                        let paths: &[&AbsPathStr] =
+                                            if matches!(&self.cmd, CliCmd::Save { .. }) {
+                                                &[p2, p1]
+                                            } else if matches!(&self.cmd, CliCmd::Restore { .. }) {
+                                                &[p1, p2]
+                                            } else {
+                                                &[]
+                                            };
+                                        let action = || Ok(());
+                                        prompt.handled_prompt_available(msg, paths, action)?;
                                     }
                                 }
                                 _ => unreachable!("Invalid files"),
