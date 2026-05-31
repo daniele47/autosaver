@@ -115,6 +115,12 @@ impl CliContext {
             let ftype = ctx.entry.file_type()?;
             let conf_rel = ctx.path.to_rel(config_dir)?;
 
+            // skip dotfiles configs
+            if ctx.entry.file_name().to_string_lossy().starts_with(".") {
+                let p = conf_rel.display();
+                bail!(format!("Configuration file '{p}' starts with a dot"));
+            }
+
             // virtual directory parsing
             if ftype.is_dir() {
                 // insert profile
@@ -174,22 +180,8 @@ impl CliContext {
             }
         }
 
-        // handle root profile
-        if let Some(value) = all_profiles.remove(&RelPathStr::from_str("")?) {
-            if all_profiles.contains_key(root_profile) {
-                let name = root_profile.display();
-                bail!("Profile name '{name}' is reserved for root profile");
-            }
-            all_profiles.insert(root_profile.to_owned(), value);
-        } else {
-            if !all_profiles.contains_key(root_profile) {
-                let profile = Profile::new(None, ProfileKind::Composite(Composite::new(vec![])));
-                all_profiles.insert(root_profile.to_owned(), profile);
-            }
-        }
-
         // handle empty directories
-        for profile in vt_names {
+        for profile in vt_names.iter().chain([root_profile.to_owned()].iter()) {
             if !all_profiles.contains_key(&profile) {
                 let profile = Profile::new(None, ProfileKind::Composite(Composite::new(vec![])));
                 all_profiles.insert(root_profile.to_owned(), profile);
