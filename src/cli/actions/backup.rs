@@ -6,7 +6,6 @@ use indexmap::{IndexMap, map::Entry};
 use crate::{
     cli::{
         Cli, CliCmd,
-        col::CliColor,
         ctx::{CliContext, Paths},
         prompt::{Prompt, PromptAnswer, PromptFlags},
     },
@@ -63,7 +62,7 @@ impl Cli {
         ctx.profiles
             .traverse(&ctx.curr_profile, trav_opts, |trav_ctx| {
                 if let ProfileKind::Module(module) = trav_ctx.item.kind() {
-                    CliColor::output_profile(trav_ctx.name);
+                    ctx.col.output_profile(trav_ctx.name);
                     let this_backup_dir = backup_dir.join(trav_ctx.item.id_or(trav_ctx.name))?;
                     for (path, entry) in resolve(module, &[home_dir, &this_backup_dir])? {
                         // filter entries with skip policy
@@ -84,7 +83,7 @@ impl Cli {
                                 only_original,
                                 only_backup,
                             } => {
-                                CliColor::output_path(&path, ctx.col.output_path);
+                                ctx.col.output_path(&path, ctx.col.output_path);
                                 if (*only_original || !only_backup)
                                     && let Some(original_file) = &entry.1[0]
                                 {
@@ -110,7 +109,7 @@ impl Cli {
                             | CliCmd::Restore { act_backup, .. } => match &entry.1 {
                                 // file is missing in the backup
                                 [Some(p1), None] => {
-                                    CliColor::output_path(&path, ctx.col.output_missing);
+                                    ctx.col.output_path(&path, ctx.col.output_missing);
                                     match &self.cmd {
                                         CliCmd::Save { .. } => {
                                             prompt.handled_prompt_available(
@@ -134,7 +133,7 @@ impl Cli {
                                 }
                                 // file is missing in home
                                 [None, Some(p1)] => {
-                                    CliColor::output_path(&path, ctx.col.output_missing);
+                                    ctx.col.output_path(&path, ctx.col.output_missing);
                                     match &self.cmd {
                                         CliCmd::Save { force, .. } => {
                                             if *force {
@@ -162,7 +161,7 @@ impl Cli {
                                     {
                                         continue;
                                     }
-                                    CliColor::output_path(&path, ctx.col.output_diff);
+                                    ctx.col.output_path(&path, ctx.col.output_diff);
                                     if matches!(&self.cmd, CliCmd::Save { .. }) {
                                         let msg = "Do you really want to update backup file?";
                                         let paths = &[p2, p1];
@@ -178,7 +177,7 @@ impl Cli {
                                 // files are equal
                                 [Some(p1), Some(p2)] => {
                                     if act_backup.unmodified {
-                                        CliColor::output_path(&path, ctx.col.output_unmodified);
+                                        ctx.col.output_path(&path, ctx.col.output_unmodified);
                                         let msg = "Nothing to be done. Type y/n to continue...";
                                         let paths: &[&AbsPathStr] =
                                             if matches!(&self.cmd, CliCmd::Save { .. }) {

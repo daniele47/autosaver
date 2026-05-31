@@ -5,7 +5,6 @@ All notable changes to this project will be documented here
 TODO:
 - [ ] improve error messages
 - [ ] see if code can be optimized further
-- [ ] make color store functions as closures, so they can be changed dynamically too
 
 IDEAS:
 - (NOPE?) consider whetever to allow `\*` option line to actually indicate ALL files/profiles???
@@ -27,6 +26,7 @@ IDEAS:
 
 - added prompts for unmodified files too (such that actions can be performed on them too!)
 - removed env variables section in help msg that felt out of place
+- made clicolor store functions as methods instead of functions
 
 ## v2.2.4
 
