@@ -176,16 +176,12 @@ impl Cli {
                                 if act_backup.unmodified {
                                     ctx.col.output_path(&path, ctx.col.output_unmodified);
                                     let msg = "Nothing to be done. Type y/n to continue...";
-                                    let paths: &[&AbsPathStr] =
-                                        if matches!(&self.cmd, CliCmd::Save { .. }) {
-                                            &[p2, p1]
-                                        } else if matches!(&self.cmd, CliCmd::Restore { .. }) {
-                                            &[p1, p2]
-                                        } else {
-                                            &[]
-                                        };
                                     let action = || Ok(());
-                                    prompt.handled_prompt_available(msg, paths, action)?;
+                                    if matches!(&self.cmd, CliCmd::Save { .. }) {
+                                        prompt.handled_prompt_available(msg, &[p2, p1], action)?;
+                                    } else if matches!(&self.cmd, CliCmd::Restore { .. }) {
+                                        prompt.handled_prompt_available(msg, &[p1, p2], action)?;
+                                    }
                                 }
                             }
                             _ => unreachable!("Invalid files"),
