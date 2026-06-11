@@ -91,7 +91,7 @@ elif [[ -v BUILD ]]; then
     "$LOCAL_BIN_PATH" --version
 else
     # previous binary version
-    OLD_VERSION="$($LOCAL_BIN_PATH --version 2>/dev/null | tr -d '\n ')"
+    OLD_VERSION="$($LOCAL_BIN_PATH --version 2>/dev/null | tr -d '\n')"
     [[ -z "$OLD_VERSION" ]] && OLD_VERSION="\e[1;31mmissing\e[m"
 
     # get platform / os dependent variables populated
