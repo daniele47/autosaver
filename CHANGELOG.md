@@ -5,7 +5,6 @@ All notable changes to this project will be documented here
 TODO:
 - `ignore` files are not detected, if already added on both sides
 - add warning for files that require `-f` flag to delete in backup action
-- [uuuuhm] consider if make `-c|--choice` actually able to edit/show config file!
 
 IDEAS:
 - (uhm?) see if code can be optimized further (fstat calls are the price here, and i already improved code massively)
@@ -21,6 +20,7 @@ IDEAS:
 ## v2.5.0
 
 - add flag `-c|--choice` that prompts to even allow executing profiles
+- `-c|--choice` is also able to edit/show config file relative to the profile
 
 ### Patches
 

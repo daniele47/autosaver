@@ -12,7 +12,7 @@ use crate::{
         ctx::{CliContext, Paths},
         prompt::{Prompt, PromptAnswer, PromptFlags},
     },
-    fs::abs::AbsPathStr,
+    fs::{abs::AbsPathStr, rel::RelPathStr},
     prof::{
         ProfileKind,
         runner::{Runner, RunnerEntry, RunnerPolicy},
@@ -61,7 +61,10 @@ impl Cli {
                         if self.choice {
                             let mut execute = false;
                             let msg = "Do you want to execute this profile?";
-                            let paths = &[];
+                            let mut name_str = trav_ctx.name.to_string_lossy().to_string();
+                            name_str.push_str(".conf");
+                            let config_path = RelPathStr::try_from(name_str)?;
+                            let paths = &[&ctx.paths[&Paths::Config].join(&config_path)?];
                             let action = || {
                                 execute = true;
                                 Ok(())
