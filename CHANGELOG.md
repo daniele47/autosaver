@@ -4,7 +4,7 @@ All notable changes to this project will be documented here
 
 TODO:
 - `ignore` files are not detected, if already added on both sides
-- add warning for files that require `-f` flag to delete in backup action
+- add warning for files that require `-f` flag to delete in backup action, and everywhere else (but `list`) where paths are listed but nothing is said!
 
 IDEAS:
 - (uhm?) see if code can be optimized further (fstat calls are the price here, and i already improved code massively)
