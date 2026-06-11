@@ -5,6 +5,7 @@ All notable changes to this project will be documented here
 TODO:
 - `ignore` files are not detected, if already added on both sides
 - add warning for files that require `-f` flag to delete in backup action
+- add flag that add prompts to even execute profiles `-c|--choice`
 
 IDEAS:
 - (uhm?) see if code can be optimized further (fstat calls are the price here, and i already improved code massively)
@@ -16,6 +17,12 @@ IDEAS:
 - [x] create `CliColor` to handle all coloring and output stylization!
     - (uhm?) provide some default colorschemes and a flag/env var to pick one precisely
 - (uhm?) decide if it's ok that deleting files means that symlinks to files are deleted too (unlike symlinks to dir which do not get deleted)
+
+## v2.5.0
+
+### Patches
+
+- handled choice in prompt now removes `f` answer when no paths are specified
 
 ## v2.4.4
 

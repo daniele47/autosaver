@@ -176,7 +176,7 @@ impl<'a> Prompt<'a> {
     {
         let mut answers = self.allowed_answers;
         if paths.is_empty() {
-            answers &= !(PromptAnswer::EDIT | PromptAnswer::SHOW);
+            answers &= !(PromptAnswer::EDIT | PromptAnswer::SHOW | PromptAnswer::FULL);
         }
         if paths.len() != 2 {
             answers &= !PromptAnswer::DIFF;
