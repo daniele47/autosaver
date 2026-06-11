@@ -33,6 +33,10 @@ pub struct Cli {
     #[arg(short = 'R', long, env = "AUTOSAVER_ROOT", global = true)]
     root: Option<PathBuf>,
 
+    /// Get prompted for each profile if to execute it or not
+    #[arg(short = 'c', long, global = true)]
+    choice: bool,
+
     /// Skip all prompts and checks entirely and list files
     #[arg(short = 'l', long, global = true, conflicts_with_all = ["assume_no", "assume_yes"])]
     list: bool,

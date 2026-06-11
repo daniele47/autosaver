@@ -61,6 +61,19 @@ impl Cli {
         ctx.profiles.traverse(&ctx.curr_profile, |trav_ctx| {
             if let ProfileKind::Module(module) = trav_ctx.item.kind() {
                 ctx.col.output_profile(trav_ctx.name);
+                if self.choice {
+                    let mut execute = false;
+                    let msg = "Do you want to execute this profile?";
+                    let paths = &[];
+                    let action = || {
+                        execute = true;
+                        Ok(())
+                    };
+                    prompt.handled_prompt_available(msg, paths, action)?;
+                    if !execute {
+                        return Ok(());
+                    }
+                }
                 let this_backup_dir = backup_dir.join(trav_ctx.item.id_or(trav_ctx.name))?;
                 for (path, entry) in resolve(module, &[home_dir, &this_backup_dir])? {
                     // filter entries with skip policy
