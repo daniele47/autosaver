@@ -1,4 +1,4 @@
-use std::{collections::HashMap, path::PathBuf, str::FromStr};
+use std::{collections::HashMap, env, path::PathBuf, str::FromStr};
 
 use crate::{
     cli::config::col::CliColor,
@@ -39,7 +39,14 @@ impl CliContext {
         let paths = load_env::load_paths_and_envvars(home, root)?;
         let root_profile = RelPathStr::from_str("all")?;
         let profiles = load_prof::load_profiles(&paths[&Paths::Config], &root_profile)?;
-        let curr_profile = flag_prof.as_ref().unwrap_or(&root_profile).to_owned();
+        let curr_profile;
+        if let Some(prof) = flag_prof {
+            curr_profile = prof.to_owned();
+        } else if let Ok(prof) = env::var("AUTOSAVER_PROFILE") {
+            curr_profile = RelPathStr::try_from(prof)?;
+        } else {
+            curr_profile = root_profile.clone();
+        }
         let col = CliColor::default_theme();
         Ok(Self {
             paths,
