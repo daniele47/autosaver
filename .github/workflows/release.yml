@@ -6,7 +6,6 @@
 # - fix all cargo clippy warnings, as those will block a new release
 # - update Cargo.toml version, and then `cargo build` to make sure Cargo.lock is correct
 # - create a new git tag starting with v and then EXACTLY the same version as specified in Cargo.toml
-# - potentially edit the github release to add docs and all
 #
 # Note:
 # - dev tags are allowed, and all tags specified as vX.Y.Z-[whatever], will be compiled by github as a prelease version
@@ -32,6 +31,21 @@ permissions:
   contents: write
 
 jobs:
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install cargo-audit
+        run: cargo install cargo-audit
+
+      - name: Run security audit
+        run: cargo audit --deny warnings
   verify-version:
     name: Verify Version
     runs-on: ubuntu-latest
@@ -69,8 +83,8 @@ jobs:
   build:
     name: Build - ${{ matrix.platform.target }}
     runs-on: ${{ matrix.platform.os }}
-    needs: verify-version
-    if: ${{ always() && (needs.verify-version.result == 'success' || needs.verify-version.result == 'skipped') }} 
+    needs: [security-audit, verify-version]
+    if: ${{ always() && (needs.security-audit.result == 'success' || needs.security-audit.result == 'skipped') && (needs.verify-version.result == 'success' || needs.verify-version.result == 'skipped') }}
 
     strategy:
       fail-fast: false
