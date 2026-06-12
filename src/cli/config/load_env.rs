@@ -53,12 +53,18 @@ pub fn load_paths_and_envvars(
     let backup_dir = root_dir.join(&RelPathStr::from_str("backup")?)?;
     let config_dir = root_dir.join(&RelPathStr::from_str("config")?)?;
     let run_dir = root_dir.join(&RelPathStr::from_str("run")?)?;
+    let localconfig_dir = root_dir.join(&RelPathStr::new_from_pathbuf(marker)?)?;
+    let localconfigenv_file = localconfig_dir.join(&RelPathStr::from_str("env")?)?;
+    let localconfigcolors_file = localconfig_dir.join(&RelPathStr::from_str("colors")?)?;
 
     paths.insert(Paths::Home, home_dir);
     paths.insert(Paths::Root, root_dir);
     paths.insert(Paths::Backup, backup_dir);
     paths.insert(Paths::Run, run_dir);
     paths.insert(Paths::Config, config_dir);
+    paths.insert(Paths::LocalConfig, localconfig_dir);
+    paths.insert(Paths::LocalConfigEnv, localconfigenv_file);
+    paths.insert(Paths::LocalConfigColors, localconfigcolors_file);
 
     Ok(paths)
 }

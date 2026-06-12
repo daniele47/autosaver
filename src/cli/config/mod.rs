@@ -17,6 +17,9 @@ pub enum Paths {
     Backup,
     Config,
     Run,
+    LocalConfig,
+    LocalConfigEnv,
+    LocalConfigColors,
 }
 #[derive(Debug, Clone, PartialEq)]
 pub struct CliContext {
