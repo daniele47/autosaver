@@ -2,12 +2,16 @@
 
 All notable changes to this project will be documented here
 
+TODO:
+- [WIP] added `.autosaver/colors` file to allows specifying a different colorscheme from the default one
+    - NOTE: remember to document it properly!
+
 ## v2.6.0
 
 ### Features
 
 - [WIP] added `.autosaver` directory as a `ROOT` directory top level marker + to store machine dependent configs
-- [WIP] added `.autosaver/defaults` file to allow specifying defaults for ALL env vars the program considers
+- [WIP] added `.autosaver/env` file to allow specifying defaults for ALL env vars the program considers
 
 ## v2.5.2
 
