@@ -3,7 +3,6 @@
 All notable changes to this project will be documented here
 
 TODO:
-- `ignore` files are not detected, if already added on both sides -> ok, this should be in `clear` action!
 - add to `install.sh` a simple calculation saying how many days ago the date of the binary is
 
 IDEAS:
@@ -19,10 +18,11 @@ IDEAS:
 
 ## v2.5.1
 
+### Patches
+
 - added warning for files that need `-f` to be deleted
 - delete action now prints path ONLY if there is something to be deleted
-
-### Patches
+- `clear` action now also is able to find and prompt to delete ignored files that somehow got in
 
 ## v2.5.0
 
