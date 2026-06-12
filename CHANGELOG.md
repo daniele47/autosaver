@@ -3,17 +3,20 @@
 All notable changes to this project will be documented here
 
 TODO:
+- purge path should, instead, allow opting out of deleting symlinks
 
 IDEAS:
 - (uhm?) see if code can be optimized further (fstat calls are the price here, and i already improved code massively)
 - (NOPE?) consider whetever to allow `\*` option line to actually indicate ALL files/profiles???
-- [x] have `clean` operation:
-    - (NOPE?) handle empty directories                  -> just use `find` command
-    - (NOPE?) handle broken symlinks                    -> just use `find` command
-    - [x] handle paths that escape the root directory   -> they already cause an error (by trying to get relpath)!
 - [x] create `CliColor` to handle all coloring and output stylization!
     - (uhm?) provide some default colorschemes and a flag/env var to pick one precisely
 - (uhm?) decide if it's ok that deleting files means that symlinks to files are deleted too (unlike symlinks to dir which do not get deleted)
+
+## v2.5.2
+
+### Patches
+
+- `purge_path` is now safer, as it NEVER deletes directories (other then empty parent directories of files)
 
 ## v2.5.1
 

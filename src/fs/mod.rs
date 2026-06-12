@@ -115,7 +115,7 @@ impl AbsPathStr {
         Ok(ord_files)
     }
 
-    pub fn purge_path_opts(&self, allow_recursive_delete: bool) -> anyhow::Result<()> {
+    pub fn purge_path(&self) -> anyhow::Result<()> {
         // skip if path not exist
         if self.path().symlink_metadata().is_err() {
             return Ok(());
@@ -135,20 +135,6 @@ impl AbsPathStr {
                 format!("Could not delete file: '{p}'")
             })?;
         }
-        // purge directory
-        else if self.is_dir() {
-            if allow_recursive_delete {
-                fs::remove_dir_all(self.path()).with_context(|| {
-                    let p = self.display();
-                    format!("Could not delete directory recursively: '{p}'")
-                })?;
-            } else {
-                fs::remove_dir(self.path()).with_context(|| {
-                    let p = self.display();
-                    format!("Could not delete directory: '{p}'")
-                })?;
-            }
-        }
         // fail if it was something else
         else {
             let p = self.display();
@@ -165,9 +151,6 @@ impl AbsPathStr {
         }
 
         Ok(())
-    }
-    pub fn purge_path(&self) -> anyhow::Result<()> {
-        self.purge_path_opts(false)
     }
 
     pub fn create_file(&self) -> anyhow::Result<()> {
