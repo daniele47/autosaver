@@ -6,7 +6,8 @@ All notable changes to this project will be documented here
 
 ### Features
 
-- [WIP] added `.defaults` file to specify default env vars
+- [WIP] added `.autosaver` directory as a `ROOT` directory top level marker + to store machine dependent configs
+- [WIP] added `.autosaver/defaults` file to allow specifying defaults for ALL env vars the program considers
 
 ## v2.5.2
 
