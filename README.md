@@ -30,13 +30,15 @@ NOTES for future reference:
 
 ## machine configuration directory
 
-- a `.autosaver` directory can be created in the `ROOT` directory, for various uses
-    1. it acts as a top level dir marker. Basically if present, `ROOT` is automatically found to be the parent dir with it
-    2. it allows specifying default and other machine dependent configurations
+- a `.autosaver` marker directory MUST BE created in the `ROOT` directory. It has various uses:
+    1. it acts as a top level dir marker. Basically it specifies that a directory is a autosaver repository.
+    2. it allows specifying machine dependent configurations:
         - `.autosaver/env` to specify the default values for ALL the environment variables of the program
             - commented lines (`# commented line`): are lines starting with `#`, which are just ignored
             - env var lines (`ENV=value`): are key-value lines, with a `=` in the middle splitting the two
             - note: all whitespace is insignificant, and always trimmed!
+        - `.autosaver/colors` to specify different colorscheme for various output elements
+            - WIP: not yet available
 
 NOTE: this directory SHOULD not be tracked with git or other sync mecchanisms to save and share the repository
 

@@ -1,7 +1,7 @@
 use std::{
     collections::{HashMap, hash_map::Entry},
     env,
-    path::PathBuf,
+    path::{Path, PathBuf},
     str::FromStr,
 };
 
@@ -24,6 +24,9 @@ pub enum Paths {
     Backup,
     Config,
     Run,
+    MachineConfig,
+    MachineConfigEnv,
+    MachineConfigColors,
 }
 #[derive(Debug, Clone, PartialEq)]
 pub struct CliContext {
@@ -59,6 +62,7 @@ impl CliContext {
         root: &Option<PathBuf>,
     ) -> anyhow::Result<HashMap<Paths, AbsPathStr>> {
         let mut paths = HashMap::new();
+        let marker = Path::new(".autosaver").to_path_buf();
 
         // load home directory
         let home_dir;
@@ -80,18 +84,32 @@ impl CliContext {
         } else {
             root_dir = env::current_dir().context("Failure getting root directory")?;
         }
-        let root_dir = AbsPathStr::new_from_pathbuf(root_dir)?;
+        // search marker, and if present upward, make its dir the root dir
+        let root_dir = root_dir
+            .ancestors()
+            .find(|a| a.join(&marker).is_dir())
+            .with_context(|| {
+                let p = root_dir.display();
+                format!("Could not find '.autosaver' marker in any ancestors of {p}")
+            })?;
+        let root_dir = AbsPathStr::new_from_pathbuf(root_dir.to_path_buf())?;
 
         // other dirs
         let backup_dir = root_dir.join(&RelPathStr::from_str("backup")?)?;
         let config_dir = root_dir.join(&RelPathStr::from_str("config")?)?;
         let run_dir = root_dir.join(&RelPathStr::from_str("run")?)?;
+        let machineconfig_dir = root_dir.join(&RelPathStr::new_from_pathbuf(marker)?)?;
+        let machineconfigenv_file = machineconfig_dir.join(&RelPathStr::from_str("env")?)?;
+        let machineconfigcolors_file = machineconfig_dir.join(&RelPathStr::from_str("colors")?)?;
 
         paths.insert(Paths::Home, home_dir);
         paths.insert(Paths::Root, root_dir);
         paths.insert(Paths::Backup, backup_dir);
         paths.insert(Paths::Run, run_dir);
         paths.insert(Paths::Config, config_dir);
+        paths.insert(Paths::MachineConfig, machineconfig_dir);
+        paths.insert(Paths::MachineConfigEnv, machineconfigenv_file);
+        paths.insert(Paths::MachineConfigColors, machineconfigcolors_file);
 
         Ok(paths)
     }
@@ -104,56 +122,52 @@ impl CliContext {
         let mut vt_profiles = vec![];
         let mut vt_entries = vec![];
 
-        // error if config directory is missing
-        if !config_dir.is_dir() {
-            let config_dir = config_dir.display();
-            bail!("Configuration directory is missing at '{config_dir}'");
-        }
-
         // find and load all profiles config files
-        config_dir.find(|ctx| {
-            let ftype = ctx.entry.file_type()?;
-            let conf_rel = ctx.path.to_rel(config_dir)?;
+        if config_dir.is_dir() {
+            config_dir.find(|ctx| {
+                let ftype = ctx.entry.file_type()?;
+                let conf_rel = ctx.path.to_rel(config_dir)?;
 
-            // skip dotfiles configs
-            if ctx.entry.file_name().to_string_lossy().starts_with(".") {
-                let p = conf_rel.display();
-                bail!(format!("Configuration file '{p}' starts with a dot"));
-            }
+                // skip dotfiles configs
+                if ctx.entry.file_name().to_string_lossy().starts_with(".") {
+                    let p = conf_rel.display();
+                    bail!(format!("Configuration file '{p}' starts with a dot"));
+                }
 
-            // virtual directory parsing
-            if ftype.is_dir() {
-                // insert profile
-                let (index_this, _) = vt_names.insert_full(conf_rel);
+                // virtual directory parsing
+                if ftype.is_dir() {
+                    // insert profile
+                    let (index_this, _) = vt_names.insert_full(conf_rel);
 
-                // insert parent profile
-                let parent = &vt_names[index_this].path().parent().expect("no parent");
-                let parent = RelPathStr::new_from_pathbuf(PathBuf::from(parent))?;
-                let (index_parent, _) = vt_names.insert_full(parent);
-                vt_entries.push((index_parent, index_this));
-            }
-            // normal profile parsing
-            else if ftype.is_file()
-                && let Some(pname) = conf_rel.to_string_lossy().strip_suffix(".conf")
-            {
-                // parse profile
-                let (index_this, _) = vt_names.insert_full(RelPathStr::from_str(pname)?);
-                let profile = Profile::parse_config(&ctx.path.read_file()?, pname)?;
-                vt_profiles.push((index_this, profile));
+                    // insert parent profile
+                    let parent = &vt_names[index_this].path().parent().expect("no parent");
+                    let parent = RelPathStr::new_from_pathbuf(PathBuf::from(parent))?;
+                    let (index_parent, _) = vt_names.insert_full(parent);
+                    vt_entries.push((index_parent, index_this));
+                }
+                // normal profile parsing
+                else if ftype.is_file()
+                    && let Some(pname) = conf_rel.to_string_lossy().strip_suffix(".conf")
+                {
+                    // parse profile
+                    let (index_this, _) = vt_names.insert_full(RelPathStr::from_str(pname)?);
+                    let profile = Profile::parse_config(&ctx.path.read_file()?, pname)?;
+                    vt_profiles.push((index_this, profile));
 
-                // insert parent profile
-                let parent = &vt_names[index_this].path().parent().expect("no parent");
-                let parent = RelPathStr::new_from_pathbuf(PathBuf::from(parent))?;
-                let (index_parent, _) = vt_names.insert_full(parent);
-                vt_entries.push((index_parent, index_this));
-            }
-            // otherwise do nothing
-            else {
-                return Ok(true);
-            }
+                    // insert parent profile
+                    let parent = &vt_names[index_this].path().parent().expect("no parent");
+                    let parent = RelPathStr::new_from_pathbuf(PathBuf::from(parent))?;
+                    let (index_parent, _) = vt_names.insert_full(parent);
+                    vt_entries.push((index_parent, index_this));
+                }
+                // otherwise do nothing
+                else {
+                    return Ok(true);
+                }
 
-            Ok(true)
-        })?;
+                Ok(true)
+            })?;
+        }
 
         // put all profiles togheter
         let mut all_profiles = HashMap::new();

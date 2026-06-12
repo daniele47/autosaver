@@ -10,8 +10,12 @@ TODO:
 
 ### Features
 
-- [WIP] added `.autosaver` directory as a `ROOT` directory top level marker + to store machine dependent configs
+- added `.autosaver` directory as a `ROOT` directory top level marker + to store machine dependent configs
 - [WIP] added `.autosaver/env` file to allow specifying defaults for ALL env vars the program considers
+
+### Patches
+
+- missing `config` directory is treated as empty directory, no langer it reports an error
 
 ## v2.5.2
 
