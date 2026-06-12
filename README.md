@@ -33,7 +33,7 @@ NOTES for future reference:
 - a `.autosaver` directory can be created in the `ROOT` directory, for various uses
     1. it acts as a top level dir marker. Basically if present, `ROOT` is automatically found to be the parent dir with it
     2. it allows specifying default and other machine dependent configurations
-        - `.autosaver/defaults` to specify the default values for ALL the environment variables of the program
+        - `.autosaver/env` to specify the default values for ALL the environment variables of the program
             - commented lines (`# commented line`): are lines starting with `#`, which are just ignored
             - env var lines (`ENV=value`): are key-value lines, with a `=` in the middle splitting the two
             - note: all whitespace is insignificant, and always trimmed!
