@@ -28,6 +28,18 @@ NOTES for future reference:
     - `HOME`: is the user home directory, unless specified otherwise
     - `ROOT`: is the dotfiles directory, in which `config`, `backup`, `run` directories are located 
 
+## machine configuration directory
+
+- a `.autosaver` directory can be created in the `ROOT` directory, for various uses
+    1. it acts as a top level dir marker. Basically if present, `ROOT` is automatically found to be the parent dir with it
+    2. it allows specifying default and other machine dependent configurations
+        - `.autosaver/defaults` to specify the default values for ALL the environment variables of the program
+            - commented lines (`# commented line`): are lines starting with `#`, which are just ignored
+            - env var lines (`ENV=value`): are key-value lines, with a `=` in the middle splitting the two
+            - note: all whitespace is insignificant, and always trimmed!
+
+NOTE: this directory SHOULD not be tracked with git or other sync mecchanisms to save and share the repository
+
 ## Configuration files
 
 All profiles share some basic properties:

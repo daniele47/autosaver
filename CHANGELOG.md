@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v2.6.0
+
+### Features
+
+- [WIP] added `.defaults` file to specify default env vars
+
 ## v2.5.2
 
 ### Patches
