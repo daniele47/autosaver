@@ -3,7 +3,6 @@
 All notable changes to this project will be documented here
 
 TODO:
-- add to `install.sh` a simple calculation saying how many days ago the date of the binary is
 
 IDEAS:
 - (uhm?) see if code can be optimized further (fstat calls are the price here, and i already improved code massively)

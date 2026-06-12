@@ -138,7 +138,9 @@ else
         echo "(2/4) Checking checksum of downloaded binary from '$REMOTE_API_URL'..."
         infos="$(curl -L --fail --show-error --progress-bar "$REMOTE_API_URL" | jq '.assets[] | select(.name == "'"$REMOTE_BIN_NAME"'") | { digest : .digest, date: .updated_at }')"
         digest="$(echo "$infos" | jq .digest -r)"
-        bin_date="($(echo "$infos" | jq .date -r))"
+        bin_date="$(echo "$infos" | jq .date -r)"
+        days_ago=$((($(date +%s) - $(date -d "$bin_date" +%s)) / 86400))
+        bin_date="(compiled on: $bin_date, $days_ago days ago)"
         tar_digest="$(sha256sum "$output")"
         digest_clean="${digest#sha256:}"
         tar_digest_clean="${tar_digest%% *}"
