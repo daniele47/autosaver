@@ -2,13 +2,6 @@
 
 All notable changes to this project will be documented here
 
-TODO:
-
-IDEAS:
-- (uhm?) see if code can be optimized further (fstat calls are the price here, and i already improved code massively)
-- [x] create `CliColor` to handle all coloring and output stylization!
-    - (uhm?) provide some default colorschemes and a flag/env var to pick one precisely
-
 ## v2.5.2
 
 ### Patches
