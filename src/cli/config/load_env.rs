@@ -5,7 +5,7 @@ use std::{
     str::FromStr,
 };
 
-use anyhow::Context;
+use anyhow::{Context, bail};
 
 use crate::{
     cli::config::Paths,
@@ -18,17 +18,6 @@ pub fn load_paths_and_envvars(
 ) -> anyhow::Result<HashMap<Paths, AbsPathStr>> {
     let mut paths = HashMap::new();
     let marker = Path::new(".autosaver").to_path_buf();
-
-    // load home directory
-    let home_dir;
-    if let Some(home) = home {
-        home_dir = home.canonicalize().with_context(|| {
-            format!("Home path could not be canonicalized: '{}'", home.display())
-        })?;
-    } else {
-        home_dir = env::home_dir().context("Failure getting home directory")?;
-    }
-    let home_dir = AbsPathStr::new_from_pathbuf(home_dir)?;
 
     // load root directory
     let root_dir;
@@ -57,6 +46,25 @@ pub fn load_paths_and_envvars(
     let localconfigenv_file = localconfig_dir.join(&RelPathStr::from_str("env")?)?;
     let localconfigcolors_file = localconfig_dir.join(&RelPathStr::from_str("colors")?)?;
 
+    // load default env vars
+    load_envvars(&localconfigenv_file)?;
+
+    // load home directory (NEEDS TO BE DONE AFTER LOADING ENV VARS!!!)
+    let home_dir;
+    if let Some(home) = home {
+        home_dir = home.canonicalize().with_context(|| {
+            format!("Home path could not be canonicalized: '{}'", home.display())
+        })?;
+    } else if let Ok(home) = env::var("AUTOSAVER_HOME") {
+        let home = PathBuf::from(home);
+        home_dir = home.canonicalize().with_context(|| {
+            format!("Home path could not be canonicalized: '{}'", home.display())
+        })?;
+    } else {
+        home_dir = env::home_dir().context("Failure getting home directory")?;
+    }
+    let home_dir = AbsPathStr::new_from_pathbuf(home_dir)?;
+
     paths.insert(Paths::Home, home_dir);
     paths.insert(Paths::Root, root_dir);
     paths.insert(Paths::Backup, backup_dir);
@@ -67,4 +75,38 @@ pub fn load_paths_and_envvars(
     paths.insert(Paths::LocalConfigColors, localconfigcolors_file);
 
     Ok(paths)
+}
+
+fn load_envvars(env_file: &AbsPathStr) -> anyhow::Result<()> {
+    if !env_file.is_file() {
+        return Ok(());
+    }
+    const ALLOWED_ENVVARS: [&str; 4] = ["AUTOSAVER_HOME", "AUTOSAVER_PROFILE", "EDITOR", "PERF"];
+
+    for (i, line) in env_file.read_file()?.lines().enumerate() {
+        let i = i + 1;
+        let line = line.trim();
+        if line.starts_with("#") {
+            continue;
+        }
+        if line.is_empty() {
+            continue;
+        }
+        let (k, v) = line.split_once("=").with_context(|| {
+            let p = env_file.display();
+            format!("Line {i} of env config file ({p}) does not contain a `=` to separate key from value")
+        })?;
+        let k = k.trim();
+        let v = v.trim();
+        if !ALLOWED_ENVVARS.contains(&k) {
+            let p = env_file.display();
+            bail!(format!(
+                "Line {i} of env config file ({p}) contains not relevant env var '{k}'"
+            ));
+        }
+        unsafe {
+            env::set_var(k, v);
+        }
+    }
+    Ok(())
 }
