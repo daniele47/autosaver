@@ -136,7 +136,9 @@ else
     echo
     if command -v jq &>/dev/null && command -v sha256sum &>/dev/null; then
         echo "(2/4) Checking checksum of downloaded binary from '$REMOTE_API_URL'..."
-        digest="$(curl -L --fail --show-error --progress-bar "$REMOTE_API_URL" | jq '.assets[] | select(.name == "'"$REMOTE_BIN_NAME"'") | .digest' -r)"
+        infos="$(curl -L --fail --show-error --progress-bar "$REMOTE_API_URL" | jq '.assets[] | select(.name == "'"$REMOTE_BIN_NAME"'") | { digest : .digest, date: .updated_at }')"
+        digest="$(echo "$infos" | jq .digest -r)"
+        bin_date="($(echo "$infos" | jq .date -r))"
         tar_digest="$(sha256sum "$output")"
         digest_clean="${digest#sha256:}"
         tar_digest_clean="${tar_digest%% *}"
@@ -161,5 +163,6 @@ else
 
     # nice update/install msg
     echo -n "Autosaver installed/updated: "
-    echo -en "$OLD_VERSION ---> " && "$LOCAL_BIN_PATH" --version
+    NEW_VERSION="$($LOCAL_BIN_PATH --version 2>/dev/null | tr -d '\n')"
+    echo -e "$OLD_VERSION ---> $NEW_VERSION $bin_date"
 fi
