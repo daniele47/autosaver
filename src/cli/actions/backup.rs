@@ -14,6 +14,7 @@ use crate::{
         ProfileKind,
         module::{Module, ModuleEntry, ModulePolicy},
     },
+    warning,
 };
 
 type Entries<'a> = IndexMap<RelPathStr, (&'a ModuleEntry, [Option<AbsPathStr>; 2])>;
@@ -97,10 +98,12 @@ impl Cli {
                             only_original,
                             only_backup,
                         } => {
-                            ctx.col.output_path(&path, ctx.col.output_path);
+                            let mut path_printed = false;
                             if (*only_original || !only_backup)
                                 && let Some(original_file) = &entry.1[0]
                             {
+                                path_printed = true;
+                                ctx.col.output_path(&path, ctx.col.output_path);
                                 prompt.handled_prompt_available(
                                     "Do you really want to delete home file?",
                                     &[original_file],
@@ -110,6 +113,9 @@ impl Cli {
                             if (*only_backup || !only_original)
                                 && let Some(backup_file) = &entry.1[1]
                             {
+                                if !path_printed {
+                                    ctx.col.output_path(&path, ctx.col.output_path);
+                                }
                                 prompt.handled_prompt_available(
                                     "Do you really want to delete backup file?",
                                     &[backup_file],
@@ -139,6 +145,8 @@ impl Cli {
                                                 &[p1],
                                                 || p1.purge_path(),
                                             )?;
+                                        } else {
+                                            warning!("Force flag is required to delete files");
                                         }
                                     }
                                     CliCmd::List { .. } => {}
@@ -156,6 +164,8 @@ impl Cli {
                                                 &[p1],
                                                 || p1.purge_path(),
                                             )?;
+                                        } else {
+                                            warning!("Force flag is required to delete files");
                                         }
                                     }
                                     CliCmd::Restore { .. } => {

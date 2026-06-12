@@ -3,8 +3,8 @@
 All notable changes to this project will be documented here
 
 TODO:
-- `ignore` files are not detected, if already added on both sides
-- add warning for files that require `-f` flag to delete in backup action, and everywhere else (but `list`) where paths are listed but nothing is said!
+- `ignore` files are not detected, if already added on both sides -> ok, this should be in `clear` action!
+- add to `install.sh` a simple calculation saying how many days ago the date of the binary is
 
 IDEAS:
 - (uhm?) see if code can be optimized further (fstat calls are the price here, and i already improved code massively)
@@ -16,6 +16,13 @@ IDEAS:
 - [x] create `CliColor` to handle all coloring and output stylization!
     - (uhm?) provide some default colorschemes and a flag/env var to pick one precisely
 - (uhm?) decide if it's ok that deleting files means that symlinks to files are deleted too (unlike symlinks to dir which do not get deleted)
+
+## v2.5.1
+
+- added warning for files that need `-f` to be deleted
+- delete action now prints path ONLY if there is something to be deleted
+
+### Patches
 
 ## v2.5.0
 
