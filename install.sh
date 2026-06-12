@@ -7,9 +7,10 @@
 # Environment variables:
 # - XDG_BIN_HOME=<PATH> : specify a different location where to install the binary to
 #  <<< possible exclusive actions >>>
-#   - UNINSTALL=          : uninstall the binary (at XDG_BIN_HOME path, if specified)
-#   - BUILD=[<GIT_REF>]   : compile from the specified git_ref, or from current repo if missing
-#   - INSTALL=[<VERSION>] : install the binary with the specified version, or latest otherwise (default)
+#   - UNINSTALL=                : uninstall the binary (at XDG_BIN_HOME path, if specified)
+#   - BUILD=[<GIT_REF>]         : compile from the specified git_ref, or from current repo if missing, in debug mode
+#   - BUILD_RELEASE=[<GIT_REF>] : compile from the specified git_ref, of from current repo if missing, in release mode
+#   - INSTALL=[<VERSION>]       : install the binary with the specified version, or latest otherwise (default)
 
 set -e
 
@@ -59,7 +60,7 @@ elif [[ -v BUILD ]]; then
 
         # compile rust binary
         echo
-        echo "(3/5) Compiling rust project..."
+        echo "(3/5) Compiling rust project in debug mode..."
         cd "$tmpdir" || exit 1
         cargo build
 
@@ -75,7 +76,7 @@ elif [[ -v BUILD ]]; then
         rm -rf "$tmpdir"
     else
         # compile rust binary
-        echo "(1/2) Compiling rust project..."
+        echo "(1/2) Compiling rust project in release mode..."
         cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")" || exit 1
         cargo build
 
@@ -84,6 +85,57 @@ elif [[ -v BUILD ]]; then
         echo "(2/2) Installing binary into '$LOCAL_BIN_PATH'..."
         mkdir -p "$LOCAL_BIN_PATH_DIR"
         cp ".target/debug/autosaver" "$LOCAL_BIN_PATH"
+    fi
+
+    # nice update/install msg
+    echo -n "Autosaver compiled: "
+    "$LOCAL_BIN_PATH" --version
+elif [[ -v BUILD_RELEASE ]]; then
+    if ! command -v cargo &>/dev/null; then
+        echo "ERROR: cargo is required to compile locally." >&2
+        exit 1
+    elif ! command -v git &>/dev/null; then
+        echo "ERROR: git is required to download the autosaver repository." >&2
+        exit 1
+    fi
+
+    if [[ -n "$BUILD_RELEASE" ]]; then
+        # download git repo
+        tmpdir="$(mktemp -d)"
+        echo "(1/5) Downloading repository from '$REMOTE_GIT_REPO'..."
+        git clone "$REMOTE_GIT_REPO" "$tmpdir"
+
+        # change branch if specified
+        echo "(2/5) Running git checkout '$BUILD_RELEASE'..."
+        git -C "$tmpdir" checkout "$BUILD_RELEASE"
+
+        # compile rust binary
+        echo
+        echo "(3/5) Compiling rust project in release mode..."
+        cd "$tmpdir" || exit 1
+        cargo build --release
+
+        # moving binary into correct place
+        echo
+        echo "(4/5) Installing binary into '$LOCAL_BIN_PATH'..."
+        mkdir -p "$LOCAL_BIN_PATH_DIR"
+        cp "$tmpdir/.target/release/autosaver" "$LOCAL_BIN_PATH"
+
+        # cleanup opeartions
+        echo
+        echo "(5/5) Cleanup temporary files..."
+        rm -rf "$tmpdir"
+    else
+        # compile rust binary
+        echo "(1/2) Compiling rust project in release mode..."
+        cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")" || exit 1
+        cargo build --release
+
+        # copying binary into correct place
+        echo
+        echo "(2/2) Installing binary into '$LOCAL_BIN_PATH'..."
+        mkdir -p "$LOCAL_BIN_PATH_DIR"
+        cp ".target/release/autosaver" "$LOCAL_BIN_PATH"
     fi
 
     # nice update/install msg
