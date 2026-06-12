@@ -1,7 +1,7 @@
 use owo_colors::OwoColorize;
 
 use crate::{
-    cli::{Cli, CliCmd, ctx::CliContext},
+    cli::{Cli, CliCmd, config::CliContext},
     out, outln,
     prof::{ProfileKind, TraverseDupPolicy},
 };

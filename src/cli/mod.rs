@@ -1,15 +1,12 @@
-use std::path::PathBuf;
+use std::{env, error::Error, fmt::Display, path::PathBuf, time::Instant};
 
 use clap::{Args, Parser, Subcommand};
 
-use crate::fs::rel::RelPathStr;
+use crate::{fs::rel::RelPathStr, performance};
 
 pub mod actions;
-pub mod col;
-pub mod ctx;
-pub mod error;
+pub mod config;
 pub mod inout;
-pub mod perf;
 pub mod prompt;
 
 #[derive(Parser, Debug, Clone, PartialEq, Eq)]
@@ -117,4 +114,26 @@ pub struct CliActBackup {
     /// Include also paths that do not differ
     #[arg(short, long)]
     unmodified: bool,
+}
+
+#[derive(Debug, Clone)]
+pub struct EarlyQuit;
+
+impl Display for EarlyQuit {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Early quit")
+    }
+}
+
+impl Error for EarlyQuit {}
+
+pub fn perf<T>(msg: &str, run: impl FnOnce() -> T) -> T {
+    if env::var_os("PERF").is_some() {
+        let start = Instant::now();
+        let res = run();
+        performance!("{msg} {:.6}s", start.elapsed().as_secs_f64());
+        res
+    } else {
+        run()
+    }
 }

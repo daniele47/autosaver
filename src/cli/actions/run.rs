@@ -9,7 +9,7 @@ use indexmap::{IndexMap, map::Entry};
 use crate::{
     cli::{
         Cli, CliCmd,
-        ctx::{CliContext, Paths},
+        config::{CliContext, Paths},
         prompt::{Prompt, PromptAnswer, PromptFlags},
     },
     fs::{abs::AbsPathStr, rel::RelPathStr},

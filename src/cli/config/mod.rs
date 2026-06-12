@@ -9,13 +9,15 @@ use anyhow::{Context, bail};
 use indexmap::IndexSet;
 
 use crate::{
-    cli::col::CliColor,
+    cli::config::col::CliColor,
     fs::{abs::AbsPathStr, rel::RelPathStr},
     prof::{
         AllProfiles, Profile, ProfileKind,
         composite::{Composite, CompositeEntry},
     },
 };
+
+pub mod col;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Paths {
@@ -24,9 +26,6 @@ pub enum Paths {
     Backup,
     Config,
     Run,
-    MachineConfig,
-    MachineConfigEnv,
-    MachineConfigColors,
 }
 #[derive(Debug, Clone, PartialEq)]
 pub struct CliContext {
@@ -98,18 +97,12 @@ impl CliContext {
         let backup_dir = root_dir.join(&RelPathStr::from_str("backup")?)?;
         let config_dir = root_dir.join(&RelPathStr::from_str("config")?)?;
         let run_dir = root_dir.join(&RelPathStr::from_str("run")?)?;
-        let machineconfig_dir = root_dir.join(&RelPathStr::new_from_pathbuf(marker)?)?;
-        let machineconfigenv_file = machineconfig_dir.join(&RelPathStr::from_str("env")?)?;
-        let machineconfigcolors_file = machineconfig_dir.join(&RelPathStr::from_str("colors")?)?;
 
         paths.insert(Paths::Home, home_dir);
         paths.insert(Paths::Root, root_dir);
         paths.insert(Paths::Backup, backup_dir);
         paths.insert(Paths::Run, run_dir);
         paths.insert(Paths::Config, config_dir);
-        paths.insert(Paths::MachineConfig, machineconfig_dir);
-        paths.insert(Paths::MachineConfigEnv, machineconfigenv_file);
-        paths.insert(Paths::MachineConfigColors, machineconfigcolors_file);
 
         Ok(paths)
     }

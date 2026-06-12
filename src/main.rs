@@ -1,5 +1,5 @@
 use autosaver::{
-    cli::{Cli, error::EarlyQuit, perf::perf},
+    cli::{Cli, EarlyQuit, perf},
     errnow, error, outnow,
 };
 use clap::Parser;

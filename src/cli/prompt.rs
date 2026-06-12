@@ -1,5 +1,5 @@
 use crate::{
-    cli::{col::CliColor, error::EarlyQuit},
+    cli::{EarlyQuit, config::col::CliColor},
     fs::abs::AbsPathStr,
     inputln, out, outln, outnow, warning,
 };
