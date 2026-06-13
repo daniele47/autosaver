@@ -104,11 +104,15 @@ impl Cli {
                             {
                                 path_printed = true;
                                 ctx.col.output_path(&path, ctx.col.output_path);
-                                prompt.handled_prompt_available(
-                                    "Do you really want to delete home file?",
-                                    &[original_file],
-                                    || original_file.purge_path(),
-                                )?;
+                                if original_file.path().symlink_metadata()?.is_symlink() {
+                                    warning!("Symlink flag is required to delete symlinks")
+                                } else {
+                                    prompt.handled_prompt_available(
+                                        "Do you really want to delete home file?",
+                                        &[original_file],
+                                        || original_file.purge_path(),
+                                    )?;
+                                }
                             }
                             if (*only_backup || !only_original)
                                 && let Some(backup_file) = &entry.1[1]
@@ -116,11 +120,15 @@ impl Cli {
                                 if !path_printed {
                                     ctx.col.output_path(&path, ctx.col.output_path);
                                 }
-                                prompt.handled_prompt_available(
-                                    "Do you really want to delete backup file?",
-                                    &[backup_file],
-                                    || backup_file.purge_path(),
-                                )?;
+                                if backup_file.path().symlink_metadata()?.is_symlink() {
+                                    warning!("Symlink flag is required to delete symlinks")
+                                } else {
+                                    prompt.handled_prompt_available(
+                                        "Do you really want to delete backup file?",
+                                        &[backup_file],
+                                        || backup_file.purge_path(),
+                                    )?;
+                                }
                             }
                         }
                         // backup action
@@ -139,14 +147,16 @@ impl Cli {
                                         )?;
                                     }
                                     CliCmd::Restore { force, .. } => {
-                                        if *force {
+                                        if !force {
+                                            warning!("Force flag is required to delete files");
+                                        } else if p1.path().symlink_metadata()?.is_symlink() {
+                                            warning!("Symlink flag is required to delete symlinks")
+                                        } else {
                                             prompt.handled_prompt_available(
                                                 "Do you really want to delete home file?",
                                                 &[p1],
                                                 || p1.purge_path(),
                                             )?;
-                                        } else {
-                                            warning!("Force flag is required to delete files");
                                         }
                                     }
                                     CliCmd::List { .. } => {}
@@ -158,14 +168,16 @@ impl Cli {
                                 ctx.col.output_path(&path, ctx.col.output_missing);
                                 match &self.cmd {
                                     CliCmd::Save { force, .. } => {
-                                        if *force {
+                                        if !force {
+                                            warning!("Force flag is required to delete files");
+                                        } else if p1.path().symlink_metadata()?.is_symlink() {
+                                            warning!("Symlink flag is required to delete symlinks")
+                                        } else {
                                             prompt.handled_prompt_available(
                                                 "Do you really want to delete backup file?",
                                                 &[p1],
                                                 || p1.purge_path(),
                                             )?;
-                                        } else {
-                                            warning!("Force flag is required to delete files");
                                         }
                                     }
                                     CliCmd::Restore { .. } => {

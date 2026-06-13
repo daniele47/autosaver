@@ -8,6 +8,7 @@ use crate::{
     },
     fs::{abs::AbsPathStr, rel::RelPathStr},
     prof::{ProfileKind, module::ModulePolicy},
+    warning,
 };
 
 fn resolve<'a>(
@@ -83,20 +84,28 @@ impl Cli {
                             if *ignored {
                                 let relpath = file.to_rel(root_dir)?;
                                 ctx.col.output_path(&relpath, ctx.col.output_path);
-                                prompt.handled_prompt_available(
-                                    "Do you really want to delete ignored file?",
-                                    &[&file],
-                                    || file.purge_path(),
-                                )?;
+                                if file.path().symlink_metadata()?.is_symlink() {
+                                    warning!("Symlink flag is required to delete symlinks")
+                                } else {
+                                    prompt.handled_prompt_available(
+                                        "Do you really want to delete ignored file?",
+                                        &[&file],
+                                        || file.purge_path(),
+                                    )?;
+                                }
                             }
                         } else {
                             let relpath = file.to_rel(root_dir)?;
                             ctx.col.output_path(&relpath, ctx.col.output_path);
-                            prompt.handled_prompt_available(
-                                "Do you really want to delete untracked file?",
-                                &[&file],
-                                || file.purge_path(),
-                            )?;
+                            if file.path().symlink_metadata()?.is_symlink() {
+                                warning!("Symlink flag is required to delete symlinks")
+                            } else {
+                                prompt.handled_prompt_available(
+                                    "Do you really want to delete untracked file?",
+                                    &[&file],
+                                    || file.purge_path(),
+                                )?;
+                            }
                         }
                     }
                 }
