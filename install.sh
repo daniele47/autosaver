@@ -60,7 +60,7 @@ elif [[ -v BUILD ]]; then
 
         # compile rust binary
         echo
-        echo "(3/5) Compiling rust project in debug mode..."
+        echo "(3/5) Compiling rust project..."
         cd "$tmpdir" || exit 1
         cargo build
 
@@ -76,7 +76,7 @@ elif [[ -v BUILD ]]; then
         rm -rf "$tmpdir"
     else
         # compile rust binary
-        echo "(1/2) Compiling rust project in release mode..."
+        echo "(1/2) Compiling rust project..."
         cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")" || exit 1
         cargo build
 
@@ -111,7 +111,7 @@ elif [[ -v BUILD_RELEASE ]]; then
 
         # compile rust binary
         echo
-        echo "(3/5) Compiling rust project in release mode..."
+        echo "(3/5) Compiling rust project..."
         cd "$tmpdir" || exit 1
         cargo build --release
 
@@ -127,7 +127,7 @@ elif [[ -v BUILD_RELEASE ]]; then
         rm -rf "$tmpdir"
     else
         # compile rust binary
-        echo "(1/2) Compiling rust project in release mode..."
+        echo "(1/2) Compiling rust project..."
         cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")" || exit 1
         cargo build --release
 
