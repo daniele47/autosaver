@@ -66,6 +66,7 @@ impl CliColor {
         }
 
         for (i, line) in colors_file.read_file()?.lines().enumerate() {
+            let i = i + 1;
             // skip comments
             if line.starts_with("#") {
                 continue;

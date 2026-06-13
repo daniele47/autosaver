@@ -26,7 +26,7 @@ So `config/cli/tmux.conf` will be loaded as the `cli/tmux` profile.
 
 NOTES for future reference:
     - `HOME`: is the user home directory, unless specified otherwise
-    - `ROOT`: is the dotfiles directory, in which `config`, `backup`, `run` directories are located 
+    - `ROOT`: is the dotfiles directory, in which `config`, `backup`, `run` directories are located
 
 ## machine configuration directory
 
@@ -42,17 +42,17 @@ NOTES for future reference:
             - commented lines (`# commented line`): are lines starting with `#`, which are just ignored
             - colors lines are a serie of words: `<ELEMENT> [<STYLE>...]`
                 - `ELEMENT`: specifies what element to apply the styles to
-                    - can be one of: `tree_composite`, `tree_runner`, `tree_module`, `tree_dedup`, `prompt_msg`, 
-                                     `prompt_choices`, `output_profile`, `output_path`, `output_missing`, `output_diff`, 
-                                     `output_unmodified`, `diff_deleted`, `diff_inserted`, `diff_header`, `show_header`
+                    - `tree_composite`, `tree_runner`, `tree_module`, `tree_dedup`, `prompt_msg`,
+                      `prompt_choices`, `output_profile`, `output_path`, `output_missing`, `output_diff`,
+                      `output_unmodified`, `diff_deleted`, `diff_inserted`, `diff_header`, `show_header`
                 - `STYLE`: specify what style to apply to the element
-                    - can be one of: `black`, `red`, `green`, `yellow`, `blue`, `magenta`, `purple`, `cyan`, `white`,
-                                     `bright_black`, `bright_red`, `bright_green`, `bright_yellow`, `bright_blue`,
-                                     `bright_magenta`, `bright_purple`, `bright_cyan`, `bright_white`, 
-                                     `on_black`, `on_red`, `on_green`, `on_yellow`, `on_blue`, `on_magenta`, `on_purple`, `on_cyan`, `on_white`, 
-                                     `on_bright_black`, `on_bright_red`, `on_bright_green`, `on_bright_yellow`, `on_bright_blue`,
-                                     `on_bright_magenta`, `on_bright_purple`, `on_bright_cyan`, `on_bright_white`,
-                                     `bold`, `dimmed`, `italic`, `underline`, `blink`, `blink_fast`, `reversed`, `hidden`, `strikethrough`
+                    - `black`, `red`, `green`, `yellow`, `blue`, `magenta`, `purple`, `cyan`, `white`,
+                      `bright_black`, `bright_red`, `bright_green`, `bright_yellow`, `bright_blue`,
+                      `bright_magenta`, `bright_purple`, `bright_cyan`, `bright_white`,
+                      `on_black`, `on_red`, `on_green`, `on_yellow`, `on_blue`, `on_magenta`, `on_purple`, `on_cyan`, `on_white`,
+                      `on_bright_black`, `on_bright_red`, `on_bright_green`, `on_bright_yellow`, `on_bright_blue`,
+                      `on_bright_magenta`, `on_bright_purple`, `on_bright_cyan`, `on_bright_white`,
+                      `bold`, `dimmed`, `italic`, `underline`, `blink`, `blink_fast`, `reversed`, `hidden`, `strikethrough`
             - note: all whitespace is insignificant, and always trimmed!
 
 NOTE: this directory SHOULD not be tracked with git or other sync mecchanisms to save and share the repository
