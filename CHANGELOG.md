@@ -2,9 +2,13 @@
 
 All notable changes to this project will be documented here
 
-TODO:
-- [WIP] added `.autosaver/colors` file to allows specifying a different colorscheme from the default one
-    - NOTE: remember to document it properly!
+TODO: properly hook `colors` parser (currently can parse, but parser is not executed!)
+
+## v2.7.0
+
+### Features
+
+- added `.autosaver/colors` file to allows specifying a different colorscheme from the default one
 
 ## v2.6.0
 

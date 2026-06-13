@@ -74,15 +74,60 @@ impl CliColor {
             let mut words = line.split_whitespace();
             if let Some(element) = words.next() {
                 let mut style = Style::new();
-                while let Some(style_word) = words.next() {
+                for style_word in words {
                     match style_word {
+                        "black" => style = style.black(),
+                        "red" => style = style.red(),
+                        "green" => style = style.green(),
+                        "yellow" => style = style.yellow(),
+                        "blue" => style = style.blue(),
+                        "magenta" => style = style.magenta(),
+                        "purple" => style = style.purple(),
+                        "cyan" => style = style.cyan(),
+                        "white" => style = style.white(),
+                        "bright_black" => style = style.bright_black(),
+                        "bright_red" => style = style.bright_red(),
+                        "bright_green" => style = style.bright_green(),
+                        "bright_yellow" => style = style.bright_yellow(),
+                        "bright_blue" => style = style.bright_blue(),
+                        "bright_magenta" => style = style.bright_magenta(),
+                        "bright_purple" => style = style.bright_purple(),
+                        "bright_cyan" => style = style.bright_cyan(),
+                        "bright_white" => style = style.bright_white(),
+                        "on_black" => style = style.on_black(),
+                        "on_red" => style = style.on_red(),
+                        "on_green" => style = style.on_green(),
+                        "on_yellow" => style = style.on_yellow(),
+                        "on_blue" => style = style.on_blue(),
+                        "on_magenta" => style = style.on_magenta(),
+                        "on_purple" => style = style.on_purple(),
+                        "on_cyan" => style = style.on_cyan(),
+                        "on_white" => style = style.on_white(),
+                        "on_bright_black" => style = style.on_bright_black(),
+                        "on_bright_red" => style = style.on_bright_red(),
+                        "on_bright_green" => style = style.on_bright_green(),
+                        "on_bright_yellow" => style = style.on_bright_yellow(),
+                        "on_bright_blue" => style = style.on_bright_blue(),
+                        "on_bright_magenta" => style = style.on_bright_magenta(),
+                        "on_bright_purple" => style = style.on_bright_purple(),
+                        "on_bright_cyan" => style = style.on_bright_cyan(),
+                        "on_bright_white" => style = style.on_bright_white(),
+                        "bold" => style = style.bold(),
+                        "dimmed" => style = style.dimmed(),
+                        "italic" => style = style.italic(),
+                        "underline" => style = style.underline(),
+                        "blink" => style = style.blink(),
+                        "blink_fast" => style = style.blink_fast(),
+                        "reversed" => style = style.reversed(),
+                        "hidden" => style = style.hidden(),
+                        "strikethrough" => style = style.strikethrough(),
                         w => {
                             let p = colors_file.display();
                             bail!(
-                                "Line {i} of colors config file ({p}) contains invalid style '{w}'"
+                                "Line {i} of colors config file ({p}) contains invalid style: '{w}'"
                             )
                         }
-                    }
+                    };
                 }
                 match element {
                     "tree_composite" => colors.tree_composite = style,
@@ -102,7 +147,9 @@ impl CliColor {
                     "show_header" => colors.show_header = style,
                     w => {
                         let p = colors_file.display();
-                        bail!("Line {i} of colors config file ({p}) contains invalid element '{w}'")
+                        bail!(
+                            "Line {i} of colors config file ({p}) contains invalid element: '{w}'"
+                        )
                     }
                 }
             }
