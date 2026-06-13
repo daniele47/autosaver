@@ -9,7 +9,7 @@ output_profile
 output_unmodified
 prompt_choices
 prompt_msg
-show_heade
+show_header
 tree_composite
 tree_dedup
 tree_module
