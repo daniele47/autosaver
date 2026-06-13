@@ -6,7 +6,7 @@ use std::{
 
 use anyhow::{Context, bail};
 
-use crate::fs::abs::AbsPathStr;
+use crate::{fs::abs::AbsPathStr, warning};
 
 pub mod abs;
 pub mod path;
@@ -148,6 +148,11 @@ impl AbsPathStr {
                 break;
             }
             parent = p.parent();
+        }
+
+        if self.path().symlink_metadata().is_ok() {
+            let p = self.display();
+            warning!("Path was not actually deleted: '{p}'");
         }
 
         Ok(())

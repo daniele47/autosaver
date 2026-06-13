@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented here
 
+## v2.8.0
+
+### Features
+
+- [WIP] added `-s|--symlink` flag to allow deleting symlinks
+
+### Patches
+
+- added warning when `purge_path` is unable to delete path
+
 ## v2.7.1
 
 ### Patches

@@ -30,6 +30,10 @@ pub struct Cli {
     #[arg(short = 'R', long, env = "AUTOSAVER_ROOT", global = true)]
     root: Option<PathBuf>,
 
+    /// Allow deleting symlink files
+    #[arg(short = 's', long, global = true)]
+    symlink: bool,
+
     /// Get prompted for each profile if to execute it or not
     #[arg(short = 'c', long, global = true)]
     choice: bool,
