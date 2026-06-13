@@ -1,7 +1,8 @@
+use anyhow::{Ok, bail};
 use owo_colors::{OwoColorize, Style};
 
 use crate::{
-    fs::{path::PathStr, rel::RelPathStr},
+    fs::{abs::AbsPathStr, path::PathStr, rel::RelPathStr},
     outln,
 };
 
@@ -55,5 +56,58 @@ impl CliColor {
     pub fn output_path(&self, path: impl AsRef<PathStr>, style: Style) {
         let path = path.as_ref();
         outln!("{} {}", "-".style(style), path.display().style(style));
+    }
+
+    pub fn parse_theme(colors_file: &AbsPathStr) -> anyhow::Result<Self> {
+        let mut colors = Self::default_theme();
+        // quit on missing config file
+        if !colors_file.is_file() {
+            return Ok(colors);
+        }
+
+        for (i, line) in colors_file.read_file()?.lines().enumerate() {
+            // skip comments
+            if line.starts_with("#") {
+                continue;
+            }
+            // split by whitespace, and consider only lines with at least 1 word
+            let mut words = line.split_whitespace();
+            if let Some(element) = words.next() {
+                let mut style = Style::new();
+                while let Some(style_word) = words.next() {
+                    match style_word {
+                        w => {
+                            let p = colors_file.display();
+                            bail!(
+                                "Line {i} of colors config file ({p}) contains invalid style '{w}'"
+                            )
+                        }
+                    }
+                }
+                match element {
+                    "tree_composite" => colors.tree_composite = style,
+                    "tree_runner" => colors.tree_runner = style,
+                    "tree_module" => colors.tree_module = style,
+                    "tree_dedup" => colors.tree_dedup = style,
+                    "prompt_msg" => colors.prompt_msg = style,
+                    "prompt_choices" => colors.prompt_choices = style,
+                    "output_profile" => colors.output_profile = style,
+                    "output_path" => colors.output_path = style,
+                    "output_missing" => colors.output_missing = style,
+                    "output_diff" => colors.output_diff = style,
+                    "output_unmodified" => colors.output_unmodified = style,
+                    "diff_deleted" => colors.diff_deleted = style,
+                    "diff_inserted" => colors.diff_inserted = style,
+                    "diff_header" => colors.diff_header = style,
+                    "show_header" => colors.show_header = style,
+                    w => {
+                        let p = colors_file.display();
+                        bail!("Line {i} of colors config file ({p}) contains invalid element '{w}'")
+                    }
+                }
+            }
+        }
+
+        Ok(colors)
     }
 }

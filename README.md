@@ -39,7 +39,15 @@ NOTES for future reference:
             - note: all whitespace is insignificant, and always trimmed!
             - note: `AUTOSAVER_ROOT` is the sole env var that is obliously not allowed specifying!
         - `.autosaver/colors` to specify different colorscheme for various output elements
-            - WIP: not yet available
+            - commented lines (`# commented line`): are lines starting with `#`, which are just ignored
+            - colors lines are a serie of words: `<ELEMENT> [<STYLE>...]`
+                - `ELEMENT`: specifies what element to apply the styles to
+                    - can be one of: `tree_composite`, `tree_runner`, `tree_module`, `tree_dedup`, `prompt_msg`, 
+                                     `prompt_choices`, `output_profile`, `output_path`, `output_missing`, `output_diff`, 
+                                     `output_unmodified`, `diff_deleted`, `diff_inserted`, `diff_header`, `show_header`
+                - `STYLE`: specify what style to apply to the element
+                    - can be one of: [WIP]
+            - note: all whitespace is insignificant, and always trimmed!
 
 NOTE: this directory SHOULD not be tracked with git or other sync mecchanisms to save and share the repository
 
