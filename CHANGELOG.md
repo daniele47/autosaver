@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v2.7.1
+
+### Patches
+
+- `PERF=` removed from accepted default env vars, as it cannot be loaded fast enough
+
 ## v2.7.0
 
 ### Features
