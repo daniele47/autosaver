@@ -2,8 +2,6 @@
 
 All notable changes to this project will be documented here
 
-TODO: properly hook `colors` parser (currently can parse, but parser is not executed!)
-
 ## v2.7.0
 
 ### Features
