@@ -104,7 +104,9 @@ impl Cli {
                             {
                                 path_printed = true;
                                 ctx.col.output_path(&path, ctx.col.output_path);
-                                if original_file.path().symlink_metadata()?.is_symlink() {
+                                if !self.symlink
+                                    && original_file.path().symlink_metadata()?.is_symlink()
+                                {
                                     warning!("Symlink flag is required to delete symlinks")
                                 } else {
                                     prompt.handled_prompt_available(
@@ -120,7 +122,9 @@ impl Cli {
                                 if !path_printed {
                                     ctx.col.output_path(&path, ctx.col.output_path);
                                 }
-                                if backup_file.path().symlink_metadata()?.is_symlink() {
+                                if !self.symlink
+                                    && backup_file.path().symlink_metadata()?.is_symlink()
+                                {
                                     warning!("Symlink flag is required to delete symlinks")
                                 } else {
                                     prompt.handled_prompt_available(
@@ -149,7 +153,9 @@ impl Cli {
                                     CliCmd::Restore { force, .. } => {
                                         if !force {
                                             warning!("Force flag is required to delete files");
-                                        } else if p1.path().symlink_metadata()?.is_symlink() {
+                                        } else if !self.symlink
+                                            && p1.path().symlink_metadata()?.is_symlink()
+                                        {
                                             warning!("Symlink flag is required to delete symlinks")
                                         } else {
                                             prompt.handled_prompt_available(
@@ -170,7 +176,9 @@ impl Cli {
                                     CliCmd::Save { force, .. } => {
                                         if !force {
                                             warning!("Force flag is required to delete files");
-                                        } else if p1.path().symlink_metadata()?.is_symlink() {
+                                        } else if !self.symlink
+                                            && p1.path().symlink_metadata()?.is_symlink()
+                                        {
                                             warning!("Symlink flag is required to delete symlinks")
                                         } else {
                                             prompt.handled_prompt_available(

@@ -2,11 +2,17 @@
 
 All notable changes to this project will be documented here
 
+## v2.8.1
+
+### Patches
+
+- added `-s|--symlink` flag now actually works
+
 ## v2.8.0
 
 ### Features
 
-- [WIP] added `-s|--symlink` flag to allow deleting symlinks
+- added `-s|--symlink` flag to allow deleting symlinks
 
 ### Patches
 
