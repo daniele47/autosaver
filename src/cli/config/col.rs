@@ -159,3 +159,24 @@ impl CliColor {
         Ok(colors)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::{env::current_dir, str::FromStr};
+
+    use super::*;
+
+    #[test]
+    fn assert_default_theme_matches_baked_in_default() {
+        let curr_dir = current_dir().unwrap();
+        let config_path = RelPathStr::from_str("colors/default").unwrap();
+        let config_path = AbsPathStr::new_from_pathbuf(curr_dir)
+            .unwrap()
+            .join(&config_path)
+            .unwrap();
+        let from_file = CliColor::parse_theme(&config_path).unwrap();
+        let from_code = CliColor::default_theme();
+
+        assert_eq!(from_code, from_file);
+    }
+}

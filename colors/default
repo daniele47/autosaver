@@ -1,15 +1,15 @@
 # vim: set commentstring=#\ %s:
-diff_deleted red,
-diff_header cyan,
-diff_inserted green,
-output_diff bright_yellow,
-output_missing red,
-output_path bright_blue,
-output_profile purple,
-output_unmodified green,
-prompt_choices bright_black,
-prompt_msg italic bright_black underline,
-show_header cyan,
+diff_deleted red
+diff_header cyan
+diff_inserted green
+output_diff bright_yellow
+output_missing red
+output_path bright_blue
+output_profile purple
+output_unmodified green
+prompt_choices bright_black
+prompt_msg italic bright_black underline
+show_header cyan
 tree_composite
 tree_dedup yellow
 tree_module bright_blue
