@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v2.8.2
+
+### Patches
+
+- more significative warnings
+
 ## v2.8.1
 
 ### Patches

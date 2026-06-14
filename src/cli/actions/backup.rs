@@ -107,7 +107,9 @@ impl Cli {
                                 if !self.symlink
                                     && original_file.path().symlink_metadata()?.is_symlink()
                                 {
-                                    warning!("Symlink flag is required to delete symlinks")
+                                    warning!(
+                                        "Symlink flag is required to delete symlink in home directory"
+                                    )
                                 } else {
                                     prompt.handled_prompt_available(
                                         "Do you really want to delete home file?",
@@ -125,7 +127,9 @@ impl Cli {
                                 if !self.symlink
                                     && backup_file.path().symlink_metadata()?.is_symlink()
                                 {
-                                    warning!("Symlink flag is required to delete symlinks")
+                                    warning!(
+                                        "Symlink flag is required to delete symlink in backup directory"
+                                    )
                                 } else {
                                     prompt.handled_prompt_available(
                                         "Do you really want to delete backup file?",
@@ -152,11 +156,11 @@ impl Cli {
                                     }
                                     CliCmd::Restore { force, .. } => {
                                         if !force {
-                                            warning!("Force flag is required to delete files");
+                                            warning!("Force flag is required to delete files in home directory");
                                         } else if !self.symlink
                                             && p1.path().symlink_metadata()?.is_symlink()
                                         {
-                                            warning!("Symlink flag is required to delete symlinks")
+                                            warning!("Symlink flag is required to delete symlinks in home directory")
                                         } else {
                                             prompt.handled_prompt_available(
                                                 "Do you really want to delete home file?",
@@ -175,11 +179,11 @@ impl Cli {
                                 match &self.cmd {
                                     CliCmd::Save { force, .. } => {
                                         if !force {
-                                            warning!("Force flag is required to delete files");
+                                            warning!("Force flag is required to delete files in backup directory");
                                         } else if !self.symlink
                                             && p1.path().symlink_metadata()?.is_symlink()
                                         {
-                                            warning!("Symlink flag is required to delete symlinks")
+                                            warning!("Symlink flag is required to delete symlinks in backup directory")
                                         } else {
                                             prompt.handled_prompt_available(
                                                 "Do you really want to delete backup file?",
