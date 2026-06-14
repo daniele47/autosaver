@@ -6,7 +6,7 @@ All notable changes to this project will be documented here
 
 ### Patches
 
-- more significative warnings
+- warnings for missing flags are now slightly more significative where necessary
 
 ## v2.8.1
 
