@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v2.8.3
+
+### Patches
+
+- unique path checks now canonicalize path prior to checking, since otherwise symlinks might end up getting the file rewritten multiple times
+
 ## v2.8.2
 
 ### Patches

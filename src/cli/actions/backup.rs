@@ -51,7 +51,7 @@ impl Cli {
     pub fn action_backup(&self, ctx: &CliContext) -> anyhow::Result<()> {
         let home_dir = &ctx.paths[&Paths::Home];
         let backup_dir = &ctx.paths[&Paths::Backup];
-        let mut all_paths = HashSet::<RelPathStr>::new();
+        let mut all_paths = HashSet::<AbsPathStr>::new();
         let prompt = Prompt::new(
             PromptAnswer::all(),
             PromptFlags::new(self.assume_no, self.assume_yes, self.list),
@@ -86,9 +86,13 @@ impl Cli {
                     }
 
                     // check path was not found yet
-                    if all_paths.contains(&path) {
-                        let p = path.display();
-                        bail!("Path '{p}' was already found previously");
+                    if !self.list && !matches!(self.cmd, CliCmd::List { .. }) {
+                        for entry in entry.1.iter().flatten() {
+                            if !all_paths.insert(entry.canonicalize()?) {
+                                let p = path.display();
+                                bail!("Path '{p}' was already found previously");
+                            }
+                        }
                     }
 
                     // run action
@@ -251,11 +255,6 @@ impl Cli {
                             _ => unreachable!("Invalid files"),
                         },
                         _ => unreachable!("Invalid backup action"),
-                    }
-
-                    // insert path to all paths
-                    if !self.list && !matches!(self.cmd, CliCmd::List { .. }) {
-                        all_paths.insert(path);
                     }
                 }
             }

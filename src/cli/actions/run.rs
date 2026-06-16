@@ -82,7 +82,7 @@ impl Cli {
                             }
 
                             // check path was not found yet
-                            if all_paths.contains(&path) {
+                            if !self.list && !all_paths.insert(path.canonicalize()?) {
                                 let p = path.to_rel(run_dir)?;
                                 let p = p.display();
                                 bail!("Script '{p}' was already run previously");
@@ -126,11 +126,6 @@ impl Cli {
                                 Ok(())
                             };
                             prompt.handled_prompt_available(msg, paths, action)?;
-
-                            // insert path to all paths
-                            if !self.list {
-                                all_paths.insert(path);
-                            }
                         }
                     }
                     Ok(())
