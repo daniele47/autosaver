@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v2.8.4
+
+### Changes
+
+- changed colors: unmodified now use default path color, and there is proper distinction between missing files on creating/deleting side
+
 ## v2.8.3
 
 ### Patches

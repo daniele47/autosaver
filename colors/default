@@ -9,14 +9,16 @@ diff_inserted green
 
 # color of files in backup action when they differ
 output_diff bright_yellow
-# color of files in backup action when one is missing
+# color of files in save and restore actions when file is to be created 
+output_create green
+# color of files in save and restore actions when file is to be deleted 
+output_delete red
+# color of files in list action when one file is missing
 output_missing red
 # color of file paths with nothing specific about them
 output_path bright_blue
 # color of profiles names
 output_profile purple
-# color of files that do not differ at all
-output_unmodified green
 
 # color of the [a/b/c/...] choices in prompts
 prompt_choices bright_black

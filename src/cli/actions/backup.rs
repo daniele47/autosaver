@@ -150,77 +150,79 @@ impl Cli {
                         | CliCmd::Save { act_backup, .. }
                         | CliCmd::Restore { act_backup, .. } => match &entry.1 {
                             // file is missing in the backup
-                            [Some(p1), None] => {
-                                ctx.col.output_path(&path, ctx.col.output_missing);
-                                match &self.cmd {
-                                    CliCmd::Save { .. } => {
-                                        prompt.handled_prompt_available(
-                                            "Do you really want to create backup file?",
-                                            &[p1],
-                                            || p1.copy_file(&path.to_abs(&this_backup_dir)?),
-                                        )?;
-                                    }
-                                    CliCmd::Restore { force, .. } => {
-                                        if !force {
-                                            warning!(
-                                                "Force flag is required to delete \
+                            [Some(p1), None] => match &self.cmd {
+                                CliCmd::Save { .. } => {
+                                    ctx.col.output_path(&path, ctx.col.output_create);
+                                    prompt.handled_prompt_available(
+                                        "Do you really want to create backup file?",
+                                        &[p1],
+                                        || p1.copy_file(&path.to_abs(&this_backup_dir)?),
+                                    )?;
+                                }
+                                CliCmd::Restore { force, .. } => {
+                                    ctx.col.output_path(&path, ctx.col.output_delete);
+                                    if !force {
+                                        warning!(
+                                            "Force flag is required to delete \
                                                 files in home directory"
-                                            );
-                                        } else if !self.symlink
-                                            && p1.path().symlink_metadata()?.is_symlink()
-                                        {
-                                            warning!(
-                                                "Symlink flag is required to delete \
+                                        );
+                                    } else if !self.symlink
+                                        && p1.path().symlink_metadata()?.is_symlink()
+                                    {
+                                        warning!(
+                                            "Symlink flag is required to delete \
                                                 symlinks in home directory"
-                                            )
-                                        } else {
-                                            prompt.handled_prompt_available(
-                                                "Do you really want to delete home file?",
-                                                &[p1],
-                                                || p1.purge_path(),
-                                            )?;
-                                        }
-                                    }
-                                    CliCmd::List { .. } => {}
-                                    _ => unreachable!("must either save or restore or list"),
-                                }
-                            }
-                            // file is missing in home
-                            [None, Some(p1)] => {
-                                ctx.col.output_path(&path, ctx.col.output_missing);
-                                match &self.cmd {
-                                    CliCmd::Save { force, .. } => {
-                                        if !force {
-                                            warning!(
-                                                "Force flag is required to delete \
-                                                files in backup directory"
-                                            );
-                                        } else if !self.symlink
-                                            && p1.path().symlink_metadata()?.is_symlink()
-                                        {
-                                            warning!(
-                                                "Symlink flag is required to delete \
-                                                symlinks in backup directory"
-                                            )
-                                        } else {
-                                            prompt.handled_prompt_available(
-                                                "Do you really want to delete backup file?",
-                                                &[p1],
-                                                || p1.purge_path(),
-                                            )?;
-                                        }
-                                    }
-                                    CliCmd::Restore { .. } => {
+                                        )
+                                    } else {
                                         prompt.handled_prompt_available(
-                                            "Do you really want to create home file?",
+                                            "Do you really want to delete home file?",
                                             &[p1],
-                                            || p1.copy_file(&path.to_abs(home_dir)?),
+                                            || p1.purge_path(),
                                         )?;
                                     }
-                                    CliCmd::List { .. } => {}
-                                    _ => unreachable!("must either save or restore or list"),
                                 }
-                            }
+                                CliCmd::List { .. } => {
+                                    ctx.col.output_path(&path, ctx.col.output_missing);
+                                }
+                                _ => unreachable!("must either save or restore or list"),
+                            },
+                            // file is missing in home
+                            [None, Some(p1)] => match &self.cmd {
+                                CliCmd::Save { force, .. } => {
+                                    ctx.col.output_path(&path, ctx.col.output_missing);
+                                    if !force {
+                                        warning!(
+                                            "Force flag is required to delete \
+                                                files in backup directory"
+                                        );
+                                    } else if !self.symlink
+                                        && p1.path().symlink_metadata()?.is_symlink()
+                                    {
+                                        warning!(
+                                            "Symlink flag is required to delete \
+                                                symlinks in backup directory"
+                                        )
+                                    } else {
+                                        prompt.handled_prompt_available(
+                                            "Do you really want to delete backup file?",
+                                            &[p1],
+                                            || p1.purge_path(),
+                                        )?;
+                                    }
+                                }
+                                CliCmd::Restore { .. } => {
+                                    ctx.col.output_path(&path, ctx.col.output_create);
+                                    prompt.handled_prompt_available(
+                                        "Do you really want to create home file?",
+                                        &[p1],
+                                        || p1.copy_file(&path.to_abs(home_dir)?),
+                                    )?;
+                                }
+                                CliCmd::List { .. } => {
+                                    ctx.col.output_path(&path, ctx.col.output_missing);
+                                }
+                                _ => unreachable!("must either save or restore or list"),
+                            },
                             // files differ
                             [Some(p1), Some(p2)] if !p1.files_eq(p2) => {
                                 if *entry.0.policy() == ModulePolicy::NotDiff && !act_backup.all {
@@ -242,7 +244,7 @@ impl Cli {
                             // files are equal
                             [Some(p1), Some(p2)] => {
                                 if act_backup.unmodified {
-                                    ctx.col.output_path(&path, ctx.col.output_unmodified);
+                                    ctx.col.output_path(&path, ctx.col.output_path);
                                     let msg = "Nothing to be done. Type y/n to continue...";
                                     let action = || Ok(());
                                     if matches!(&self.cmd, CliCmd::Save { .. }) {
