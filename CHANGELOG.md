@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v2.8.5
+
+### Patches
+
+- invalid input error now trims input string, for better output
+
 ## v2.8.4
 
 ### Changes

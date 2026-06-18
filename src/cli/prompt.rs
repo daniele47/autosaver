@@ -126,7 +126,8 @@ impl<'a> Prompt<'a> {
             if !input.ends_with("\n") {
                 outln!();
             }
-            if let Some(input) = Self::parse_answer(input.trim(), self.allowed_answers) {
+            let input = input.trim();
+            if let Some(input) = Self::parse_answer(input, self.allowed_answers) {
                 return input;
             }
             outln!("Invalid answer '{input}'. Please retry...")
