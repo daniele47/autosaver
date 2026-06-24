@@ -85,7 +85,12 @@ impl Cli {
                             if !self.list && !all_paths.insert(path.canonicalize()?) {
                                 let p = path.to_rel(run_dir)?;
                                 let p = p.display();
-                                bail!("Script '{p}' was already run previously");
+                                let msg = format!("Script '{p}' was already run previously");
+                                if self.allow_duplicates {
+                                    warning!("{msg}")
+                                } else {
+                                    bail!(msg)
+                                }
                             }
 
                             // output path

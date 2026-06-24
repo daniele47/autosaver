@@ -90,7 +90,12 @@ impl Cli {
                         for entry in entry.1.iter().flatten() {
                             if !all_paths.insert(entry.canonicalize()?) {
                                 let p = path.display();
-                                bail!("Path '{p}' was already found previously");
+                                let msg = format!("Path '{p}' was already found previously");
+                                if self.allow_duplicates {
+                                    warning!("{msg}")
+                                } else {
+                                    bail!(msg)
+                                }
                             }
                         }
                     }

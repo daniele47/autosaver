@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v2.9.0
+
+### Features
+
+- added `--allow-duplicates|-d` to avoid early exiting when duplicated paths are found
+
 ## v2.8.5
 
 ### Patches
