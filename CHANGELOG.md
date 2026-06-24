@@ -2,15 +2,15 @@
 
 All notable changes to this project will be documented here
 
-## v2.9.0
+IDEAS:
+- add `--profiles|-P` that allows specifying 0..N profiles, and runs them in orders
 
-### Features
-
-- [WIP]: added `--profiles|-P` flag to allow specifying N profiles, which are just going to be applied in that order
+## v2.9.1
 
 ### Patches
 
 - reserved profile names should be instantly checked for!
+- use `-D` for `--allow-duplicates` to avoid conflicts
 
 ## v2.9.0
 

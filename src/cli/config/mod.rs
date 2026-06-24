@@ -40,11 +40,8 @@ impl CliContext {
         let paths = load_env::load_paths_and_envvars(home, root)?;
         let root_profile = RelPathStr::from_str("all")?;
         let custom_profile = RelPathStr::from_str("custom")?;
-        let profiles = load_prof::load_profiles(
-            &paths[&Paths::Config],
-            &root_profile,
-            &[&root_profile, &custom_profile],
-        )?;
+        let profiles =
+            load_prof::load_profiles(&paths[&Paths::Config], &root_profile, &[&root_profile])?;
         let curr_profile;
         if let Some(prof) = flag_prof {
             curr_profile = prof.to_owned();

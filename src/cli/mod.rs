@@ -35,7 +35,7 @@ pub struct Cli {
     symlink: bool,
 
     /// Allow duplicated paths, and just warn about them
-    #[arg(short = 'd', long, global = true)]
+    #[arg(short = 'D', long, global = true)]
     allow_duplicates: bool,
 
     /// Get prompted for each profile if to execute it or not
