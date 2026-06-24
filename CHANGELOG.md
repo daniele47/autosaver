@@ -6,6 +6,16 @@ All notable changes to this project will be documented here
 
 ### Features
 
+- [WIP]: added `--profiles|-P` flag to allow specifying N profiles, which are just going to be applied in that order
+
+### Patches
+
+- reserved profile names should be instantly checked for!
+
+## v2.9.0
+
+### Features
+
 - added `--allow-duplicates|-d` to avoid early exiting when duplicated paths are found
 
 ## v2.8.5

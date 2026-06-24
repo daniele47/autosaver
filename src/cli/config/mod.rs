@@ -25,6 +25,7 @@ pub enum Paths {
 pub struct CliContext {
     pub paths: HashMap<Paths, AbsPathStr>,
     pub root_profile: RelPathStr,
+    pub custom_profile: RelPathStr,
     pub profiles: AllProfiles,
     pub curr_profile: RelPathStr,
     pub col: CliColor,
@@ -38,7 +39,12 @@ impl CliContext {
     ) -> anyhow::Result<Self> {
         let paths = load_env::load_paths_and_envvars(home, root)?;
         let root_profile = RelPathStr::from_str("all")?;
-        let profiles = load_prof::load_profiles(&paths[&Paths::Config], &root_profile)?;
+        let custom_profile = RelPathStr::from_str("custom")?;
+        let profiles = load_prof::load_profiles(
+            &paths[&Paths::Config],
+            &root_profile,
+            &[&root_profile, &custom_profile],
+        )?;
         let curr_profile;
         if let Some(prof) = flag_prof {
             curr_profile = prof.to_owned();
@@ -51,6 +57,7 @@ impl CliContext {
         Ok(Self {
             paths,
             root_profile,
+            custom_profile,
             profiles,
             curr_profile,
             col,

@@ -15,9 +15,19 @@ use crate::{
     },
 };
 
+fn check_profile(profile: &RelPathStr, reserved_profiles: &[&RelPathStr]) -> anyhow::Result<()> {
+    if reserved_profiles.contains(&profile) {
+        let p = profile.display();
+        let msg = format!("Profile name '{p}' cannot be used, as it is reserved");
+        bail!(msg);
+    }
+    Ok(())
+}
+
 pub fn load_profiles(
     config_dir: &AbsPathStr,
     root_profile: &RelPathStr,
+    reserved_profiles: &[&RelPathStr],
 ) -> anyhow::Result<AllProfiles> {
     let mut vt_names = IndexSet::new();
     let mut vt_profiles = vec![];
@@ -38,11 +48,13 @@ pub fn load_profiles(
             // virtual directory parsing
             if ftype.is_dir() {
                 // insert profile
+                check_profile(&conf_rel, reserved_profiles)?;
                 let (index_this, _) = vt_names.insert_full(conf_rel);
 
                 // insert parent profile
                 let parent = &vt_names[index_this].path().parent().expect("no parent");
                 let parent = RelPathStr::new_from_pathbuf(PathBuf::from(parent))?;
+                check_profile(&parent, reserved_profiles)?;
                 let (index_parent, _) = vt_names.insert_full(parent);
                 vt_entries.push((index_parent, index_this));
             }
@@ -51,13 +63,16 @@ pub fn load_profiles(
                 && let Some(pname) = conf_rel.to_string_lossy().strip_suffix(".conf")
             {
                 // parse profile
-                let (index_this, _) = vt_names.insert_full(RelPathStr::from_str(pname)?);
+                let prof_name = RelPathStr::from_str(pname)?;
+                check_profile(&prof_name, reserved_profiles)?;
+                let (index_this, _) = vt_names.insert_full(prof_name);
                 let profile = Profile::parse_config(&ctx.path.read_file()?, pname)?;
                 vt_profiles.push((index_this, profile));
 
                 // insert parent profile
                 let parent = &vt_names[index_this].path().parent().expect("no parent");
                 let parent = RelPathStr::new_from_pathbuf(PathBuf::from(parent))?;
+                check_profile(&parent, reserved_profiles)?;
                 let (index_parent, _) = vt_names.insert_full(parent);
                 vt_entries.push((index_parent, index_this));
             }
@@ -102,10 +117,6 @@ pub fn load_profiles(
     }
 
     // handle root profile
-    if all_profiles.contains_key(root_profile) {
-        let name = root_profile.display();
-        bail!("Profile name '{name}' is reserved for root profile");
-    }
     if let Some(value) = all_profiles.remove(&RelPathStr::from_str("")?) {
         all_profiles.insert(root_profile.to_owned(), value);
     }
