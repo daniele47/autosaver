@@ -8,8 +8,11 @@ pub mod tree;
 impl Cli {
     pub fn run_cmd(&self) -> anyhow::Result<()> {
         let ctx = perf("    - Configs parsed -->", || {
-            CliContext::new(&self.home, &self.root, &self.profile)
+            CliContext::new(&self.home, &self.root, &self.profile, &self.profiles)
         })?;
+
+        dbg!(&self);
+        dbg!(&ctx.curr_profile);
 
         perf("    - Command run    -->", || match self.cmd {
             CliCmd::List { .. }

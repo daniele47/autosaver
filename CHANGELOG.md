@@ -2,8 +2,11 @@
 
 All notable changes to this project will be documented here
 
-IDEAS:
-- add `--profiles|-P` that allows specifying 0..N profiles, and runs them in orders
+## v2.10.0
+
+### Features
+
+- added `--profiles|-P` that allows specifying 0..N profiles, and runs them in orders
 
 ## v2.9.1
 

@@ -19,8 +19,12 @@ pub struct Cli {
     cmd: CliCmd,
 
     /// Specify which profile to use
-    #[arg(short, long, env = "AUTOSAVER_PROFILE", global = true)]
+    #[arg(short = 'p', long, env = "AUTOSAVER_PROFILE", global = true, conflicts_with_all = ["profiles"])]
     profile: Option<RelPathStr>,
+
+    /// Specify a list of profiles to use
+    #[arg(short = 'P', long, num_args=1.., global = true, conflicts_with_all = ["profile"])]
+    profiles: Vec<RelPathStr>,
 
     /// Specify a different home directory to use
     #[arg(short = 'H', long, env = "AUTOSAVER_HOME", global = true)]

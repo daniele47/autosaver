@@ -36,15 +36,21 @@ impl CliContext {
         home: &Option<PathBuf>,
         root: &Option<PathBuf>,
         flag_prof: &Option<RelPathStr>,
+        flag_profs: &[RelPathStr],
     ) -> anyhow::Result<Self> {
         let paths = load_env::load_paths_and_envvars(home, root)?;
         let root_profile = RelPathStr::from_str("all")?;
         let custom_profile = RelPathStr::from_str("custom")?;
-        let profiles =
-            load_prof::load_profiles(&paths[&Paths::Config], &root_profile, &[&root_profile])?;
+        let profiles = load_prof::load_profiles(
+            &paths[&Paths::Config],
+            &root_profile,
+            &[&root_profile, &custom_profile],
+        )?;
         let curr_profile;
         if let Some(prof) = flag_prof {
             curr_profile = prof.to_owned();
+        } else if !flag_profs.is_empty() {
+            curr_profile = custom_profile.clone();
         } else if let Ok(prof) = env::var("AUTOSAVER_PROFILE") {
             curr_profile = RelPathStr::try_from(prof)?;
         } else {
