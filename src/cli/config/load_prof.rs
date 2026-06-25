@@ -27,7 +27,9 @@ fn check_profile(profile: &RelPathStr, reserved_profiles: &[&RelPathStr]) -> any
 pub fn load_profiles(
     config_dir: &AbsPathStr,
     root_profile: &RelPathStr,
+    custom_profile: &RelPathStr,
     reserved_profiles: &[&RelPathStr],
+    profiles: &[RelPathStr],
 ) -> anyhow::Result<AllProfiles> {
     let mut vt_names = IndexSet::new();
     let mut vt_profiles = vec![];
@@ -126,6 +128,15 @@ pub fn load_profiles(
         let profile = Profile::new(None, ProfileKind::Composite(Composite::new(vec![])));
         all_profiles.insert(root_profile.to_owned(), profile);
     }
+
+    // handle custom profile (aka virtual profile specified from cmdline)
+    let mut custom_comp = vec![];
+    for profs in profiles {
+        custom_comp.push(CompositeEntry::new(profs.to_owned()));
+    }
+    let custom_kind = ProfileKind::Composite(Composite::new(custom_comp));
+    let custom_prof = Profile::new(None, custom_kind);
+    all_profiles.insert(custom_profile.to_owned(), custom_prof);
 
     Ok(AllProfiles::new(all_profiles))
 }

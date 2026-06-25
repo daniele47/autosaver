@@ -11,9 +11,6 @@ impl Cli {
             CliContext::new(&self.home, &self.root, &self.profile, &self.profiles)
         })?;
 
-        dbg!(&self);
-        dbg!(&ctx.curr_profile);
-
         perf("    - Command run    -->", || match self.cmd {
             CliCmd::List { .. }
             | CliCmd::Save { .. }

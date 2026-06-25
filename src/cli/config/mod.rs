@@ -44,7 +44,9 @@ impl CliContext {
         let profiles = load_prof::load_profiles(
             &paths[&Paths::Config],
             &root_profile,
+            &custom_profile,
             &[&root_profile, &custom_profile],
+            flag_profs,
         )?;
         let curr_profile;
         if let Some(prof) = flag_prof {
