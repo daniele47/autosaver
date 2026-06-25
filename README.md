@@ -102,7 +102,14 @@ The scripts are search from the `run/<profile_id>` directory
 - `data lines`: 
     - each data line is a relative path of the script to track
 
-## Environment variables not specified in help text
+## Extra notes
+
+### Environment variables not specified in help text
 
 - `PERF`  : prints the performance of various sections of the code
 - `EDITOR`: to pick the editor used with `e` answer in prompts
+
+### Reserved profile names
+
+- `all`: top profile, used when none are specified, and from which ALL profiles can be found
+- `custom`: virtual profile that contains the profiles specified by `--profiles|-P` flag
