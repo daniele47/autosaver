@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v2.11.0
+
+### Features
+
+- [WIP] added `--auto-answer|-A` flag to allow listing answers to automatially give to all prompts
+
 ## v2.10.0
 
 ### Features
