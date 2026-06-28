@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use crate::{
     cli::{EarlyQuit, config::col::CliColor},
     fs::abs::AbsPathStr,
@@ -5,41 +7,42 @@ use crate::{
 };
 
 use anyhow::bail;
-use bitflags::bitflags;
 use owo_colors::OwoColorize;
 use similar::{ChangeTag, TextDiff};
 
-bitflags! {
-    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-    pub struct PromptAnswer: u32 {
-        const YES =  1 << 0; // execute what prompt asks for
-        const NO =   1 << 1; // not execute what prompt asks for
-        const SKIP = 1 << 2; // skip prompt entirely (Like NO, but not even shows prompt!)
-        const QUIT = 1 << 3; // quit program entirely
-        const HELP = 1 << 4; // show help about answers
-        const DIFF = 1 << 5; // show diff between two files
-        const EDIT = 1 << 6; // edit all files
-        const SHOW = 1 << 7; // show files in their entirety
-        const FULL = 1 << 8; // show full path of all files
-    }
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PromptAnswer {
+    YES = 1 << 0,  // execute what prompt asks for
+    NO = 1 << 1,   // not execute what prompt asks for
+    SKIP = 1 << 2, // skip prompt entirely (Like NO, but not even shows prompt!)
+    QUIT = 1 << 3, // quit program entirely
+    HELP = 1 << 4, // show help about answers
+    DIFF = 1 << 5, // show diff between two files
+    EDIT = 1 << 6, // edit all files
+    SHOW = 1 << 7, // show files in their entirety
+    FULL = 1 << 8, // show full path of all files
+}
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct PromptAnswers {
+    value: u32,
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Prompt<'a> {
-    allowed_answers: PromptAnswer,
-    auto_answers: PromptAnswer,
+    allowed_answers: PromptAnswers,
+    auto_answers: PromptAnswers,
     fmt: String,
     col: &'a CliColor,
 }
 
 impl<'a> Prompt<'a> {
     pub fn new(
-        allowed_answers: PromptAnswer,
-        auto_answers: PromptAnswer,
+        allowed_answers: PromptAnswers,
+        auto_answers:PromptAnswers,
         col: &'a CliColor,
     ) -> Self {
-        let allowed_answers = allowed_answers | PromptAnswer::YES | PromptAnswer::NO;
-        let fmt = Self::ordered_answers(&allowed_answers);
+        let allowed_answers = *allowed_answers | PromptAnswer::YES.into() | PromptAnswer::NO.into();
+        let fmt = Self::ordered_answers(allowed_answers);
         Self {
             col,
             allowed_answers,
@@ -48,23 +51,23 @@ impl<'a> Prompt<'a> {
         }
     }
 
-    fn parse_answer(input: &str, allowed: PromptAnswer) -> Option<PromptAnswer> {
+    fn parse_answer(input: char, allowed: PromptAnswers) -> Option<PromptAnswer> {
         match input {
-            "d" => Some(PromptAnswer::DIFF),
-            "e" => Some(PromptAnswer::EDIT),
-            "f" => Some(PromptAnswer::FULL),
-            "h" => Some(PromptAnswer::HELP),
-            "n" | "" => Some(PromptAnswer::NO),
-            "q" => Some(PromptAnswer::QUIT),
-            "s" => Some(PromptAnswer::SHOW),
-            "y" => Some(PromptAnswer::YES),
+            'd' => Some(PromptAnswer::DIFF),
+            'e' => Some(PromptAnswer::EDIT),
+            'f' => Some(PromptAnswer::FULL),
+            'h' => Some(PromptAnswer::HELP),
+            'n' => Some(PromptAnswer::NO),
+            'q' => Some(PromptAnswer::QUIT),
+            's' => Some(PromptAnswer::SHOW),
+            'y' => Some(PromptAnswer::YES),
             _ => None,
         }
-        .map(|f| f & allowed)
-        .and_then(|f| if f.is_empty() { None } else { Some(f) })
+        .map(|f| f.into() & allowed.value)
+        .and_then(|f| if f == 0 { None } else { Some(f) })
     }
 
-    fn ordered_answers(answers: &PromptAnswer) -> String {
+    fn ordered_answers(answers: PromptAnswers) -> String {
         const ANSWER_LIST: &[(PromptAnswer, &str)] = &[
             (PromptAnswer::DIFF, "d"),
             (PromptAnswer::EDIT, "e"),
@@ -295,5 +298,18 @@ impl<'a> Prompt<'a> {
                 warning!("{}", e)
             }
         }
+    }
+}
+
+impl Deref for PromptAnswers {
+    type Target = u32;
+    fn deref(&self) -> &Self::Target {
+        &self.value
+    }
+}
+
+impl From<PromptAnswer> for u32 {
+    fn from(value: PromptAnswer) -> Self {
+        value as u32
     }
 }

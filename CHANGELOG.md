@@ -8,6 +8,7 @@ All notable changes to this project will be documented here
 
 - [WIP] added `--auto-answer|-A` flag to allow listing answers to automatially give to all prompts
     - [WIP] refactor internally `Prompt` to make it more consistent (have ALL auto_answers into a single str. consider using chars for answers, ...)
+        - [WIP] replace bitflags with PromptAnswer (enum) and PromptAnswers (u32 wrapper)
 
 ## v2.10.0
 
