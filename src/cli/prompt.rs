@@ -12,58 +12,39 @@ use similar::{ChangeTag, TextDiff};
 bitflags! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq)]
     pub struct PromptAnswer: u32 {
-        /// Answer yes
-        const YES = 1 << 0;
-        /// Answer no
-        const NO = 1 << 1;
-        /// Quit program entirely
-        const QUIT = 1 << 2;
-        /// Show help for the prompt
-        const HELP = 1 << 3;
-        /// Show the diff of 2 files
-        const DIFF = 1 << 4;
-        /// Open a tui editor on the file
-        const EDIT = 1 << 5;
-        /// Show entire file
-        const SHOW = 1 << 6;
-        /// Show full paths of all files
-        const FULL = 1 << 7;
+        const YES =  1 << 0; // execute what prompt asks for
+        const NO =   1 << 1; // not execute what prompt asks for
+        const SKIP = 1 << 2; // skip prompt entirely (Like NO, but not even shows prompt!)
+        const QUIT = 1 << 3; // quit program entirely
+        const HELP = 1 << 4; // show help about answers
+        const DIFF = 1 << 5; // show diff between two files
+        const EDIT = 1 << 6; // edit all files
+        const SHOW = 1 << 7; // show files in their entirety
+        const FULL = 1 << 8; // show full path of all files
     }
-}
-
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
-pub struct PromptFlags {
-    answer_no: bool,
-    answer_yes: bool,
-    skip_prompt: bool,
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Prompt<'a> {
     allowed_answers: PromptAnswer,
-    flags: PromptFlags,
+    auto_answers: PromptAnswer,
     fmt: String,
     col: &'a CliColor,
 }
 
-impl PromptFlags {
-    pub fn new(answer_no: bool, answer_yes: bool, skip_prompt: bool) -> Self {
-        Self {
-            answer_no,
-            answer_yes,
-            skip_prompt,
-        }
-    }
-}
-
 impl<'a> Prompt<'a> {
-    pub fn new(allowed_answers: PromptAnswer, flags: PromptFlags, col: &'a CliColor) -> Self {
+    pub fn new(
+        allowed_answers: PromptAnswer,
+        auto_answers: PromptAnswer,
+        col: &'a CliColor,
+    ) -> Self {
         let allowed_answers = allowed_answers | PromptAnswer::YES | PromptAnswer::NO;
+        let fmt = Self::ordered_answers(&allowed_answers);
         Self {
             col,
             allowed_answers,
-            flags,
-            fmt: Self::ordered_answers(&allowed_answers),
+            auto_answers,
+            fmt,
         }
     }
 
