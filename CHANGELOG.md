@@ -7,6 +7,7 @@ All notable changes to this project will be documented here
 ### Features
 
 - [WIP] added `--auto-answer|-A` flag to allow listing answers to automatially give to all prompts
+    - [WIP] refactor internally `Prompt` to make it more consistent (have ALL auto_answers into a single str. consider using chars for answers, ...)
 
 ## v2.10.0
 
