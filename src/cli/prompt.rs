@@ -22,36 +22,20 @@ pub enum PromptAnswer {
     SHOW = 1 << 7, // show files in their entirety
     FULL = 1 << 8, // show full path of all files
 }
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct PromptAnswers {
-    value: u32,
-}
+pub type PromptAnswers = u32;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Prompt<'a> {
-    allowed_answers: PromptAnswers,
     auto_answers: PromptAnswers,
-    fmt: String,
     col: &'a CliColor,
 }
 
 impl<'a> Prompt<'a> {
-    pub fn new(
-        allowed_answers: PromptAnswers,
-        auto_answers:PromptAnswers,
-        col: &'a CliColor,
-    ) -> Self {
-        let allowed_answers = *allowed_answers | PromptAnswer::YES.into() | PromptAnswer::NO.into();
-        let fmt = Self::ordered_answers(allowed_answers);
-        Self {
-            col,
-            allowed_answers,
-            auto_answers,
-            fmt,
-        }
+    pub fn new(auto_answers: PromptAnswers, col: &'a CliColor) -> Self {
+        Self { col, auto_answers }
     }
 
-    fn parse_answer(input: char, allowed: PromptAnswers) -> Option<PromptAnswer> {
+    fn parse_answer(input: char) -> Option<PromptAnswer> {
         match input {
             'd' => Some(PromptAnswer::DIFF),
             'e' => Some(PromptAnswer::EDIT),
@@ -63,31 +47,29 @@ impl<'a> Prompt<'a> {
             'y' => Some(PromptAnswer::YES),
             _ => None,
         }
-        .map(|f| f.into() & allowed.value)
-        .and_then(|f| if f == 0 { None } else { Some(f) })
     }
 
-    fn ordered_answers(answers: PromptAnswers) -> String {
-        const ANSWER_LIST: &[(PromptAnswer, &str)] = &[
-            (PromptAnswer::DIFF, "d"),
-            (PromptAnswer::EDIT, "e"),
-            (PromptAnswer::FULL, "f"),
-            (PromptAnswer::HELP, "h"),
-            (PromptAnswer::NO, "n"),
-            (PromptAnswer::QUIT, "q"),
-            (PromptAnswer::SHOW, "s"),
-            (PromptAnswer::YES, "y"),
-        ];
-        let mut res = [""; ANSWER_LIST.len()];
-        let mut count = 0;
-        for (answer, ch) in ANSWER_LIST {
-            if answers.contains(*answer) {
-                res[count] = ch;
-                count += 1;
-            }
-        }
-        res[..count].join("/")
-    }
+    // fn ordered_answers(answers: PromptAnswers) -> String {
+    //     const ANSWER_LIST: &[(PromptAnswer, &str)] = &[
+    //         (PromptAnswer::DIFF, "d"),
+    //         (PromptAnswer::EDIT, "e"),
+    //         (PromptAnswer::FULL, "f"),
+    //         (PromptAnswer::HELP, "h"),
+    //         (PromptAnswer::NO, "n"),
+    //         (PromptAnswer::QUIT, "q"),
+    //         (PromptAnswer::SHOW, "s"),
+    //         (PromptAnswer::YES, "y"),
+    //     ];
+    //     let mut res = [""; ANSWER_LIST.len()];
+    //     let mut count = 0;
+    //     for (answer, ch) in ANSWER_LIST {
+    //         if answers.contains(*answer) {
+    //             res[count] = ch;
+    //             count += 1;
+    //         }
+    //     }
+    //     res[..count].join("/")
+    // }
 
     pub fn prompt(&self, msg: &str) -> PromptAnswer {
         loop {
@@ -173,22 +155,22 @@ impl<'a> Prompt<'a> {
         }
     }
 
-    pub fn on_no(&self) {}
-    pub fn on_yes<T>(&self, action: T) -> anyhow::Result<()>
+    fn on_no(&self) {}
+    fn on_yes<T>(&self, action: T) -> anyhow::Result<()>
     where
         T: FnOnce() -> anyhow::Result<()>,
     {
         action()
     }
-    pub fn on_quit(&self) -> anyhow::Result<()> {
+    fn on_quit(&self) -> anyhow::Result<()> {
         bail!(EarlyQuit)
     }
-    pub fn on_full(&self, paths: &[&AbsPathStr]) {
+    fn on_full(&self, paths: &[&AbsPathStr]) {
         for path in paths {
             outln!("- {}", path.display());
         }
     }
-    pub fn on_help(&self) {
+    fn on_help(&self) {
         let f = self.allowed_answers;
         if f.contains(PromptAnswer::DIFF) {
             outln!("[D]iff : show the diff between the files");
@@ -215,7 +197,7 @@ impl<'a> Prompt<'a> {
             outln!("[Y]es  : answer yes to the prompt");
         }
     }
-    pub fn on_edit(&self, paths: &[&AbsPathStr]) {
+    fn on_edit(&self, paths: &[&AbsPathStr]) {
         assert!(!paths.is_empty());
         match std::env::var("EDITOR").ok() {
             Some(editor_cmd) => {
@@ -235,7 +217,7 @@ impl<'a> Prompt<'a> {
             None => warning!("No editor found! Set EDITOR environment variable"),
         }
     }
-    pub fn on_show(&self, paths: &[&AbsPathStr]) {
+    fn on_show(&self, paths: &[&AbsPathStr]) {
         assert!(!paths.is_empty());
         for path in paths {
             let header = format!("@@ {} @@", path.display());
@@ -246,7 +228,7 @@ impl<'a> Prompt<'a> {
             }
         }
     }
-    pub fn on_diff(&self, paths: &[&AbsPathStr]) {
+    fn on_diff(&self, paths: &[&AbsPathStr]) {
         assert_eq!(paths.len(), 2);
         let old_text = paths[0].read_file();
         let new_text = paths[1].read_file();
@@ -298,18 +280,5 @@ impl<'a> Prompt<'a> {
                 warning!("{}", e)
             }
         }
-    }
-}
-
-impl Deref for PromptAnswers {
-    type Target = u32;
-    fn deref(&self) -> &Self::Target {
-        &self.value
-    }
-}
-
-impl From<PromptAnswer> for u32 {
-    fn from(value: PromptAnswer) -> Self {
-        value as u32
     }
 }
