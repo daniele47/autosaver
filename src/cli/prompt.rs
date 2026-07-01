@@ -4,12 +4,12 @@ use crate::{
     out, outln, outnow, warning,
 };
 
-use anyhow::bail;
+use anyhow::{Context, bail};
 use owo_colors::OwoColorize;
 use similar::{ChangeTag, TextDiff};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum PromptAnswer {
+enum PromptAnswer {
     YES = 1 << 0,  // execute what prompt asks for
     NO = 1 << 1,   // not execute what prompt asks for
     SKIP = 1 << 2, // skip prompt entirely (Like NO, but not even shows prompt!)
@@ -20,7 +20,7 @@ pub enum PromptAnswer {
     SHOW = 1 << 7, // show files in their entirety
     FULL = 1 << 8, // show full path of all files
 }
-pub type PromptAnswers = u32;
+type PromptAnswers = u32;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Prompt<'a> {
@@ -28,9 +28,21 @@ pub struct Prompt<'a> {
     col: &'a CliColor,
 }
 
+#[derive(Debug, Clone)]
+pub struct AutoAnswerOpts {
+    auto_yes: bool,
+    auto_no: bool,
+    auto_skip: bool,
+}
+
 impl<'a> Prompt<'a> {
-    pub fn new(auto_answers: Vec<PromptAnswer>, col: &'a CliColor) -> Self {
-        Self { col, auto_answers }
+    pub fn new(
+        auto_answers: String,
+        auto_answer_opts: AutoAnswerOpts,
+        col: &'a CliColor,
+    ) -> anyhow::Result<Self> {
+        let auto_answers = Self::auto_answers(auto_answers, auto_answer_opts)?;
+        Ok(Self { col, auto_answers })
     }
 
     fn parse_answer(input: char) -> Option<PromptAnswer> {
@@ -45,6 +57,28 @@ impl<'a> Prompt<'a> {
             'y' => Some(PromptAnswer::YES),
             _ => None,
         }
+    }
+
+    fn auto_answers(
+        input: String,
+        auto_answer_opts: AutoAnswerOpts,
+    ) -> anyhow::Result<Vec<PromptAnswer>> {
+        let mut answers = vec![];
+        for c in input.chars() {
+            let parsed_char = Self::parse_answer(c)
+                .with_context(|| format!("Unknown answer '{c}' inside answers '{input}'"))?;
+            answers.push(parsed_char);
+        }
+        if auto_answer_opts.auto_skip {
+            answers.push(PromptAnswer::SKIP);
+        }
+        if auto_answer_opts.auto_no {
+            answers.push(PromptAnswer::NO);
+        }
+        if auto_answer_opts.auto_yes {
+            answers.push(PromptAnswer::YES);
+        }
+        Ok(answers)
     }
 
     // fn ordered_answers(answers: PromptAnswers) -> String {
