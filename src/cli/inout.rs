@@ -66,14 +66,6 @@ macro_rules! inputln {
 }
 
 #[macro_export]
-macro_rules! performance {
-    ($($arg:tt)*) => {{
-        $crate::err!("perf: ");
-        $crate::errln!($($arg)*);
-    }};
-}
-
-#[macro_export]
 macro_rules! error {
     ($($arg:tt)*) => {{
         use owo_colors::OwoColorize;
