@@ -19,12 +19,6 @@ pub struct FindCtx {
     pub depth: usize,
 }
 
-impl FindCtx {
-    pub fn new(path: AbsPathStr, entry: DirEntry, depth: usize) -> Self {
-        Self { path, entry, depth }
-    }
-}
-
 impl AbsPathStr {
     fn list_raw(&self) -> anyhow::Result<ReadDir> {
         fs::read_dir(self.path()).with_context(|| {
@@ -40,7 +34,11 @@ impl AbsPathStr {
         self.list_raw()?.try_for_each(|e| {
             let e = e?;
             let abs = AbsPathStr::new_from_pathbuf(e.path())?;
-            on_each(FindCtx::new(abs, e, 1))
+            on_each(FindCtx {
+                path: abs,
+                entry: e,
+                depth: 1,
+            })
         })
     }
 
@@ -70,11 +68,11 @@ impl AbsPathStr {
             }
 
             children.try_for_each(|dir_entry| {
-                let dir_entry = dir_entry?;
-                let abs = AbsPathStr::new_from_pathbuf(dir_entry.path())?;
-                let ftype = dir_entry.file_type()?;
-                let is_dir = ftype.is_dir() || (ftype.is_symlink() && abs.path().is_dir());
-                let ctx = FindCtx::new(abs, dir_entry, depth);
+                let entry = dir_entry?;
+                let path = AbsPathStr::new_from_pathbuf(entry.path())?;
+                let ftype = entry.file_type()?;
+                let is_dir = ftype.is_dir() || (ftype.is_symlink() && path.path().is_dir());
+                let ctx = FindCtx { path, entry, depth };
                 if is_dir {
                     stack.push(ctx);
                 } else {
