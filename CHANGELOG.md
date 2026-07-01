@@ -9,6 +9,10 @@ All notable changes to this project will be documented here
 - [WIP] added `--auto-answer|-A` flag to allow listing answers to automatially give to all prompts
     - [WIP] refactor internally `Prompt` to make it more consistent (have ALL auto_answers into a single str. consider using chars for answers, ...)
 
+### Patches
+
+- fully removed `PERF` environment variable, which was too hacky and garbage overall
+
 ## v2.10.0
 
 ### Features

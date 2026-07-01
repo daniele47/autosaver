@@ -1,8 +1,8 @@
-use std::{env, error::Error, fmt::Display, path::PathBuf, time::Instant};
+use std::{error::Error, fmt::Display, path::PathBuf};
 
 use clap::{Args, Parser, Subcommand};
 
-use crate::{fs::rel::RelPathStr, performance};
+use crate::fs::rel::RelPathStr;
 
 pub mod actions;
 pub mod config;
@@ -138,14 +138,3 @@ impl Display for EarlyQuit {
 }
 
 impl Error for EarlyQuit {}
-
-pub fn perf<T>(msg: &str, run: impl FnOnce() -> T) -> T {
-    if env::var_os("PERF").is_some() {
-        let start = Instant::now();
-        let res = run();
-        performance!("{msg} {:.6}s", start.elapsed().as_secs_f64());
-        res
-    } else {
-        run()
-    }
-}
