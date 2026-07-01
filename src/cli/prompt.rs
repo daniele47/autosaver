@@ -81,27 +81,27 @@ impl<'a> Prompt<'a> {
         Ok(answers)
     }
 
-    // fn ordered_answers(answers: PromptAnswers) -> String {
-    //     const ANSWER_LIST: &[(PromptAnswer, &str)] = &[
-    //         (PromptAnswer::DIFF, "d"),
-    //         (PromptAnswer::EDIT, "e"),
-    //         (PromptAnswer::FULL, "f"),
-    //         (PromptAnswer::HELP, "h"),
-    //         (PromptAnswer::NO, "n"),
-    //         (PromptAnswer::QUIT, "q"),
-    //         (PromptAnswer::SHOW, "s"),
-    //         (PromptAnswer::YES, "y"),
-    //     ];
-    //     let mut res = [""; ANSWER_LIST.len()];
-    //     let mut count = 0;
-    //     for (answer, ch) in ANSWER_LIST {
-    //         if answers.contains(*answer) {
-    //             res[count] = ch;
-    //             count += 1;
-    //         }
-    //     }
-    //     res[..count].join("/")
-    // }
+    fn ordered_answers(answers: PromptAnswers) -> String {
+        const ANSWER_LIST: &[(PromptAnswer, &str)] = &[
+            (PromptAnswer::DIFF, "d"),
+            (PromptAnswer::EDIT, "e"),
+            (PromptAnswer::FULL, "f"),
+            (PromptAnswer::HELP, "h"),
+            (PromptAnswer::NO, "n"),
+            (PromptAnswer::QUIT, "q"),
+            (PromptAnswer::SHOW, "s"),
+            (PromptAnswer::YES, "y"),
+        ];
+        let mut res = [""; ANSWER_LIST.len()];
+        let mut count = 0;
+        for (answer, ch) in ANSWER_LIST {
+            if *answer as PromptAnswers & answers != 0 {
+                res[count] = ch;
+                count += 1;
+            }
+        }
+        res[..count].join("/")
+    }
 
     // pub fn prompt(&self, msg: &str) -> PromptAnswer {
     //     loop {
