@@ -12,47 +12,33 @@ use similar::{ChangeTag, TextDiff};
 enum PromptAnswer {
     YES = 1 << 0,  // execute what prompt asks for
     NO = 1 << 1,   // not execute what prompt asks for
-    SKIP = 1 << 2, // skip prompt entirely (Like NO, but not even shows prompt!)
-    QUIT = 1 << 3, // quit program entirely
-    HELP = 1 << 4, // show help about answers
-    DIFF = 1 << 5, // show diff between two files
-    EDIT = 1 << 6, // edit all files
-    SHOW = 1 << 7, // show files in their entirety
-    FULL = 1 << 8, // show full path of all files
+    QUIT = 1 << 2, // quit program entirely
+    HELP = 1 << 3, // show help about answers
+    DIFF = 1 << 4, // show diff between two files
+    EDIT = 1 << 5, // edit all files
+    SHOW = 1 << 6, // show files in their entirety
+    FULL = 1 << 7, // show full path of all files
 }
 type PromptAnswers = u32;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct Prompt<'a> {
+pub struct Prompt {
     auto_answers: Vec<PromptAnswer>,
-    col: &'a CliColor,
-}
-
-#[derive(Debug, Clone)]
-pub struct AutoAnswerOpts {
-    auto_yes: bool,
-    auto_no: bool,
     auto_skip: bool,
 }
 
-impl AutoAnswerOpts {
-    pub fn new(auto_yes: bool, auto_no: bool, auto_skip: bool) -> Self {
-        Self {
-            auto_yes,
-            auto_no,
-            auto_skip,
-        }
-    }
-}
-
-impl<'a> Prompt<'a> {
+impl Prompt {
     pub fn new(
         auto_answers: String,
-        auto_answer_opts: AutoAnswerOpts,
-        col: &'a CliColor,
+        auto_yes: bool,
+        auto_no: bool,
+        auto_skip: bool,
     ) -> anyhow::Result<Self> {
-        let auto_answers = Self::auto_answers(auto_answers, auto_answer_opts)?;
-        Ok(Self { col, auto_answers })
+        let auto_answers = Self::auto_answers(auto_answers, auto_yes, auto_no)?;
+        Ok(Self {
+            auto_answers,
+            auto_skip,
+        })
     }
 
     fn parse_answer(input: char) -> Option<PromptAnswer> {
@@ -71,21 +57,23 @@ impl<'a> Prompt<'a> {
 
     fn auto_answers(
         input: String,
-        auto_answer_opts: AutoAnswerOpts,
+        auto_yes: bool,
+        auto_no: bool,
     ) -> anyhow::Result<Vec<PromptAnswer>> {
         let mut answers = vec![];
+        let allowed_auto_answers = &[PromptAnswer::DIFF, PromptAnswer::FULL, PromptAnswer::SHOW];
         for c in input.chars() {
             let parsed_char = Self::parse_answer(c)
-                .with_context(|| format!("Unknown answer '{c}' inside answers '{input}'"))?;
+                .with_context(|| format!("Unknown answer '{c}' inside auto-answer: '{input}'"))?;
+            if !allowed_auto_answers.contains(&parsed_char) {
+                bail!(format!("Answer '{c}' is not allowed as an auto-answer"));
+            }
             answers.push(parsed_char);
         }
-        if auto_answer_opts.auto_skip {
-            answers.push(PromptAnswer::SKIP);
-        }
-        if auto_answer_opts.auto_no {
+        if auto_no {
             answers.push(PromptAnswer::NO);
         }
-        if auto_answer_opts.auto_yes {
+        if auto_yes {
             answers.push(PromptAnswer::YES);
         }
         Ok(answers)
@@ -111,6 +99,20 @@ impl<'a> Prompt<'a> {
             }
         }
         res[..count].join("/")
+    }
+
+    pub fn prompt(
+        &self,
+        msg: &str,
+        paths: &[&AbsPathStr],
+        action: impl FnOnce() -> anyhow::Result<()>,
+        col: &CliColor,
+    ) -> anyhow::Result<()> {
+        drop(msg);
+        drop(paths);
+        drop(action);
+        drop(col);
+        Ok(())
     }
 
     // pub fn prompt(&self, msg: &str) -> PromptAnswer {
