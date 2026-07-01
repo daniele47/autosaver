@@ -1,9 +1,7 @@
-use std::ops::Deref;
-
 use crate::{
     cli::{EarlyQuit, config::col::CliColor},
     fs::abs::AbsPathStr,
-    inputln, out, outln, outnow, warning,
+    out, outln, outnow, warning,
 };
 
 use anyhow::bail;
@@ -26,12 +24,12 @@ pub type PromptAnswers = u32;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Prompt<'a> {
-    auto_answers: PromptAnswers,
+    auto_answers: Vec<PromptAnswer>,
     col: &'a CliColor,
 }
 
 impl<'a> Prompt<'a> {
-    pub fn new(auto_answers: PromptAnswers, col: &'a CliColor) -> Self {
+    pub fn new(auto_answers: Vec<PromptAnswer>, col: &'a CliColor) -> Self {
         Self { col, auto_answers }
     }
 
@@ -71,89 +69,89 @@ impl<'a> Prompt<'a> {
     //     res[..count].join("/")
     // }
 
-    pub fn prompt(&self, msg: &str) -> PromptAnswer {
-        loop {
-            if self.flags.skip_prompt {
-                return PromptAnswer::NO;
-            }
-            let msg = msg.style(self.col.prompt_msg);
-            let choises = format!("[{}]", self.fmt);
-            let choises = choises.style(self.col.prompt_choices);
-            outnow!("{msg} {choises} ",);
-            if self.flags.answer_no {
-                outln!("n");
-                return PromptAnswer::NO;
-            }
-            if self.flags.answer_yes {
-                outln!("y");
-                return PromptAnswer::YES;
-            }
-            let input = inputln!();
-            if !input.ends_with("\n") {
-                outln!();
-            }
-            let input = input.trim();
-            if let Some(input) = Self::parse_answer(input, self.allowed_answers) {
-                return input;
-            }
-            outln!("Invalid answer '{input}'. Please retry...")
-        }
-    }
-
-    pub fn handled_prompt<T>(
-        &self,
-        msg: &str,
-        paths: &[&AbsPathStr],
-        action: T,
-    ) -> anyhow::Result<()>
-    where
-        T: FnOnce() -> anyhow::Result<()>,
-    {
-        let mut prompt_answer = self.prompt(msg);
-        while !prompt_answer.contains(PromptAnswer::YES)
-            && !prompt_answer.contains(PromptAnswer::NO)
-        {
-            match prompt_answer {
-                i if i.contains(PromptAnswer::QUIT) => self.on_quit()?,
-                i if i.contains(PromptAnswer::HELP) => self.on_help(),
-                i if i.contains(PromptAnswer::DIFF) => self.on_diff(paths),
-                i if i.contains(PromptAnswer::EDIT) => self.on_edit(paths),
-                i if i.contains(PromptAnswer::SHOW) => self.on_show(paths),
-                i if i.contains(PromptAnswer::FULL) => self.on_full(paths),
-                _ => unimplemented!("Prompt answer not handled"),
-            };
-            prompt_answer = self.prompt(msg);
-        }
-        match prompt_answer {
-            i if i.contains(PromptAnswer::YES) => self.on_yes(action)?,
-            i if i.contains(PromptAnswer::NO) => self.on_no(),
-            _ => unimplemented!("Prompt answer not handled"),
-        }
-        Ok(())
-    }
-
-    pub fn handled_prompt_available<T>(
-        &self,
-        msg: &str,
-        paths: &[&AbsPathStr],
-        action: T,
-    ) -> anyhow::Result<()>
-    where
-        T: FnOnce() -> anyhow::Result<()>,
-    {
-        let mut answers = self.allowed_answers;
-        if paths.is_empty() {
-            answers &= !(PromptAnswer::EDIT | PromptAnswer::SHOW | PromptAnswer::FULL);
-        }
-        if paths.len() != 2 {
-            answers &= !PromptAnswer::DIFF;
-        }
-        if self.allowed_answers != answers {
-            Self::new(answers, self.flags, self.col).handled_prompt(msg, paths, action)
-        } else {
-            self.handled_prompt(msg, paths, action)
-        }
-    }
+    // pub fn prompt(&self, msg: &str) -> PromptAnswer {
+    //     loop {
+    //         if self.flags.skip_prompt {
+    //             return PromptAnswer::NO;
+    //         }
+    //         let msg = msg.style(self.col.prompt_msg);
+    //         let choises = format!("[{}]", self.fmt);
+    //         let choises = choises.style(self.col.prompt_choices);
+    //         outnow!("{msg} {choises} ",);
+    //         if self.flags.answer_no {
+    //             outln!("n");
+    //             return PromptAnswer::NO;
+    //         }
+    //         if self.flags.answer_yes {
+    //             outln!("y");
+    //             return PromptAnswer::YES;
+    //         }
+    //         let input = inputln!();
+    //         if !input.ends_with("\n") {
+    //             outln!();
+    //         }
+    //         let input = input.trim();
+    //         if let Some(input) = Self::parse_answer(input, self.allowed_answers) {
+    //             return input;
+    //         }
+    //         outln!("Invalid answer '{input}'. Please retry...")
+    //     }
+    // }
+    //
+    // pub fn handled_prompt<T>(
+    //     &self,
+    //     msg: &str,
+    //     paths: &[&AbsPathStr],
+    //     action: T,
+    // ) -> anyhow::Result<()>
+    // where
+    //     T: FnOnce() -> anyhow::Result<()>,
+    // {
+    //     let mut prompt_answer = self.prompt(msg);
+    //     while !prompt_answer.contains(PromptAnswer::YES)
+    //         && !prompt_answer.contains(PromptAnswer::NO)
+    //     {
+    //         match prompt_answer {
+    //             i if i.contains(PromptAnswer::QUIT) => self.on_quit()?,
+    //             i if i.contains(PromptAnswer::HELP) => self.on_help(),
+    //             i if i.contains(PromptAnswer::DIFF) => self.on_diff(paths),
+    //             i if i.contains(PromptAnswer::EDIT) => self.on_edit(paths),
+    //             i if i.contains(PromptAnswer::SHOW) => self.on_show(paths),
+    //             i if i.contains(PromptAnswer::FULL) => self.on_full(paths),
+    //             _ => unimplemented!("Prompt answer not handled"),
+    //         };
+    //         prompt_answer = self.prompt(msg);
+    //     }
+    //     match prompt_answer {
+    //         i if i.contains(PromptAnswer::YES) => self.on_yes(action)?,
+    //         i if i.contains(PromptAnswer::NO) => self.on_no(),
+    //         _ => unimplemented!("Prompt answer not handled"),
+    //     }
+    //     Ok(())
+    // }
+    //
+    // pub fn handled_prompt_available<T>(
+    //     &self,
+    //     msg: &str,
+    //     paths: &[&AbsPathStr],
+    //     action: T,
+    // ) -> anyhow::Result<()>
+    // where
+    //     T: FnOnce() -> anyhow::Result<()>,
+    // {
+    //     let mut answers = self.allowed_answers;
+    //     if paths.is_empty() {
+    //         answers &= !(PromptAnswer::EDIT | PromptAnswer::SHOW | PromptAnswer::FULL);
+    //     }
+    //     if paths.len() != 2 {
+    //         answers &= !PromptAnswer::DIFF;
+    //     }
+    //     if self.allowed_answers != answers {
+    //         Self::new(answers, self.flags, self.col).handled_prompt(msg, paths, action)
+    //     } else {
+    //         self.handled_prompt(msg, paths, action)
+    //     }
+    // }
 
     fn on_no(&self) {}
     fn on_yes<T>(&self, action: T) -> anyhow::Result<()>
@@ -170,30 +168,29 @@ impl<'a> Prompt<'a> {
             outln!("- {}", path.display());
         }
     }
-    fn on_help(&self) {
-        let f = self.allowed_answers;
-        if f.contains(PromptAnswer::DIFF) {
+    fn on_help(&self, ok_answers: PromptAnswers) {
+        if PromptAnswer::DIFF as PromptAnswers & ok_answers != 0 {
             outln!("[D]iff : show the diff between the files");
         }
-        if f.contains(PromptAnswer::EDIT) {
+        if PromptAnswer::EDIT as PromptAnswers & ok_answers != 0 {
             outln!("[E]dit : edit the file with the $EDITOR");
         }
-        if f.contains(PromptAnswer::FULL) {
+        if PromptAnswer::FULL as PromptAnswers & ok_answers != 0 {
             outln!("[F]ull : show all the full paths");
         }
-        if f.contains(PromptAnswer::HELP) {
+        if PromptAnswer::HELP as PromptAnswers & ok_answers != 0 {
             outln!("[H]elp : show the current help message");
         }
-        if f.contains(PromptAnswer::NO) {
+        if PromptAnswer::NO as PromptAnswers & ok_answers != 0 {
             outln!("[N]o   : answer no to the prompt");
         }
-        if f.contains(PromptAnswer::QUIT) {
+        if PromptAnswer::QUIT as PromptAnswers & ok_answers != 0 {
             outln!("[Q]uit : quit the program entirely");
         }
-        if f.contains(PromptAnswer::SHOW) {
+        if PromptAnswer::SHOW as PromptAnswers & ok_answers != 0 {
             outln!("[S]how : show the file in question");
         }
-        if f.contains(PromptAnswer::YES) {
+        if PromptAnswer::YES as PromptAnswers & ok_answers != 0 {
             outln!("[Y]es  : answer yes to the prompt");
         }
     }
