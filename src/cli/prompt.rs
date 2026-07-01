@@ -35,6 +35,16 @@ pub struct AutoAnswerOpts {
     auto_skip: bool,
 }
 
+impl AutoAnswerOpts {
+    pub fn new(auto_yes: bool, auto_no: bool, auto_skip: bool) -> Self {
+        Self {
+            auto_yes,
+            auto_no,
+            auto_skip,
+        }
+    }
+}
+
 impl<'a> Prompt<'a> {
     pub fn new(
         auto_answers: String,

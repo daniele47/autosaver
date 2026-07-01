@@ -4,7 +4,7 @@ use crate::{
     cli::{
         Cli, CliCmd,
         config::{CliContext, Paths},
-        prompt::{Prompt, PromptAnswer, PromptFlags},
+        prompt::Prompt,
     },
     fs::{abs::AbsPathStr, rel::RelPathStr},
     prof::{ProfileKind, module::ModulePolicy},
