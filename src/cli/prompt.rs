@@ -103,12 +103,21 @@ impl Prompt {
                         return Ok(());
                     }
                     // ask for new input
-                    outnow!("{msg} {choises} ");
-                    let input = inputln!();
-                    if !input.ends_with("\n") {
-                        outln!();
+                    loop {
+                        outnow!("{msg} {choises} ");
+                        let input = inputln!();
+                        if !input.ends_with("\n") {
+                            outln!();
+                        }
+                        let parsed_answer = Self::parse_answers(input.trim(), valid_answers);
+                        if let Ok(ok_ans) = parsed_answer {
+                            input_answers = ok_ans;
+                            break;
+                        } else if let Err(err_ans) = parsed_answer {
+                            outln!("{err_ans}. Please retry...");
+                        }
                     }
-                    input_answers = Self::parse_answers(input.trim(), valid_answers)?;
+                    // input_answers = Self::parse_answers(input.trim(), valid_answers)?;
                     if let Some(next_input) = input_answers.first() {
                         answer = Some(*next_input);
                     }
@@ -116,6 +125,15 @@ impl Prompt {
                 }
                 answer
             };
+
+            // check answer is currently valid
+            if let Some(ans) = answer
+                && ans as PromptAnswers & valid_answers == 0
+            {
+                let answer_char = Self::answer_to_char(answer.unwrap());
+                warning!("Answer '{answer_char}' is invalid for current prompt");
+                continue;
+            }
 
             // act based on action
             match answer {
