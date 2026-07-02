@@ -81,6 +81,10 @@ impl Prompt {
         // loop through answers
         loop {
             // get answer
+            let msg = msg.style(col.prompt_msg);
+            let choises = format!("[{}]", Self::ordered_answers(valid_answers));
+            let choises = choises.style(col.prompt_choices);
+
             let answer = PromptAnswer::Quit; // TODO: THIS BUT TEMPORARY
             // TODO: read from auto_answers first then from input
             // (NOTE: auto_answers MUST write the answer char!
@@ -101,6 +105,18 @@ impl Prompt {
 
     // UTILITY FUNCTIONS
 
+    const fn all_answers() -> &'static [PromptAnswer] {
+        &[
+            (PromptAnswer::Diff),
+            (PromptAnswer::Edit),
+            (PromptAnswer::Full),
+            (PromptAnswer::Help),
+            (PromptAnswer::No),
+            (PromptAnswer::Quit),
+            (PromptAnswer::Show),
+            (PromptAnswer::Yes),
+        ]
+    }
     fn parse_answer(input: char) -> Option<PromptAnswer> {
         match input {
             'd' => Some(PromptAnswer::Diff),
@@ -135,7 +151,8 @@ impl Prompt {
             let parsed_char = Self::parse_answer(c)
                 .with_context(|| format!("Unknown answer '{c}' inside answers: '{answers}'"))?;
             if valid_answers & parsed_char as PromptAnswers == 0 {
-                bail!(format!("Answer '{c}' is not allowed as an answer"));
+                let allowed = Self::ordered_answers(valid_answers);
+                bail!(format!("Answer '{c}' is not allowed (not in: '{allowed}')"));
             }
             res.push(parsed_char);
         }
@@ -143,26 +160,17 @@ impl Prompt {
     }
     fn ordered_answers(answers: PromptAnswers) -> String {
         const SEP: char = '/';
-        [
-            (PromptAnswer::Diff),
-            (PromptAnswer::Edit),
-            (PromptAnswer::Full),
-            (PromptAnswer::Help),
-            (PromptAnswer::No),
-            (PromptAnswer::Quit),
-            (PromptAnswer::Show),
-            (PromptAnswer::Yes),
-        ]
-        .iter()
-        .filter(|e| **e as PromptAnswers & answers != 0)
-        .map(|e| Self::answer_to_char(*e))
-        .fold(String::new(), |mut acc, new| {
-            if !acc.is_empty() {
-                acc.push(SEP);
-            }
-            acc.push(new);
-            acc
-        })
+        Self::all_answers()
+            .iter()
+            .filter(|e| **e as PromptAnswers & answers != 0)
+            .map(|e| Self::answer_to_char(*e))
+            .fold(String::new(), |mut acc, new| {
+                if !acc.is_empty() {
+                    acc.push(SEP);
+                }
+                acc.push(new);
+                acc
+            })
     }
 
     // UTILITY ACTION FUNCTIONS

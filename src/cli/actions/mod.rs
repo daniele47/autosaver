@@ -8,7 +8,7 @@ pub mod tree;
 impl Cli {
     pub fn run_cmd(&self) -> anyhow::Result<()> {
         let prompt = Prompt::new(
-            self.auto_answers.clone().unwrap_or_default(),
+            self.auto_answers.as_deref().unwrap_or(""),
             self.assume_yes,
             self.assume_no,
             self.list,
