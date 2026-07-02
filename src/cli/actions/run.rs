@@ -10,7 +10,6 @@ use crate::{
     cli::{
         Cli, CliCmd,
         config::{CliContext, Paths},
-        prompt::Prompt,
     },
     fs::{abs::AbsPathStr, rel::RelPathStr},
     prof::{
@@ -48,11 +47,6 @@ impl Cli {
             CliCmd::Run { stdin } => {
                 let run_dir = &ctx.paths[&Paths::Run];
                 let mut all_paths = HashSet::<AbsPathStr>::new();
-                let prompt = Prompt::new(
-                    PromptAnswer::all() & !PromptAnswer::DIFF,
-                    PromptFlags::new(self.assume_no, self.assume_yes, self.list),
-                    &ctx.col,
-                );
 
                 // traverse all runner profiles
                 ctx.profiles.traverse(&ctx.curr_profile, |trav_ctx| {
@@ -69,7 +63,7 @@ impl Cli {
                                 execute = true;
                                 Ok(())
                             };
-                            prompt.handled_prompt_available(msg, paths, action)?;
+                            ctx.prompt.question(msg, paths, action, &ctx.col)?;
                             if !execute {
                                 return Ok(());
                             }
@@ -130,7 +124,7 @@ impl Cli {
 
                                 Ok(())
                             };
-                            prompt.handled_prompt_available(msg, paths, action)?;
+                            ctx.prompt.question(msg, paths, action, &ctx.col)?;
                         }
                     }
                     Ok(())

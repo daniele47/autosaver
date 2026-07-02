@@ -42,6 +42,10 @@ pub struct Cli {
     #[arg(short = 'D', long, global = true)]
     allow_duplicates: bool,
 
+    /// Auto answer to all prompts with the specified answers
+    #[arg(short = 'A', long, global = true)]
+    auto_answers: Option<String>,
+
     /// Get prompted for each profile if to execute it or not
     #[arg(short = 'c', long, global = true)]
     choice: bool,

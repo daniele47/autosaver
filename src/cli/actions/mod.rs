@@ -1,4 +1,4 @@
-use crate::cli::{Cli, CliCmd, config::CliContext};
+use crate::cli::{Cli, CliCmd, config::CliContext, prompt::Prompt};
 
 pub mod backup;
 pub mod clear;
@@ -7,7 +7,19 @@ pub mod tree;
 
 impl Cli {
     pub fn run_cmd(&self) -> anyhow::Result<()> {
-        let ctx = CliContext::new(&self.home, &self.root, &self.profile, &self.profiles)?;
+        let prompt = Prompt::new(
+            self.auto_answers.clone().unwrap_or_default(),
+            self.assume_yes,
+            self.assume_no,
+            self.list,
+        )?;
+        let ctx = CliContext::new(
+            &self.home,
+            &self.root,
+            &self.profile,
+            &self.profiles,
+            prompt,
+        )?;
 
         match self.cmd {
             CliCmd::List { .. }

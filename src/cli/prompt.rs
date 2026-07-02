@@ -10,16 +10,16 @@ use similar::{ChangeTag, TextDiff};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum PromptAnswer {
-    YES = 1 << 0,  // execute what prompt asks for
-    NO = 1 << 1,   // not execute what prompt asks for
-    QUIT = 1 << 2, // quit program entirely
-    HELP = 1 << 3, // show help about answers
-    DIFF = 1 << 4, // show diff between two files
-    EDIT = 1 << 5, // edit all files
-    SHOW = 1 << 6, // show files in their entirety
-    FULL = 1 << 7, // show full path of all files
+    Yes = 1 << 0,  // execute what prompt asks for
+    No = 1 << 1,   // not execute what prompt asks for
+    Quit = 1 << 2, // quit program entirely
+    Help = 1 << 3, // show help about answers
+    Diff = 1 << 4, // show diff between two files
+    Edit = 1 << 5, // edit all files
+    Show = 1 << 6, // show files in their entirety
+    Full = 1 << 7, // show full path of all files
 }
-type PromptAnswers = u32;
+type PromptAnswers = u8;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Prompt {
@@ -43,14 +43,14 @@ impl Prompt {
 
     fn parse_answer(input: char) -> Option<PromptAnswer> {
         match input {
-            'd' => Some(PromptAnswer::DIFF),
-            'e' => Some(PromptAnswer::EDIT),
-            'f' => Some(PromptAnswer::FULL),
-            'h' => Some(PromptAnswer::HELP),
-            'n' => Some(PromptAnswer::NO),
-            'q' => Some(PromptAnswer::QUIT),
-            's' => Some(PromptAnswer::SHOW),
-            'y' => Some(PromptAnswer::YES),
+            'd' => Some(PromptAnswer::Diff),
+            'e' => Some(PromptAnswer::Edit),
+            'f' => Some(PromptAnswer::Full),
+            'h' => Some(PromptAnswer::Help),
+            'n' => Some(PromptAnswer::No),
+            'q' => Some(PromptAnswer::Quit),
+            's' => Some(PromptAnswer::Show),
+            'y' => Some(PromptAnswer::Yes),
             _ => None,
         }
     }
@@ -61,7 +61,7 @@ impl Prompt {
         auto_no: bool,
     ) -> anyhow::Result<Vec<PromptAnswer>> {
         let mut answers = vec![];
-        let allowed_auto_answers = &[PromptAnswer::DIFF, PromptAnswer::FULL, PromptAnswer::SHOW];
+        let allowed_auto_answers = &[PromptAnswer::Diff, PromptAnswer::Full, PromptAnswer::Show];
         for c in input.chars() {
             let parsed_char = Self::parse_answer(c)
                 .with_context(|| format!("Unknown answer '{c}' inside auto-answer: '{input}'"))?;
@@ -71,24 +71,24 @@ impl Prompt {
             answers.push(parsed_char);
         }
         if auto_no {
-            answers.push(PromptAnswer::NO);
+            answers.push(PromptAnswer::No);
         }
         if auto_yes {
-            answers.push(PromptAnswer::YES);
+            answers.push(PromptAnswer::Yes);
         }
         Ok(answers)
     }
 
     fn ordered_answers(answers: PromptAnswers) -> String {
         const ANSWER_LIST: &[(PromptAnswer, &str)] = &[
-            (PromptAnswer::DIFF, "d"),
-            (PromptAnswer::EDIT, "e"),
-            (PromptAnswer::FULL, "f"),
-            (PromptAnswer::HELP, "h"),
-            (PromptAnswer::NO, "n"),
-            (PromptAnswer::QUIT, "q"),
-            (PromptAnswer::SHOW, "s"),
-            (PromptAnswer::YES, "y"),
+            (PromptAnswer::Diff, "d"),
+            (PromptAnswer::Edit, "e"),
+            (PromptAnswer::Full, "f"),
+            (PromptAnswer::Help, "h"),
+            (PromptAnswer::No, "n"),
+            (PromptAnswer::Quit, "q"),
+            (PromptAnswer::Show, "s"),
+            (PromptAnswer::Yes, "y"),
         ];
         let mut res = [""; ANSWER_LIST.len()];
         let mut count = 0;
@@ -101,17 +101,14 @@ impl Prompt {
         res[..count].join("/")
     }
 
-    pub fn prompt(
+    pub fn question(
         &self,
         msg: &str,
         paths: &[&AbsPathStr],
         action: impl FnOnce() -> anyhow::Result<()>,
         col: &CliColor,
     ) -> anyhow::Result<()> {
-        drop(msg);
-        drop(paths);
-        drop(action);
-        drop(col);
+        let _ = (msg, paths, action, col);
         Ok(())
     }
 
@@ -215,28 +212,28 @@ impl Prompt {
         }
     }
     fn on_help(&self, ok_answers: PromptAnswers) {
-        if PromptAnswer::DIFF as PromptAnswers & ok_answers != 0 {
+        if PromptAnswer::Diff as PromptAnswers & ok_answers != 0 {
             outln!("[D]iff : show the diff between the files");
         }
-        if PromptAnswer::EDIT as PromptAnswers & ok_answers != 0 {
+        if PromptAnswer::Edit as PromptAnswers & ok_answers != 0 {
             outln!("[E]dit : edit the file with the $EDITOR");
         }
-        if PromptAnswer::FULL as PromptAnswers & ok_answers != 0 {
+        if PromptAnswer::Full as PromptAnswers & ok_answers != 0 {
             outln!("[F]ull : show all the full paths");
         }
-        if PromptAnswer::HELP as PromptAnswers & ok_answers != 0 {
+        if PromptAnswer::Help as PromptAnswers & ok_answers != 0 {
             outln!("[H]elp : show the current help message");
         }
-        if PromptAnswer::NO as PromptAnswers & ok_answers != 0 {
+        if PromptAnswer::No as PromptAnswers & ok_answers != 0 {
             outln!("[N]o   : answer no to the prompt");
         }
-        if PromptAnswer::QUIT as PromptAnswers & ok_answers != 0 {
+        if PromptAnswer::Quit as PromptAnswers & ok_answers != 0 {
             outln!("[Q]uit : quit the program entirely");
         }
-        if PromptAnswer::SHOW as PromptAnswers & ok_answers != 0 {
+        if PromptAnswer::Show as PromptAnswers & ok_answers != 0 {
             outln!("[S]how : show the file in question");
         }
-        if PromptAnswer::YES as PromptAnswers & ok_answers != 0 {
+        if PromptAnswer::Yes as PromptAnswers & ok_answers != 0 {
             outln!("[Y]es  : answer yes to the prompt");
         }
     }
@@ -260,18 +257,18 @@ impl Prompt {
             None => warning!("No editor found! Set EDITOR environment variable"),
         }
     }
-    fn on_show(&self, paths: &[&AbsPathStr]) {
+    fn on_show(&self, paths: &[&AbsPathStr], col: &CliColor) {
         assert!(!paths.is_empty());
         for path in paths {
             let header = format!("@@ {} @@", path.display());
-            outln!("{}", header.style(self.col.show_header));
+            outln!("{}", header.style(col.show_header));
             match path.read_file() {
                 Ok(text) => outnow!("{text}"),
                 Err(e) => warning!("{e}"),
             }
         }
     }
-    fn on_diff(&self, paths: &[&AbsPathStr]) {
+    fn on_diff(&self, paths: &[&AbsPathStr], col: &CliColor) {
         assert_eq!(paths.len(), 2);
         let old_text = paths[0].read_file();
         let new_text = paths[1].read_file();
@@ -297,17 +294,17 @@ impl Prompt {
                         "@@ -{},{} +{},{} @@",
                         old_start, old_len, new_start, new_len
                     );
-                    outln!("{}", str.style(self.col.diff_header));
+                    outln!("{}", str.style(col.diff_header));
                 }
 
                 for op in group {
                     for change in diff.iter_changes(&op) {
                         match change.tag() {
                             ChangeTag::Delete => {
-                                out!("{} {change}", "-".style(self.col.diff_deleted))
+                                out!("{} {change}", "-".style(col.diff_deleted))
                             }
                             ChangeTag::Insert => {
-                                out!("{} {change}", "+".style(self.col.diff_inserted))
+                                out!("{} {change}", "+".style(col.diff_inserted))
                             }
                             ChangeTag::Equal => out!("  {change}"),
                         };

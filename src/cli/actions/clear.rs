@@ -4,7 +4,6 @@ use crate::{
     cli::{
         Cli, CliCmd,
         config::{CliContext, Paths},
-        prompt::Prompt,
     },
     fs::{abs::AbsPathStr, rel::RelPathStr},
     prof::{ProfileKind, module::ModulePolicy},
@@ -44,11 +43,6 @@ impl Cli {
                 let backup_dir = &ctx.paths[&Paths::Backup];
                 let root_dir = &ctx.paths[&Paths::Root];
                 let mut entries = IndexMap::new();
-                let prompt = Prompt::new(
-                    PromptAnswer::all() & !PromptAnswer::DIFF,
-                    PromptFlags::new(self.assume_no, self.assume_yes, self.list),
-                    &ctx.col,
-                );
 
                 // traverse all leaf profiles
                 ctx.profiles.traverse(&ctx.root_profile, |ctx| {
@@ -87,10 +81,11 @@ impl Cli {
                                 if !self.symlink && file.path().symlink_metadata()?.is_symlink() {
                                     warning!("Symlink flag is required to delete symlinks")
                                 } else {
-                                    prompt.handled_prompt_available(
+                                    ctx.prompt.question(
                                         "Do you really want to delete ignored file?",
                                         &[&file],
                                         || file.purge_path(),
+                                        &ctx.col,
                                     )?;
                                 }
                             }
@@ -100,10 +95,11 @@ impl Cli {
                             if !self.symlink && file.path().symlink_metadata()?.is_symlink() {
                                 warning!("Symlink flag is required to delete symlinks")
                             } else {
-                                prompt.handled_prompt_available(
+                                ctx.prompt.question(
                                     "Do you really want to delete untracked file?",
                                     &[&file],
                                     || file.purge_path(),
+                                    &ctx.col,
                                 )?;
                             }
                         }

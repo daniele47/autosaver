@@ -1,7 +1,7 @@
 use std::{collections::HashMap, env, path::PathBuf, str::FromStr};
 
 use crate::{
-    cli::config::col::CliColor,
+    cli::{config::col::CliColor, prompt::Prompt},
     fs::{abs::AbsPathStr, rel::RelPathStr},
     prof::AllProfiles,
 };
@@ -29,6 +29,7 @@ pub struct CliContext {
     pub profiles: AllProfiles,
     pub curr_profile: RelPathStr,
     pub col: CliColor,
+    pub prompt: Prompt,
 }
 
 impl CliContext {
@@ -37,6 +38,7 @@ impl CliContext {
         root: &Option<PathBuf>,
         flag_prof: &Option<RelPathStr>,
         flag_profs: &[RelPathStr],
+        prompt: Prompt,
     ) -> anyhow::Result<Self> {
         let paths = load_env::load_paths_and_envvars(home, root)?;
         let root_profile = RelPathStr::from_str("all")?;
@@ -66,6 +68,7 @@ impl CliContext {
             profiles,
             curr_profile,
             col,
+            prompt,
         })
     }
 }

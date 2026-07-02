@@ -7,7 +7,6 @@ use crate::{
     cli::{
         Cli, CliCmd,
         config::{CliContext, Paths},
-        prompt::Prompt,
     },
     fs::{abs::AbsPathStr, rel::RelPathStr},
     prof::{
@@ -52,11 +51,6 @@ impl Cli {
         let home_dir = &ctx.paths[&Paths::Home];
         let backup_dir = &ctx.paths[&Paths::Backup];
         let mut all_paths = HashSet::<AbsPathStr>::new();
-        let prompt = Prompt::new(
-            PromptAnswer::all(),
-            PromptFlags::new(self.assume_no, self.assume_yes, self.list),
-            &ctx.col,
-        );
 
         // traverse profiles
         ctx.profiles.traverse(&ctx.curr_profile, |trav_ctx| {
@@ -73,7 +67,7 @@ impl Cli {
                         execute = true;
                         Ok(())
                     };
-                    prompt.handled_prompt_available(msg, paths, action)?;
+                    ctx.prompt.question(msg, paths, action, &ctx.col)?;
                     if !execute {
                         return Ok(());
                     }
@@ -121,10 +115,11 @@ impl Cli {
                                         symlink in home directory"
                                     )
                                 } else {
-                                    prompt.handled_prompt_available(
+                                    ctx.prompt.question(
                                         "Do you really want to delete home file?",
                                         &[original_file],
                                         || original_file.purge_path(),
+                                        &ctx.col,
                                     )?;
                                 }
                             }
@@ -142,10 +137,11 @@ impl Cli {
      symlink in backup directory"
                                     );
                                 } else {
-                                    prompt.handled_prompt_available(
+                                    ctx.prompt.question(
                                         "Do you really want to delete backup file?",
                                         &[backup_file],
                                         || backup_file.purge_path(),
+                                        &ctx.col,
                                     )?;
                                 }
                             }
@@ -158,10 +154,11 @@ impl Cli {
                             [Some(p1), None] => match &self.cmd {
                                 CliCmd::Save { .. } => {
                                     ctx.col.output_path(&path, ctx.col.output_create);
-                                    prompt.handled_prompt_available(
+                                    ctx.prompt.question(
                                         "Do you really want to create backup file?",
                                         &[p1],
                                         || p1.copy_file(&path.to_abs(&this_backup_dir)?),
+                                        &ctx.col,
                                     )?;
                                 }
                                 CliCmd::Restore { force, .. } => {
@@ -179,10 +176,11 @@ impl Cli {
                                                 symlinks in home directory"
                                         )
                                     } else {
-                                        prompt.handled_prompt_available(
+                                        ctx.prompt.question(
                                             "Do you really want to delete home file?",
                                             &[p1],
                                             || p1.purge_path(),
+                                            &ctx.col,
                                         )?;
                                     }
                                 }
@@ -208,19 +206,21 @@ impl Cli {
                                                 symlinks in backup directory"
                                         )
                                     } else {
-                                        prompt.handled_prompt_available(
+                                        ctx.prompt.question(
                                             "Do you really want to delete backup file?",
                                             &[p1],
                                             || p1.purge_path(),
+                                            &ctx.col,
                                         )?;
                                     }
                                 }
                                 CliCmd::Restore { .. } => {
                                     ctx.col.output_path(&path, ctx.col.output_create);
-                                    prompt.handled_prompt_available(
+                                    ctx.prompt.question(
                                         "Do you really want to create home file?",
                                         &[p1],
                                         || p1.copy_file(&path.to_abs(home_dir)?),
+                                        &ctx.col,
                                     )?;
                                 }
                                 CliCmd::List { .. } => {
@@ -238,12 +238,12 @@ impl Cli {
                                     let msg = "Do you really want to update backup file?";
                                     let paths = &[p2, p1];
                                     let action = || p1.copy_file(p2);
-                                    prompt.handled_prompt_available(msg, paths, action)?;
+                                    ctx.prompt.question(msg, paths, action, &ctx.col)?;
                                 } else if matches!(&self.cmd, CliCmd::Restore { .. }) {
                                     let msg = "Do you really want to update home file?";
                                     let paths = &[p1, p2];
                                     let action = || p2.copy_file(p1);
-                                    prompt.handled_prompt_available(msg, paths, action)?;
+                                    ctx.prompt.question(msg, paths, action, &ctx.col)?;
                                 }
                             }
                             // files are equal
@@ -253,9 +253,9 @@ impl Cli {
                                     let msg = "Nothing to be done. Type y/n to continue...";
                                     let action = || Ok(());
                                     if matches!(&self.cmd, CliCmd::Save { .. }) {
-                                        prompt.handled_prompt_available(msg, &[p2, p1], action)?;
+                                        ctx.prompt.question(msg, &[p2, p1], action, &ctx.col)?;
                                     } else if matches!(&self.cmd, CliCmd::Restore { .. }) {
-                                        prompt.handled_prompt_available(msg, &[p1, p2], action)?;
+                                        ctx.prompt.question(msg, &[p1, p2], action, &ctx.col)?;
                                     }
                                 }
                             }
