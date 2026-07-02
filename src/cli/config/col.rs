@@ -1,4 +1,4 @@
-use anyhow::{Ok, bail};
+use anyhow::bail;
 use owo_colors::{OwoColorize, Style};
 
 use crate::{
