@@ -108,7 +108,24 @@ impl Prompt {
         action: impl FnOnce() -> anyhow::Result<()>,
         col: &CliColor,
     ) -> anyhow::Result<()> {
-        let _ = (msg, paths, action, col);
+        // early exit with auto_skip enabled
+        if self.auto_skip {
+            return Ok(());
+        }
+
+        // filter invalid answers out
+        let valid_answers = {
+            let mut answers = PromptAnswers::MAX;
+            if paths.is_empty() {
+                answers &= !(PromptAnswer::Edit as PromptAnswers
+                    | PromptAnswer::Show as PromptAnswers
+                    | PromptAnswer::Full as PromptAnswers);
+            }
+            if paths.len() != 2 {
+                answers &= !(PromptAnswer::Diff as PromptAnswers);
+            }
+            answers
+        };
         Ok(())
     }
 
