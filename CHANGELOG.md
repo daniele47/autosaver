@@ -2,14 +2,6 @@
 
 All notable changes to this project will be documented here
 
-## v2.12.0
-
-### Features
-
-- [WIP] added `--docs|-D` flag to print entire documentation of the cli
-    - [WIP] allow docs subsection, via `--docs <ARGUMENT>` flag
-        - [WIP] add prompt answers, colorschemes, ... docs
-
 ## v2.11.0
 
 ### Features
