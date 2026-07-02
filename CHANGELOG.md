@@ -2,15 +2,19 @@
 
 All notable changes to this project will be documented here
 
+## v2.12.0
+
+### Features
+
+- [WIP] added `--docs|-D` flag to print entire documentation of the cli
+    - [WIP] allow docs subsection, via `--docs <ARGUMENT>` flag
+        - [WIP] add prompt answers, colorschemes, ... docs
+
 ## v2.11.0
 
 ### Features
 
-- [WIP] added `--auto-answer|-A` flag to allow listing answers to automatially give to all prompts
-    - [WIP] refactor internally `Prompt` to make it more consistent (have ALL auto_answers into a single str. consider using chars for answers, ...)
-- [WIP] added `--docs|-D` flag to print entire documentation of the cli
-    - [WIP] allow docs subsection, via `--docs <ARGUMENT>` flag
-        - [WIP] add prompt answers, colorschemes, ... docs
+- added `--auto-answer|-A` flag to allow listing answers to automatially give to all prompts
 
 ## v2.10.1
 

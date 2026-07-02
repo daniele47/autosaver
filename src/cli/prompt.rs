@@ -1,7 +1,7 @@
 use crate::{
     cli::{EarlyQuit, config::col::CliColor},
     fs::abs::AbsPathStr,
-    out, outln, outnow, warning,
+    inputln, out, outln, outnow, warning,
 };
 
 use anyhow::{Context, bail};
@@ -36,8 +36,8 @@ impl Prompt {
     ) -> anyhow::Result<Self> {
         // parse auto_answers
         let allowed_auto_answers = PromptAnswer::Diff as PromptAnswers
-            & PromptAnswer::Full as PromptAnswers
-            & PromptAnswer::Show as PromptAnswers;
+            | PromptAnswer::Full as PromptAnswers
+            | PromptAnswer::Show as PromptAnswers;
         let mut auto_answers = Self::parse_answers(auto_answers, allowed_auto_answers)?;
         if auto_no {
             auto_answers.push(PromptAnswer::No);
@@ -59,11 +59,6 @@ impl Prompt {
         action: impl FnOnce() -> anyhow::Result<()>,
         col: &CliColor,
     ) -> anyhow::Result<()> {
-        // early exit with auto_skip enabled
-        if self.auto_skip {
-            return Ok(());
-        }
-
         // filter invalid answers out
         let valid_answers = {
             let mut answers = PromptAnswers::MAX;
@@ -79,26 +74,60 @@ impl Prompt {
         };
 
         // loop through answers
+        let mut auto_answer_iter = self.auto_answers.iter();
+        let mut input_answers = vec![];
+        let mut input_answers_index = 0;
         loop {
-            // get answer
+            // prompt
             let msg = msg.style(col.prompt_msg);
             let choises = format!("[{}]", Self::ordered_answers(valid_answers));
             let choises = choises.style(col.prompt_choices);
 
-            let answer = PromptAnswer::Quit; // TODO: THIS BUT TEMPORARY
-            // TODO: read from auto_answers first then from input
-            // (NOTE: auto_answers MUST write the answer char!
+            // get next answer
+            let answer: Option<PromptAnswer> = {
+                let mut answer = None;
+                if let Some(next_auto) = auto_answer_iter.next() {
+                    // use remaining automatic answers from cmdline flag
+                    answer = Some(*next_auto);
+                    outnow!("{msg} {choises} ");
+                    outln!("{}", Self::answer_to_char(*next_auto));
+                } else if let Some(next_input) = input_answers.get(input_answers_index) {
+                    // use remaining input answers from stdin
+                    input_answers_index += 1;
+                    answer = Some(*next_input);
+                    outnow!("{msg} {choises} ");
+                    outln!("{}", Self::answer_to_char(*next_input));
+                } else {
+                    // early quit if auto_skip is enabled
+                    if self.auto_skip {
+                        return Ok(());
+                    }
+                    // ask for new input
+                    outnow!("{msg} {choises} ");
+                    let input = inputln!();
+                    if !input.ends_with("\n") {
+                        outln!();
+                    }
+                    input_answers = Self::parse_answers(input.trim(), valid_answers)?;
+                    if let Some(next_input) = input_answers.first() {
+                        answer = Some(*next_input);
+                    }
+                    input_answers_index = 1;
+                }
+                answer
+            };
 
             // act based on action
             match answer {
-                PromptAnswer::Yes => return action(),
-                PromptAnswer::No => return Ok(()),
-                PromptAnswer::Quit => bail!(EarlyQuit),
-                PromptAnswer::Help => self.on_help(valid_answers),
-                PromptAnswer::Diff => self.on_diff(paths, col),
-                PromptAnswer::Edit => self.on_edit(paths),
-                PromptAnswer::Show => self.on_show(paths, col),
-                PromptAnswer::Full => self.on_full(paths),
+                Some(PromptAnswer::Yes) => return action(),
+                Some(PromptAnswer::No) => return Ok(()),
+                Some(PromptAnswer::Quit) => bail!(EarlyQuit),
+                Some(PromptAnswer::Help) => self.on_help(valid_answers),
+                Some(PromptAnswer::Diff) => self.on_diff(paths, col),
+                Some(PromptAnswer::Edit) => self.on_edit(paths),
+                Some(PromptAnswer::Show) => self.on_show(paths, col),
+                Some(PromptAnswer::Full) => self.on_full(paths),
+                None => return Ok(()),
             };
         }
     }
