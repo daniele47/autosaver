@@ -29,78 +29,29 @@ pub struct Prompt {
 
 impl Prompt {
     pub fn new(
-        auto_answers: String,
+        auto_answers: &str,
         auto_yes: bool,
         auto_no: bool,
         auto_skip: bool,
     ) -> anyhow::Result<Self> {
-        let auto_answers = Self::auto_answers(auto_answers, auto_yes, auto_no)?;
+        // parse auto_answers
+        let allowed_auto_answers = PromptAnswer::Diff as PromptAnswers
+            & PromptAnswer::Full as PromptAnswers
+            & PromptAnswer::Show as PromptAnswers;
+        let mut auto_answers = Self::parse_answers(auto_answers, allowed_auto_answers)?;
+        if auto_no {
+            auto_answers.push(PromptAnswer::No);
+        }
+        if auto_yes {
+            auto_answers.push(PromptAnswer::Yes);
+        }
+
+        // instanciate new object
         Ok(Self {
             auto_answers,
             auto_skip,
         })
     }
-
-    fn parse_answer(input: char) -> Option<PromptAnswer> {
-        match input {
-            'd' => Some(PromptAnswer::Diff),
-            'e' => Some(PromptAnswer::Edit),
-            'f' => Some(PromptAnswer::Full),
-            'h' => Some(PromptAnswer::Help),
-            'n' => Some(PromptAnswer::No),
-            'q' => Some(PromptAnswer::Quit),
-            's' => Some(PromptAnswer::Show),
-            'y' => Some(PromptAnswer::Yes),
-            _ => None,
-        }
-    }
-
-    fn auto_answers(
-        input: String,
-        auto_yes: bool,
-        auto_no: bool,
-    ) -> anyhow::Result<Vec<PromptAnswer>> {
-        let mut answers = vec![];
-        let allowed_auto_answers = &[PromptAnswer::Diff, PromptAnswer::Full, PromptAnswer::Show];
-        for c in input.chars() {
-            let parsed_char = Self::parse_answer(c)
-                .with_context(|| format!("Unknown answer '{c}' inside auto-answer: '{input}'"))?;
-            if !allowed_auto_answers.contains(&parsed_char) {
-                bail!(format!("Answer '{c}' is not allowed as an auto-answer"));
-            }
-            answers.push(parsed_char);
-        }
-        if auto_no {
-            answers.push(PromptAnswer::No);
-        }
-        if auto_yes {
-            answers.push(PromptAnswer::Yes);
-        }
-        Ok(answers)
-    }
-
-    fn ordered_answers(answers: PromptAnswers) -> String {
-        const ANSWER_LIST: &[(PromptAnswer, &str)] = &[
-            (PromptAnswer::Diff, "d"),
-            (PromptAnswer::Edit, "e"),
-            (PromptAnswer::Full, "f"),
-            (PromptAnswer::Help, "h"),
-            (PromptAnswer::No, "n"),
-            (PromptAnswer::Quit, "q"),
-            (PromptAnswer::Show, "s"),
-            (PromptAnswer::Yes, "y"),
-        ];
-        let mut res = [""; ANSWER_LIST.len()];
-        let mut count = 0;
-        for (answer, ch) in ANSWER_LIST {
-            if *answer as PromptAnswers & answers != 0 {
-                res[count] = ch;
-                count += 1;
-            }
-        }
-        res[..count].join("/")
-    }
-
     pub fn question(
         &self,
         msg: &str,
@@ -126,103 +77,96 @@ impl Prompt {
             }
             answers
         };
-        Ok(())
+
+        // loop through answers
+        loop {
+            // get answer
+            let answer = PromptAnswer::Quit; // TODO: THIS BUT TEMPORARY
+            // TODO: read from auto_answers first then from input
+            // (NOTE: auto_answers MUST write the answer char!
+
+            // act based on action
+            match answer {
+                PromptAnswer::Yes => return action(),
+                PromptAnswer::No => return Ok(()),
+                PromptAnswer::Quit => bail!(EarlyQuit),
+                PromptAnswer::Help => self.on_help(valid_answers),
+                PromptAnswer::Diff => self.on_diff(paths, col),
+                PromptAnswer::Edit => self.on_edit(paths),
+                PromptAnswer::Show => self.on_show(paths, col),
+                PromptAnswer::Full => self.on_full(paths),
+            };
+        }
     }
 
-    // pub fn prompt(&self, msg: &str) -> PromptAnswer {
-    //     loop {
-    //         if self.flags.skip_prompt {
-    //             return PromptAnswer::NO;
-    //         }
-    //         let msg = msg.style(self.col.prompt_msg);
-    //         let choises = format!("[{}]", self.fmt);
-    //         let choises = choises.style(self.col.prompt_choices);
-    //         outnow!("{msg} {choises} ",);
-    //         if self.flags.answer_no {
-    //             outln!("n");
-    //             return PromptAnswer::NO;
-    //         }
-    //         if self.flags.answer_yes {
-    //             outln!("y");
-    //             return PromptAnswer::YES;
-    //         }
-    //         let input = inputln!();
-    //         if !input.ends_with("\n") {
-    //             outln!();
-    //         }
-    //         let input = input.trim();
-    //         if let Some(input) = Self::parse_answer(input, self.allowed_answers) {
-    //             return input;
-    //         }
-    //         outln!("Invalid answer '{input}'. Please retry...")
-    //     }
-    // }
-    //
-    // pub fn handled_prompt<T>(
-    //     &self,
-    //     msg: &str,
-    //     paths: &[&AbsPathStr],
-    //     action: T,
-    // ) -> anyhow::Result<()>
-    // where
-    //     T: FnOnce() -> anyhow::Result<()>,
-    // {
-    //     let mut prompt_answer = self.prompt(msg);
-    //     while !prompt_answer.contains(PromptAnswer::YES)
-    //         && !prompt_answer.contains(PromptAnswer::NO)
-    //     {
-    //         match prompt_answer {
-    //             i if i.contains(PromptAnswer::QUIT) => self.on_quit()?,
-    //             i if i.contains(PromptAnswer::HELP) => self.on_help(),
-    //             i if i.contains(PromptAnswer::DIFF) => self.on_diff(paths),
-    //             i if i.contains(PromptAnswer::EDIT) => self.on_edit(paths),
-    //             i if i.contains(PromptAnswer::SHOW) => self.on_show(paths),
-    //             i if i.contains(PromptAnswer::FULL) => self.on_full(paths),
-    //             _ => unimplemented!("Prompt answer not handled"),
-    //         };
-    //         prompt_answer = self.prompt(msg);
-    //     }
-    //     match prompt_answer {
-    //         i if i.contains(PromptAnswer::YES) => self.on_yes(action)?,
-    //         i if i.contains(PromptAnswer::NO) => self.on_no(),
-    //         _ => unimplemented!("Prompt answer not handled"),
-    //     }
-    //     Ok(())
-    // }
-    //
-    // pub fn handled_prompt_available<T>(
-    //     &self,
-    //     msg: &str,
-    //     paths: &[&AbsPathStr],
-    //     action: T,
-    // ) -> anyhow::Result<()>
-    // where
-    //     T: FnOnce() -> anyhow::Result<()>,
-    // {
-    //     let mut answers = self.allowed_answers;
-    //     if paths.is_empty() {
-    //         answers &= !(PromptAnswer::EDIT | PromptAnswer::SHOW | PromptAnswer::FULL);
-    //     }
-    //     if paths.len() != 2 {
-    //         answers &= !PromptAnswer::DIFF;
-    //     }
-    //     if self.allowed_answers != answers {
-    //         Self::new(answers, self.flags, self.col).handled_prompt(msg, paths, action)
-    //     } else {
-    //         self.handled_prompt(msg, paths, action)
-    //     }
-    // }
+    // UTILITY FUNCTIONS
 
-    fn on_no(&self) {}
-    fn on_yes<T>(&self, action: T) -> anyhow::Result<()>
-    where
-        T: FnOnce() -> anyhow::Result<()>,
-    {
-        action()
+    fn parse_answer(input: char) -> Option<PromptAnswer> {
+        match input {
+            'd' => Some(PromptAnswer::Diff),
+            'e' => Some(PromptAnswer::Edit),
+            'f' => Some(PromptAnswer::Full),
+            'h' => Some(PromptAnswer::Help),
+            'n' => Some(PromptAnswer::No),
+            'q' => Some(PromptAnswer::Quit),
+            's' => Some(PromptAnswer::Show),
+            'y' => Some(PromptAnswer::Yes),
+            _ => None,
+        }
     }
-    fn on_quit(&self) -> anyhow::Result<()> {
-        bail!(EarlyQuit)
+    fn answer_to_char(answer: PromptAnswer) -> char {
+        match answer {
+            PromptAnswer::Diff => 'd',
+            PromptAnswer::Edit => 'e',
+            PromptAnswer::Full => 'f',
+            PromptAnswer::Help => 'h',
+            PromptAnswer::No => 'n',
+            PromptAnswer::Quit => 'q',
+            PromptAnswer::Show => 's',
+            PromptAnswer::Yes => 'y',
+        }
     }
+    fn parse_answers(
+        answers: &str,
+        valid_answers: PromptAnswers,
+    ) -> anyhow::Result<Vec<PromptAnswer>> {
+        let mut res = vec![];
+        for c in answers.chars() {
+            let parsed_char = Self::parse_answer(c)
+                .with_context(|| format!("Unknown answer '{c}' inside answers: '{answers}'"))?;
+            if valid_answers & parsed_char as PromptAnswers == 0 {
+                bail!(format!("Answer '{c}' is not allowed as an answer"));
+            }
+            res.push(parsed_char);
+        }
+        Ok(res)
+    }
+    fn ordered_answers(answers: PromptAnswers) -> String {
+        const SEP: char = '/';
+        [
+            (PromptAnswer::Diff),
+            (PromptAnswer::Edit),
+            (PromptAnswer::Full),
+            (PromptAnswer::Help),
+            (PromptAnswer::No),
+            (PromptAnswer::Quit),
+            (PromptAnswer::Show),
+            (PromptAnswer::Yes),
+        ]
+        .iter()
+        .filter(|e| **e as PromptAnswers & answers != 0)
+        .map(|e| Self::answer_to_char(*e))
+        .fold(String::new(), |mut acc, new| {
+            if !acc.is_empty() {
+                acc.push(SEP);
+            }
+            acc.push(new);
+            acc
+        })
+    }
+
+    // UTILITY ACTION FUNCTIONS
+
     fn on_full(&self, paths: &[&AbsPathStr]) {
         for path in paths {
             outln!("- {}", path.display());
