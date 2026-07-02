@@ -28,7 +28,7 @@ NOTES for future reference:
     - `HOME`: is the user home directory, unless specified otherwise
     - `ROOT`: is the dotfiles directory, in which `config`, `backup`, `run` directories are located
 
-## machine configuration directory
+## Machine configuration directory
 
 - a `.autosaver` marker directory MUST BE created in the `ROOT` directory. It has various uses:
     1. it acts as a top level dir marker. Basically it specifies that a directory is a autosaver repository.
@@ -46,7 +46,7 @@ NOTES for future reference:
 
 NOTE: this directory SHOULD not be tracked with git or other sync mecchanisms to save and share the repository
 
-## colorscheme configuration file
+### Colorscheme configuration file
 
 ```
 # vim: set commentstring=#\ %s:
