@@ -28,14 +28,18 @@ REMOTE_RELEASE_URL=""
 REMOTE_BIN_NAME=""
 
 # utility function
+function err() {
+    echo -en "\e[1;31mERROR: \e[m" >&2
+    echo "$@" >&2
+    exit 1
+}
 function download_url() {
     if command -v curl &>/dev/null; then
         curl -L --fail --show-error --progress-bar --output "$1" "$2"
     elif command -v wget &>/dev/null; then
         wget --no-verbose --show-progress --output-document="$1" "$2"
     else
-        echo "ERROR: Neither curl nor wget found. Please install one." >&2
-        exit 1
+        err "Neither curl nor wget found. Please install one!"
     fi
 }
 
@@ -53,11 +57,9 @@ if [[ -v UNINSTALL ]]; then
     exit 0
 elif [[ -v BUILD ]]; then
     if ! command -v cargo &>/dev/null; then
-        echo "ERROR: cargo is required to compile locally." >&2
-        exit 1
+        err "cargo is required to compile locally!"
     elif ! command -v git &>/dev/null; then
-        echo "ERROR: git is required to download the autosaver repository." >&2
-        exit 1
+        err "git is required to download the autosaver repository!"
     fi
 
     if [[ -n "$BUILD" ]]; then
@@ -100,11 +102,9 @@ elif [[ -v BUILD ]]; then
     "$LOCAL_BIN_PATH" --version
 elif [[ -v BUILD_RELEASE ]]; then
     if ! command -v cargo &>/dev/null; then
-        echo "ERROR: cargo is required to compile locally." >&2
-        exit 1
+        err "cargo is required to compile locally!"
     elif ! command -v git &>/dev/null; then
-        echo "ERROR: git is required to download the autosaver repository." >&2
-        exit 1
+        err "git is required to download the autosaver repository!"
     fi
 
     if [[ -n "$BUILD_RELEASE" ]]; then
@@ -195,12 +195,10 @@ else
         digest_clean="${digest#sha256:}"
         tar_digest_clean="${tar_digest%% *}"
         if [[ "$digest_clean" != "$tar_digest_clean" ]]; then
-            echo "ERROR: checksum of downloaded binary does not match the expected one." >&2
-            exit 1
+            err "checksum of downloaded binary does not match the expected one!"
         fi
     else
-        echo "ERROR: either jq or sha256sum are not available, but they are required for a safe installation." >&2
-        exit 1
+        err "either jq or sha256sum are not available, but they are required for a safe installation!"
     fi
 
     # decompression operations
