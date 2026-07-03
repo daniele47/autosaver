@@ -201,7 +201,8 @@ else
             exit 1
         fi
     else
-        echo "(2/4) Skipping checksum check as either jq or sha256sum is not available..."
+        echo "ERROR: either jq or sha256sum are not available, but they are required for a safe installation." >&2
+        exit 1
     fi
 
     # decompression operations
