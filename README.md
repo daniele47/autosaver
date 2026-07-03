@@ -67,9 +67,9 @@ diff_inserted green
 
 # color of files in backup action when they differ
 output_diff bright_yellow
-# color of files in save and restore actions when file is to be created 
+# color of files in save and restore actions when file is to be created
 output_create green
-# color of files in save and restore actions when file is to be deleted 
+# color of files in save and restore actions when file is to be deleted
 output_delete red
 # color of files in list action when one file is missing
 output_missing red
@@ -97,11 +97,13 @@ tree_runner green
 
 # foreground colors
 # black red green yellow blue magenta purple cyan white
-# bright_black bright_red bright_green bright_yellow bright_blue bright_magenta bright_purple bright_cyan bright_white
+# bright_black bright_red bright_green bright_yellow bright_blue
+# bright_magenta bright_purple bright_cyan bright_white
 #
 # background colors
 # on_black on_red on_green on_yellow on_blue on_magenta on_purple on_cyan on_white
-# on_bright_black on_bright_red on_bright_green on_bright_yellow on_bright_blue on_bright_magenta on_bright_purple on_bright_cyan on_bright_white
+# on_bright_black on_bright_red on_bright_green on_bright_yellow on_bright_blue
+# on_bright_magenta on_bright_purple on_bright_cyan on_bright_white
 #
 # modifiers
 # bold dimmed italic underline blink blink_fast reversed hidden strikethrough
