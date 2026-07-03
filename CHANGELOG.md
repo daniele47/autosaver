@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v2.11.1
+
+### Patches
+
+- safer and more robust install script and command
+
 ## v2.11.0
 
 ### Features
