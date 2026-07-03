@@ -27,6 +27,20 @@ REMOTE_RELEASE_URL_VERSION="$REMOTE_GIT_REPO/releases/download"
 REMOTE_RELEASE_URL=""
 REMOTE_BIN_NAME=""
 
+# utility function
+function download_url() {
+    output="$1"
+    url="$2"
+    if command -v curl &>/dev/null; then
+        curl -L --fail --show-error --progress-bar --output "$output" "$url"
+    elif command -v wget &>/dev/null; then
+        wget --no-verbose --show-progress --output-document="$output" "$url"
+    else
+        echo "ERROR: Neither curl nor wget found. Please install one." >&2
+        exit 1
+    fi
+}
+
 # update/uninstall
 if [[ -v UNINSTALL ]]; then
     # uninstall operations
@@ -175,14 +189,7 @@ else
     url="$REMOTE_RELEASE_URL"
     tmpdir="$(mktemp -d)"
     output=$tmpdir/archive.tar.gz""
-    if command -v curl &>/dev/null; then
-        curl -L --fail --show-error --progress-bar --output "$output" "$url"
-    elif command -v wget &>/dev/null; then
-        wget --no-verbose --show-progress --output-document="$output" "$url"
-    else
-        echo "ERROR: Neither curl nor wget found. Please install one." >&2
-        exit 1
-    fi
+    download_url "$output" "$url"
 
     # checking checksum if jq is installed
     echo
