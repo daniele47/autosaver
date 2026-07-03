@@ -71,19 +71,16 @@ elif [[ -v BUILD ]]; then
         git -C "$tmpdir" checkout "$BUILD"
 
         # compile rust binary
-        echo
         echo "(3/5) Compiling rust project..."
         cd "$tmpdir" || exit 1
         cargo build
 
         # moving binary into correct place
-        echo
         echo "(4/5) Installing binary into '$LOCAL_BIN_PATH'..."
         mkdir -p "$LOCAL_BIN_PATH_DIR"
         cp "$tmpdir/.target/debug/autosaver" "$LOCAL_BIN_PATH"
 
         # cleanup opeartions
-        echo
         echo "(5/5) Cleanup temporary files..."
         rm -rf "$tmpdir"
     else
@@ -93,7 +90,6 @@ elif [[ -v BUILD ]]; then
         cargo build
 
         # copying binary into correct place
-        echo
         echo "(2/2) Installing binary into '$LOCAL_BIN_PATH'..."
         mkdir -p "$LOCAL_BIN_PATH_DIR"
         cp ".target/debug/autosaver" "$LOCAL_BIN_PATH"
@@ -122,19 +118,16 @@ elif [[ -v BUILD_RELEASE ]]; then
         git -C "$tmpdir" checkout "$BUILD_RELEASE"
 
         # compile rust binary
-        echo
         echo "(3/5) Compiling rust project..."
         cd "$tmpdir" || exit 1
         cargo build --release
 
         # moving binary into correct place
-        echo
         echo "(4/5) Installing binary into '$LOCAL_BIN_PATH'..."
         mkdir -p "$LOCAL_BIN_PATH_DIR"
         cp "$tmpdir/.target/release/autosaver" "$LOCAL_BIN_PATH"
 
         # cleanup opeartions
-        echo
         echo "(5/5) Cleanup temporary files..."
         rm -rf "$tmpdir"
     else
@@ -144,7 +137,6 @@ elif [[ -v BUILD_RELEASE ]]; then
         cargo build --release
 
         # copying binary into correct place
-        echo
         echo "(2/2) Installing binary into '$LOCAL_BIN_PATH'..."
         mkdir -p "$LOCAL_BIN_PATH_DIR"
         cp ".target/release/autosaver" "$LOCAL_BIN_PATH"
@@ -190,7 +182,6 @@ else
     download_url "$output" "$url"
 
     # checking checksum if jq is installed
-    echo
     if command -v jq &>/dev/null && command -v sha256sum &>/dev/null; then
         echo "(2/4) Checking checksum of downloaded binary from '$REMOTE_API_URL'..."
         output_api="$tmpdir/api.json"
@@ -213,13 +204,11 @@ else
     fi
 
     # decompression operations
-    echo
     echo "(3/4) Decompossing downloaded archive..."
     mkdir -p "$LOCAL_BIN_PATH_DIR"
     tar -xzf "$output" -C "$LOCAL_BIN_PATH_DIR"
 
     # cleanup operations
-    echo
     echo "(4/4) Cleanup temporary files..."
     rm -rf "$tmpdir"
 
