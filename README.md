@@ -5,12 +5,9 @@ Copy-based dotfiles tracking cli, written in rust
 ## How to install and use
 
 ```sh
-COMMIT_HASH="cbf1d44191271282c98c9f950580427b42ae6976"
-SCRIPT_URL="https://raw.githubusercontent.com/daniele47/autosaver/$COMMIT_HASH/install.sh"
-EXPECTED_HASH="88ac8406bc98720bcbcbfd6da4d451c68e3991c31a6d220801c3f97ce1bcdba6"
 tmp=$(mktemp) &&
-    curl -fsSL "$SCRIPT_URL" -o "$tmp" &&
-    printf '%s  %s\n' "$EXPECTED_HASH" "$tmp" | sha256sum -c &&
+    curl -fsSL "https://raw.githubusercontent.com/daniele47/autosaver/refs/heads/main/install.sh" -o "$tmp" &&
+    printf '%s  %s\n' "9a429a6848e8111fed237d9e9b906d7769f1f1d54318374c0e7b75e4f4d91538" "$tmp" | sha256sum -c &&
     bash "$tmp" ||
     echo -e '\e[1;31merror:\e[m Installation failed!\e[m'
 ```

@@ -226,5 +226,5 @@ else
     # nice update/install msg
     echo -n "Autosaver installed/updated: "
     NEW_VERSION="$($LOCAL_BIN_PATH --version 2>/dev/null | tr -d '\n')"
-    echo -e "$OLD_VERSION ---> $NEW_VERSION $bin_date"
+    echo -e "\e[1;34m$OLD_VERSION\e[m ---> \e[1;34m$NEW_VERSION\e[m $bin_date"
 fi
