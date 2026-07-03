@@ -29,12 +29,10 @@ REMOTE_BIN_NAME=""
 
 # utility function
 function download_url() {
-    output="$1"
-    url="$2"
     if command -v curl &>/dev/null; then
-        curl -L --fail --show-error --progress-bar --output "$output" "$url"
+        curl -L --fail --show-error --progress-bar --output "$1" "$2"
     elif command -v wget &>/dev/null; then
-        wget --no-verbose --show-progress --output-document="$output" "$url"
+        wget --no-verbose --show-progress --output-document="$1" "$2"
     else
         echo "ERROR: Neither curl nor wget found. Please install one." >&2
         exit 1
@@ -195,7 +193,9 @@ else
     echo
     if command -v jq &>/dev/null && command -v sha256sum &>/dev/null; then
         echo "(2/4) Checking checksum of downloaded binary from '$REMOTE_API_URL'..."
-        infos="$(curl -L --fail --show-error --progress-bar "$REMOTE_API_URL" | jq '.assets[] | select(.name == "'"$REMOTE_BIN_NAME"'") | { digest : .digest, date: .updated_at }')"
+        output_api="$tmpdir/api.json"
+        download_url "$output_api" "$REMOTE_API_URL"
+        infos="$(cat "$output_api" | jq '.assets[] | select(.name == "'"$REMOTE_BIN_NAME"'") | { digest : .digest, date: .updated_at }')"
         digest="$(echo "$infos" | jq .digest -r)"
         bin_date="$(echo "$infos" | jq .date -r)"
         days_ago=$((($(date +%s) - $(date -d "$bin_date" +%s)) / 86400))
