@@ -72,6 +72,7 @@ impl Prompt {
             }
             answers
         };
+        let sep = "@".repeat(80);
 
         // loop through answers
         let mut auto_answer_iter = self.auto_answers.iter();
@@ -100,6 +101,9 @@ impl Prompt {
                 } else {
                     // early quit if auto_skip is enabled
                     if self.auto_skip {
+                        if !self.auto_answers.is_empty() {
+                            outln!("{sep}");
+                        }
                         return Ok(());
                     }
                     // ask for new input
@@ -137,15 +141,24 @@ impl Prompt {
 
             // act based on action
             match answer {
-                Some(PromptAnswer::Yes) => return action(),
-                Some(PromptAnswer::No) => return Ok(()),
+                Some(PromptAnswer::Yes) => {
+                    outln!("{sep}");
+                    return action();
+                }
+                Some(PromptAnswer::No) => {
+                    outln!("{sep}");
+                    return Ok(());
+                }
                 Some(PromptAnswer::Quit) => bail!(EarlyQuit),
                 Some(PromptAnswer::Help) => self.on_help(valid_answers),
                 Some(PromptAnswer::Diff) => self.on_diff(paths, col),
                 Some(PromptAnswer::Edit) => self.on_edit(paths),
                 Some(PromptAnswer::Show) => self.on_show(paths, col),
                 Some(PromptAnswer::Full) => self.on_full(paths),
-                None => return Ok(()),
+                None => {
+                    outln!("{sep}");
+                    return Ok(());
+                }
             };
         }
     }
