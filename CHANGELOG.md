@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented here
 
+## v2.11.2
+
+### Changes
+
+- [WIP] now file uniqueness check doesn't always invalidate, only when operation direction causes issues
+    - [DELETE] example: if running save, and the file is identical in the backup, then it's fine!
+- [UHHHM] try adding a empty line between files when not in -l mode or maybe even a 80 char `----` separator?
+
 ## v2.11.1
 
 ### Patches
