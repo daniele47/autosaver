@@ -1,5 +1,6 @@
 #[macro_export]
 macro_rules! out {
+    () => {{}};
     ($($arg:tt)*) => {{
         use std::io::Write;
         let _ = write!(std::io::stdout(), $($arg)*);
@@ -21,6 +22,10 @@ macro_rules! outnow {
 
 #[macro_export]
 macro_rules! outln {
+    () => {{
+        use std::io::Write;
+        let _ = writeln!(std::io::stdout());
+    }};
     ($($arg:tt)*) => {{
         use std::io::Write;
         let _ = writeln!(std::io::stdout(), $($arg)*);
@@ -29,6 +34,7 @@ macro_rules! outln {
 
 #[macro_export]
 macro_rules! err {
+    () => {{}};
     ($($arg:tt)*) => {{
         use std::io::Write;
         let _ = write!(std::io::stderr(), $($arg)*);
@@ -50,6 +56,10 @@ macro_rules! errnow {
 
 #[macro_export]
 macro_rules! errln {
+    () => {{
+        use std::io::Write;
+        let _ = writeln!(std::io::stderr());
+    }};
     ($($arg:tt)*) => {{
         use std::io::Write;
         let _ = writeln!(std::io::stderr(), $($arg)*);
@@ -64,6 +74,8 @@ macro_rules! inputln {
         input
     }};
 }
+
+// [DIRTY] macros using OwoColorize crate
 
 #[macro_export]
 macro_rules! error {
