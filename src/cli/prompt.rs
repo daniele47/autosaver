@@ -330,12 +330,8 @@ impl Prompt {
                         printed_hunk = true;
                     }
                     match change.tag() {
-                        ChangeTag::Delete => {
-                            out!("{}", format!("- {change}").style(col.diff_deleted))
-                        }
-                        ChangeTag::Insert => {
-                            out!("{}", format!("+ {change}").style(col.diff_inserted))
-                        }
+                        ChangeTag::Delete => out!("{} {change}", "-".style(col.diff_deleted)),
+                        ChangeTag::Insert => out!("{} {change}", "+".style(col.diff_inserted)),
                         ChangeTag::Equal => {}
                     };
                 }
