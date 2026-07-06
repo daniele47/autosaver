@@ -6,10 +6,12 @@ All notable changes to this project will be documented here
 
 ### Changes
 
+- added nice separator between different prompts, making it easier on the eye to parse prompts
+- now diff output is fully colored + has no context, showing only exactly what changed
 - [WIP] now file uniqueness check doesn't always invalidate, only when operation direction causes issues
     - [DELETE] example: if running save, and the file is identical in the backup, then it's fine!
-- [UHHHM] try adding a empty line between files when not in -l mode or maybe even a 80 char `----` separator?
 - [WIP] add `default` color for everything that by default doesn't get colored (this allows FULL color cusotmization)
+    - add `separator` color for prompt separators
 
 ## v2.11.1
 

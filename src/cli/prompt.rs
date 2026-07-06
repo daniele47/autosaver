@@ -72,7 +72,7 @@ impl Prompt {
             }
             answers
         };
-        let sep = "@".repeat(80);
+        let sep = "\n";
 
         // loop through answers
         let mut auto_answer_iter = self.auto_answers.iter();
@@ -102,7 +102,7 @@ impl Prompt {
                     // early quit if auto_skip is enabled
                     if self.auto_skip {
                         if !self.auto_answers.is_empty() {
-                            outln!("{sep}");
+                            out!("{sep}");
                         }
                         return Ok(());
                     }
@@ -142,11 +142,11 @@ impl Prompt {
             // act based on action
             match answer {
                 Some(PromptAnswer::Yes) => {
-                    outln!("{sep}");
+                    out!("{sep}");
                     return action();
                 }
                 Some(PromptAnswer::No) => {
-                    outln!("{sep}");
+                    out!("{sep}");
                     return Ok(());
                 }
                 Some(PromptAnswer::Quit) => bail!(EarlyQuit),
@@ -156,7 +156,7 @@ impl Prompt {
                 Some(PromptAnswer::Show) => self.on_show(paths, col),
                 Some(PromptAnswer::Full) => self.on_full(paths),
                 None => {
-                    outln!("{sep}");
+                    out!("{sep}");
                     return Ok(());
                 }
             };
@@ -304,40 +304,40 @@ impl Prompt {
 
         if let (Ok(old_text), Ok(new_text)) = (&old_text, &new_text) {
             let diff = TextDiff::from_lines(old_text, new_text);
-            let groups = diff.grouped_ops(3);
+            let ops = diff.ops();
 
-            for group in groups {
+            for op in ops {
                 // Calculate line ranges for this hunk
-                if let Some(first_op) = group.first()
-                    && let Some(last_op) = group.last()
-                {
-                    let old_start = first_op.old_range().start + 1;
-                    let old_end = last_op.old_range().end;
-                    let old_len = old_end - old_start + 1;
-                    let new_start = first_op.new_range().start + 1;
-                    let new_end = last_op.new_range().end;
-                    let new_len = new_end - new_start + 1;
+                let old_start = op.old_range().start + 1;
+                let old_end = op.old_range().end;
+                let old_len = 1 + old_end - old_start;
+                let new_start = op.new_range().start + 1;
+                let new_end = op.new_range().end;
+                let new_len = 1 + new_end - new_start;
 
-                    // Print the hunk header
-                    let str = format!(
-                        "@@ -{},{} +{},{} @@",
-                        old_start, old_len, new_start, new_len
-                    );
-                    outln!("{}", str.style(col.diff_header));
-                }
+                // Print the hunk header
+                let str = format!(
+                    "@@ -{},{} +{},{} @@",
+                    old_start, old_len, new_start, new_len
+                );
+                let str = str.style(col.diff_header);
+                let mut printed_hunk = false;
 
-                for op in group {
-                    for change in diff.iter_changes(&op) {
-                        match change.tag() {
-                            ChangeTag::Delete => {
-                                out!("{} {change}", "-".style(col.diff_deleted))
-                            }
-                            ChangeTag::Insert => {
-                                out!("{} {change}", "+".style(col.diff_inserted))
-                            }
-                            ChangeTag::Equal => out!("  {change}"),
-                        };
+                // Print changes for this op
+                for change in diff.iter_changes(op) {
+                    if change.tag() != ChangeTag::Equal && !printed_hunk {
+                        outln!("{str}");
+                        printed_hunk = true;
                     }
+                    match change.tag() {
+                        ChangeTag::Delete => {
+                            out!("{}", format!("- {change}").style(col.diff_deleted))
+                        }
+                        ChangeTag::Insert => {
+                            out!("{}", format!("+ {change}").style(col.diff_inserted))
+                        }
+                        ChangeTag::Equal => {}
+                    };
                 }
             }
             outnow!(); // force a safety flush
