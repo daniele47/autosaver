@@ -6,7 +6,6 @@ macro_rules! out {
         let _ = write!(std::io::stdout(), $($arg)*);
     }};
 }
-
 #[macro_export]
 macro_rules! outnow {
     () => {{
@@ -19,7 +18,6 @@ macro_rules! outnow {
         let _ = std::io::stdout().flush();
     }};
 }
-
 #[macro_export]
 macro_rules! outln {
     () => {{
@@ -40,7 +38,6 @@ macro_rules! err {
         let _ = write!(std::io::stderr(), $($arg)*);
     }};
 }
-
 #[macro_export]
 macro_rules! errnow {
     () => {{
@@ -53,7 +50,6 @@ macro_rules! errnow {
         let _ = std::io::stderr().flush();
     }};
 }
-
 #[macro_export]
 macro_rules! errln {
     () => {{
@@ -76,6 +72,50 @@ macro_rules! inputln {
 }
 
 // [DIRTY] macros using OwoColorize crate
+
+#[macro_export]
+macro_rules! cout {
+    ($style:expr, $($arg:tt)*) => {{
+        use owo_colors::OwoColorize;
+        $crate::out!("{}", format!($($arg)*).style($style));
+    }};
+}
+#[macro_export]
+macro_rules! coutnow {
+    ($style:expr, $($arg:tt)*) => {{
+        use owo_colors::OwoColorize;
+        $crate::outnow!("{}", format!($($arg)*).style($style));
+    }};
+}
+#[macro_export]
+macro_rules! coutln {
+    ($style:expr, $($arg:tt)*) => {{
+        use owo_colors::OwoColorize;
+        $crate::outln!("{}", format!($($arg)*).style($style));
+    }};
+}
+
+#[macro_export]
+macro_rules! cerr {
+    ($style:expr, $($arg:tt)*) => {{
+        use owo_colors::OwoColorize;
+        $crate::err!("{}", format!($($arg)*).style($style));
+    }};
+}
+#[macro_export]
+macro_rules! cerrnow {
+    ($style:expr, $($arg:tt)*) => {{
+        use owo_colors::OwoColorize;
+        $crate::errnow!("{}", format!($($arg)*).style($style));
+    }};
+}
+#[macro_export]
+macro_rules! cerrln {
+    ($style:expr, $($arg:tt)*) => {{
+        use owo_colors::OwoColorize;
+        $crate::errln!("{}", format!($($arg)*).style($style));
+    }};
+}
 
 #[macro_export]
 macro_rules! error {
