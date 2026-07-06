@@ -1,8 +1,6 @@
-use owo_colors::OwoColorize;
-
 use crate::{
     cli::{Cli, CliCmd, config::CliContext},
-    out, outln,
+    cout, coutln,
     prof::{ProfileKind, TraverseDupPolicy},
 };
 
@@ -38,11 +36,11 @@ impl Cli {
                         }
                         for item in are_last.iter().take(len).skip(1) {
                             let line_start = if *item { TREE[1] } else { TREE[0] };
-                            out!("{line_start}");
+                            cout!(ctx.col.default, "{line_start}");
                         }
                         if len > 0 {
                             let line_last = if is_last { TREE[3] } else { TREE[2] };
-                            out!("{line_last}");
+                            cout!(ctx.col.default, "{line_last}");
                         }
                         // render profile name
                         let prof_style = match trav_ctx.item.kind() {
@@ -50,16 +48,16 @@ impl Cli {
                             ProfileKind::Module(_) => ctx.col.tree_module,
                             ProfileKind::Runner(_) => ctx.col.tree_runner,
                         };
-                        out!("{}", trav_ctx.name.display().style(prof_style));
+                        cout!(prof_style, "{}", trav_ctx.name.display());
                         // show profile id
                         if *show_id && let Some(id) = trav_ctx.item.id() {
-                            out!(" ({})", id.display());
+                            cout!(ctx.col.default, " ({})", id.display());
                         }
                         // render dedup symbol
                         if !no_dedup && trav_ctx.is_dup {
-                            out!(" {}", "(*)".style(ctx.col.tree_dedup));
+                            cout!(ctx.col.tree_dedup, "(*)");
                         }
-                        outln!();
+                        coutln!(ctx.col.default, "");
                         Ok(())
                     },
                 )

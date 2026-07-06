@@ -55,6 +55,9 @@ NOTE: this directory SHOULD not be tracked with git or other sync mecchanisms to
 ```
 # vim: set commentstring=#\ %s:
 
+# color used for all not colored text
+default
+
 # color of `-` symbol before deleted lines in diff outputs
 diff_deleted red
 # color of `@@@` headers in diff outputs

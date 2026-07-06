@@ -1,7 +1,8 @@
 use crate::{
     cli::{EarlyQuit, config::col::CliColor},
+    cout, coutln, coutnow,
     fs::abs::AbsPathStr,
-    inputln, out, outln, outnow, warning,
+    inputln, warning,
 };
 
 use anyhow::{Context, bail};
@@ -80,9 +81,14 @@ impl Prompt {
         let mut input_answers_index = 0;
         loop {
             // prompt
-            let msg = msg.style(col.prompt_msg);
             let choises = format!("[{}]", Self::ordered_answers(valid_answers));
             let choises = choises.style(col.prompt_choices);
+            let print_msg = || {
+                cout!(col.prompt_msg, "{msg}");
+                cout!(col.default, " ");
+                cout!(col.prompt_choices, "{choises}");
+                coutnow!(col.default, " ");
+            };
 
             // get next answer
             let answer: Option<PromptAnswer> = {
@@ -90,35 +96,35 @@ impl Prompt {
                 if let Some(next_auto) = auto_answer_iter.next() {
                     // use remaining automatic answers from cmdline flag
                     answer = Some(*next_auto);
-                    outnow!("{msg} {choises} ");
-                    outln!("{}", Self::answer_to_char(*next_auto));
+                    print_msg();
+                    coutln!(col.default, "{}", Self::answer_to_char(*next_auto));
                 } else if let Some(next_input) = input_answers.get(input_answers_index) {
                     // use remaining input answers from stdin
                     input_answers_index += 1;
                     answer = Some(*next_input);
-                    outnow!("{msg} {choises} ");
-                    outln!("{}", Self::answer_to_char(*next_input));
+                    print_msg();
+                    coutln!(col.default, "{}", Self::answer_to_char(*next_input));
                 } else {
                     // early quit if auto_skip is enabled
                     if self.auto_skip {
                         if !self.auto_answers.is_empty() {
-                            out!("{sep}");
+                            cout!(col.default, "{sep}");
                         }
                         return Ok(());
                     }
                     // ask for new input
                     loop {
-                        outnow!("{msg} {choises} ");
+                        print_msg();
                         let input = inputln!();
                         if !input.ends_with("\n") {
-                            outln!();
+                            coutln!(col.default, "");
                         }
                         let parsed_answer = Self::parse_answers(input.trim(), valid_answers);
                         if let Ok(ok_ans) = parsed_answer {
                             input_answers = ok_ans;
                             break;
                         } else if let Err(err_ans) = parsed_answer {
-                            outln!("{err_ans}. Please retry...");
+                            warning!("{err_ans}. Please retry...");
                         }
                     }
                     // input_answers = Self::parse_answers(input.trim(), valid_answers)?;
@@ -142,21 +148,21 @@ impl Prompt {
             // act based on action
             match answer {
                 Some(PromptAnswer::Yes) => {
-                    out!("{sep}");
+                    cout!(col.default, "{sep}");
                     return action();
                 }
                 Some(PromptAnswer::No) => {
-                    out!("{sep}");
+                    cout!(col.default, "{sep}");
                     return Ok(());
                 }
                 Some(PromptAnswer::Quit) => bail!(EarlyQuit),
-                Some(PromptAnswer::Help) => self.on_help(valid_answers),
+                Some(PromptAnswer::Help) => self.on_help(valid_answers, col),
                 Some(PromptAnswer::Diff) => self.on_diff(paths, col),
                 Some(PromptAnswer::Edit) => self.on_edit(paths),
                 Some(PromptAnswer::Show) => self.on_show(paths, col),
-                Some(PromptAnswer::Full) => self.on_full(paths),
+                Some(PromptAnswer::Full) => self.on_full(paths, col),
                 None => {
-                    out!("{sep}");
+                    cout!(col.default, "{sep}");
                     return Ok(());
                 }
             };
@@ -235,35 +241,35 @@ impl Prompt {
 
     // UTILITY ACTION FUNCTIONS
 
-    fn on_full(&self, paths: &[&AbsPathStr]) {
+    fn on_full(&self, paths: &[&AbsPathStr], col: &CliColor) {
         for path in paths {
-            outln!("- {}", path.display());
+            coutln!(col.default, "- {}", path.display());
         }
     }
-    fn on_help(&self, ok_answers: PromptAnswers) {
+    fn on_help(&self, ok_answers: PromptAnswers, col: &CliColor) {
         if PromptAnswer::Diff as PromptAnswers & ok_answers != 0 {
-            outln!("[D]iff : show the diff between the files");
+            coutln!(col.default, "[D]iff : show the diff between the files");
         }
         if PromptAnswer::Edit as PromptAnswers & ok_answers != 0 {
-            outln!("[E]dit : edit the file with the $EDITOR");
+            coutln!(col.default, "[E]dit : edit the file with the $EDITOR");
         }
         if PromptAnswer::Full as PromptAnswers & ok_answers != 0 {
-            outln!("[F]ull : show all the full paths");
+            coutln!(col.default, "[F]ull : show all the full paths");
         }
         if PromptAnswer::Help as PromptAnswers & ok_answers != 0 {
-            outln!("[H]elp : show the current help message");
+            coutln!(col.default, "[H]elp : show the current help message");
         }
         if PromptAnswer::No as PromptAnswers & ok_answers != 0 {
-            outln!("[N]o   : answer no to the prompt");
+            coutln!(col.default, "[N]o   : answer no to the prompt");
         }
         if PromptAnswer::Quit as PromptAnswers & ok_answers != 0 {
-            outln!("[Q]uit : quit the program entirely");
+            coutln!(col.default, "[Q]uit : quit the program entirely");
         }
         if PromptAnswer::Show as PromptAnswers & ok_answers != 0 {
-            outln!("[S]how : show the file in question");
+            coutln!(col.default, "[S]how : show the file in question");
         }
         if PromptAnswer::Yes as PromptAnswers & ok_answers != 0 {
-            outln!("[Y]es  : answer yes to the prompt");
+            coutln!(col.default, "[Y]es  : answer yes to the prompt");
         }
     }
     fn on_edit(&self, paths: &[&AbsPathStr]) {
@@ -290,9 +296,9 @@ impl Prompt {
         assert!(!paths.is_empty());
         for path in paths {
             let header = format!("@@ {} @@", path.display());
-            outln!("{}", header.style(col.show_header));
+            coutln!(col.show_header, "{header}");
             match path.read_file() {
-                Ok(text) => outnow!("{text}"),
+                Ok(text) => cout!(col.default, "{text}"),
                 Err(e) => warning!("{e}"),
             }
         }
@@ -320,23 +326,27 @@ impl Prompt {
                     "@@ -{},{} +{},{} @@",
                     old_start, old_len, new_start, new_len
                 );
-                let str = str.style(col.diff_header);
                 let mut printed_hunk = false;
 
                 // Print changes for this op
                 for change in diff.iter_changes(op) {
                     if change.tag() != ChangeTag::Equal && !printed_hunk {
-                        outln!("{str}");
+                        coutln!(col.diff_header, "{str}");
                         printed_hunk = true;
                     }
                     match change.tag() {
-                        ChangeTag::Delete => out!("{} {change}", "-".style(col.diff_deleted)),
-                        ChangeTag::Insert => out!("{} {change}", "+".style(col.diff_inserted)),
+                        ChangeTag::Delete => {
+                            cout!(col.diff_deleted, "- ");
+                            cout!(col.default, "{change}");
+                        }
+                        ChangeTag::Insert => {
+                            cout!(col.diff_inserted, "+ ");
+                            cout!(col.default, "{change}");
+                        }
                         ChangeTag::Equal => {}
                     };
                 }
             }
-            outnow!(); // force a safety flush
         } else {
             if let Err(e) = old_text {
                 warning!("{}", e)

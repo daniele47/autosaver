@@ -1,13 +1,14 @@
 use anyhow::bail;
-use owo_colors::{OwoColorize, Style};
+use owo_colors::Style;
 
 use crate::{
+    coutln,
     fs::{abs::AbsPathStr, path::PathStr, rel::RelPathStr},
-    outln,
 };
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct CliColor {
+    pub default: Style,
     pub tree_composite: Style,
     pub tree_runner: Style,
     pub tree_module: Style,
@@ -29,6 +30,7 @@ pub struct CliColor {
 impl CliColor {
     pub fn default_theme() -> Self {
         Self {
+            default: Style::new(),
             tree_composite: Style::new(),
             tree_runner: Style::new().green(),
             tree_module: Style::new().bright_blue(),
@@ -51,13 +53,12 @@ impl CliColor {
     pub fn output_profile(&self, profile: &RelPathStr) {
         let style = self.output_profile;
         let profile = profile.display();
-        let profile = profile.style(style);
-        outln!("{} {profile} {0}", "***".style(style));
+        coutln!(style, "*** {profile} ***");
     }
 
     pub fn output_path(&self, path: impl AsRef<PathStr>, style: Style) {
         let path = path.as_ref();
-        outln!("{} {}", "-".style(style), path.display().style(style));
+        coutln!(style, "- {}", path.display());
     }
 
     pub fn parse_theme(colors_file: &AbsPathStr) -> anyhow::Result<Self> {
@@ -133,6 +134,7 @@ impl CliColor {
                     };
                 }
                 match element {
+                    "default" => colors.default = style,
                     "tree_composite" => colors.tree_composite = style,
                     "tree_runner" => colors.tree_runner = style,
                     "tree_module" => colors.tree_module = style,

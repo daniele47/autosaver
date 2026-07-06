@@ -8,8 +8,8 @@ All notable changes to this project will be documented here
 
 - added nice separator between different prompts, making it easier on the eye to parse prompts
 - now diff output has no context, showing only exactly what changed
+- add `default` color for everything that by default doesn't get colored (this allows FULL color cusotmization)
 - [WIP] now file uniqueness check doesn't always invalidate, only when operation direction causes issues
-- [WIP] add `default` color for everything that by default doesn't get colored (this allows FULL color cusotmization)
 
 ## v2.11.1
 

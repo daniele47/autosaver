@@ -1,6 +1,6 @@
 use autosaver::{
     cli::{Cli, EarlyQuit},
-    errnow, error, outnow,
+    error,
 };
 use clap::Parser;
 
@@ -9,10 +9,6 @@ fn main() {
     let cli = Cli::parse();
     // run application
     let run_res = cli.run_cmd();
-
-    // assure output streams are flushed
-    outnow!();
-    errnow!();
 
     // handle error
     let code = match run_res {
