@@ -36,7 +36,6 @@ impl CliContext {
     pub fn new(
         home: &Option<PathBuf>,
         root: &Option<PathBuf>,
-        flag_prof: &Option<RelPathStr>,
         flag_profs: &[RelPathStr],
         prompt: Prompt,
     ) -> anyhow::Result<Self> {
@@ -51,8 +50,8 @@ impl CliContext {
             flag_profs,
         )?;
         let curr_profile;
-        if let Some(prof) = flag_prof {
-            curr_profile = prof.to_owned();
+        if flag_profs.len() == 1 {
+            curr_profile = flag_profs[0].to_owned();
         } else if !flag_profs.is_empty() {
             curr_profile = custom_profile.clone();
         } else if let Ok(prof) = env::var("AUTOSAVER_PROFILE") {

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v2.12.1
+
+### Changes
+
+- compacted `-p` and `-P` into a single `-p` flag
+
 ## v2.12.0
 
 ### Features
