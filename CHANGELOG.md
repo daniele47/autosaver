@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented here
 
+## v2.12.0
+
+### Features
+
+- [WIP] added `--no-color|-C` flag to disable colors entirely (accessibility flag)
+
+### Changes
+
+- reorganized help message, to include a `Global Options` section, for easier parsing
+
 ## v2.11.2
 
 ### Changes

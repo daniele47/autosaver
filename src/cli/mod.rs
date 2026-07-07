@@ -19,47 +19,59 @@ pub struct Cli {
     cmd: CliCmd,
 
     /// Specify which profile to use
-    #[arg(short = 'p', long, env = "AUTOSAVER_PROFILE", global = true, conflicts_with_all = ["profiles"])]
+    #[arg(short = 'p', long, env = "AUTOSAVER_PROFILE", global = true, conflicts_with_all = ["profiles"], help_heading = "Global Options")]
     profile: Option<RelPathStr>,
 
     /// Specify a list of profiles to use
-    #[arg(short = 'P', long, num_args=1.., global = true, conflicts_with_all = ["profile"])]
+    #[arg(short = 'P', long, num_args=1.., global = true, conflicts_with_all = ["profile"], help_heading = "Global Options")]
     profiles: Vec<RelPathStr>,
 
     /// Specify a different home directory to use
-    #[arg(short = 'H', long, env = "AUTOSAVER_HOME", global = true)]
+    #[arg(
+        short = 'H',
+        long,
+        env = "AUTOSAVER_HOME",
+        global = true,
+        help_heading = "Global Options"
+    )]
     home: Option<PathBuf>,
 
     /// Specify a different root directory to use
-    #[arg(short = 'R', long, env = "AUTOSAVER_ROOT", global = true)]
+    #[arg(
+        short = 'R',
+        long,
+        env = "AUTOSAVER_ROOT",
+        global = true,
+        help_heading = "Global Options"
+    )]
     root: Option<PathBuf>,
 
     /// Allow deleting symlink files
-    #[arg(short = 's', long, global = true)]
+    #[arg(short = 's', long, global = true, help_heading = "Global Options")]
     symlink: bool,
 
     /// Allow duplicated paths, and just warn about them
-    #[arg(short = 'D', long, global = true)]
+    #[arg(short = 'D', long, global = true, help_heading = "Global Options")]
     allow_duplicates: bool,
 
     /// Auto answer to all prompts with the specified answers
-    #[arg(short = 'A', long, global = true)]
+    #[arg(short = 'A', long, global = true, help_heading = "Global Options")]
     auto_answers: Option<String>,
 
     /// Get prompted for each profile if to execute it or not
-    #[arg(short = 'c', long, global = true)]
+    #[arg(short = 'c', long, global = true, help_heading = "Global Options")]
     choice: bool,
 
     /// Skip all prompts and checks entirely and list files
-    #[arg(short = 'l', long, global = true, conflicts_with_all = ["assume_no", "assume_yes"])]
+    #[arg(short = 'l', long, global = true, conflicts_with_all = ["assume_no", "assume_yes"], help_heading = "Global Options")]
     list: bool,
 
     /// Auto-answer yes to all prompts
-    #[arg(short = 'y', long, global = true, conflicts_with_all = ["assume_no", "list"])]
+    #[arg(short = 'y', long, global = true, conflicts_with_all = ["assume_no", "list"], help_heading = "Global Options")]
     assume_yes: bool,
 
     /// Auto-answer no to all prompts
-    #[arg(short = 'n', long, global = true, conflicts_with_all = ["list", "assume_yes"])]
+    #[arg(short = 'n', long, global = true, conflicts_with_all = ["list", "assume_yes"], help_heading = "Global Options")]
     assume_no: bool,
 }
 
