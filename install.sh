@@ -74,7 +74,7 @@ elif [[ -v BUILD ]]; then
 
         # compile rust binary
         echo "(3/5) Compiling rust project..."
-        cd "$tmpdir" || exit 1
+        cd "$tmpdir" || err "unable to cd into temporary directory!"
         cargo build
 
         # moving binary into correct place
@@ -88,7 +88,7 @@ elif [[ -v BUILD ]]; then
     else
         # compile rust binary
         echo "(1/2) Compiling rust project..."
-        cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")" || exit 1
+        cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")" || err "unable to cd into script directory!"
         cargo build
 
         # copying binary into correct place
@@ -119,7 +119,7 @@ elif [[ -v BUILD_RELEASE ]]; then
 
         # compile rust binary
         echo "(3/5) Compiling rust project..."
-        cd "$tmpdir" || exit 1
+        cd "$tmpdir" || err "unable to cd into temporary directory!"
         cargo build --release
 
         # moving binary into correct place
@@ -133,7 +133,7 @@ elif [[ -v BUILD_RELEASE ]]; then
     else
         # compile rust binary
         echo "(1/2) Compiling rust project..."
-        cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")" || exit 1
+        cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")" || err "unable to cd into script directory!"
         cargo build --release
 
         # copying binary into correct place
@@ -159,10 +159,10 @@ else
         armv7l) REMOTE_BIN_NAME="autosaver-armv7-unknown-linux-musleabihf.tar.gz" ;;
         aarch64) REMOTE_BIN_NAME="autosaver-aarch64-unknown-linux-musl.tar.gz" ;;
         x86_64) REMOTE_BIN_NAME="autosaver-x86_64-unknown-linux-musl.tar.gz" ;;
-        *) echo "$PLATFORM with $ARCHITECTURE is not supported" && exit 1 ;;
+        *) err "$PLATFORM with $ARCHITECTURE is not supported" ;;
         esac
         ;;
-    *) echo "$PLATFORM is not supported" && exit 1 ;;
+    *) err "$PLATFORM is not supported" ;;
     esac
 
     # download operations
