@@ -42,6 +42,15 @@ function download_url() {
         err "Neither curl nor wget found. Please install one!"
     fi
 }
+function hash_binary() {
+    if ! command -v sha256sum &>/dev/null; then
+        err "sha256sum is not available, but they are required for a safe installation!"
+    fi
+    sha256sum "$LOCAL_BIN_PATH" 2>/dev/null || true
+}
+
+# store old binary hash
+old_binary_hash="$(hash_binary)"
 
 # update/uninstall
 if [[ -v UNINSTALL ]]; then
@@ -214,4 +223,10 @@ else
     echo -n "Autosaver installed/updated: "
     NEW_VERSION="$($LOCAL_BIN_PATH --version 2>/dev/null | tr -d '\n')"
     echo -e "\e[1;34m$OLD_VERSION\e[m ---> \e[1;34m$NEW_VERSION\e[m $bin_date"
+fi
+
+if [[ "$(hash_binary)" == "$old_binary_hash" ]]; then
+    echo -e "\e[1;33mNOTE: binary file didn't change at all!\e[m"
+else
+    echo -e "\e[1;32mNOTE: binary file was changed!\e[m"
 fi
