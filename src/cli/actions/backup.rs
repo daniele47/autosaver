@@ -80,7 +80,7 @@ impl Cli {
                     }
 
                     // check path was not found yet
-                    if !self.list && !matches!(self.cmd, CliCmd::List { .. }) {
+                    if !matches!(self.cmd, CliCmd::List { .. }) {
                         let relpath = if let Some(original_file) = &entry.1[0] {
                             original_file.to_rel(home_dir)
                         } else if let Some(backup_file) = &entry.1[1] {
@@ -141,7 +141,7 @@ impl Cli {
                                 {
                                     warning!(
                                         "Symlink flag is required to delete \
-     symlink in backup directory"
+                                         symlink in backup directory"
                                     );
                                 } else {
                                     ctx.prompt.question(

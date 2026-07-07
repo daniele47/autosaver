@@ -1,7 +1,4 @@
-use std::{
-    collections::HashSet,
-    process::{Command, Stdio},
-};
+use std::process::{Command, Stdio};
 
 use anyhow::{Context, bail};
 use indexmap::{IndexMap, map::Entry};
@@ -46,7 +43,6 @@ impl Cli {
         match self.cmd {
             CliCmd::Run { stdin } => {
                 let run_dir = &ctx.paths[&Paths::Run];
-                let mut all_paths = HashSet::<RelPathStr>::new();
 
                 // traverse all runner profiles
                 ctx.profiles.traverse(&ctx.curr_profile, |trav_ctx| {
@@ -75,19 +71,8 @@ impl Cli {
                                 continue;
                             }
 
-                            // check path was not found yet
-                            let relpath = path.to_rel(run_dir)?;
-                            if !self.list && !all_paths.insert(relpath.clone()) {
-                                let p = relpath.display();
-                                let msg = format!("Script '{p}' was already run previously");
-                                if self.allow_duplicates {
-                                    warning!("{msg}")
-                                } else {
-                                    bail!(msg)
-                                }
-                            }
-
                             // output path
+                            let relpath = path.to_rel(run_dir)?;
                             ctx.col.output_path(&relpath, ctx.col.output_path);
 
                             // prompt user
