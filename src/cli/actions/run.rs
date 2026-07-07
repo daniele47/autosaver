@@ -46,7 +46,7 @@ impl Cli {
         match self.cmd {
             CliCmd::Run { stdin } => {
                 let run_dir = &ctx.paths[&Paths::Run];
-                let mut all_paths = HashSet::<AbsPathStr>::new();
+                let mut all_paths = HashSet::<RelPathStr>::new();
 
                 // traverse all runner profiles
                 ctx.profiles.traverse(&ctx.curr_profile, |trav_ctx| {
@@ -76,9 +76,9 @@ impl Cli {
                             }
 
                             // check path was not found yet
-                            if !self.list && !all_paths.insert(path.canonicalize()?) {
-                                let p = path.to_rel(run_dir)?;
-                                let p = p.display();
+                            let relpath = path.to_rel(run_dir)?;
+                            if !self.list && !all_paths.insert(relpath.clone()) {
+                                let p = relpath.display();
                                 let msg = format!("Script '{p}' was already run previously");
                                 if self.allow_duplicates {
                                     warning!("{msg}")
@@ -88,7 +88,6 @@ impl Cli {
                             }
 
                             // output path
-                            let relpath = path.to_rel(run_dir)?;
                             ctx.col.output_path(&relpath, ctx.col.output_path);
 
                             // prompt user

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v2.12.2
+
+### Changes
+
+- made `-D` flag only check for relative path duplicates
+
 ## v2.12.1
 
 ### Changes

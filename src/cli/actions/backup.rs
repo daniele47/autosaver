@@ -50,7 +50,7 @@ impl Cli {
     pub fn action_backup(&self, ctx: &CliContext) -> anyhow::Result<()> {
         let home_dir = &ctx.paths[&Paths::Home];
         let backup_dir = &ctx.paths[&Paths::Backup];
-        let mut all_paths = HashSet::<AbsPathStr>::new();
+        let mut all_paths = HashSet::<RelPathStr>::new();
 
         // traverse profiles
         ctx.profiles.traverse(&ctx.curr_profile, |trav_ctx| {
@@ -81,15 +81,22 @@ impl Cli {
 
                     // check path was not found yet
                     if !self.list && !matches!(self.cmd, CliCmd::List { .. }) {
-                        for entry in entry.1.iter().flatten() {
-                            if !all_paths.insert(entry.canonicalize()?) {
-                                let p = path.display();
-                                let msg = format!("Path '{p}' was already found previously");
-                                if self.allow_duplicates {
-                                    warning!("{msg}")
-                                } else {
-                                    bail!(msg)
-                                }
+                        let relpath = if let Some(original_file) = &entry.1[0] {
+                            original_file.to_rel(home_dir)
+                        } else if let Some(backup_file) = &entry.1[1] {
+                            backup_file.to_rel(backup_dir)
+                        } else {
+                            bail!("missing path")
+                        };
+                        if let Ok(relpath) = relpath
+                            && !all_paths.insert(relpath.clone())
+                        {
+                            let p = relpath.display();
+                            let msg = format!("Path '{p}' was already found previously");
+                            if self.allow_duplicates {
+                                warning!("{msg}")
+                            } else {
+                                bail!(msg)
                             }
                         }
                     }
