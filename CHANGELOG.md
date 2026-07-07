@@ -11,10 +11,6 @@ All notable changes to this project will be documented here
 - add `default` color for everything that by default doesn't get colored
 - add `whitespaces` color for all whitespace between elements of different types
 
-### Patches
-
-- [WIP] applied colorscheme to input too
-
 ## v2.11.1
 
 ### Patches
