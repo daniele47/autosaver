@@ -6,7 +6,7 @@ All notable changes to this project will be documented here
 
 ### Features
 
-- [WIP] added `--no-color|-C` flag to disable colors entirely (accessibility flag)
+- added `--no-color|-C` flag (`NO_COLOR` env var) to disable colors entirely (accessibility flag)
 
 ### Changes
 

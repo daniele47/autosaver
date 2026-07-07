@@ -60,7 +60,11 @@ impl CliContext {
         } else {
             curr_profile = root_profile.clone();
         }
-        let col = CliColor::parse_theme(&paths[&Paths::LocalConfigColors])?;
+        let col = if env::var("NO_COLOR").is_ok() {
+            CliColor::nocolor_theme()
+        } else {
+            CliColor::parse_theme(&paths[&Paths::LocalConfigColors])?
+        };
         Ok(Self {
             paths,
             root_profile,

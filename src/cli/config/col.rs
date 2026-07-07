@@ -52,6 +52,29 @@ impl CliColor {
         }
     }
 
+    pub fn nocolor_theme() -> Self {
+        Self {
+            default: Style::new(),
+            whitespaces: Style::new(),
+            tree_composite: Style::new(),
+            tree_runner: Style::new(),
+            tree_module: Style::new(),
+            tree_dedup: Style::new(),
+            prompt_msg: Style::new(),
+            prompt_choices: Style::new(),
+            output_profile: Style::new(),
+            output_path: Style::new(),
+            output_create: Style::new(),
+            output_delete: Style::new(),
+            output_missing: Style::new(),
+            output_diff: Style::new(),
+            diff_deleted: Style::new(),
+            diff_inserted: Style::new(),
+            diff_header: Style::new(),
+            show_header: Style::new(),
+        }
+    }
+
     pub fn output_profile(&self, profile: &RelPathStr) {
         let style = self.output_profile;
         let profile = profile.display();

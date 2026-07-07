@@ -54,13 +54,13 @@ pub struct Cli {
     #[arg(short = 'D', long, global = true, help_heading = "Global Options")]
     allow_duplicates: bool,
 
-    /// Auto answer to all prompts with the specified answers
-    #[arg(short = 'A', long, global = true, help_heading = "Global Options")]
-    auto_answers: Option<String>,
-
     /// Get prompted for each profile if to execute it or not
     #[arg(short = 'c', long, global = true, help_heading = "Global Options")]
     choice: bool,
+
+    /// Auto answer to all prompts with the specified answers
+    #[arg(short = 'A', long, global = true, help_heading = "Global Options")]
+    auto_answers: Option<String>,
 
     /// Skip all prompts and checks entirely and list files
     #[arg(short = 'l', long, global = true, conflicts_with_all = ["assume_no", "assume_yes"], help_heading = "Global Options")]
@@ -73,6 +73,10 @@ pub struct Cli {
     /// Auto-answer no to all prompts
     #[arg(short = 'n', long, global = true, conflicts_with_all = ["list", "assume_yes"], help_heading = "Global Options")]
     assume_no: bool,
+
+    /// Disable all colored output
+    #[arg(short = 'C', long, global = true, help_heading = "Global Options")]
+    no_color: bool,
 }
 
 #[derive(Subcommand, Debug, Clone, PartialEq, Eq)]

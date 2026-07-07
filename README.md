@@ -40,7 +40,7 @@ NOTES for future reference:
         - `.autosaver/env` to specify the default values for ALL the environment variables of the program
             - commented lines (`# commented line`): are lines starting with `#`, which are just ignored
             - env var lines (`ENV=value`): are key-value lines, with a `=` in the middle splitting the two
-            - accepted env var: `AUTOSAVER_HOME`, `AUTOSAVER_PROFILE`, `EDITOR`
+            - accepted env var: `AUTOSAVER_HOME`, `AUTOSAVER_PROFILE`, `EDITOR`, `NO_COLOR`
             - note: all whitespace is insignificant, and always trimmed!
         - `.autosaver/colors` to specify different colorscheme for various output elements
             - commented lines (`# commented line`): are lines starting with `#`, which are just ignored
@@ -170,6 +170,7 @@ The scripts are search from the `run/<profile_id>` directory
 ### Environment variables not specified in help text
 
 - `EDITOR`: to pick the editor used with `e` answer in prompts
+- `NO_COLOR`: set to anything to disable coloring
 
 ### Reserved profile names
 
