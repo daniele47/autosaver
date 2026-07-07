@@ -57,6 +57,8 @@ NOTE: this directory SHOULD not be tracked with git or other sync mecchanisms to
 
 # color used for all not colored text
 default
+# color used for all whitespaces found between different elements
+whitespaces
 
 # color of `-` symbol before deleted lines in diff outputs
 diff_deleted red

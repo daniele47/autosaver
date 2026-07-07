@@ -8,7 +8,12 @@ All notable changes to this project will be documented here
 
 - added nice separator between different prompts, making it easier on the eye to parse prompts
 - now diff output has no context, showing only exactly what changed
-- add `default` color for everything that by default doesn't get colored (this allows FULL color cusotmization)
+- add `default` color for everything that by default doesn't get colored
+- add `whitespaces` color for all whitespace between elements of different types
+
+### Patches
+
+- [WIP] applied colorscheme to input too
 
 ## v2.11.1
 

@@ -85,9 +85,9 @@ impl Prompt {
             let choises = choises.style(col.prompt_choices);
             let print_msg = || {
                 cout!(col.prompt_msg, "{msg}");
-                cout!(col.default, " ");
+                cout!(col.whitespaces, " ");
                 cout!(col.prompt_choices, "{choises}");
-                coutnow!(col.default, " ");
+                coutnow!(col.whitespaces, " ");
             };
 
             // get next answer
@@ -108,7 +108,7 @@ impl Prompt {
                     // early quit if auto_skip is enabled
                     if self.auto_skip {
                         if !self.auto_answers.is_empty() {
-                            cout!(col.default, "{sep}");
+                            cout!(col.whitespaces, "{sep}");
                         }
                         return Ok(());
                     }
@@ -117,7 +117,7 @@ impl Prompt {
                         print_msg();
                         let input = inputln!();
                         if !input.ends_with("\n") {
-                            coutln!(col.default, "");
+                            coutln!(col.whitespaces, "");
                         }
                         let parsed_answer = Self::parse_answers(input.trim(), valid_answers);
                         if let Ok(ok_ans) = parsed_answer {
@@ -148,11 +148,11 @@ impl Prompt {
             // act based on action
             match answer {
                 Some(PromptAnswer::Yes) => {
-                    cout!(col.default, "{sep}");
+                    cout!(col.whitespaces, "{sep}");
                     return action();
                 }
                 Some(PromptAnswer::No) => {
-                    cout!(col.default, "{sep}");
+                    cout!(col.whitespaces, "{sep}");
                     return Ok(());
                 }
                 Some(PromptAnswer::Quit) => bail!(EarlyQuit),
@@ -162,7 +162,7 @@ impl Prompt {
                 Some(PromptAnswer::Show) => self.on_show(paths, col),
                 Some(PromptAnswer::Full) => self.on_full(paths, col),
                 None => {
-                    cout!(col.default, "{sep}");
+                    cout!(col.whitespaces, "{sep}");
                     return Ok(());
                 }
             };
@@ -336,11 +336,13 @@ impl Prompt {
                     }
                     match change.tag() {
                         ChangeTag::Delete => {
-                            cout!(col.diff_deleted, "- ");
+                            cout!(col.diff_deleted, "-");
+                            cout!(col.whitespaces, " ");
                             cout!(col.default, "{change}");
                         }
                         ChangeTag::Insert => {
-                            cout!(col.diff_inserted, "+ ");
+                            cout!(col.diff_inserted, "+");
+                            cout!(col.whitespaces, " ");
                             cout!(col.default, "{change}");
                         }
                         ChangeTag::Equal => {}

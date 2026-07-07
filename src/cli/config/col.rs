@@ -9,6 +9,7 @@ use crate::{
 #[derive(Debug, Clone, PartialEq)]
 pub struct CliColor {
     pub default: Style,
+    pub whitespaces: Style,
     pub tree_composite: Style,
     pub tree_runner: Style,
     pub tree_module: Style,
@@ -31,6 +32,7 @@ impl CliColor {
     pub fn default_theme() -> Self {
         Self {
             default: Style::new(),
+            whitespaces: Style::new(),
             tree_composite: Style::new(),
             tree_runner: Style::new().green(),
             tree_module: Style::new().bright_blue(),
@@ -135,6 +137,7 @@ impl CliColor {
                 }
                 match element {
                     "default" => colors.default = style,
+                    "whitespaces" => colors.whitespaces = style,
                     "tree_composite" => colors.tree_composite = style,
                     "tree_runner" => colors.tree_runner = style,
                     "tree_module" => colors.tree_module = style,

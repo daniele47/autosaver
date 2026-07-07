@@ -51,13 +51,15 @@ impl Cli {
                         cout!(prof_style, "{}", trav_ctx.name.display());
                         // show profile id
                         if *show_id && let Some(id) = trav_ctx.item.id() {
-                            cout!(ctx.col.default, " ({})", id.display());
+                            cout!(ctx.col.whitespaces, " ");
+                            cout!(ctx.col.default, "({})", id.display());
                         }
                         // render dedup symbol
                         if !no_dedup && trav_ctx.is_dup {
+                            cout!(ctx.col.whitespaces, " ");
                             cout!(ctx.col.tree_dedup, "(*)");
                         }
-                        coutln!(ctx.col.default, "");
+                        coutln!(ctx.col.whitespaces, "");
                         Ok(())
                     },
                 )
