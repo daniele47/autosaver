@@ -202,7 +202,7 @@ else
     fi
 
     # decompression operations
-    echo "(3/4) Decompossing downloaded archive..."
+    echo "(3/4) Decompossing downloaded archive and installing binary into '$LOCAL_BIN_PATH'..."
     mkdir -p "$LOCAL_BIN_PATH_DIR"
     tar -xzf "$output" -C "$LOCAL_BIN_PATH_DIR"
 
