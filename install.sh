@@ -225,8 +225,10 @@ else
     echo -e "\e[1;34m$OLD_VERSION\e[m ---> \e[1;34m$NEW_VERSION\e[m $bin_date"
 fi
 
+bin_size="$(du -sh "$LOCAL_BIN_PATH" 2>/dev/null | cut -f1 2>/dev/null)"
+bin_size="${bin_size:-0}"
 if [[ "$(hash_binary)" == "$old_binary_hash" ]]; then
-    echo -e "\e[1;33mNOTE: binary file didn't change at all!\e[m"
+    echo -e "\e[1;33mNOTE: binary file (size: $bin_size) didn't change at all!\e[m"
 else
-    echo -e "\e[1;32mNOTE: binary file was changed!\e[m"
+    echo -e "\e[1;32mNOTE: binary file (size: $bin_size) was changed!\e[m"
 fi

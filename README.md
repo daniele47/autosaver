@@ -7,7 +7,7 @@ Copy-based dotfiles tracking cli, written in rust
 ```sh
 tmp=$(mktemp) &&
     curl -fsSL "https://raw.githubusercontent.com/daniele47/autosaver/refs/heads/main/install.sh" -o "$tmp" &&
-    printf '%s  %s\n' "96314beb9e74bd86e86a98d55802c6f1eca4465670070a95301fa431a76ba7f5" "$tmp" | sha256sum -c &&
+    printf '%s  %s\n' "cb2ec2336ce7ec12eb2f1568ce62bacba9876590012b4fa163af1c00de038dab" "$tmp" | sha256sum -c &&
     bash "$tmp" ||
     echo -e '\e[1;31merror:\e[m Installation failed!\e[m'
 ```
