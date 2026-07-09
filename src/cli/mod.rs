@@ -30,10 +30,6 @@ pub struct Cli {
     #[arg(short = 'R', long, env = "AUTOSAVER_ROOT", global = true)]
     root: Option<PathBuf>,
 
-    /// Allow deleting symlink files
-    #[arg(short = 's', long, global = true)]
-    symlink: bool,
-
     /// Get prompted for each profile if to execute it or not
     #[arg(short = 'c', long, global = true)]
     choice: bool,
@@ -75,6 +71,10 @@ pub enum CliCmd {
         #[arg(short, long)]
         force: bool,
 
+        /// Allow deleting symlink files
+        #[arg(short = 's', long, global = true)]
+        symlink: bool,
+
         /// Allow duplicated paths, and just warn about them
         #[arg(short = 'D', long, global = true, help_heading = "Global Options")]
         allow_duplicates: bool,
@@ -88,6 +88,10 @@ pub enum CliCmd {
         #[arg(short, long)]
         force: bool,
 
+        /// Allow deleting symlink files
+        #[arg(short = 's', long, global = true)]
+        symlink: bool,
+
         /// Allow duplicated paths, and just warn about them
         #[arg(short = 'D', long, global = true, help_heading = "Global Options")]
         allow_duplicates: bool,
@@ -97,9 +101,14 @@ pub enum CliCmd {
         /// Show only files only from home directory
         #[arg(short = 'o', long, conflicts_with = "only_backup")]
         only_original: bool,
+
         /// Show only files from the backup directory
         #[arg(short = 'b', long, conflicts_with = "only_original")]
         only_backup: bool,
+
+        /// Allow deleting symlink files
+        #[arg(short = 's', long, global = true)]
+        symlink: bool,
     },
     /// Run init scripts
     Run {
@@ -122,7 +131,11 @@ pub enum CliCmd {
         ignore: Vec<RelPathStr>,
     },
     /// Clear untracked files in backup directories
-    Clear,
+    Clear {
+        /// Allow deleting symlink files
+        #[arg(short = 's', long, global = true)]
+        symlink: bool,
+    },
 }
 
 #[derive(Args, Debug, Clone, PartialEq, Eq)]

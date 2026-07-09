@@ -115,6 +115,7 @@ impl Cli {
                         CliCmd::Delete {
                             only_original,
                             only_backup,
+                            symlink,
                         } => {
                             let mut path_printed = false;
                             if (*only_original || !only_backup)
@@ -122,8 +123,7 @@ impl Cli {
                             {
                                 path_printed = true;
                                 ctx.col.output_path(&path, ctx.col.output_path);
-                                if !self.symlink
-                                    && original_file.path().symlink_metadata()?.is_symlink()
+                                if !symlink && original_file.path().symlink_metadata()?.is_symlink()
                                 {
                                     warning!(
                                         "Symlink flag is required to delete \
@@ -144,9 +144,7 @@ impl Cli {
                                 if !path_printed {
                                     ctx.col.output_path(&path, ctx.col.output_path);
                                 }
-                                if !self.symlink
-                                    && backup_file.path().symlink_metadata()?.is_symlink()
-                                {
+                                if !symlink && backup_file.path().symlink_metadata()?.is_symlink() {
                                     warning!(
                                         "Symlink flag is required to delete \
                                          symlink in backup directory"
@@ -176,15 +174,14 @@ impl Cli {
                                         &ctx.col,
                                     )?;
                                 }
-                                CliCmd::Restore { force, .. } => {
+                                CliCmd::Restore { force, symlink, .. } => {
                                     ctx.col.output_path(&path, ctx.col.output_delete);
                                     if !force {
                                         warning!(
                                             "Force flag is required to delete \
                                                 files in home directory"
                                         );
-                                    } else if !self.symlink
-                                        && p1.path().symlink_metadata()?.is_symlink()
+                                    } else if !symlink && p1.path().symlink_metadata()?.is_symlink()
                                     {
                                         warning!(
                                             "Symlink flag is required to delete \
@@ -206,15 +203,14 @@ impl Cli {
                             },
                             // file is missing in home
                             [None, Some(p1)] => match &self.cmd {
-                                CliCmd::Save { force, .. } => {
+                                CliCmd::Save { force, symlink, .. } => {
                                     ctx.col.output_path(&path, ctx.col.output_missing);
                                     if !force {
                                         warning!(
                                             "Force flag is required to delete \
                                                 files in backup directory"
                                         );
-                                    } else if !self.symlink
-                                        && p1.path().symlink_metadata()?.is_symlink()
+                                    } else if !symlink && p1.path().symlink_metadata()?.is_symlink()
                                     {
                                         warning!(
                                             "Symlink flag is required to delete \

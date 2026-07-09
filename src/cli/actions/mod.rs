@@ -22,7 +22,7 @@ impl Cli {
             | CliCmd::Delete { .. } => self.action_backup(&ctx),
             CliCmd::Run { .. } => self.action_run(&ctx),
             CliCmd::Tree { .. } => self.action_tree(&ctx),
-            CliCmd::Clear => self.action_clear(&ctx),
+            CliCmd::Clear { .. } => self.action_clear(&ctx),
         }
     }
 }
