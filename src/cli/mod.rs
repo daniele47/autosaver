@@ -42,10 +42,6 @@ pub struct Cli {
     #[arg(short = 'a', long, help_heading = "Prompt Options")]
     auto_answers: Option<String>,
 
-    /// Skip all prompts and checks entirely
-    #[arg(short = 'l', long, conflicts_with_all = ["assume_no", "assume_yes"], help_heading = "Prompt Options")]
-    dry_run: bool,
-
     /// Auto-answer yes to all prompts
     #[arg(short = 'y', long, conflicts_with_all = ["assume_no", "dry_run"], help_heading = "Prompt Options")]
     assume_yes: bool,
@@ -53,6 +49,10 @@ pub struct Cli {
     /// Auto-answer no to all prompts
     #[arg(short = 'n', long, conflicts_with_all = ["dry_run", "assume_yes"], help_heading = "Prompt Options")]
     assume_no: bool,
+
+    /// Skip all prompts and checks entirely
+    #[arg(short = 'N', long, conflicts_with_all = ["assume_no", "assume_yes"], help_heading = "Prompt Options")]
+    dry_run: bool,
 }
 
 #[derive(Subcommand, Debug, Clone, PartialEq, Eq)]

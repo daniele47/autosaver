@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v2.12.5
+
+### Changes
+
+- `-l` ---> `-N` (made no sense to have -l for --dry-run)
+
 ## v2.12.4
 
 ### Patches
