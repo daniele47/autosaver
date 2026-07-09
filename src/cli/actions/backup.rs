@@ -123,7 +123,7 @@ impl Cli {
                             {
                                 path_printed = true;
                                 ctx.col.output_path(&path, ctx.col.output_path);
-                                if !act_delsymlinks.symlink
+                                if !act_delsymlinks.allow_symlink
                                     && original_file.path().symlink_metadata()?.is_symlink()
                                 {
                                     warning!(
@@ -145,7 +145,7 @@ impl Cli {
                                 if !path_printed {
                                     ctx.col.output_path(&path, ctx.col.output_path);
                                 }
-                                if !act_delsymlinks.symlink
+                                if !act_delsymlinks.allow_symlink
                                     && backup_file.path().symlink_metadata()?.is_symlink()
                                 {
                                     warning!(
@@ -183,12 +183,12 @@ impl Cli {
                                     ..
                                 } => {
                                     ctx.col.output_path(&path, ctx.col.output_delete);
-                                    if !act_saverestore.force {
+                                    if !act_saverestore.allow_purge {
                                         warning!(
                                             "Force flag is required to delete \
                                                 files in home directory"
                                         );
-                                    } else if !act_delsymlinks.symlink
+                                    } else if !act_delsymlinks.allow_symlink
                                         && p1.path().symlink_metadata()?.is_symlink()
                                     {
                                         warning!(
@@ -217,12 +217,12 @@ impl Cli {
                                     ..
                                 } => {
                                     ctx.col.output_path(&path, ctx.col.output_missing);
-                                    if !act_saverestore.force {
+                                    if !act_saverestore.allow_purge {
                                         warning!(
                                             "Force flag is required to delete \
                                                 files in backup directory"
                                         );
-                                    } else if !act_delsymlinks.symlink
+                                    } else if !act_delsymlinks.allow_symlink
                                         && p1.path().symlink_metadata()?.is_symlink()
                                     {
                                         warning!(
@@ -254,7 +254,9 @@ impl Cli {
                             },
                             // files differ
                             [Some(p1), Some(p2)] if !p1.files_eq(p2) => {
-                                if *entry.0.policy() == ModulePolicy::NotDiff && !act_backup.all {
+                                if *entry.0.policy() == ModulePolicy::NotDiff
+                                    && !act_backup.show_excluded
+                                {
                                     continue;
                                 }
                                 ctx.col.output_path(&path, ctx.col.output_diff);
@@ -272,7 +274,7 @@ impl Cli {
                             }
                             // files are equal
                             [Some(p1), Some(p2)] => {
-                                if act_backup.unmodified {
+                                if act_backup.show_unmodified {
                                     ctx.col.output_path(&path, ctx.col.output_path);
                                     let msg = "Nothing to be done. Type y/n to continue...";
                                     let action = || Ok(());

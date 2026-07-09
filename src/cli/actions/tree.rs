@@ -10,9 +10,9 @@ impl Cli {
     pub fn action_tree(&self, ctx: &CliContext) -> anyhow::Result<()> {
         match &self.cmd {
             CliCmd::Tree {
-                no_dedup,
+                show_dups: no_dedup,
                 show_id,
-                ignore,
+                exclude: ignore,
             } => {
                 let trav_dups = if *no_dedup {
                     TraverseDupPolicy::Include

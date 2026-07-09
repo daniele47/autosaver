@@ -41,7 +41,7 @@ fn resolve<'a>(
 impl Cli {
     pub fn action_run(&self, ctx: &CliContext) -> anyhow::Result<()> {
         match self.cmd {
-            CliCmd::Run { stdin } => {
+            CliCmd::Run { allow_stdin: stdin } => {
                 let run_dir = &ctx.paths[&Paths::Run];
 
                 // traverse all runner profiles

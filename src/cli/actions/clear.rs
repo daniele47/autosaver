@@ -78,7 +78,7 @@ impl Cli {
                             if *ignored {
                                 let relpath = file.to_rel(root_dir)?;
                                 ctx.col.output_path(&relpath, ctx.col.output_path);
-                                if !act_delsymlinks.symlink
+                                if !act_delsymlinks.allow_symlink
                                     && file.path().symlink_metadata()?.is_symlink()
                                 {
                                     warning!("Symlink flag is required to delete symlinks")
@@ -94,7 +94,7 @@ impl Cli {
                         } else {
                             let relpath = file.to_rel(root_dir)?;
                             ctx.col.output_path(&relpath, ctx.col.output_path);
-                            if !act_delsymlinks.symlink
+                            if !act_delsymlinks.allow_symlink
                                 && file.path().symlink_metadata()?.is_symlink()
                             {
                                 warning!("Symlink flag is required to delete symlinks")

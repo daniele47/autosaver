@@ -65,34 +65,34 @@ pub enum CliCmd {
     /// Save changes in home directory to the backup
     Save {
         #[command(flatten)]
-        act_backup: CliActBackup,
-
-        #[command(flatten)]
         act_saverestore: CliActSaveRestore,
 
         #[command(flatten)]
         act_delsymlinks: CliActDelSymlinks,
+
+        #[command(flatten)]
+        act_backup: CliActBackup,
     },
     /// Restore changes in backup directory to the home
     Restore {
         #[command(flatten)]
-        act_backup: CliActBackup,
-
-        #[command(flatten)]
         act_saverestore: CliActSaveRestore,
 
         #[command(flatten)]
         act_delsymlinks: CliActDelSymlinks,
+
+        #[command(flatten)]
+        act_backup: CliActBackup,
     },
     /// Delete tracked dotfiles
     Delete {
-        /// Show only files only from home directory
-        #[arg(short = 'o', long, conflicts_with = "only_backup")]
-        only_original: bool,
-
         /// Show only files from the backup directory
         #[arg(short = 'b', long, conflicts_with = "only_original")]
         only_backup: bool,
+
+        /// Show only files from the original home directory
+        #[arg(short = 'o', long, conflicts_with = "only_backup")]
+        only_original: bool,
 
         #[command(flatten)]
         act_delsymlinks: CliActDelSymlinks,
@@ -101,23 +101,23 @@ pub enum CliCmd {
     Run {
         /// Enable stdin in scripts that hint their need for it
         #[arg(short = 'i', long)]
-        stdin: bool,
+        allow_stdin: bool,
     },
     /// Show dependency tree of profiles
     Tree {
-        /// Do no deduplicate profiles
+        /// Show duplicated profiles
         #[arg(short = 'd', long)]
-        no_dedup: bool,
+        show_dups: bool,
 
-        /// Show the id related to each profile
-        #[arg(short = 's', long)]
+        /// Show the id of each profile
+        #[arg(short = 'i', long)]
         show_id: bool,
 
-        /// Ignore one or more profiles, if repeated
-        #[arg(short = 'i', long, value_name = "PROFILE")]
-        ignore: Vec<RelPathStr>,
+        /// Exclude profiles from the tree visualization
+        #[arg(short = 'e', long, value_name = "PROFILE")]
+        exclude: Vec<RelPathStr>,
     },
-    /// Clear untracked files in backup directories
+    /// Clear untracked files in backup directory
     Clear {
         #[command(flatten)]
         act_delsymlinks: CliActDelSymlinks,
@@ -125,30 +125,30 @@ pub enum CliCmd {
 }
 
 #[derive(Args, Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CliActSaveRestore {
+    /// Allow duplicated paths, and just warn about them
+    #[arg(short = 'd', long, global = true)]
+    allow_duplicates: bool,
+
+    /// Allow deleting files in backup directory
+    #[arg(short = 'p', long)]
+    allow_purge: bool,
+}
+
+#[derive(Args, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CliActDelSymlinks {
     /// Allow deleting symlink files
     #[arg(short = 's', long, global = true)]
-    symlink: bool,
+    allow_symlink: bool,
 }
 
 #[derive(Args, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CliActBackup {
-    /// Include also paths with notdiff policy
-    #[arg(short = 'a', long)]
-    all: bool,
+    /// Show also paths with notdiff policy
+    #[arg(short = 'e', long)]
+    show_excluded: bool,
 
-    /// Include also paths that do not differ
+    /// Show also paths that do not differ
     #[arg(short = 'u', long)]
-    unmodified: bool,
-}
-
-#[derive(Args, Debug, Clone, Copy, PartialEq, Eq)]
-pub struct CliActSaveRestore {
-    /// Allow deleting files in backup directory
-    #[arg(short = 'f', long)]
-    force: bool,
-
-    /// Allow duplicated paths, and just warn about them
-    #[arg(short = 'd', long, global = true)]
-    allow_duplicates: bool,
+    show_unmodified: bool,
 }
