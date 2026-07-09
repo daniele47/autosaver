@@ -11,7 +11,7 @@ impl Cli {
             self.auto_answers.as_deref().unwrap_or(""),
             self.assume_yes,
             self.assume_no,
-            self.list,
+            self.dry_run,
         )?;
         let ctx = CliContext::new(&self.home, &self.root, &self.profile, prompt)?;
 

@@ -30,7 +30,7 @@ pub struct Cli {
     #[arg(short = 'R', long, env = "AUTOSAVER_ROOT")]
     root: Option<PathBuf>,
 
-    /// Get prompted for each profile if to execute it or not
+    /// Get prompted for each profile before executing it
     #[arg(short = 'c', long)]
     choice: bool,
 
@@ -42,16 +42,16 @@ pub struct Cli {
     #[arg(short = 'a', long, help_heading = "Prompt Options")]
     auto_answers: Option<String>,
 
-    /// Skip all prompts and checks entirely and list files
+    /// Skip all prompts and checks entirely
     #[arg(short = 'l', long, conflicts_with_all = ["assume_no", "assume_yes"], help_heading = "Prompt Options")]
-    list: bool,
+    dry_run: bool,
 
     /// Auto-answer yes to all prompts
-    #[arg(short = 'y', long, conflicts_with_all = ["assume_no", "list"], help_heading = "Prompt Options")]
+    #[arg(short = 'y', long, conflicts_with_all = ["assume_no", "dry_run"], help_heading = "Prompt Options")]
     assume_yes: bool,
 
     /// Auto-answer no to all prompts
-    #[arg(short = 'n', long, conflicts_with_all = ["list", "assume_yes"], help_heading = "Prompt Options")]
+    #[arg(short = 'n', long, conflicts_with_all = ["dry_run", "assume_yes"], help_heading = "Prompt Options")]
     assume_no: bool,
 }
 
@@ -86,11 +86,11 @@ pub enum CliCmd {
     },
     /// Delete tracked dotfiles
     Delete {
-        /// Show only files from the backup directory
+        /// Delete only files from the backup directory
         #[arg(short = 'b', long, conflicts_with = "only_original")]
         only_backup: bool,
 
-        /// Show only files from the original home directory
+        /// Delete only files from the original home directory
         #[arg(short = 'o', long, conflicts_with = "only_backup")]
         only_original: bool,
 
@@ -105,11 +105,11 @@ pub enum CliCmd {
     },
     /// Show dependency tree of profiles
     Tree {
-        /// Show duplicated profiles
+        /// Show duplicated profiles that appear multiple times
         #[arg(short = 'd', long)]
         show_dups: bool,
 
-        /// Show the id of each profile
+        /// Show the profile id in the tree visualization
         #[arg(short = 'i', long)]
         show_id: bool,
 
