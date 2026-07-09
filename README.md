@@ -175,4 +175,3 @@ The scripts are search from the `run/<profile_id>` directory
 ### Reserved profile names
 
 - `all`: top profile, used when none are specified, and from which ALL profiles can be found
-- `custom`: virtual profile that contains the profiles specified by `--profile|-p` flag, when multiple profiles are specified

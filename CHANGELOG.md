@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v2.12.6
+
+### Changes
+
+- removed `-p` flag allowing multiple profiles (too weird to use)
+
 ## v2.12.5
 
 ### Changes

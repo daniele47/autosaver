@@ -25,7 +25,6 @@ pub enum Paths {
 pub struct CliContext {
     pub paths: HashMap<Paths, AbsPathStr>,
     pub root_profile: RelPathStr,
-    pub custom_profile: RelPathStr,
     pub profiles: AllProfiles,
     pub curr_profile: RelPathStr,
     pub col: CliColor,
@@ -36,25 +35,17 @@ impl CliContext {
     pub fn new(
         home: &Option<PathBuf>,
         root: &Option<PathBuf>,
-        flag_profs: &[RelPathStr],
+        flag_prof: &Option<RelPathStr>,
         no_color: bool,
         prompt: Prompt,
     ) -> anyhow::Result<Self> {
         let paths = load_env::load_paths_and_envvars(home, root)?;
         let root_profile = RelPathStr::from_str("all")?;
-        let custom_profile = RelPathStr::from_str("custom")?;
-        let profiles = load_prof::load_profiles(
-            &paths[&Paths::Config],
-            &root_profile,
-            &custom_profile,
-            &[&root_profile, &custom_profile],
-            flag_profs,
-        )?;
+        let profiles =
+            load_prof::load_profiles(&paths[&Paths::Config], &root_profile, &[&root_profile])?;
         let curr_profile;
-        if flag_profs.len() == 1 {
-            curr_profile = flag_profs[0].to_owned();
-        } else if !flag_profs.is_empty() {
-            curr_profile = custom_profile.clone();
+        if let Some(flag_profs) = flag_prof {
+            curr_profile = flag_profs.to_owned();
         } else if let Ok(prof) = env::var("AUTOSAVER_PROFILE") {
             curr_profile = RelPathStr::try_from(prof)?;
         } else {
@@ -68,7 +59,6 @@ impl CliContext {
         Ok(Self {
             paths,
             root_profile,
-            custom_profile,
             profiles,
             curr_profile,
             col,
