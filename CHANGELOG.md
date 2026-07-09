@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v2.12.4
+
+### Patches
+
+- `--no-color|-C` didn't previously remove coloring at all (only the env var `NO_COLOR` worked previously)
+
 ## v2.12.3
 
 ### Changes

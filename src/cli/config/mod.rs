@@ -37,6 +37,7 @@ impl CliContext {
         home: &Option<PathBuf>,
         root: &Option<PathBuf>,
         flag_profs: &[RelPathStr],
+        no_color: bool,
         prompt: Prompt,
     ) -> anyhow::Result<Self> {
         let paths = load_env::load_paths_and_envvars(home, root)?;
@@ -59,7 +60,7 @@ impl CliContext {
         } else {
             curr_profile = root_profile.clone();
         }
-        let col = if env::var("NO_COLOR").is_ok() {
+        let col = if no_color || env::var("NO_COLOR").is_ok() {
             CliColor::nocolor_theme()
         } else {
             CliColor::parse_theme(&paths[&Paths::LocalConfigColors])?
