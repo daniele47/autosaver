@@ -37,8 +37,8 @@ fn resolve<'a>(
 
 impl Cli {
     pub fn action_clear(&self, ctx: &CliContext) -> anyhow::Result<()> {
-        match self.cmd {
-            CliCmd::Clear { symlink } => {
+        match &self.cmd {
+            CliCmd::Clear { act_delsymlinks } => {
                 let run_dir = &ctx.paths[&Paths::Run];
                 let backup_dir = &ctx.paths[&Paths::Backup];
                 let root_dir = &ctx.paths[&Paths::Root];
@@ -78,7 +78,9 @@ impl Cli {
                             if *ignored {
                                 let relpath = file.to_rel(root_dir)?;
                                 ctx.col.output_path(&relpath, ctx.col.output_path);
-                                if !symlink && file.path().symlink_metadata()?.is_symlink() {
+                                if !act_delsymlinks.symlink
+                                    && file.path().symlink_metadata()?.is_symlink()
+                                {
                                     warning!("Symlink flag is required to delete symlinks")
                                 } else {
                                     ctx.prompt.question(
@@ -92,7 +94,9 @@ impl Cli {
                         } else {
                             let relpath = file.to_rel(root_dir)?;
                             ctx.col.output_path(&relpath, ctx.col.output_path);
-                            if !symlink && file.path().symlink_metadata()?.is_symlink() {
+                            if !act_delsymlinks.symlink
+                                && file.path().symlink_metadata()?.is_symlink()
+                            {
                                 warning!("Symlink flag is required to delete symlinks")
                             } else {
                                 ctx.prompt.question(
