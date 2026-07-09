@@ -1,7 +1,6 @@
-use autosaver::{
-    cli::{Cli, EarlyQuit},
-    error,
-};
+use std::process::exit;
+
+use autosaver::{cli::Cli, error};
 use clap::Parser;
 
 fn main() {
@@ -11,14 +10,8 @@ fn main() {
     let run_res = cli.run_cmd();
 
     // handle error
-    let code = match run_res {
-        Ok(_) => 0,
-        Err(err) if err.downcast_ref::<EarlyQuit>().is_some() => 0,
-        Err(err) => {
-            error!("{err:?}");
-            1
-        }
-    };
-
-    std::process::exit(code)
+    if let Err(err) = run_res {
+        error!("{err:?}");
+        exit(1);
+    }
 }

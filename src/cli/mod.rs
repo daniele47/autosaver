@@ -1,4 +1,4 @@
-use std::{error::Error, fmt::Display, path::PathBuf};
+use std::path::PathBuf;
 
 use clap::{Args, Parser, Subcommand};
 
@@ -19,60 +19,44 @@ pub struct Cli {
     cmd: CliCmd,
 
     /// Specify which profile to use
-    #[arg(short = 'p', long, env = "AUTOSAVER_PROFILE", num_args=1.., global = true, help_heading = "Global Options")]
+    #[arg(short = 'p', long, env = "AUTOSAVER_PROFILE", num_args=1.., global = true)]
     profile: Vec<RelPathStr>,
 
     /// Specify a different home directory to use
-    #[arg(
-        short = 'H',
-        long,
-        env = "AUTOSAVER_HOME",
-        global = true,
-        help_heading = "Global Options"
-    )]
+    #[arg(short = 'H', long, env = "AUTOSAVER_HOME", global = true)]
     home: Option<PathBuf>,
 
     /// Specify a different root directory to use
-    #[arg(
-        short = 'R',
-        long,
-        env = "AUTOSAVER_ROOT",
-        global = true,
-        help_heading = "Global Options"
-    )]
+    #[arg(short = 'R', long, env = "AUTOSAVER_ROOT", global = true)]
     root: Option<PathBuf>,
 
     /// Allow deleting symlink files
-    #[arg(short = 's', long, global = true, help_heading = "Global Options")]
+    #[arg(short = 's', long, global = true)]
     symlink: bool,
 
-    /// Allow duplicated paths, and just warn about them
-    #[arg(short = 'D', long, global = true, help_heading = "Global Options")]
-    allow_duplicates: bool,
-
     /// Get prompted for each profile if to execute it or not
-    #[arg(short = 'c', long, global = true, help_heading = "Global Options")]
+    #[arg(short = 'c', long, global = true)]
     choice: bool,
 
+    /// Disable all colored output
+    #[arg(short = 'C', long, global = true)]
+    no_color: bool,
+
     /// Auto answer to all prompts with the specified answers
-    #[arg(short = 'A', long, global = true, help_heading = "Global Options")]
+    #[arg(short = 'A', long, global = true, help_heading = "Prompt Options")]
     auto_answers: Option<String>,
 
     /// Skip all prompts and checks entirely and list files
-    #[arg(short = 'l', long, global = true, conflicts_with_all = ["assume_no", "assume_yes"], help_heading = "Global Options")]
+    #[arg(short = 'l', long, global = true, conflicts_with_all = ["assume_no", "assume_yes"], help_heading = "Prompt Options")]
     list: bool,
 
     /// Auto-answer yes to all prompts
-    #[arg(short = 'y', long, global = true, conflicts_with_all = ["assume_no", "list"], help_heading = "Global Options")]
+    #[arg(short = 'y', long, global = true, conflicts_with_all = ["assume_no", "list"], help_heading = "Prompt Options")]
     assume_yes: bool,
 
     /// Auto-answer no to all prompts
-    #[arg(short = 'n', long, global = true, conflicts_with_all = ["list", "assume_yes"], help_heading = "Global Options")]
+    #[arg(short = 'n', long, global = true, conflicts_with_all = ["list", "assume_yes"], help_heading = "Prompt Options")]
     assume_no: bool,
-
-    /// Disable all colored output
-    #[arg(short = 'C', long, global = true, help_heading = "Global Options")]
-    no_color: bool,
 }
 
 #[derive(Subcommand, Debug, Clone, PartialEq, Eq)]
@@ -90,6 +74,10 @@ pub enum CliCmd {
         /// Allow deleting files in backup directory
         #[arg(short, long)]
         force: bool,
+
+        /// Allow duplicated paths, and just warn about them
+        #[arg(short = 'D', long, global = true, help_heading = "Global Options")]
+        allow_duplicates: bool,
     },
     /// Restore changes in backup directory to the home
     Restore {
@@ -99,6 +87,10 @@ pub enum CliCmd {
         /// Allow deleting files in home directory
         #[arg(short, long)]
         force: bool,
+
+        /// Allow duplicated paths, and just warn about them
+        #[arg(short = 'D', long, global = true, help_heading = "Global Options")]
+        allow_duplicates: bool,
     },
     /// Delete tracked dotfiles
     Delete {
@@ -143,14 +135,3 @@ pub struct CliActBackup {
     #[arg(short, long)]
     unmodified: bool,
 }
-
-#[derive(Debug, Clone)]
-pub struct EarlyQuit;
-
-impl Display for EarlyQuit {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Early quit")
-    }
-}
-
-impl Error for EarlyQuit {}

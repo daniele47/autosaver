@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v2.12.3
+
+### Changes
+
+- reorganized cli flags, to heavily reduce global flags, and replace them with command relative flags
+
 ## v2.12.2
 
 ### Changes

@@ -80,25 +80,33 @@ impl Cli {
                     }
 
                     // check path was not found yet
-                    if !matches!(self.cmd, CliCmd::List { .. }) {
-                        let relpath = if let Some(original_file) = &entry.1[0] {
-                            original_file.to_rel(home_dir)
-                        } else if let Some(backup_file) = &entry.1[1] {
-                            backup_file.to_rel(backup_dir)
-                        } else {
-                            bail!("missing path")
-                        };
-                        if let Ok(relpath) = relpath
-                            && !all_paths.insert(relpath.clone())
-                        {
-                            let p = relpath.display();
-                            let msg = format!("Path '{p}' was already found previously");
-                            if self.allow_duplicates {
-                                warning!("{msg}")
+                    match self.cmd {
+                        CliCmd::Restore {
+                            allow_duplicates, ..
+                        }
+                        | CliCmd::Save {
+                            allow_duplicates, ..
+                        } => {
+                            let relpath = if let Some(original_file) = &entry.1[0] {
+                                original_file.to_rel(home_dir)
+                            } else if let Some(backup_file) = &entry.1[1] {
+                                backup_file.to_rel(backup_dir)
                             } else {
-                                bail!(msg)
+                                bail!("missing path")
+                            };
+                            if let Ok(relpath) = relpath
+                                && !all_paths.insert(relpath.clone())
+                            {
+                                let p = relpath.display();
+                                let msg = format!("Path '{p}' was already found previously");
+                                if allow_duplicates {
+                                    warning!("{msg}")
+                                } else {
+                                    bail!(msg)
+                                }
                             }
                         }
+                        _ => {}
                     }
 
                     // run action

@@ -1,8 +1,7 @@
+use std::process::exit;
+
 use crate::{
-    cli::{EarlyQuit, config::col::CliColor},
-    cout, coutln, coutnow,
-    fs::abs::AbsPathStr,
-    inputln, warning,
+    cli::config::col::CliColor, cout, coutln, coutnow, fs::abs::AbsPathStr, inputln, warning,
 };
 
 use anyhow::{Context, bail};
@@ -155,7 +154,7 @@ impl Prompt {
                     cout!(col.whitespaces, "{sep}");
                     return Ok(());
                 }
-                Some(PromptAnswer::Quit) => bail!(EarlyQuit),
+                Some(PromptAnswer::Quit) => exit(0),
                 Some(PromptAnswer::Help) => self.on_help(valid_answers, col),
                 Some(PromptAnswer::Diff) => self.on_diff(paths, col),
                 Some(PromptAnswer::Edit) => self.on_edit(paths),
