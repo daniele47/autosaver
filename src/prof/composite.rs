@@ -1,12 +1,5 @@
 use crate::fs::rel::RelPathStr;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum CompositePolicy {
-    Ignore,
-    NotDiff,
-    Track,
-}
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CompositeEntry {
     child: RelPathStr,

@@ -31,8 +31,8 @@ impl RunnerEntry {
         &self.path
     }
 
-    pub fn policy(&self) -> &RunnerPolicy {
-        &self.policy
+    pub fn policy(&self) -> RunnerPolicy {
+        self.policy
     }
 
     pub fn stdin(&self) -> bool {

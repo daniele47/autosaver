@@ -260,13 +260,13 @@ mod tests {
                 let entries = module.entries();
                 assert_eq!(entries.len(), 4);
                 assert_eq!(*entries[0].path(), "src_main.rs".parse()?);
-                assert_eq!(*entries[0].policy(), ModulePolicy::Include);
+                assert_eq!(entries[0].policy(), ModulePolicy::Include);
                 assert_eq!(*entries[1].path(), "src_lib.rs".parse()?);
-                assert_eq!(*entries[1].policy(), ModulePolicy::Include);
+                assert_eq!(entries[1].policy(), ModulePolicy::Include);
                 assert_eq!(*entries[2].path(), "target".parse()?);
-                assert_eq!(*entries[2].policy(), ModulePolicy::Exclude);
+                assert_eq!(entries[2].policy(), ModulePolicy::Exclude);
                 assert_eq!(*entries[3].path(), "Cargo.lock".parse()?);
-                assert_eq!(*entries[3].policy(), ModulePolicy::NotDiff);
+                assert_eq!(entries[3].policy(), ModulePolicy::NotDiff);
             }
             _ => panic!("Expected Module profile"),
         }
@@ -301,13 +301,13 @@ mod tests {
                 let entries = runner.entries();
                 assert_eq!(entries.len(), 4);
                 assert_eq!(*entries[0].path(), "script1.sh".parse()?);
-                assert_eq!(*entries[0].policy(), RunnerPolicy::Include);
+                assert_eq!(entries[0].policy(), RunnerPolicy::Include);
                 assert_eq!(*entries[1].path(), "scripts".parse()?);
-                assert_eq!(*entries[1].policy(), RunnerPolicy::Include);
+                assert_eq!(entries[1].policy(), RunnerPolicy::Include);
                 assert_eq!(*entries[2].path(), "data".parse()?);
-                assert_eq!(*entries[2].policy(), RunnerPolicy::Exclude);
+                assert_eq!(entries[2].policy(), RunnerPolicy::Exclude);
                 assert_eq!(*entries[3].path(), "script2.sh".parse()?);
-                assert_eq!(*entries[3].policy(), RunnerPolicy::Include);
+                assert_eq!(entries[3].policy(), RunnerPolicy::Include);
             }
             _ => panic!("Expected Runner profile"),
         }

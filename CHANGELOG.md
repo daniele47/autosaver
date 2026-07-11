@@ -2,12 +2,6 @@
 
 All notable changes to this project will be documented here
 
-## v2.13.0
-
-### Features
-
-- [WIP] added `policy` option to composite profiles, to allow ignoring
-
 ## v2.12.7
 
 ### Changes

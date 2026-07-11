@@ -27,8 +27,8 @@ impl ModuleEntry {
         &self.path
     }
 
-    pub fn policy(&self) -> &ModulePolicy {
-        &self.policy
+    pub fn policy(&self) -> ModulePolicy {
+        self.policy
     }
 }
 
