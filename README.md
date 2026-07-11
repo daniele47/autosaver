@@ -127,6 +127,7 @@ treated as a composite profile aggregrating the files and directories directly i
 
 - `option lines`:
     - `kind`: must be `composite`
+    - `id`  : (parsed, but currently not used for anything)
 
 - `data lines`: 
     - each data line is exactly the name of an other profile
