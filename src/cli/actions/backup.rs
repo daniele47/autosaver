@@ -75,7 +75,7 @@ impl Cli {
                 let this_backup_dir = backup_dir.join(trav_ctx.item.id_or(trav_ctx.name))?;
                 for (path, entry) in resolve(module, &[home_dir, &this_backup_dir])? {
                     // filter entries with skip policy
-                    if *entry.0.policy() == ModulePolicy::Ignore {
+                    if *entry.0.policy() == ModulePolicy::Exclude {
                         continue;
                     }
 

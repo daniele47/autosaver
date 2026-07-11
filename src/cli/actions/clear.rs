@@ -52,7 +52,7 @@ impl Cli {
                             let relpaths = module
                                 .entries()
                                 .iter()
-                                .map(|e| (e.path(), e.policy() == &ModulePolicy::Ignore));
+                                .map(|e| (e.path(), e.policy() == &ModulePolicy::Exclude));
                             resolve(relpaths, &this_backup_dir, &mut entries)?;
                         }
                         ProfileKind::Runner(runner) => {

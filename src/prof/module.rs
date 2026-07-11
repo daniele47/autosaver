@@ -2,9 +2,9 @@ use crate::fs::rel::RelPathStr;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ModulePolicy {
-    Ignore,
+    Exclude,
     NotDiff,
-    Track,
+    Include,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

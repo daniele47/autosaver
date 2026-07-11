@@ -67,7 +67,7 @@ impl Cli {
                         let this_run_dir = run_dir.join(trav_ctx.item.id_or(trav_ctx.name))?;
                         for (path, entry) in resolve(runner, &this_run_dir)? {
                             // filter entries with skip policy
-                            if *entry.policy() == RunnerPolicy::Skip {
+                            if *entry.policy() == RunnerPolicy::Exclude {
                                 continue;
                             }
 

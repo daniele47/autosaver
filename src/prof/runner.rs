@@ -2,8 +2,8 @@ use crate::fs::rel::RelPathStr;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RunnerPolicy {
-    Skip,
-    Run,
+    Exclude,
+    Include,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

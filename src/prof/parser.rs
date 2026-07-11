@@ -110,16 +110,16 @@ impl Profile {
 
     fn parse_module(raw: RawProfile) -> anyhow::Result<Self> {
         let mut entries = vec![];
-        let mut policy = ModulePolicy::Track;
+        let mut policy = ModulePolicy::Include;
         let kind = "module";
         for line in raw.lines {
             match line {
                 RawProfileLine::Option(opt, i) => match opt {
                     opt_policy if let Some(opt_val) = opt_policy.strip_prefix("policy") => {
                         match opt_val.trim() {
-                            "ignore" => policy = ModulePolicy::Ignore,
+                            "exclude" => policy = ModulePolicy::Exclude,
                             "notdiff" => policy = ModulePolicy::NotDiff,
-                            "track" => policy = ModulePolicy::Track,
+                            "include" => policy = ModulePolicy::Include,
                             _ => bail!(Self::err_val(raw.name, opt, i, kind)),
                         }
                     }
@@ -139,7 +139,7 @@ impl Profile {
 
     fn parse_runner(raw: RawProfile) -> anyhow::Result<Self> {
         let mut entries = vec![];
-        let mut policy = RunnerPolicy::Run;
+        let mut policy = RunnerPolicy::Include;
         let mut stdin = false;
         let kind = "runner";
         for line in raw.lines {
@@ -147,8 +147,8 @@ impl Profile {
                 RawProfileLine::Option(opt, i) => match opt {
                     opt_policy if let Some(opt_val) = opt_policy.strip_prefix("policy") => {
                         match opt_val.trim() {
-                            "run" => policy = RunnerPolicy::Run,
-                            "skip" => policy = RunnerPolicy::Skip,
+                            "exclude" => policy = RunnerPolicy::Exclude,
+                            "include" => policy = RunnerPolicy::Include,
                             _ => bail!(Self::err_val(raw.name, opt, i, kind)),
                         }
                     }
@@ -238,10 +238,10 @@ mod tests {
         let config = r#"
             /! kind module
             /! id profile_my_module
-            /! policy track
+            /! policy include
             src_main.rs
             src_lib.rs
-            /! policy ignore
+            /! policy exclude
             target
             /! policy notdiff
             Cargo.lock
@@ -260,11 +260,11 @@ mod tests {
                 let entries = module.entries();
                 assert_eq!(entries.len(), 4);
                 assert_eq!(*entries[0].path(), "src_main.rs".parse()?);
-                assert_eq!(*entries[0].policy(), ModulePolicy::Track);
+                assert_eq!(*entries[0].policy(), ModulePolicy::Include);
                 assert_eq!(*entries[1].path(), "src_lib.rs".parse()?);
-                assert_eq!(*entries[1].policy(), ModulePolicy::Track);
+                assert_eq!(*entries[1].policy(), ModulePolicy::Include);
                 assert_eq!(*entries[2].path(), "target".parse()?);
-                assert_eq!(*entries[2].policy(), ModulePolicy::Ignore);
+                assert_eq!(*entries[2].policy(), ModulePolicy::Exclude);
                 assert_eq!(*entries[3].path(), "Cargo.lock".parse()?);
                 assert_eq!(*entries[3].policy(), ModulePolicy::NotDiff);
             }
@@ -279,12 +279,12 @@ mod tests {
         let config = r#"
             /! kind runner
             /! id profiles_my_runner
-            /! policy run
+            /! policy include
             script1.sh
             scripts
-            /! policy skip
+            /! policy exclude
             data
-            /! policy run
+            /! policy include
             script2.sh
         "#;
 
@@ -301,13 +301,13 @@ mod tests {
                 let entries = runner.entries();
                 assert_eq!(entries.len(), 4);
                 assert_eq!(*entries[0].path(), "script1.sh".parse()?);
-                assert_eq!(*entries[0].policy(), RunnerPolicy::Run);
+                assert_eq!(*entries[0].policy(), RunnerPolicy::Include);
                 assert_eq!(*entries[1].path(), "scripts".parse()?);
-                assert_eq!(*entries[1].policy(), RunnerPolicy::Run);
+                assert_eq!(*entries[1].policy(), RunnerPolicy::Include);
                 assert_eq!(*entries[2].path(), "data".parse()?);
-                assert_eq!(*entries[2].policy(), RunnerPolicy::Skip);
+                assert_eq!(*entries[2].policy(), RunnerPolicy::Exclude);
                 assert_eq!(*entries[3].path(), "script2.sh".parse()?);
-                assert_eq!(*entries[3].policy(), RunnerPolicy::Run);
+                assert_eq!(*entries[3].policy(), RunnerPolicy::Include);
             }
             _ => panic!("Expected Runner profile"),
         }

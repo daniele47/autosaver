@@ -143,9 +143,9 @@ The saved files will end up in the `backup/<profile_id>` directory
     - `kind`   : must be `module`
     - `id`     : identifies the backup directory
     - `policy` : specify the policy for all the files after it
-        - `ignore`  : always ignore path
+        - `exclude` : always exclude path from backup
         - `notdiff` : do not show by default if `HOME` and `ROOT` version just differ
-        - `always`  : always show path
+        - `include` : include path from backup
 
 - `data lines`: 
     - each data line is a relative path of the dotfiles to track in the `HOME`
@@ -159,8 +159,8 @@ The scripts are search from the `run/<profile_id>` directory
     - `kind`   : must be `runner`
     - `id`     : identifies the run directory
     - `policy` : specify the policy for all the files after it
-        - `skip` : ignore the script
-        - `run`  : run the script
+        - `exclude` : exclude the script from those being run
+        - `include` : include the script in those being run
     - `stdin` `on|off` : hints about enabling stdin
 
 - `data lines`: 
