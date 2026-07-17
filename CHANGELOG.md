@@ -2,8 +2,6 @@
 
 All notable changes to this project will be documented here
 
-- TODO: better testing where truly required!
-
 ## v2.13.0
 
 ### Features
@@ -12,6 +10,11 @@ All notable changes to this project will be documented here
     -> this allows profile configs to specify directories handled by the program relative to the profile, and easily clean it up
     -> NOTE: cleanup is prompted BEFORE prompting for all else. even prior calculating files presence on disk!
 - [WIP] added `/! cleanup <PATH>` option line for module profiles, tied to --allow-cleanup flag
+    -> update module parse test with this newer option
+
+### Changes
+
+- stricter config parser rejects all lines starting with `/` but not `//`
 
 ## v2.12.7
 

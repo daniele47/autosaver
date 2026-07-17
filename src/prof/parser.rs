@@ -54,8 +54,19 @@ impl<'a> RawProfile<'a> {
                     lines.push(RawProfileLine::Option(opt, i));
                 }
             }
+            // comment lines
+            else if line.starts_with("//") || line.is_empty() {
+            }
+            // invalid reserved lines
+            else if line.starts_with("/") {
+                let str_init: String = line.chars().take(2).collect();
+                bail!(format!(
+                    "Invalid start of line '{str_init}' for {kind} profile '{name}' \
+                    (line {i}): currently reserved for potential future use"
+                ));
+            }
             // data lines
-            else if !line.starts_with("/") && !line.is_empty() {
+            else {
                 lines.push(RawProfileLine::Data(line, i));
             }
         }

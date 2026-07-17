@@ -116,7 +116,7 @@ tree_runner green
 All profiles share some basic properties:
 - all lines starting with `//` are `comments` and completely ignored
 - all lines starting with `/!` are `option lines`, and can be used to change various settings
-- all other lines starting with `/` are reserved for future use, thus currently ignored
+- all other lines starting with `/` are reserved for potential future use
 - all other lines are `data lines`, aka the actual entries of the profile itself
 
 ### Composite Profile
