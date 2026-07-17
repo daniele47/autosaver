@@ -286,6 +286,7 @@ mod tests {
             /! policy include
             script1.sh
             scripts
+            /! stdin on
             /! policy exclude
             data
             /! policy include
@@ -306,12 +307,16 @@ mod tests {
                 assert_eq!(entries.len(), 4);
                 assert_eq!(entries[0].path, "script1.sh".parse()?);
                 assert_eq!(entries[0].policy, RunnerPolicy::Include);
+                assert_eq!(entries[0].stdin, false);
                 assert_eq!(entries[1].path, "scripts".parse()?);
                 assert_eq!(entries[1].policy, RunnerPolicy::Include);
+                assert_eq!(entries[1].stdin, false);
                 assert_eq!(entries[2].path, "data".parse()?);
                 assert_eq!(entries[2].policy, RunnerPolicy::Exclude);
+                assert_eq!(entries[2].stdin, true);
                 assert_eq!(entries[3].path, "script2.sh".parse()?);
                 assert_eq!(entries[3].policy, RunnerPolicy::Include);
+                assert_eq!(entries[3].stdin, true);
             }
             _ => panic!("Expected Runner profile"),
         }
