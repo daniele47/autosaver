@@ -139,7 +139,7 @@ impl Profile {
                     opt_cleanup if let Some(opt_val) = opt_cleanup.strip_prefix("cleanup") => {
                         let opt_val = opt_val.trim();
                         let opt_val_relpath = RelPathStr::from_str(opt_val)
-                            .with_context(|| Self::err_val(raw.name, &[opt, opt_val], i, kind))?;
+                            .with_context(|| Self::err_val(raw.name, &[opt], i, kind))?;
                         cleanup.insert(opt_val_relpath);
                     }
                     _ => bail!(Self::err_opt(raw.name, opt, i, kind)),
@@ -212,11 +212,11 @@ impl Profile {
         let opts = {
             match opt.len() {
                 1 => {
-                    let mut split = opt[0].split_whitespace();
-                    [
-                        split.next().unwrap_or_default(),
-                        split.next().unwrap_or_default(),
-                    ]
+                    if let Some((first, second)) = opt[0].split_once(char::is_whitespace) {
+                        [first, second]
+                    } else {
+                        [opt[0], ""]
+                    }
                 }
                 2 => [opt[0], opt[1]],
                 _ => unreachable!("opt must be long 1 or 2"),

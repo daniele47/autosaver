@@ -16,6 +16,10 @@ All notable changes to this project will be documented here
 - stricter config parser rejects all lines starting with `/` but not `//`
 - removed `--no-color` flag, leaving only this setting available via `NO_COLOR` env var
 
+### Patches
+
+- make parsing more uniform in how things error: for options with single value, NOT SPLIT BY WHITESPACE
+
 ## v2.12.7
 
 ### Changes
