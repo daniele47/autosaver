@@ -13,7 +13,7 @@ impl Cli {
             self.assume_no,
             self.dry_run,
         )?;
-        let ctx = CliContext::new(&self.home, &self.root, &self.profile, self.no_color, prompt)?;
+        let ctx = CliContext::new(&self.home, &self.root, &self.profile, prompt)?;
 
         match self.cmd {
             CliCmd::List { .. }

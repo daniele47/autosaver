@@ -81,7 +81,7 @@ fn load_envvars(env_file: &AbsPathStr) -> anyhow::Result<()> {
     if !env_file.is_file() {
         return Ok(());
     }
-    const ALLOWED_ENVVARS: &[&str] = &["AUTOSAVER_HOME", "AUTOSAVER_PROFILE", "EDITOR", "NO_COLOR"];
+    const ALLOWED_ENVVARS: &[&str] = &["AUTOSAVER_HOME", "AUTOSAVER_PROFILE", "EDITOR"];
 
     for (i, line) in env_file.read_file()?.lines().enumerate() {
         let i = i + 1;

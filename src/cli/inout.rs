@@ -1,3 +1,5 @@
+use std::sync::atomic::{AtomicBool, Ordering};
+
 #[macro_export]
 macro_rules! out {
     () => {{}};
@@ -73,55 +75,71 @@ macro_rules! inputln {
 
 // [DIRTY] macros using OwoColorize crate
 
+pub static COLOR_ENABLED: AtomicBool = AtomicBool::new(false);
+
+pub fn init_colors() {
+    if std::env::var_os("NO_COLOR").is_none() {
+        COLOR_ENABLED.store(true, Ordering::Relaxed);
+    }
+}
+
 #[macro_export]
 macro_rules! cout {
     ($style:expr, $($arg:tt)*) => {{
-        use owo_colors::OwoColorize;
-        $crate::out!("{}", format!($($arg)*).style($style));
+        if $crate::cli::inout::COLOR_ENABLED.load(std::sync::atomic::Ordering::Relaxed){
+            use owo_colors::OwoColorize;
+            $crate::out!("{}", format!($($arg)*).style($style));
+        }else{
+            $crate::out!("{}", format!($($arg)*))
+        }
     }};
 }
 #[macro_export]
 macro_rules! coutnow {
     ($style:expr, $($arg:tt)*) => {{
-        use owo_colors::OwoColorize;
-        $crate::outnow!("{}", format!($($arg)*).style($style));
+        $crate::cout!($style, $($arg)*);
+        $crate::outnow!();
     }};
 }
 #[macro_export]
 macro_rules! coutln {
     ($style:expr, $($arg:tt)*) => {{
-        use owo_colors::OwoColorize;
-        $crate::outln!("{}", format!($($arg)*).style($style));
+        $crate::cout!($style, $($arg)*);
+        $crate::outln!();
     }};
 }
 
 #[macro_export]
 macro_rules! cerr {
     ($style:expr, $($arg:tt)*) => {{
-        use owo_colors::OwoColorize;
-        $crate::err!("{}", format!($($arg)*).style($style));
+        if $crate::cli::inout::COLOR_ENABLED.load(std::sync::atomic::Ordering::Relaxed){
+            use owo_colors::OwoColorize;
+            $crate::err!("{}", format!($($arg)*).style($style));
+        }else{
+            $crate::err!("{}", format!($($arg)*))
+        }
     }};
 }
 #[macro_export]
 macro_rules! cerrnow {
     ($style:expr, $($arg:tt)*) => {{
-        use owo_colors::OwoColorize;
-        $crate::errnow!("{}", format!($($arg)*).style($style));
+        $crate::cerr!($style, $($arg)*);
+        $crate::errnow!();
     }};
 }
 #[macro_export]
 macro_rules! cerrln {
     ($style:expr, $($arg:tt)*) => {{
-        use owo_colors::OwoColorize;
-        $crate::errln!("{}", format!($($arg)*).style($style));
+        $crate::cerr!($style, $($arg)*);
+        $crate::errln!();
     }};
 }
 
 #[macro_export]
 macro_rules! error {
     ($($arg:tt)*) => {{
-        use owo_colors::OwoColorize;
-        $crate::err!("{}", "error: ".red().bold());
+        use owo_colors::Style;
+        $crate::cerr!(Style::new().red().bold(), "error: ");
         $crate::errln!($($arg)*);
     }};
 }
@@ -129,8 +147,8 @@ macro_rules! error {
 #[macro_export]
 macro_rules! warning {
     ($($arg:tt)*) => {{
-        use owo_colors::OwoColorize;
-        $crate::err!("{}", "warning: ".yellow().bold());
+        use owo_colors::Style;
+        $crate::cerr!(Style::new().yellow().bold(), "warning: ");
         $crate::errln!($($arg)*);
     }};
 }

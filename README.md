@@ -40,7 +40,7 @@ NOTES for future reference:
         - `.autosaver/env` to specify the default values for ALL the environment variables of the program
             - commented lines (`# commented line`): are lines starting with `#`, which are just ignored
             - env var lines (`ENV=value`): are key-value lines, with a `=` in the middle splitting the two
-            - accepted env var: `AUTOSAVER_HOME`, `AUTOSAVER_PROFILE`, `EDITOR`, `NO_COLOR`
+            - accepted env var: `AUTOSAVER_HOME`, `AUTOSAVER_PROFILE`, `EDITOR`
             - note: all whitespace is insignificant, and always trimmed!
         - `.autosaver/colors` to specify different colorscheme for various output elements
             - commented lines (`# commented line`): are lines starting with `#`, which are just ignored

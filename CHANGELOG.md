@@ -15,6 +15,7 @@ All notable changes to this project will be documented here
 ### Changes
 
 - stricter config parser rejects all lines starting with `/` but not `//`
+- removed `--no-color` flag, leaving only this setting available via `NO_COLOR` env var
 
 ## v2.12.7
 
