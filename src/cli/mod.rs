@@ -77,6 +77,10 @@ pub enum CliCmd {
         #[command(flatten)]
         act_delsymlinks: CliActDelSymlinks,
 
+        /// Delete also cleanup paths specified in config files
+        #[arg(short = 'c', long)]
+        allow_cleanup: bool,
+
         #[command(flatten)]
         act_backup: CliActBackup,
     },

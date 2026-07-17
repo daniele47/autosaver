@@ -73,6 +73,16 @@ impl Cli {
                     }
                 }
                 let this_backup_dir = backup_dir.join(trav_ctx.item.id_or(trav_ctx.name))?;
+
+                // cleanup paths before running anything else
+                if let CliCmd::Restore {
+                    allow_cleanup: true,
+                    ..
+                } = self.cmd
+                {
+                    unimplemented!("CLEANUP ACTION")
+                }
+
                 for (path, entry) in resolve(module, &[home_dir, &this_backup_dir])? {
                     // filter entries with skip policy
                     if entry.0.policy == ModulePolicy::Exclude {
