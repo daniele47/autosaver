@@ -133,14 +133,13 @@ impl Profile {
                             "exclude" => policy = ModulePolicy::Exclude,
                             "notdiff" => policy = ModulePolicy::NotDiff,
                             "include" => policy = ModulePolicy::Include,
-                            _ => bail!(Self::err_val(raw.name, opt, i, kind)),
+                            _ => bail!(Self::err_val(raw.name, &[opt], i, kind)),
                         }
                     }
                     opt_cleanup if let Some(opt_val) = opt_cleanup.strip_prefix("cleanup") => {
                         let opt_val = opt_val.trim();
-                        let opt_val_relpath = RelPathStr::from_str(opt_val).with_context(|| {
-                            format!("{} TODO: proper error msg if opt_val invalid relpath", 2)
-                        })?;
+                        let opt_val_relpath = RelPathStr::from_str(opt_val)
+                            .with_context(|| Self::err_val(raw.name, &[opt, opt_val], i, kind))?;
                         cleanup.insert(opt_val_relpath);
                     }
                     _ => bail!(Self::err_opt(raw.name, opt, i, kind)),
@@ -170,14 +169,14 @@ impl Profile {
                         match opt_val.trim() {
                             "exclude" => policy = RunnerPolicy::Exclude,
                             "include" => policy = RunnerPolicy::Include,
-                            _ => bail!(Self::err_val(raw.name, opt, i, kind)),
+                            _ => bail!(Self::err_val(raw.name, &[opt], i, kind)),
                         }
                     }
                     opt_set if let Some(opt_val) = opt_set.strip_prefix("stdin") => {
                         match opt_val.trim() {
                             "on" => stdin = true,
                             "off" => stdin = false,
-                            _ => bail!(Self::err_val(raw.name, opt, i, kind)),
+                            _ => bail!(Self::err_val(raw.name, &[opt], i, kind)),
                         }
                     }
                     _ => bail!(Self::err_opt(raw.name, opt, i, kind)),
@@ -209,10 +208,22 @@ impl Profile {
         let opt1 = opt_split.next().unwrap_or("");
         anyhow!("Option '{opt1}' for {kind} profile '{name}' (line {i}) is invalid")
     }
-    fn err_val(name: &str, opt: &str, i: usize, kind: &str) -> anyhow::Error {
-        let mut opt_split = opt.split_whitespace();
-        let opt1 = opt_split.next().unwrap_or("");
-        let opt2 = opt_split.next().unwrap_or("");
+    fn err_val(name: &str, opt: &[&str], i: usize, kind: &str) -> anyhow::Error {
+        let opts = {
+            match opt.len() {
+                1 => {
+                    let mut split = opt[0].split_whitespace();
+                    [
+                        split.next().unwrap_or_default(),
+                        split.next().unwrap_or_default(),
+                    ]
+                }
+                2 => [opt[0], opt[1]],
+                _ => unreachable!("opt must be long 1 or 2"),
+            }
+        };
+        let opt1 = opts[0];
+        let opt2 = opts[1];
         anyhow!("Option'{opt1}' for {kind} profile '{name}' (line {i}) has invalid value '{opt2}'")
     }
     fn err_dup(name: &str, opt: &str, i: usize) -> anyhow::Error {
