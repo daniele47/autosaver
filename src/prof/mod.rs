@@ -42,11 +42,10 @@ pub struct TraverseContext<'a> {
     pub stack: &'a [(&'a RelPathStr, bool)],
     pub is_dup: bool,
 }
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum TraverseDupPolicy {
     Include,
     Shallow,
-    #[default]
     Exclude,
 }
 
@@ -68,7 +67,7 @@ impl AllProfiles {
         root: &RelPathStr,
         on_elem: impl FnMut(TraverseContext) -> anyhow::Result<()>,
     ) -> anyhow::Result<()> {
-        self.traverse_opts(root, TraverseDupPolicy::default(), |_| true, on_elem)
+        self.traverse_opts(root, TraverseDupPolicy::Exclude, |_| true, on_elem)
     }
 
     pub fn traverse_opts(
