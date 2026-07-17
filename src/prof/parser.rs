@@ -105,7 +105,7 @@ impl Profile {
         }
         let id = raw.id.map(RelPathStr::from_str).transpose()?;
         let kind = ProfileKind::Composite(Composite { entries });
-        Ok(Profile::new(id, kind))
+        Ok(Profile { id, kind })
     }
 
     fn parse_module(raw: RawProfile) -> anyhow::Result<Self> {
@@ -134,7 +134,7 @@ impl Profile {
         }
         let id = raw.id.map(RelPathStr::from_str).transpose()?;
         let kind = ProfileKind::Module(Module { entries });
-        Ok(Profile::new(id, kind))
+        Ok(Profile { id, kind })
     }
 
     fn parse_runner(raw: RawProfile) -> anyhow::Result<Self> {
@@ -174,7 +174,7 @@ impl Profile {
         }
         let id = raw.id.map(RelPathStr::from_str).transpose()?;
         let kind = ProfileKind::Runner(Runner { entries });
-        Ok(Profile::new(id, kind))
+        Ok(Profile { id, kind })
     }
 
     // packaged error messages
@@ -220,10 +220,10 @@ mod tests {
 
         // validate
         assert_eq!(
-            profile.id().as_ref().and_then(RelPathStr::to_str),
+            profile.id.as_ref().and_then(RelPathStr::to_str),
             Some("profiles_my_composite")
         );
-        match profile.kind() {
+        match profile.kind {
             ProfileKind::Composite(composite) => {
                 let entries = &composite.entries;
                 assert_eq!(entries.len(), 3);
@@ -256,10 +256,10 @@ mod tests {
 
         // validate
         assert_eq!(
-            profile.id().as_ref().and_then(RelPathStr::to_str),
+            profile.id.as_ref().and_then(RelPathStr::to_str),
             Some("profile_my_module")
         );
-        match profile.kind() {
+        match profile.kind {
             ProfileKind::Module(module) => {
                 let entries = &module.entries;
                 assert_eq!(entries.len(), 4);
@@ -298,10 +298,10 @@ mod tests {
 
         // validate
         assert_eq!(
-            profile.id().as_ref().and_then(RelPathStr::to_str),
+            profile.id.as_ref().and_then(RelPathStr::to_str),
             Some("profiles_my_runner")
         );
-        match profile.kind() {
+        match profile.kind {
             ProfileKind::Runner(runner) => {
                 let entries = &runner.entries;
                 assert_eq!(entries.len(), 4);

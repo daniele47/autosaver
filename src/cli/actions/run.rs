@@ -46,7 +46,7 @@ impl Cli {
 
                 // traverse all runner profiles
                 ctx.profiles.traverse(&ctx.curr_profile, |trav_ctx| {
-                    if let ProfileKind::Runner(runner) = trav_ctx.item.kind() {
+                    if let ProfileKind::Runner(runner) = &trav_ctx.item.kind {
                         ctx.col.output_profile(trav_ctx.name);
                         if self.choice {
                             let mut execute = false;

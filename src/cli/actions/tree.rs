@@ -43,14 +43,14 @@ impl Cli {
                             cout!(ctx.col.default, "{line_last}");
                         }
                         // render profile name
-                        let prof_style = match trav_ctx.item.kind() {
+                        let prof_style = match &trav_ctx.item.kind {
                             ProfileKind::Composite(_) => ctx.col.tree_composite,
                             ProfileKind::Module(_) => ctx.col.tree_module,
                             ProfileKind::Runner(_) => ctx.col.tree_runner,
                         };
                         cout!(prof_style, "{}", trav_ctx.name.display());
                         // show profile id
-                        if *show_id && let Some(id) = trav_ctx.item.id() {
+                        if *show_id && let Some(id) = &trav_ctx.item.id {
                             cout!(ctx.col.whitespaces, " ");
                             cout!(ctx.col.default, "({})", id.display());
                         }
