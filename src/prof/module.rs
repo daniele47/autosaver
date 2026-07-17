@@ -16,4 +16,5 @@ pub struct ModuleEntry {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Module {
     pub entries: Vec<ModuleEntry>,
+    pub cleanup: Vec<RelPathStr>,
 }

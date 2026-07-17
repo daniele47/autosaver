@@ -1,6 +1,7 @@
 use std::str::FromStr;
 
 use anyhow::{Context, anyhow, bail};
+use indexmap::IndexSet;
 
 use crate::{
     fs::rel::RelPathStr,
@@ -121,6 +122,7 @@ impl Profile {
 
     fn parse_module(raw: RawProfile) -> anyhow::Result<Self> {
         let mut entries = vec![];
+        let mut cleanup = IndexSet::new();
         let mut policy = ModulePolicy::Include;
         let kind = "module";
         for line in raw.lines {
@@ -134,6 +136,13 @@ impl Profile {
                             _ => bail!(Self::err_val(raw.name, opt, i, kind)),
                         }
                     }
+                    opt_cleanup if let Some(opt_val) = opt_cleanup.strip_prefix("cleanup") => {
+                        let opt_val = opt_val.trim();
+                        let opt_val_relpath = RelPathStr::from_str(opt_val).with_context(|| {
+                            format!("{} TODO: proper error msg if opt_val invalid relpath", 2)
+                        })?;
+                        cleanup.insert(opt_val_relpath);
+                    }
                     _ => bail!(Self::err_opt(raw.name, opt, i, kind)),
                 },
                 RawProfileLine::Data(data, i) => {
@@ -144,7 +153,8 @@ impl Profile {
             }
         }
         let id = raw.id.map(RelPathStr::from_str).transpose()?;
-        let kind = ProfileKind::Module(Module { entries });
+        let cleanup = cleanup.into_iter().collect();
+        let kind = ProfileKind::Module(Module { entries, cleanup });
         Ok(Profile { id, kind })
     }
 
@@ -266,6 +276,10 @@ mod tests {
                         policy: ModulePolicy::NotDiff,
                     },
                 ],
+                cleanup: vec![
+                    RelPathStr::from_str(".cargo")?,
+                    RelPathStr::from_str(".rustup")?,
+                ],
             }),
         };
         let actual_config = r#"
@@ -278,6 +292,8 @@ mod tests {
             target
             /! policy notdiff
             Cargo.lock
+            /! cleanup .cargo
+            /! cleanup .rustup
         "#;
         let actual = Profile::parse_config(actual_config, "my_module")?;
 

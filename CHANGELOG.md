@@ -7,10 +7,10 @@ All notable changes to this project will be documented here
 ### Features
 
 - [WIP] added `--allow-cleanup|-c` which prompts to delete files/dir specified in profile config file
-    -> this allows profile configs to specify directories handled by the program relative to the profile, and easily clean it up
-    -> NOTE: cleanup is prompted BEFORE prompting for all else. even prior calculating files presence on disk!
-- [WIP] added `/! cleanup <PATH>` option line for module profiles, tied to --allow-cleanup flag
-    -> update module parse test with this newer option
+    -> [WIP] this allows profile configs to specify directories handled by the program relative to the profile, and easily clean it up
+    -> [WIP] NOTE: cleanup is prompted BEFORE prompting for all else. even prior calculating files presence on disk!
+- added `/! cleanup <PATH>` option line for module profiles, tied to --allow-cleanup flag
+    -> [WIP] update module parse test with this newer option
 
 ### Changes
 

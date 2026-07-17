@@ -164,7 +164,10 @@ mod tests {
 
         let module1 = Profile {
             id: None,
-            kind: ProfileKind::Module(Module { entries: vec![] }),
+            kind: ProfileKind::Module(Module {
+                entries: vec![],
+                cleanup: vec![],
+            }),
         };
         let runner1 = Profile {
             id: None,
