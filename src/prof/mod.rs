@@ -223,15 +223,43 @@ mod tests {
         Ok(AllProfiles { profiles })
     }
 
+    // DEPENDENCY GRAPH:
+    //
+    //      composite1 <------+
+    //     /          \       |
+    // composite2  composite3 |
+    //     \          /       |
+    //      composite4 -------+
+    //     /          \
+    //  runner1     module1
+    fn setup_test_profiles_cycle() -> anyhow::Result<AllProfiles> {
+        let mut all_profiles = setup_test_profiles()?;
+
+        let composite4 = all_profiles
+            .profiles
+            .get_mut(&RelPathStr::from_str("composite4")?)
+            .unwrap();
+
+        if let ProfileKind::Composite(c) = &mut composite4.kind {
+            c.entries.push(CompositeEntry {
+                child: RelPathStr::from_str("composite1")?,
+            });
+        } else {
+            unreachable!()
+        }
+
+        Ok(all_profiles)
+    }
+
     fn traverse(
         dup_policy: TraverseDupPolicy,
         ignore: impl Fn(&CompositeEntry) -> bool,
     ) -> anyhow::Result<Vec<String>> {
-        let profiles = setup_test_profiles()?;
         let pname = RelPathStr::from_str("composite1")?;
         let mut visited_order = Vec::new();
+        let all_profiles = setup_test_profiles()?;
 
-        profiles.traverse_opts(&pname, dup_policy, ignore, |ctx| {
+        all_profiles.traverse_opts(&pname, dup_policy, ignore, |ctx| {
             visited_order.push(ctx.name.to_string_lossy().to_string());
             Ok(())
         })?;
@@ -302,6 +330,21 @@ mod tests {
         })?;
 
         assert_eq!(actual, expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn traverse_cycle_err() -> anyhow::Result<()> {
+        let profiles_with_cycle = setup_test_profiles_cycle()?;
+        let err = profiles_with_cycle
+            .traverse(&"composite1".parse()?, |_| Ok(()))
+            .unwrap_err();
+
+        assert_eq!(
+            err.to_string(),
+            "Profile 'composite1' has a dependency cycle: 'composite1' --> 'composite2' --> 'composite4' --> 'composite1'"
+        );
 
         Ok(())
     }
