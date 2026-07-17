@@ -9,35 +9,11 @@ pub enum ModulePolicy {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ModuleEntry {
-    path: RelPathStr,
-    policy: ModulePolicy,
+    pub path: RelPathStr,
+    pub policy: ModulePolicy,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Module {
-    entries: Vec<ModuleEntry>,
-}
-
-impl ModuleEntry {
-    pub fn new(path: RelPathStr, policy: ModulePolicy) -> Self {
-        Self { path, policy }
-    }
-
-    pub fn path(&self) -> &RelPathStr {
-        &self.path
-    }
-
-    pub fn policy(&self) -> ModulePolicy {
-        self.policy
-    }
-}
-
-impl Module {
-    pub fn new(entries: Vec<ModuleEntry>) -> Self {
-        Self { entries }
-    }
-
-    pub fn entries(&self) -> &[ModuleEntry] {
-        &self.entries
-    }
+    pub entries: Vec<ModuleEntry>,
 }

@@ -20,9 +20,9 @@ type Entries<'a> = IndexMap<RelPathStr, (&'a ModuleEntry, [Option<AbsPathStr>; 2
 
 fn resolve<'a>(runner: &'a Module, dirs: &[&AbsPathStr; 2]) -> anyhow::Result<Entries<'a>> {
     let mut entries = <Entries>::new();
-    for entry in runner.entries() {
+    for entry in &runner.entries {
         for (i, dir) in dirs.iter().enumerate() {
-            for p in entry.path().to_abs(dir)?.all_files_ord()? {
+            for p in entry.path.to_abs(dir)?.all_files_ord()? {
                 let rp = p.to_rel(dir)?;
                 match entries.entry(rp) {
                     Entry::Vacant(e) => {
@@ -34,7 +34,7 @@ fn resolve<'a>(runner: &'a Module, dirs: &[&AbsPathStr; 2]) -> anyhow::Result<En
                         if e.get().1[i].is_none() {
                             e.get_mut().1[i] = Some(p);
                         }
-                        if (entry.policy() as u64) < ((e.get()).0.policy() as u64) {
+                        if (entry.policy as u64) < ((e.get()).0.policy as u64) {
                             e.get_mut().0 = entry;
                         }
                     }
@@ -75,7 +75,7 @@ impl Cli {
                 let this_backup_dir = backup_dir.join(trav_ctx.item.id_or(trav_ctx.name))?;
                 for (path, entry) in resolve(module, &[home_dir, &this_backup_dir])? {
                     // filter entries with skip policy
-                    if entry.0.policy() == ModulePolicy::Exclude {
+                    if entry.0.policy == ModulePolicy::Exclude {
                         continue;
                     }
 
@@ -254,7 +254,7 @@ impl Cli {
                             },
                             // files differ
                             [Some(p1), Some(p2)] if !p1.files_eq(p2) => {
-                                if entry.0.policy() == ModulePolicy::NotDiff
+                                if entry.0.policy == ModulePolicy::NotDiff
                                     && !act_backup.show_excluded
                                 {
                                     continue;

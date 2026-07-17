@@ -50,14 +50,14 @@ impl Cli {
                         ProfileKind::Module(module) => {
                             let this_backup_dir = backup_dir.join(ctx.item.id_or(ctx.name))?;
                             let relpaths = module
-                                .entries()
+                                .entries
                                 .iter()
-                                .map(|e| (e.path(), e.policy() == ModulePolicy::Exclude));
+                                .map(|e| (&e.path, e.policy == ModulePolicy::Exclude));
                             resolve(relpaths, &this_backup_dir, &mut entries)?;
                         }
                         ProfileKind::Runner(runner) => {
                             let this_runner_dir = run_dir.join(ctx.item.id_or(ctx.name))?;
-                            let relpaths = runner.entries().iter().map(|e| (e.path(), false));
+                            let relpaths = runner.entries.iter().map(|e| (&e.path, false));
 
                             resolve(relpaths, &this_runner_dir, &mut entries)?;
                         }

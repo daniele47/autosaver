@@ -95,11 +95,13 @@ pub fn load_profiles(
         all_entries
             .entry(vt_names[i].clone())
             .or_default()
-            .push(CompositeEntry::new(vt_names[j].clone()));
+            .push(CompositeEntry {
+                child: vt_names[j].clone(),
+            });
     }
     for (name, mut entries) in all_entries {
-        entries.sort_unstable_by(|a, b| a.child().cmp(b.child()));
-        let profile = Profile::new(None, ProfileKind::Composite(Composite::new(entries)));
+        entries.sort_unstable_by(|a, b| a.child.cmp(&b.child));
+        let profile = Profile::new(None, ProfileKind::Composite(Composite { entries }));
         match all_profiles.entry(name) {
             Entry::Vacant(v) => {
                 v.insert(profile);
@@ -111,9 +113,9 @@ pub fn load_profiles(
         }
     }
     for pname in vt_names {
-        all_profiles
-            .entry(pname)
-            .or_insert_with(|| Profile::new(None, ProfileKind::Composite(Composite::new(vec![]))));
+        all_profiles.entry(pname).or_insert_with(|| {
+            Profile::new(None, ProfileKind::Composite(Composite { entries: vec![] }))
+        });
     }
 
     // handle root profile
@@ -123,7 +125,7 @@ pub fn load_profiles(
 
     // handle empty config dir
     if !all_profiles.contains_key(root_profile) {
-        let profile = Profile::new(None, ProfileKind::Composite(Composite::new(vec![])));
+        let profile = Profile::new(None, ProfileKind::Composite(Composite { entries: vec![] }));
         all_profiles.insert(root_profile.to_owned(), profile);
     }
 

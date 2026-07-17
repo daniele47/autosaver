@@ -21,11 +21,11 @@ fn resolve<'a>(
     dir: &AbsPathStr,
 ) -> anyhow::Result<IndexMap<AbsPathStr, &'a RunnerEntry>> {
     let mut entries = IndexMap::<AbsPathStr, &'a RunnerEntry>::new();
-    for entry in runner.entries() {
-        for p in entry.path().to_abs(dir)?.all_files_ord()? {
+    for entry in &runner.entries {
+        for p in entry.path.to_abs(dir)?.all_files_ord()? {
             match entries.entry(p) {
                 Entry::Occupied(mut e) => {
-                    if (entry.policy() as u64) < ((e.get()).policy() as u64) {
+                    if (entry.policy as u64) < ((e.get()).policy as u64) {
                         e.insert(entry);
                     }
                 }
@@ -67,7 +67,7 @@ impl Cli {
                         let this_run_dir = run_dir.join(trav_ctx.item.id_or(trav_ctx.name))?;
                         for (path, entry) in resolve(runner, &this_run_dir)? {
                             // filter entries with skip policy
-                            if entry.policy() == RunnerPolicy::Exclude {
+                            if entry.policy == RunnerPolicy::Exclude {
                                 continue;
                             }
 
@@ -76,7 +76,7 @@ impl Cli {
                             ctx.col.output_path(&relpath, ctx.col.output_path);
 
                             // prompt user
-                            let msg = if entry.stdin() {
+                            let msg = if entry.stdin {
                                 if stdin {
                                     "Do you really want to run the script with stdin enabled?"
                                 } else {

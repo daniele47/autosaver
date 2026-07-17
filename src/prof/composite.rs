@@ -2,30 +2,10 @@ use crate::fs::rel::RelPathStr;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CompositeEntry {
-    child: RelPathStr,
+    pub child: RelPathStr,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Composite {
-    entries: Vec<CompositeEntry>,
-}
-
-impl CompositeEntry {
-    pub fn new(child: RelPathStr) -> Self {
-        Self { child }
-    }
-
-    pub fn child(&self) -> &RelPathStr {
-        &self.child
-    }
-}
-
-impl Composite {
-    pub fn new(entries: Vec<CompositeEntry>) -> Self {
-        Self { entries }
-    }
-
-    pub fn entries(&self) -> &[CompositeEntry] {
-        &self.entries
-    }
+    pub entries: Vec<CompositeEntry>,
 }

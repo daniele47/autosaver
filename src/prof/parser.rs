@@ -97,14 +97,14 @@ impl Profile {
                     bail!(Self::err_opt(raw.name, opt, i, kind));
                 }
                 RawProfileLine::Data(data, i) => {
-                    let data = Self::data_ctx(raw.name, data, i, kind)?;
-                    let entry = CompositeEntry::new(data);
+                    let child = Self::data_ctx(raw.name, data, i, kind)?;
+                    let entry = CompositeEntry { child };
                     entries.push(entry);
                 }
             }
         }
         let id = raw.id.map(RelPathStr::from_str).transpose()?;
-        let kind = ProfileKind::Composite(Composite::new(entries));
+        let kind = ProfileKind::Composite(Composite { entries });
         Ok(Profile::new(id, kind))
     }
 
@@ -126,14 +126,14 @@ impl Profile {
                     _ => bail!(Self::err_opt(raw.name, opt, i, kind)),
                 },
                 RawProfileLine::Data(data, i) => {
-                    let data = Self::data_ctx(raw.name, data, i, kind)?;
-                    let entry = ModuleEntry::new(data, policy);
+                    let path = Self::data_ctx(raw.name, data, i, kind)?;
+                    let entry = ModuleEntry { path, policy };
                     entries.push(entry);
                 }
             }
         }
         let id = raw.id.map(RelPathStr::from_str).transpose()?;
-        let kind = ProfileKind::Module(Module::new(entries));
+        let kind = ProfileKind::Module(Module { entries });
         Ok(Profile::new(id, kind))
     }
 
@@ -162,14 +162,18 @@ impl Profile {
                     _ => bail!(Self::err_opt(raw.name, opt, i, kind)),
                 },
                 RawProfileLine::Data(data, i) => {
-                    let data = Self::data_ctx(raw.name, data, i, kind)?;
-                    let entry = RunnerEntry::new(data, policy, stdin);
+                    let path = Self::data_ctx(raw.name, data, i, kind)?;
+                    let entry = RunnerEntry {
+                        path,
+                        policy,
+                        stdin,
+                    };
                     entries.push(entry);
                 }
             }
         }
         let id = raw.id.map(RelPathStr::from_str).transpose()?;
-        let kind = ProfileKind::Runner(Runner::new(entries));
+        let kind = ProfileKind::Runner(Runner { entries });
         Ok(Profile::new(id, kind))
     }
 
@@ -221,11 +225,11 @@ mod tests {
         );
         match profile.kind() {
             ProfileKind::Composite(composite) => {
-                let entries = composite.entries();
+                let entries = &composite.entries;
                 assert_eq!(entries.len(), 3);
-                assert_eq!(*entries[0].child(), "path_to_file1.txt".parse()?);
-                assert_eq!(*entries[1].child(), "path_to_file2.txt".parse()?);
-                assert_eq!(*entries[2].child(), "path_to_file3.txt".parse()?);
+                assert_eq!(entries[0].child, "path_to_file1.txt".parse()?);
+                assert_eq!(entries[1].child, "path_to_file2.txt".parse()?);
+                assert_eq!(entries[2].child, "path_to_file3.txt".parse()?);
             }
             _ => panic!("Expected Composite profile"),
         }
@@ -257,16 +261,16 @@ mod tests {
         );
         match profile.kind() {
             ProfileKind::Module(module) => {
-                let entries = module.entries();
+                let entries = &module.entries;
                 assert_eq!(entries.len(), 4);
-                assert_eq!(*entries[0].path(), "src_main.rs".parse()?);
-                assert_eq!(entries[0].policy(), ModulePolicy::Include);
-                assert_eq!(*entries[1].path(), "src_lib.rs".parse()?);
-                assert_eq!(entries[1].policy(), ModulePolicy::Include);
-                assert_eq!(*entries[2].path(), "target".parse()?);
-                assert_eq!(entries[2].policy(), ModulePolicy::Exclude);
-                assert_eq!(*entries[3].path(), "Cargo.lock".parse()?);
-                assert_eq!(entries[3].policy(), ModulePolicy::NotDiff);
+                assert_eq!(entries[0].path, "src_main.rs".parse()?);
+                assert_eq!(entries[0].policy, ModulePolicy::Include);
+                assert_eq!(entries[1].path, "src_lib.rs".parse()?);
+                assert_eq!(entries[1].policy, ModulePolicy::Include);
+                assert_eq!(entries[2].path, "target".parse()?);
+                assert_eq!(entries[2].policy, ModulePolicy::Exclude);
+                assert_eq!(entries[3].path, "Cargo.lock".parse()?);
+                assert_eq!(entries[3].policy, ModulePolicy::NotDiff);
             }
             _ => panic!("Expected Module profile"),
         }
@@ -298,16 +302,16 @@ mod tests {
         );
         match profile.kind() {
             ProfileKind::Runner(runner) => {
-                let entries = runner.entries();
+                let entries = &runner.entries;
                 assert_eq!(entries.len(), 4);
-                assert_eq!(*entries[0].path(), "script1.sh".parse()?);
-                assert_eq!(entries[0].policy(), RunnerPolicy::Include);
-                assert_eq!(*entries[1].path(), "scripts".parse()?);
-                assert_eq!(entries[1].policy(), RunnerPolicy::Include);
-                assert_eq!(*entries[2].path(), "data".parse()?);
-                assert_eq!(entries[2].policy(), RunnerPolicy::Exclude);
-                assert_eq!(*entries[3].path(), "script2.sh".parse()?);
-                assert_eq!(entries[3].policy(), RunnerPolicy::Include);
+                assert_eq!(entries[0].path, "script1.sh".parse()?);
+                assert_eq!(entries[0].policy, RunnerPolicy::Include);
+                assert_eq!(entries[1].path, "scripts".parse()?);
+                assert_eq!(entries[1].policy, RunnerPolicy::Include);
+                assert_eq!(entries[2].path, "data".parse()?);
+                assert_eq!(entries[2].policy, RunnerPolicy::Exclude);
+                assert_eq!(entries[3].path, "script2.sh".parse()?);
+                assert_eq!(entries[3].policy, RunnerPolicy::Include);
             }
             _ => panic!("Expected Runner profile"),
         }

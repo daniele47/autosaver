@@ -150,8 +150,8 @@ impl AllProfiles {
             if let ProfileKind::Composite(composite) = item_profile.kind() {
                 path.push(item_name);
                 stack.push((item_name, true));
-                for child in composite.entries().iter().filter(|i| ignore_elem(i)).rev() {
-                    stack.push((child.child(), false));
+                for child in composite.entries.iter().filter(|i| ignore_elem(i)).rev() {
+                    stack.push((&child.child, false));
                 }
             }
         }
@@ -171,29 +171,37 @@ mod tests {
         let mut profiles = HashMap::new();
 
         // Leaf module
-        let module1 = Profile::new(None, ProfileKind::Module(Module::new(vec![])));
+        let module1 = Profile::new(None, ProfileKind::Module(Module { entries: vec![] }));
         profiles.insert(RelPathStr::from_str("module1")?, module1);
 
         // profile3 depends on module1
         let profile3 = Profile::new(
             None,
-            ProfileKind::Composite(Composite::new(vec![CompositeEntry::new(
-                RelPathStr::from_str("module1")?,
-            )])),
+            ProfileKind::Composite(Composite {
+                entries: vec![CompositeEntry {
+                    child: RelPathStr::from_str("module1")?,
+                }],
+            }),
         );
         profiles.insert(RelPathStr::from_str("profile3")?, profile3);
 
         // profile2 is a leaf (no dependencies)
-        let profile2 = Profile::new(None, ProfileKind::Module(Module::new(vec![])));
+        let profile2 = Profile::new(None, ProfileKind::Module(Module { entries: vec![] }));
         profiles.insert(RelPathStr::from_str("profile2")?, profile2);
 
         // profile1 depends on profile2 and profile3
         let profile1 = Profile::new(
             None,
-            ProfileKind::Composite(Composite::new(vec![
-                CompositeEntry::new(RelPathStr::from_str("profile3")?),
-                CompositeEntry::new(RelPathStr::from_str("profile2")?),
-            ])),
+            ProfileKind::Composite(Composite {
+                entries: vec![
+                    CompositeEntry {
+                        child: RelPathStr::from_str("profile3")?,
+                    },
+                    CompositeEntry {
+                        child: RelPathStr::from_str("profile2")?,
+                    },
+                ],
+            }),
         );
         profiles.insert(RelPathStr::from_str("profile1")?, profile1);
 
