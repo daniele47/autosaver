@@ -161,24 +161,6 @@ mod tests {
         };
         profiles.insert(RelPathStr::from_str("module1")?, module1);
 
-        // profile3 depends on module1
-        let profile3 = Profile {
-            id: None,
-            kind: ProfileKind::Composite(Composite {
-                entries: vec![CompositeEntry {
-                    child: RelPathStr::from_str("module1")?,
-                }],
-            }),
-        };
-        profiles.insert(RelPathStr::from_str("profile3")?, profile3);
-
-        // profile2 is a leaf (no dependencies)
-        let profile2 = Profile {
-            id: None,
-            kind: ProfileKind::Module(Module { entries: vec![] }),
-        };
-        profiles.insert(RelPathStr::from_str("profile2")?, profile2);
-
         // profile1 depends on profile2 and profile3
         let profile1 = Profile {
             id: None,
@@ -194,6 +176,24 @@ mod tests {
             }),
         };
         profiles.insert(RelPathStr::from_str("profile1")?, profile1);
+
+        // profile2 is a leaf (no dependencies)
+        let profile2 = Profile {
+            id: None,
+            kind: ProfileKind::Module(Module { entries: vec![] }),
+        };
+        profiles.insert(RelPathStr::from_str("profile2")?, profile2);
+
+        // profile3 depends on module1
+        let profile3 = Profile {
+            id: None,
+            kind: ProfileKind::Composite(Composite {
+                entries: vec![CompositeEntry {
+                    child: RelPathStr::from_str("module1")?,
+                }],
+            }),
+        };
+        profiles.insert(RelPathStr::from_str("profile3")?, profile3);
 
         Ok(AllProfiles { profiles })
     }
