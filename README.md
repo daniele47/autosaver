@@ -146,6 +146,7 @@ The saved files will end up in the `backup/<profile_id>` directory
         - `exclude` : always exclude path from backup
         - `notdiff` : do not show by default if `HOME` and `ROOT` version just differ
         - `include` : include path from backup
+    - `cleanup` : specifies a relative path, that can be delete easily, to clean resources
 
 - `data lines`: 
     - each data line is a relative path of the dotfiles to track in the `HOME`
