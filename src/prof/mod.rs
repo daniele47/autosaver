@@ -150,69 +150,158 @@ mod tests {
     use super::*;
     use std::{collections::HashMap, str::FromStr};
 
+    // DEPENDENCY GRAPH:
+    //
+    //      composite1
+    //     /          \
+    // composite2  composite3
+    //     \          /
+    //      composite4
+    //     /          \
+    //  runner1     module1
     fn setup_test_profiles() -> anyhow::Result<AllProfiles> {
         let mut profiles = HashMap::new();
 
-        // Leaf module
         let module1 = Profile {
             id: None,
             kind: ProfileKind::Module(Module { entries: vec![] }),
         };
-        profiles.insert(RelPathStr::from_str("module1")?, module1);
-
-        // profile1 depends on profile2 and profile3
-        let profile1 = Profile {
+        let runner1 = Profile {
+            id: None,
+            kind: ProfileKind::Runner(Runner { entries: vec![] }),
+        };
+        let composite1 = Profile {
             id: None,
             kind: ProfileKind::Composite(Composite {
                 entries: vec![
                     CompositeEntry {
-                        child: RelPathStr::from_str("profile3")?,
+                        child: RelPathStr::from_str("composite2")?,
                     },
                     CompositeEntry {
-                        child: RelPathStr::from_str("profile2")?,
+                        child: RelPathStr::from_str("composite3")?,
                     },
                 ],
             }),
         };
-        profiles.insert(RelPathStr::from_str("profile1")?, profile1);
-
-        // profile2 is a leaf (no dependencies)
-        let profile2 = Profile {
-            id: None,
-            kind: ProfileKind::Module(Module { entries: vec![] }),
-        };
-        profiles.insert(RelPathStr::from_str("profile2")?, profile2);
-
-        // profile3 depends on module1
-        let profile3 = Profile {
+        let composite2 = Profile {
             id: None,
             kind: ProfileKind::Composite(Composite {
                 entries: vec![CompositeEntry {
-                    child: RelPathStr::from_str("module1")?,
+                    child: RelPathStr::from_str("composite4")?,
                 }],
             }),
         };
-        profiles.insert(RelPathStr::from_str("profile3")?, profile3);
+        let composite3 = Profile {
+            id: None,
+            kind: ProfileKind::Composite(Composite {
+                entries: vec![CompositeEntry {
+                    child: RelPathStr::from_str("composite4")?,
+                }],
+            }),
+        };
+        let composite4 = Profile {
+            id: None,
+            kind: ProfileKind::Composite(Composite {
+                entries: vec![
+                    CompositeEntry {
+                        child: RelPathStr::from_str("module1")?,
+                    },
+                    CompositeEntry {
+                        child: RelPathStr::from_str("runner1")?,
+                    },
+                ],
+            }),
+        };
+
+        profiles.insert(RelPathStr::from_str("module1")?, module1);
+        profiles.insert(RelPathStr::from_str("runner1")?, runner1);
+        profiles.insert(RelPathStr::from_str("composite1")?, composite1);
+        profiles.insert(RelPathStr::from_str("composite2")?, composite2);
+        profiles.insert(RelPathStr::from_str("composite3")?, composite3);
+        profiles.insert(RelPathStr::from_str("composite4")?, composite4);
 
         Ok(AllProfiles { profiles })
     }
 
-    #[test]
-    fn test_traverse_full_tree() -> anyhow::Result<()> {
+    fn traverse(
+        dup_policy: TraverseDupPolicy,
+        ignore: impl Fn(&CompositeEntry) -> bool,
+    ) -> anyhow::Result<Vec<String>> {
         let profiles = setup_test_profiles()?;
-        let pname = RelPathStr::from_str("profile1")?;
-
+        let pname = RelPathStr::from_str("composite1")?;
         let mut visited_order = Vec::new();
 
-        profiles.traverse(&pname, |ctx| {
+        profiles.traverse_opts(&pname, dup_policy, ignore, |ctx| {
             visited_order.push(ctx.name.to_string_lossy().to_string());
             Ok(())
         })?;
 
-        assert_eq!(
-            visited_order,
-            vec!["profile1", "profile3", "module1", "profile2"]
-        );
+        Ok(visited_order)
+    }
+
+    #[test]
+    fn traverse_include() -> anyhow::Result<()> {
+        let expected = &[
+            "composite1",
+            "composite2",
+            "composite4",
+            "module1",
+            "runner1",
+            "composite3",
+            "composite4",
+            "module1",
+            "runner1",
+        ];
+        let actual = &traverse(TraverseDupPolicy::Include, |_| true)?;
+
+        assert_eq!(actual, expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn traverse_shallow() -> anyhow::Result<()> {
+        let expected = &[
+            "composite1",
+            "composite2",
+            "composite4",
+            "module1",
+            "runner1",
+            "composite3",
+            "composite4",
+        ];
+        let actual = &traverse(TraverseDupPolicy::Shallow, |_| true)?;
+
+        assert_eq!(actual, expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn traverse_exclude() -> anyhow::Result<()> {
+        let expected = &[
+            "composite1",
+            "composite2",
+            "composite4",
+            "module1",
+            "runner1",
+            "composite3",
+        ];
+        let actual = &traverse(TraverseDupPolicy::Exclude, |_| true)?;
+
+        assert_eq!(actual, expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn traverse_ignore() -> anyhow::Result<()> {
+        let expected = &["composite1", "composite2", "composite3"];
+        let actual = &traverse(TraverseDupPolicy::Exclude, |c| {
+            c.child != "composite4".parse().unwrap()
+        })?;
+
+        assert_eq!(actual, expected);
 
         Ok(())
     }

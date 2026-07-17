@@ -205,7 +205,7 @@ mod tests {
     use crate::prof::ProfileKind;
 
     #[test]
-    fn test_parse_composite_profile() -> anyhow::Result<()> {
+    fn parse_composite() -> anyhow::Result<()> {
         let expected = Profile {
             id: None,
             kind: ProfileKind::Composite(Composite {
@@ -233,7 +233,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_module_profile() -> anyhow::Result<()> {
+    fn parse_module() -> anyhow::Result<()> {
         let expected = Profile {
             id: Some("test_module".parse()?),
             kind: ProfileKind::Module(Module {
@@ -276,7 +276,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_runner_profile() -> anyhow::Result<()> {
+    fn parse_runner() -> anyhow::Result<()> {
         let expected = Profile {
             id: Some("test_runner".parse()?),
             kind: ProfileKind::Runner(Runner {
