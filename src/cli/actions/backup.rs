@@ -75,12 +75,31 @@ impl Cli {
                 let this_backup_dir = backup_dir.join(trav_ctx.item.id_or(trav_ctx.name))?;
 
                 // cleanup paths before running anything else
-                if let CliCmd::Restore {
-                    allow_cleanup: true,
-                    ..
-                } = self.cmd
-                {
-                    unimplemented!("CLEANUP ACTION")
+                if !module.cleanup.is_empty() {
+                    let mut allow_symlinks = false;
+                    let run_cleanup = match self.cmd {
+                        CliCmd::Restore {
+                            act_delsymlinks,
+                            allow_cleanup,
+                            ..
+                        } => {
+                            allow_symlinks = act_delsymlinks.allow_symlink;
+                            allow_cleanup
+                        }
+                        CliCmd::Delete {
+                            only_cleanup,
+                            only_backup,
+                            only_original,
+                            act_delsymlinks,
+                        } => {
+                            allow_symlinks = act_delsymlinks.allow_symlink;
+                            only_cleanup || (!only_backup && !only_original)
+                        }
+                        _ => false,
+                    };
+                    if run_cleanup {
+                        todo!("IMPLEMENT CLEANUP ({allow_symlinks})");
+                    }
                 }
 
                 for (path, entry) in resolve(module, &[home_dir, &this_backup_dir])? {
@@ -129,7 +148,7 @@ impl Cli {
                             act_delsymlinks,
                         } => {
                             let mut path_printed = false;
-                            let no_filter = !only_backup && !only_original;
+                            let no_filter = !only_backup && !only_original && !only_cleanup;
                             if (*only_original || no_filter)
                                 && let Some(original_file) = &entry.1[0]
                             {
