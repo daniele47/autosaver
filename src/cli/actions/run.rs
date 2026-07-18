@@ -47,7 +47,7 @@ impl Cli {
                 // traverse all runner profiles
                 ctx.profiles.traverse(&ctx.curr_profile, |trav_ctx| {
                     if let ProfileKind::Runner(runner) = &trav_ctx.item.kind {
-                        ctx.col.output_profile(trav_ctx.name);
+                        Self::output_profile(trav_ctx.name, ctx.col.output_profile);
                         if self.choice {
                             let mut execute = false;
                             let msg = "Do you want to execute this profile?";
@@ -73,7 +73,7 @@ impl Cli {
 
                             // output path
                             let relpath = path.to_rel(run_dir)?;
-                            ctx.col.output_path(&relpath, ctx.col.output_path);
+                            Self::output_path(&relpath, ctx.col.output_path);
 
                             // prompt user
                             let msg = if entry.stdin {

@@ -77,7 +77,7 @@ impl Cli {
                         if let Some(ignored) = entries.get(&file) {
                             if *ignored {
                                 let relpath = file.to_rel(root_dir)?;
-                                ctx.col.output_path(&relpath, ctx.col.output_path);
+                                Self::output_path(&relpath, ctx.col.output_path);
                                 if !act_delsymlinks.allow_symlink
                                     && file.path().symlink_metadata()?.is_symlink()
                                 {
@@ -96,7 +96,7 @@ impl Cli {
                             }
                         } else {
                             let relpath = file.to_rel(root_dir)?;
-                            ctx.col.output_path(&relpath, ctx.col.output_path);
+                            Self::output_path(&relpath, ctx.col.output_path);
                             if !act_delsymlinks.allow_symlink
                                 && file.path().symlink_metadata()?.is_symlink()
                             {

@@ -1,10 +1,7 @@
 use anyhow::bail;
 use owo_colors::Style;
 
-use crate::{
-    coutln,
-    fs::{abs::AbsPathStr, path::PathStr, rel::RelPathStr},
-};
+use crate::fs::abs::AbsPathStr;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct CliColor {
@@ -50,17 +47,6 @@ impl CliColor {
             diff_header: Style::new().cyan(),
             show_header: Style::new().cyan(),
         }
-    }
-
-    pub fn output_profile(&self, profile: &RelPathStr) {
-        let style = self.output_profile;
-        let profile = profile.display();
-        coutln!(style, "*** {profile} ***");
-    }
-
-    pub fn output_path(&self, path: impl AsRef<PathStr>, style: Style) {
-        let path = path.as_ref();
-        coutln!(style, "- {}", path.display());
     }
 
     pub fn parse_theme(colors_file: &AbsPathStr) -> anyhow::Result<Self> {

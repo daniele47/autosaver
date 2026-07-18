@@ -1,4 +1,10 @@
-use crate::cli::{Cli, CliCmd, config::CliContext, prompt::Prompt};
+use owo_colors::Style;
+
+use crate::{
+    cli::{Cli, CliCmd, config::CliContext, prompt::Prompt},
+    coutln,
+    fs::{path::PathStr, rel::RelPathStr},
+};
 
 pub mod backup;
 pub mod clear;
@@ -8,6 +14,16 @@ pub mod tree;
 impl Cli {
     const SYMLINK_FLAG: &str = "--allow_symlink";
     const DELETE_FLAG: &str = "--allow_purge";
+
+    fn output_profile(profile: &RelPathStr, style: Style) {
+        let profile = profile.display();
+        coutln!(style, "*** {profile} ***");
+    }
+
+    fn output_path(path: impl AsRef<PathStr>, style: Style) {
+        let path = path.as_ref();
+        coutln!(style, "- {}", path.display());
+    }
 
     pub fn run_cmd(&self) -> anyhow::Result<()> {
         let prompt = Prompt::new(

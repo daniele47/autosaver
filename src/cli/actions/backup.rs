@@ -55,7 +55,7 @@ impl Cli {
         // traverse profiles
         ctx.profiles.traverse(&ctx.curr_profile, |trav_ctx| {
             if let ProfileKind::Module(module) = &trav_ctx.item.kind {
-                ctx.col.output_profile(trav_ctx.name);
+                Self::output_profile(trav_ctx.name, ctx.col.output_profile);
                 if self.choice {
                     let mut execute = false;
                     let msg = "Do you want to execute this profile?";
@@ -153,7 +153,7 @@ impl Cli {
                                 && let Some(original_file) = &entry.1[0]
                             {
                                 path_printed = true;
-                                ctx.col.output_path(&path, ctx.col.output_path);
+                                Self::output_path(&path, ctx.col.output_path);
                                 if !act_delsymlinks.allow_symlink
                                     && original_file.path().symlink_metadata()?.is_symlink()
                                 {
@@ -175,7 +175,7 @@ impl Cli {
                                 && let Some(backup_file) = &entry.1[1]
                             {
                                 if !path_printed {
-                                    ctx.col.output_path(&path, ctx.col.output_path);
+                                    Self::output_path(&path, ctx.col.output_path);
                                 }
                                 if !act_delsymlinks.allow_symlink
                                     && backup_file.path().symlink_metadata()?.is_symlink()
@@ -202,7 +202,7 @@ impl Cli {
                             // file is missing in the backup
                             [Some(p1), None] => match &self.cmd {
                                 CliCmd::Save { .. } => {
-                                    ctx.col.output_path(&path, ctx.col.output_create);
+                                    Self::output_path(&path, ctx.col.output_create);
                                     ctx.prompt.question(
                                         "Do you really want to create backup file?",
                                         &[p1],
@@ -215,7 +215,7 @@ impl Cli {
                                     act_saverestore,
                                     ..
                                 } => {
-                                    ctx.col.output_path(&path, ctx.col.output_delete);
+                                    Self::output_path(&path, ctx.col.output_delete);
                                     if !act_saverestore.allow_purge {
                                         warning!(
                                             "{} flag is required to delete \
@@ -240,7 +240,7 @@ impl Cli {
                                     }
                                 }
                                 CliCmd::List { .. } => {
-                                    ctx.col.output_path(&path, ctx.col.output_missing);
+                                    Self::output_path(&path, ctx.col.output_missing);
                                 }
                                 _ => unreachable!("must either save or restore or list"),
                             },
@@ -251,7 +251,7 @@ impl Cli {
                                     act_saverestore,
                                     ..
                                 } => {
-                                    ctx.col.output_path(&path, ctx.col.output_missing);
+                                    Self::output_path(&path, ctx.col.output_missing);
                                     if !act_saverestore.allow_purge {
                                         warning!(
                                             "{} flag is required to delete \
@@ -276,7 +276,7 @@ impl Cli {
                                     }
                                 }
                                 CliCmd::Restore { .. } => {
-                                    ctx.col.output_path(&path, ctx.col.output_create);
+                                    Self::output_path(&path, ctx.col.output_create);
                                     ctx.prompt.question(
                                         "Do you really want to create home file?",
                                         &[p1],
@@ -285,7 +285,7 @@ impl Cli {
                                     )?;
                                 }
                                 CliCmd::List { .. } => {
-                                    ctx.col.output_path(&path, ctx.col.output_missing);
+                                    Self::output_path(&path, ctx.col.output_missing);
                                 }
                                 _ => unreachable!("must either save or restore or list"),
                             },
@@ -296,7 +296,7 @@ impl Cli {
                                 {
                                     continue;
                                 }
-                                ctx.col.output_path(&path, ctx.col.output_diff);
+                                Self::output_path(&path, ctx.col.output_diff);
                                 if matches!(&self.cmd, CliCmd::Save { .. }) {
                                     let msg = "Do you really want to update backup file?";
                                     let paths = &[p2, p1];
@@ -312,7 +312,7 @@ impl Cli {
                             // files are equal
                             [Some(p1), Some(p2)] => {
                                 if act_backup.show_unmodified {
-                                    ctx.col.output_path(&path, ctx.col.output_path);
+                                    Self::output_path(&path, ctx.col.output_path);
                                     let msg = "Nothing to be done. Type y/n to continue...";
                                     let action = || Ok(());
                                     if matches!(&self.cmd, CliCmd::Save { .. }) {
