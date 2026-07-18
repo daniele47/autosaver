@@ -96,6 +96,7 @@ impl Cli {
                             act_delsymlinks,
                         } => {
                             allow_symlinks = act_delsymlinks.allow_symlink;
+                            allow_purge = true;
                             only_cleanup || (!only_backup && !only_original)
                         }
                         _ => false,
@@ -106,7 +107,7 @@ impl Cli {
                             if abs_cleanup.path().symlink_metadata().is_err() {
                                 continue;
                             }
-                            Self::output_path(&abs_cleanup, ctx.col.output_cleanup);
+                            Self::output_path(cleanup, ctx.col.output_cleanup);
                             let is_symlink = abs_cleanup
                                 .path()
                                 .symlink_metadata()

@@ -70,6 +70,11 @@ impl Prompt {
             if paths.len() != 2 {
                 answers &= !(PromptAnswer::Diff as PromptAnswers);
             }
+            if paths.iter().any(|f| !f.is_file()) {
+                answers &= !(PromptAnswer::Edit as PromptAnswers
+                    | PromptAnswer::Show as PromptAnswers
+                    | PromptAnswer::Diff as PromptAnswers);
+            }
             answers
         };
         let sep = "\n";
