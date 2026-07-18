@@ -123,6 +123,7 @@ impl Cli {
                     match &self.cmd {
                         // delete action
                         CliCmd::Delete {
+                            only_cleanup,
                             only_original,
                             only_backup,
                             act_delsymlinks,
@@ -138,8 +139,9 @@ impl Cli {
                                     && original_file.path().symlink_metadata()?.is_symlink()
                                 {
                                     warning!(
-                                        "Symlink flag is required to delete \
-                                        symlink in home directory"
+                                        "{} flag is required to delete \
+                                        symlink in home directory",
+                                        Self::SYMLINK_FLAG
                                     )
                                 } else {
                                     ctx.prompt.question(
@@ -160,8 +162,9 @@ impl Cli {
                                     && backup_file.path().symlink_metadata()?.is_symlink()
                                 {
                                     warning!(
-                                        "Symlink flag is required to delete \
-                                         symlink in backup directory"
+                                        "{} flag is required to delete \
+                                         symlink in backup directory",
+                                        Self::SYMLINK_FLAG
                                     );
                                 } else {
                                     ctx.prompt.question(
@@ -196,15 +199,17 @@ impl Cli {
                                     ctx.col.output_path(&path, ctx.col.output_delete);
                                     if !act_saverestore.allow_purge {
                                         warning!(
-                                            "Force flag is required to delete \
-                                                files in home directory"
+                                            "{} flag is required to delete \
+                                                files in home directory",
+                                            Self::DELETE_FLAG
                                         );
                                     } else if !act_delsymlinks.allow_symlink
                                         && p1.path().symlink_metadata()?.is_symlink()
                                     {
                                         warning!(
-                                            "Symlink flag is required to delete \
-                                                symlinks in home directory"
+                                            "{} flag is required to delete \
+                                                symlinks in home directory",
+                                            Self::SYMLINK_FLAG
                                         )
                                     } else {
                                         ctx.prompt.question(
@@ -230,15 +235,17 @@ impl Cli {
                                     ctx.col.output_path(&path, ctx.col.output_missing);
                                     if !act_saverestore.allow_purge {
                                         warning!(
-                                            "Force flag is required to delete \
-                                                files in backup directory"
+                                            "{} flag is required to delete \
+                                                files in backup directory",
+                                            Self::DELETE_FLAG
                                         );
                                     } else if !act_delsymlinks.allow_symlink
                                         && p1.path().symlink_metadata()?.is_symlink()
                                     {
                                         warning!(
-                                            "Symlink flag is required to delete \
-                                                symlinks in backup directory"
+                                            "{} flag is required to delete \
+                                                symlinks in backup directory",
+                                            Self::SYMLINK_FLAG
                                         )
                                     } else {
                                         ctx.prompt.question(

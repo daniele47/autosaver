@@ -81,7 +81,10 @@ impl Cli {
                                 if !act_delsymlinks.allow_symlink
                                     && file.path().symlink_metadata()?.is_symlink()
                                 {
-                                    warning!("Symlink flag is required to delete symlinks")
+                                    warning!(
+                                        "{} flag is required to delete symlinks",
+                                        Self::SYMLINK_FLAG
+                                    )
                                 } else {
                                     ctx.prompt.question(
                                         "Do you really want to delete ignored file?",
@@ -97,7 +100,10 @@ impl Cli {
                             if !act_delsymlinks.allow_symlink
                                 && file.path().symlink_metadata()?.is_symlink()
                             {
-                                warning!("Symlink flag is required to delete symlinks")
+                                warning!(
+                                    "{} flag is required to delete symlinks",
+                                    Self::SYMLINK_FLAG
+                                )
                             } else {
                                 ctx.prompt.question(
                                     "Do you really want to delete untracked file?",

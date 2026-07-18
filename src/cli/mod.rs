@@ -86,6 +86,10 @@ pub enum CliCmd {
     },
     /// Delete tracked dotfiles
     Delete {
+        /// Delete only cleanup paths specified by profile configs
+        #[arg(short = 'c', long)]
+        only_cleanup: bool,
+
         /// Delete only files from the backup directory
         #[arg(short = 'b', long)]
         only_backup: bool,

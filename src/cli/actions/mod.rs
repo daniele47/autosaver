@@ -6,6 +6,9 @@ pub mod run;
 pub mod tree;
 
 impl Cli {
+    const SYMLINK_FLAG: &str = "--allow_symlink";
+    const DELETE_FLAG: &str = "--allow_purge";
+
     pub fn run_cmd(&self) -> anyhow::Result<()> {
         let prompt = Prompt::new(
             self.auto_answers.as_deref().unwrap_or(""),
