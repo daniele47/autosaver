@@ -1,6 +1,6 @@
 [package]
 name = "autosaver"
-version = "2.12.7"
+version = "2.13.0"
 edition = "2024"
 default-run = "autosaver"
 
