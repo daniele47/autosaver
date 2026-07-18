@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v2.13.1
+
+### Changes
+
+- now `cleanup` paths are automatically sorted alphabetically
+
 ## v2.13.0
 
 ### Features

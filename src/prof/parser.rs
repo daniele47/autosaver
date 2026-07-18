@@ -290,7 +290,9 @@ mod tests {
                 cleanup: vec![
                     RelPathStr::from_str(".cargo")?,
                     RelPathStr::from_str(".rustup")?,
-                ],
+                ]
+                .into_iter()
+                .collect(),
             }),
         };
         let actual_config = r#"

@@ -148,7 +148,10 @@ mod tests {
     use crate::prof::composite::CompositeEntry;
 
     use super::*;
-    use std::{collections::HashMap, str::FromStr};
+    use std::{
+        collections::{BTreeSet, HashMap},
+        str::FromStr,
+    };
 
     // DEPENDENCY GRAPH:
     //
@@ -166,7 +169,7 @@ mod tests {
             id: None,
             kind: ProfileKind::Module(Module {
                 entries: vec![],
-                cleanup: vec![],
+                cleanup: BTreeSet::new(),
             }),
         };
         let runner1 = Profile {
