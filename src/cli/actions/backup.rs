@@ -77,13 +77,16 @@ impl Cli {
                 // cleanup paths before running anything else
                 if !module.cleanup.is_empty() {
                     let mut allow_symlinks = false;
+                    let mut allow_purge = false;
                     let run_cleanup = match self.cmd {
                         CliCmd::Restore {
                             act_delsymlinks,
                             allow_cleanup,
+                            act_saverestore,
                             ..
                         } => {
                             allow_symlinks = act_delsymlinks.allow_symlink;
+                            allow_purge = act_saverestore.allow_purge;
                             allow_cleanup
                         }
                         CliCmd::Delete {
@@ -98,7 +101,32 @@ impl Cli {
                         _ => false,
                     };
                     if run_cleanup {
-                        todo!("IMPLEMENT CLEANUP ({allow_symlinks})");
+                        for cleanup in &module.cleanup {
+                            let abs_cleanup = cleanup.to_abs(home_dir)?;
+                            if abs_cleanup.path().symlink_metadata().is_err() {
+                                continue;
+                            }
+                            Self::output_path(&abs_cleanup, ctx.col.output_cleanup);
+                            let is_symlink = abs_cleanup
+                                .path()
+                                .symlink_metadata()
+                                .is_ok_and(|d| d.is_symlink());
+                            if !allow_purge {
+                                warning!("{} flag is required to cleanup files", Self::PURGE_FLAG);
+                            } else if !allow_symlinks && is_symlink {
+                                warning!(
+                                    "{} flag is required to cleanup symlink files",
+                                    Self::SYMLINK_FLAG
+                                );
+                            } else {
+                                ctx.prompt.question(
+                                    "Do you really want to delete cleanup path?",
+                                    &[&abs_cleanup],
+                                    || abs_cleanup.purge_path_opts(true),
+                                    &ctx.col,
+                                )?;
+                            }
+                        }
                     }
                 }
 
@@ -220,7 +248,7 @@ impl Cli {
                                         warning!(
                                             "{} flag is required to delete \
                                                 files in home directory",
-                                            Self::DELETE_FLAG
+                                            Self::PURGE_FLAG
                                         );
                                     } else if !act_delsymlinks.allow_symlink
                                         && p1.path().symlink_metadata()?.is_symlink()
@@ -256,7 +284,7 @@ impl Cli {
                                         warning!(
                                             "{} flag is required to delete \
                                                 files in backup directory",
-                                            Self::DELETE_FLAG
+                                            Self::PURGE_FLAG
                                         );
                                     } else if !act_delsymlinks.allow_symlink
                                         && p1.path().symlink_metadata()?.is_symlink()

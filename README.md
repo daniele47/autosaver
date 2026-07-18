@@ -77,6 +77,8 @@ output_delete red
 output_missing red
 # color of files in list action when files are fully equal
 output_unmodified
+# color of files in list action when files are to be cleanup
+output_cleanup bright_red
 # color of file paths with nothing specific about them
 output_path bright_blue
 # color of profiles names

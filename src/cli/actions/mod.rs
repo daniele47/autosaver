@@ -13,7 +13,7 @@ pub mod tree;
 
 impl Cli {
     const SYMLINK_FLAG: &str = "--allow_symlink";
-    const DELETE_FLAG: &str = "--allow_purge";
+    const PURGE_FLAG: &str = "--allow_purge";
 
     fn output_profile(profile: &RelPathStr, style: Style) {
         let profile = profile.display();
