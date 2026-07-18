@@ -113,7 +113,7 @@ impl AbsPathStr {
         Ok(ord_files)
     }
 
-    pub fn purge_path(&self) -> anyhow::Result<()> {
+    pub fn purge_path_opts(&self, purge_dir: bool) -> anyhow::Result<()> {
         // skip if path not exist
         if self.path().symlink_metadata().is_err() {
             return Ok(());
@@ -131,6 +131,13 @@ impl AbsPathStr {
             fs::remove_file(self.path()).with_context(|| {
                 let p = self.display();
                 format!("Could not delete file: '{p}'")
+            })?;
+        }
+        // purge directory if allowed
+        else if purge_dir && self.is_dir() {
+            fs::remove_dir_all(self.path()).with_context(|| {
+                let p = self.display();
+                format!("Could not delete directory: '{p}'")
             })?;
         }
         // fail if it was something else
@@ -154,6 +161,10 @@ impl AbsPathStr {
         }
 
         Ok(())
+    }
+
+    pub fn purge_path(&self) -> anyhow::Result<()> {
+        self.purge_path_opts(false)
     }
 
     pub fn create_file(&self) -> anyhow::Result<()> {
