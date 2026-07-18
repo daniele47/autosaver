@@ -9,7 +9,7 @@ All notable changes to this project will be documented here
 - added `/! cleanup <PATH>` option line for module profiles, tied to --allow-cleanup flag
 - [WIP] added `--allow-cleanup|-c` which prompts to delete files/dir specified in profile config file in `restore` action
 - [WIP] added `--only-cleanup|-c` which prompts to delete files/dir specified in profile config file in `delete` action
-- [WIP] add new colorschemes for `cleanup` paths and for `unmodified` paths in `backup` action
+- [50% WIP] add new colorschemes for `cleanup` paths and for `unmodified` paths in `backup` action
     -> NOTE: update readme for it!
     -> maybe add an extra not color based way to disntiguish cleanup paths from normal paths (maybe `- [!] <PATH>` instead of `- <PATH>`
 

@@ -75,6 +75,8 @@ output_create green
 output_delete red
 # color of files in list action when one file is missing
 output_missing red
+# color of files in list action when files are fully equal
+output_unmodified
 # color of file paths with nothing specific about them
 output_path bright_blue
 # color of profiles names

@@ -312,7 +312,7 @@ impl Cli {
                             // files are equal
                             [Some(p1), Some(p2)] => {
                                 if act_backup.show_unmodified {
-                                    Self::output_path(&path, ctx.col.output_path);
+                                    Self::output_path(&path, ctx.col.output_unmodified);
                                     let msg = "Nothing to be done. Type y/n to continue...";
                                     let action = || Ok(());
                                     if matches!(&self.cmd, CliCmd::Save { .. }) {
