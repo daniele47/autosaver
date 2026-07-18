@@ -87,11 +87,11 @@ pub enum CliCmd {
     /// Delete tracked dotfiles
     Delete {
         /// Delete only files from the backup directory
-        #[arg(short = 'b', long, conflicts_with = "only_original")]
+        #[arg(short = 'b', long)]
         only_backup: bool,
 
         /// Delete only files from the original home directory
-        #[arg(short = 'o', long, conflicts_with = "only_backup")]
+        #[arg(short = 'o', long)]
         only_original: bool,
 
         #[command(flatten)]

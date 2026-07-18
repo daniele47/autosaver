@@ -128,7 +128,8 @@ impl Cli {
                             act_delsymlinks,
                         } => {
                             let mut path_printed = false;
-                            if (*only_original || !only_backup)
+                            let no_filter = !only_backup && !only_original;
+                            if (*only_original || no_filter)
                                 && let Some(original_file) = &entry.1[0]
                             {
                                 path_printed = true;
@@ -149,7 +150,7 @@ impl Cli {
                                     )?;
                                 }
                             }
-                            if (*only_backup || !only_original)
+                            if (*only_backup || no_filter)
                                 && let Some(backup_file) = &entry.1[1]
                             {
                                 if !path_printed {
