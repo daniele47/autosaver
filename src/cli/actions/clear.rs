@@ -48,7 +48,7 @@ impl Cli {
                 ctx.profiles.traverse(
                     &ctx.root_profile,
                     TraverseDupPolicy::Exclude,
-                    |e| !self.exclude_profile.contains(&e.child),
+                    |e| !self.exclude.contains(&e.child),
                     |ctx| {
                         match &ctx.item.kind {
                             ProfileKind::Module(module) => {

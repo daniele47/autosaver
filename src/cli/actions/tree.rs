@@ -22,7 +22,7 @@ impl Cli {
                 ctx.profiles.traverse(
                     &ctx.curr_profile,
                     trav_dups,
-                    |e| !self.exclude_profile.contains(&e.child),
+                    |e| !self.exclude.contains(&e.child),
                     |trav_ctx| {
                         let len = trav_ctx.path.len();
 

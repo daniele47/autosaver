@@ -24,7 +24,7 @@ pub struct Cli {
 
     /// Specify profiles to exclude
     #[arg(short = 'e', long, value_name = "PROFILE")]
-    pub exclude_profile: Vec<RelPathStr>,
+    pub exclude: Vec<RelPathStr>,
 
     /// Specify a different home directory to use
     #[arg(short = 'H', long, env = "AUTOSAVER_HOME")]
