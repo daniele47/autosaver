@@ -65,14 +65,6 @@ impl AllProfiles {
     pub fn traverse(
         &self,
         root: &RelPathStr,
-        on_elem: impl FnMut(TraverseContext) -> anyhow::Result<()>,
-    ) -> anyhow::Result<()> {
-        self.traverse_opts(root, TraverseDupPolicy::Exclude, |_| true, on_elem)
-    }
-
-    pub fn traverse_opts(
-        &self,
-        root: &RelPathStr,
         dups_policy: TraverseDupPolicy,
         ignore_elem: impl Fn(&CompositeEntry) -> bool,
         mut on_elem: impl FnMut(TraverseContext) -> anyhow::Result<()>,
@@ -265,7 +257,7 @@ mod tests {
         let mut visited_order = Vec::new();
         let all_profiles = setup_test_profiles()?;
 
-        all_profiles.traverse_opts(&pname, dup_policy, ignore, |ctx| {
+        all_profiles.traverse(&pname, dup_policy, ignore, |ctx| {
             visited_order.push(ctx.name.to_string_lossy().to_string());
             Ok(())
         })?;
@@ -344,7 +336,12 @@ mod tests {
     fn traverse_cycle_err() -> anyhow::Result<()> {
         let profiles_with_cycle = setup_test_profiles_cycle()?;
         let err = profiles_with_cycle
-            .traverse(&"composite1".parse()?, |_| Ok(()))
+            .traverse(
+                &"composite1".parse()?,
+                TraverseDupPolicy::Exclude,
+                |_| true,
+                |_| Ok(()),
+            )
             .unwrap_err();
 
         assert_eq!(

@@ -22,6 +22,10 @@ pub struct Cli {
     #[arg(short = 'p', long, env = "AUTOSAVER_PROFILE")]
     pub profile: Option<RelPathStr>,
 
+    /// Specify profiles to exclude
+    #[arg(short = 'e', long, value_name = "PROFILE")]
+    pub exclude_profile: Vec<RelPathStr>,
+
     /// Specify a different home directory to use
     #[arg(short = 'H', long, env = "AUTOSAVER_HOME")]
     pub home: Option<PathBuf>,
@@ -116,10 +120,6 @@ pub enum CliCmd {
         /// Show the profile id in the tree visualization
         #[arg(short = 'i', long)]
         show_id: bool,
-
-        /// Exclude profiles from the tree visualization
-        #[arg(short = 'e', long, value_name = "PROFILE")]
-        exclude: Vec<RelPathStr>,
     },
     /// Clear untracked files in backup directory
     Clear {

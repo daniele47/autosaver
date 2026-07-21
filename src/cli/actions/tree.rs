@@ -12,7 +12,6 @@ impl Cli {
             CliCmd::Tree {
                 show_dups: no_dedup,
                 show_id,
-                exclude: ignore,
             } => {
                 let trav_dups = if *no_dedup {
                     TraverseDupPolicy::Include
@@ -20,10 +19,10 @@ impl Cli {
                     TraverseDupPolicy::Shallow
                 };
                 let mut are_last = Vec::<bool>::new();
-                ctx.profiles.traverse_opts(
+                ctx.profiles.traverse(
                     &ctx.curr_profile,
                     trav_dups,
-                    |e| !ignore.contains(&e.child),
+                    |e| !self.exclude_profile.contains(&e.child),
                     |trav_ctx| {
                         let len = trav_ctx.path.len();
 

@@ -6,6 +6,7 @@ All notable changes to this project will be documented here
 
 ### Changes
 
+- now ignore profiles is a global flag, allowing profiles to be ignored with all actions
 - allow-stdin now shortners to `-s` for consistency with everything else
 - dry-run now shortners to `-d` for consistency with everything else
 

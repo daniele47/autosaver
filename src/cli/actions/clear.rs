@@ -6,7 +6,7 @@ use crate::{
         config::{CliContext, Paths},
     },
     fs::{abs::AbsPathStr, rel::RelPathStr},
-    prof::{ProfileKind, module::ModulePolicy},
+    prof::{ProfileKind, TraverseDupPolicy, module::ModulePolicy},
     warning,
 };
 
@@ -45,26 +45,31 @@ impl Cli {
                 let mut entries = IndexMap::new();
 
                 // traverse all leaf profiles
-                ctx.profiles.traverse(&ctx.root_profile, |ctx| {
-                    match &ctx.item.kind {
-                        ProfileKind::Module(module) => {
-                            let this_backup_dir = backup_dir.join(ctx.item.id_or(ctx.name))?;
-                            let relpaths = module
-                                .entries
-                                .iter()
-                                .map(|e| (&e.path, e.policy == ModulePolicy::Exclude));
-                            resolve(relpaths, &this_backup_dir, &mut entries)?;
-                        }
-                        ProfileKind::Runner(runner) => {
-                            let this_runner_dir = run_dir.join(ctx.item.id_or(ctx.name))?;
-                            let relpaths = runner.entries.iter().map(|e| (&e.path, false));
+                ctx.profiles.traverse(
+                    &ctx.root_profile,
+                    TraverseDupPolicy::Exclude,
+                    |e| !self.exclude_profile.contains(&e.child),
+                    |ctx| {
+                        match &ctx.item.kind {
+                            ProfileKind::Module(module) => {
+                                let this_backup_dir = backup_dir.join(ctx.item.id_or(ctx.name))?;
+                                let relpaths = module
+                                    .entries
+                                    .iter()
+                                    .map(|e| (&e.path, e.policy == ModulePolicy::Exclude));
+                                resolve(relpaths, &this_backup_dir, &mut entries)?;
+                            }
+                            ProfileKind::Runner(runner) => {
+                                let this_runner_dir = run_dir.join(ctx.item.id_or(ctx.name))?;
+                                let relpaths = runner.entries.iter().map(|e| (&e.path, false));
 
-                            resolve(relpaths, &this_runner_dir, &mut entries)?;
+                                resolve(relpaths, &this_runner_dir, &mut entries)?;
+                            }
+                            _ => {}
                         }
-                        _ => {}
-                    }
-                    Ok(())
-                })?;
+                        Ok(())
+                    },
+                )?;
 
                 // compare found files with those tracked
                 for dir in [run_dir, backup_dir] {
