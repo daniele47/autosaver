@@ -47,7 +47,7 @@ pub struct Cli {
     pub assume_no: bool,
 
     /// Skip all prompts and checks entirely
-    #[arg(short = 'N', long, conflicts_with_all = ["assume_no", "assume_yes"], help_heading = "Prompt Options")]
+    #[arg(short = 'd', long, conflicts_with_all = ["assume_no", "assume_yes"], help_heading = "Prompt Options")]
     pub dry_run: bool,
 }
 
