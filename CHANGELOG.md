@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v2.13.2
+
+### Changes
+
+- allow-stdin now shortners to `-s` for consistency with everything else
+
 ## v2.13.1
 
 ### Changes

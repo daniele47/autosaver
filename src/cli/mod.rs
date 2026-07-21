@@ -104,7 +104,7 @@ pub enum CliCmd {
     /// Run init scripts
     Run {
         /// Enable stdin in scripts that hint their need for it
-        #[arg(short = 'i', long)]
+        #[arg(short = 's', long)]
         allow_stdin: bool,
     },
     /// Show dependency tree of profiles
