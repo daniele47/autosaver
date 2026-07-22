@@ -20,7 +20,7 @@ pub struct Cli {
 
     /// Specify which profile to use
     #[arg(short = 'p', long, env = "AUTOSAVER_PROFILE")]
-    pub profile: Option<RelPathStr>,
+    pub profile: Vec<RelPathStr>,
 
     /// Specify profiles to exclude
     #[arg(short = 'e', long, value_name = "PROFILE")]

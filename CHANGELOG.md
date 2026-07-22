@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v2.14.0
+
+### Features
+
+- added `custom` reserved profile to allow specifying multiple profiles via cmdline flag
+
 ## v2.13.2
 
 ### Changes

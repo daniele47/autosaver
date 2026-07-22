@@ -27,11 +27,13 @@ fn check_profile(profile: &RelPathStr, reserved_profiles: &[&RelPathStr]) -> any
 pub fn load_profiles(
     config_dir: &AbsPathStr,
     root_profile: &RelPathStr,
+    custom_profile: &RelPathStr,
+    flag_profs: &[RelPathStr],
 ) -> anyhow::Result<AllProfiles> {
     let mut vt_names = IndexSet::new();
     let mut vt_profiles = vec![];
     let mut vt_entries = vec![];
-    let reserved_profiles = &[root_profile];
+    let reserved_profiles = &[root_profile, custom_profile];
 
     // find and load all profiles config files
     if config_dir.is_dir() {
@@ -135,6 +137,19 @@ pub fn load_profiles(
         };
         all_profiles.insert(root_profile.to_owned(), profile);
     }
+
+    // handle custom profile
+    let entries = flag_profs
+        .iter()
+        .map(|p| CompositeEntry {
+            child: p.to_owned(),
+        })
+        .collect();
+    let profile = Profile {
+        id: None,
+        kind: ProfileKind::Composite(Composite { entries }),
+    };
+    all_profiles.insert(custom_profile.to_owned(), profile);
 
     Ok(AllProfiles {
         profiles: all_profiles,
