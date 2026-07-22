@@ -27,11 +27,11 @@ fn check_profile(profile: &RelPathStr, reserved_profiles: &[&RelPathStr]) -> any
 pub fn load_profiles(
     config_dir: &AbsPathStr,
     root_profile: &RelPathStr,
-    reserved_profiles: &[&RelPathStr],
 ) -> anyhow::Result<AllProfiles> {
     let mut vt_names = IndexSet::new();
     let mut vt_profiles = vec![];
     let mut vt_entries = vec![];
+    let reserved_profiles = &[root_profile];
 
     // find and load all profiles config files
     if config_dir.is_dir() {

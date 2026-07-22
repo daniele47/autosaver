@@ -47,8 +47,7 @@ impl CliContext {
     ) -> anyhow::Result<Self> {
         let paths = load_env::load_paths_and_envvars(home, root)?;
         let root_profile = RelPathStr::from_str("all")?;
-        let profiles =
-            load_prof::load_profiles(&paths[&Paths::Config], &root_profile, &[&root_profile])?;
+        let profiles = load_prof::load_profiles(&paths[&Paths::Config], &root_profile)?;
         let curr_profile;
         if let Some(flag_profs) = flag_prof {
             curr_profile = flag_profs.to_owned();
