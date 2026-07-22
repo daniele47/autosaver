@@ -94,7 +94,7 @@ impl AbsPathStr {
         } else if self.is_dir() {
             self.find(|ctx| {
                 let ftype = ctx.entry.file_type()?;
-                if ftype.is_file() || (ftype.is_symlink() && ftype.is_file()) {
+                if ftype.is_file() || (ftype.is_symlink() && ctx.path.is_file()) {
                     on_each(ctx.path)?;
                 }
                 Ok(true)

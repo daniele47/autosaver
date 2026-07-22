@@ -78,6 +78,11 @@ pub fn load_profiles(
                 let (index_parent, _) = vt_names.insert_full(parent);
                 vt_entries.push((index_parent, index_this));
             }
+            // explicit error on symlinks inside config directory
+            else if ftype.is_symlink() {
+                let p = conf_rel.display();
+                bail!(format!("Configuration file '{p}' is a symlink"));
+            }
             // otherwise do nothing
             else {
                 return Ok(true);
