@@ -1,9 +1,14 @@
-use std::{collections::HashMap, env, path::PathBuf, str::FromStr};
+use std::{
+    collections::{HashMap, HashSet},
+    env,
+    path::PathBuf,
+    str::FromStr,
+};
 
 use crate::{
     cli::{config::col::CliColor, prompt::Prompt},
     fs::{abs::AbsPathStr, rel::RelPathStr},
-    prof::AllProfiles,
+    prof::{AllProfiles, TraverseDupPolicy},
 };
 
 pub mod col;
@@ -28,6 +33,7 @@ pub struct CliContext {
     pub profiles: AllProfiles,
     pub curr_profile: RelPathStr,
     pub col: CliColor,
+    pub exclude_all: HashSet<RelPathStr>,
     pub prompt: Prompt,
 }
 
@@ -36,6 +42,7 @@ impl CliContext {
         home: &Option<PathBuf>,
         root: &Option<PathBuf>,
         flag_prof: &Option<RelPathStr>,
+        exclude: &[RelPathStr],
         prompt: Prompt,
     ) -> anyhow::Result<Self> {
         let paths = load_env::load_paths_and_envvars(home, root)?;
@@ -51,12 +58,25 @@ impl CliContext {
             curr_profile = root_profile.clone();
         }
         let col = CliColor::parse_theme(&paths[&Paths::LocalConfigColors])?;
+        let mut exclude_all = HashSet::new();
+        for e in exclude {
+            profiles.traverse(
+                e,
+                TraverseDupPolicy::Exclude,
+                |_| true,
+                |e| {
+                    exclude_all.insert(e.name.to_owned());
+                    Ok(())
+                },
+            )?;
+        }
         Ok(Self {
             paths,
             root_profile,
             profiles,
             curr_profile,
             col,
+            exclude_all,
             prompt,
         })
     }

@@ -56,7 +56,7 @@ impl Cli {
         ctx.profiles.traverse(
             &ctx.curr_profile,
             TraverseDupPolicy::Exclude,
-            |e| !self.exclude.contains(&e.child),
+            |e| !ctx.exclude_all.contains(&e.child),
             |trav_ctx| {
                 if let ProfileKind::Module(module) = &trav_ctx.item.kind {
                     Self::output_profile(trav_ctx.name, ctx.col.output_profile);
