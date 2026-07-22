@@ -7,8 +7,6 @@ All notable changes to this project will be documented here
 ### Patches
 
 - symlink files are now found
-- [WIP] added `--only-symlinks` flag to `delete` action to list and ask to delete symlinks (NOTE: they are NOT included by default!)
-- [WIP] made `-o` and `-b` the only 2 defaults in `delete` action (symlinks and cleanup require flag to be run)
 
 ## v2.14.0
 
