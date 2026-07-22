@@ -95,13 +95,12 @@ impl Cli {
                             }
                             CliCmd::Delete {
                                 only_cleanup,
-                                only_backup,
-                                only_original,
                                 act_delsymlinks,
+                                ..
                             } => {
                                 allow_symlinks = act_delsymlinks.allow_symlink;
                                 allow_purge = true;
-                                only_cleanup || (!only_backup && !only_original)
+                                only_cleanup
                             }
                             _ => false,
                         };

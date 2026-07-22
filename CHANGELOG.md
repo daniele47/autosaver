@@ -8,6 +8,10 @@ All notable changes to this project will be documented here
 
 - symlink files are now found
 
+### Changes
+
+- now `delete` action defaults to `-ob` (not include cleanup by default)
+
 ## v2.14.0
 
 ### Features
