@@ -1,3 +1,5 @@
+use std::collections::BTreeSet;
+
 use indexmap::{IndexMap, map::Entry};
 
 use crate::{
@@ -118,6 +120,35 @@ impl Cli {
                                 )?;
                             }
                         }
+                    }
+                }
+
+                // find invalid symlink files
+                let mut files = BTreeSet::new();
+
+                for dir in [run_dir, backup_dir].iter().filter(|d| d.is_dir()) {
+                    dir.find(|ctx| {
+                        if !ctx.path.path().exists()
+                            && ctx.entry.file_type().is_ok_and(|f| f.is_symlink())
+                        {
+                            files.insert(ctx.path);
+                        }
+                        Ok(true)
+                    })?;
+                }
+
+                for file in files {
+                    let relpath = file.to_rel(root_dir)?;
+                    Self::output_path(&relpath, ctx.col.output_path);
+                    if !act_delsymlinks.allow_symlink {
+                        warning!("{} flag is required to delete symlinks", Self::SYMLINK_FLAG)
+                    } else {
+                        ctx.prompt.question(
+                            "Do you really want to delete invalid symlink file?",
+                            &[&file],
+                            || file.purge_path(),
+                            &ctx.col,
+                        )?;
                     }
                 }
 

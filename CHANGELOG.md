@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v2.15.0
+
+### Features
+
+- `clear` action when `--allow-symlink` is passed, also finds invalid symlinks
+
 ## v2.14.1
 
 ### Patches
