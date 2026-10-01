@@ -50,13 +50,8 @@ impl CliContext {
         let paths = load_env::load_paths_and_envvars(home, root)?;
         let root_profile = RelPathStr::from_str("all")?;
         let custom_profile = RelPathStr::from_str("custom")?;
-        let profiles = load_prof::load_profiles(
-            &paths[&Paths::Config],
-            &root_profile,
-            &custom_profile,
-            flag_profs,
-        )?;
         let curr_profile;
+        let mut use_profiles: Vec<_> = flag_profs.iter().cloned().collect();
         if flag_profs.len() == 1
             && let Some(flag_profs) = flag_profs.first()
         {
@@ -64,10 +59,25 @@ impl CliContext {
         } else if !flag_profs.is_empty() {
             curr_profile = custom_profile.to_owned();
         } else if let Ok(prof) = env::var("AUTOSAVER_PROFILE") {
-            curr_profile = RelPathStr::try_from(prof)?;
+            let splitted: Vec<_> = prof.split(" ").map(String::from).collect();
+            if splitted.len() <= 1 {
+                curr_profile = RelPathStr::try_from(prof)?;
+            } else {
+                curr_profile = custom_profile.to_owned();
+                use_profiles = splitted
+                    .into_iter()
+                    .map(RelPathStr::new)
+                    .collect::<Result<Vec<RelPathStr>, _>>()?;
+            }
         } else {
             curr_profile = root_profile.to_owned();
         }
+        let profiles = load_prof::load_profiles(
+            &paths[&Paths::Config],
+            &root_profile,
+            &custom_profile,
+            &use_profiles,
+        )?;
         let col = CliColor::parse_theme(&paths[&Paths::LocalConfigColors])?;
         let mut exclude_all = HashSet::new();
         for e in exclude {

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v2.17.0
+
+### Features
+
+- introduced proper support for multiple profiles via env variable or config file (split on spaces)
+
 ## v2.16.3
 
 ### Patches

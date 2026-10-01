@@ -28,7 +28,7 @@ pub fn load_profiles(
     config_dir: &AbsPathStr,
     root_profile: &RelPathStr,
     custom_profile: &RelPathStr,
-    flag_profs: &[RelPathStr],
+    profiles: &[RelPathStr],
 ) -> anyhow::Result<AllProfiles> {
     let mut vt_names = IndexSet::new();
     let mut vt_profiles = vec![];
@@ -144,7 +144,7 @@ pub fn load_profiles(
     }
 
     // handle custom profile
-    let entries = flag_profs
+    let entries = profiles
         .iter()
         .map(|p| CompositeEntry {
             child: p.to_owned(),

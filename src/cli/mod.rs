@@ -19,7 +19,7 @@ pub struct Cli {
     pub cmd: CliCmd,
 
     /// Specify which profile to use
-    #[arg(short = 'p', long, env = "AUTOSAVER_PROFILE")]
+    #[arg(short = 'p', long, env = "AUTOSAVER_PROFILE", value_delimiter = ' ')]
     pub profile: Vec<RelPathStr>,
 
     /// Specify profiles to exclude
