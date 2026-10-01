@@ -51,7 +51,7 @@ impl CliContext {
         let root_profile = RelPathStr::from_str("all")?;
         let custom_profile = RelPathStr::from_str("custom")?;
         let curr_profile;
-        let mut use_profiles: Vec<_> = flag_profs.iter().cloned().collect();
+        let mut use_profiles: Vec<_> = flag_profs.to_vec();
         if flag_profs.len() == 1
             && let Some(flag_profs) = flag_profs.first()
         {
