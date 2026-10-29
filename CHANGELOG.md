@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented here
 
+## v2.17.1
+
+- properly handled cases of conflicts with symlinked files in `save` or `restore` actions
+
 ## v2.17.0
 
 ### Features
