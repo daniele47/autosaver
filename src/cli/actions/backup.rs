@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use anyhow::{Context, bail};
+use anyhow::bail;
 use indexmap::{IndexMap, map::Entry};
 
 use crate::{
@@ -168,11 +168,11 @@ impl Cli {
                                     if !all_home_paths.insert(canon.clone())
                                         && matches!(&self.cmd, CliCmd::Restore { .. })
                                     {
-                                        warning!(
-                                            "Path already found in home directory: '{}'",
-                                            canon.display()
-                                        );
                                         if !act_saverestore.allow_duplicates {
+                                            warning!(
+                                                "Skipping path already found in home directory: '{}'",
+                                                canon.display()
+                                            );
                                             continue;
                                         }
                                     }
@@ -193,11 +193,11 @@ impl Cli {
                                     if !all_root_paths.insert(canon.clone())
                                         && matches!(&self.cmd, CliCmd::Save { .. })
                                     {
-                                        warning!(
-                                            "Path already found in backup directory: '{}'",
-                                            canon.display()
-                                        );
                                         if !act_saverestore.allow_duplicates {
+                                            warning!(
+                                                "Skipping path already found in backup directory: '{}'",
+                                                canon.display()
+                                            );
                                             continue;
                                         }
                                     }
