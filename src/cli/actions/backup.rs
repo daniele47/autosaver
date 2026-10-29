@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use anyhow::bail;
+use anyhow::{Context, bail};
 use indexmap::{IndexMap, map::Entry};
 
 use crate::{
@@ -50,7 +50,8 @@ impl Cli {
     pub fn action_backup(&self, ctx: &CliContext) -> anyhow::Result<()> {
         let home_dir = &ctx.paths[&Paths::Home];
         let backup_dir = &ctx.paths[&Paths::Backup];
-        let mut all_paths = HashSet::<RelPathStr>::new();
+        let mut all_home_paths = HashSet::<AbsPathStr>::new();
+        let mut all_root_paths = HashSet::<AbsPathStr>::new();
 
         // traverse profiles
         ctx.profiles.traverse(
@@ -151,22 +152,54 @@ impl Cli {
                             | CliCmd::Save {
                                 act_saverestore, ..
                             } => {
-                                let relpath = if let Some(original_file) = &entry.1[0] {
-                                    original_file.to_rel(home_dir)
-                                } else if let Some(backup_file) = &entry.1[1] {
-                                    backup_file.to_rel(backup_dir)
-                                } else {
-                                    bail!("missing path")
-                                };
-                                if let Ok(relpath) = relpath
-                                    && !all_paths.insert(relpath.clone())
-                                {
-                                    let p = relpath.display();
-                                    let msg = format!("Path '{p}' was already found previously");
-                                    if act_saverestore.allow_duplicates {
-                                        warning!("{msg}")
-                                    } else {
-                                        bail!(msg)
+                                if let Some(original_file) = &entry.1[0] {
+                                    let canon = original_file.canonicalize()?;
+                                    if all_root_paths.contains(&canon) {
+                                        let msg = format!(
+                                            "Path '{}' was already found previously",
+                                            canon.display()
+                                        );
+                                        if act_saverestore.allow_duplicates {
+                                            warning!("{msg}")
+                                        } else {
+                                            bail!("{msg}")
+                                        }
+                                    }
+                                    if !all_home_paths.insert(canon.clone())
+                                        && matches!(&self.cmd, CliCmd::Restore { .. })
+                                    {
+                                        warning!(
+                                            "Path already found in home directory: '{}'",
+                                            canon.display()
+                                        );
+                                        if !act_saverestore.allow_duplicates {
+                                            continue;
+                                        }
+                                    }
+                                }
+                                if let Some(backup_file) = &entry.1[1] {
+                                    let canon = backup_file.canonicalize()?;
+                                    if all_home_paths.contains(&canon) {
+                                        let msg = format!(
+                                            "Path '{}' was already found previously",
+                                            canon.display()
+                                        );
+                                        if act_saverestore.allow_duplicates {
+                                            warning!("{msg}")
+                                        } else {
+                                            bail!("{msg}")
+                                        }
+                                    }
+                                    if !all_root_paths.insert(canon.clone())
+                                        && matches!(&self.cmd, CliCmd::Save { .. })
+                                    {
+                                        warning!(
+                                            "Path already found in backup directory: '{}'",
+                                            canon.display()
+                                        );
+                                        if !act_saverestore.allow_duplicates {
+                                            continue;
+                                        }
                                     }
                                 }
                             }
