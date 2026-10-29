@@ -144,6 +144,10 @@ impl Cli {
                             continue;
                         }
 
+                        // track if files are repeated on home or root dir side
+                        let mut repeated_home_file : Option<AbsPathStr> = None;
+                        let mut repeated_root_file : Option<AbsPathStr> = None;
+
                         // check path was not found yet
                         match &self.cmd {
                             CliCmd::Restore {
@@ -167,14 +171,9 @@ impl Cli {
                                     }
                                     if !all_home_paths.insert(canon.clone())
                                         && matches!(&self.cmd, CliCmd::Restore { .. })
+                                        && !act_saverestore.allow_duplicates
                                     {
-                                        if !act_saverestore.allow_duplicates {
-                                            warning!(
-                                                "Skipping path already found in home directory: '{}'",
-                                                canon.display()
-                                            );
-                                            continue;
-                                        }
+                                        repeated_home_file = Some(canon);
                                     }
                                 }
                                 if let Some(backup_file) = &entry.1[1] {
@@ -192,14 +191,9 @@ impl Cli {
                                     }
                                     if !all_root_paths.insert(canon.clone())
                                         && matches!(&self.cmd, CliCmd::Save { .. })
+                                        && !act_saverestore.allow_duplicates
                                     {
-                                        if !act_saverestore.allow_duplicates {
-                                            warning!(
-                                                "Skipping path already found in backup directory: '{}'",
-                                                canon.display()
-                                            );
-                                            continue;
-                                        }
+                                        repeated_root_file = Some(canon);
                                     }
                                 }
                             }
@@ -366,11 +360,25 @@ impl Cli {
                                     }
                                     Self::output_path(&path, ctx.col.output_diff);
                                     if matches!(&self.cmd, CliCmd::Save { .. }) {
+                                        if let Some(canon) = repeated_root_file {
+                                            warning!(
+                                                "Skipping path already found in root directory: '{}'",
+                                                canon.display()
+                                            );
+                                            continue;
+                                        }
                                         let msg = "Do you really want to update backup file?";
                                         let paths = &[p2, p1];
                                         let action = || p1.copy_file(p2);
                                         ctx.prompt.question(msg, paths, action, &ctx.col)?;
                                     } else if matches!(&self.cmd, CliCmd::Restore { .. }) {
+                                        if let Some(canon) = repeated_home_file {
+                                            warning!(
+                                                "Skipping path already found in home directory: '{}'",
+                                                canon.display()
+                                            );
+                                            continue;
+                                        }
                                         let msg = "Do you really want to update home file?";
                                         let paths = &[p1, p2];
                                         let action = || p2.copy_file(p1);
