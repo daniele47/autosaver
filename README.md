@@ -62,10 +62,14 @@ whitespaces
 
 # color of `-` symbol before deleted lines in diff outputs
 diff_deleted red
+# color of deleted lines in diff outputs
+diff_deleted_lines red
 # color of `@@@` headers in diff outputs
 diff_header cyan
 # color of `+` symbol before deleted lines in diff outputs
 diff_inserted green
+# color of inserted lines before deleted lines in diff outputs
+diff_inserted_lines green
 
 # color of files in backup action when they differ
 output_diff bright_yellow

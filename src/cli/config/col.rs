@@ -22,7 +22,9 @@ pub struct CliColor {
     pub output_unmodified: Style,
     pub output_cleanup: Style,
     pub diff_deleted: Style,
+    pub diff_deleted_lines: Style,
     pub diff_inserted: Style,
+    pub diff_inserted_lines: Style,
     pub diff_header: Style,
     pub show_header: Style,
 }
@@ -47,7 +49,9 @@ impl CliColor {
             output_unmodified: Style::new(),
             output_cleanup: Style::new().bright_red(),
             diff_deleted: Style::new().red(),
+            diff_deleted_lines: Style::new().red(),
             diff_inserted: Style::new().green(),
+            diff_inserted_lines: Style::new().green(),
             diff_header: Style::new().cyan(),
             show_header: Style::new().cyan(),
         }
@@ -143,7 +147,9 @@ impl CliColor {
                     "output_unmodified" => colors.output_unmodified = style,
                     "output_cleanup" => colors.output_cleanup = style,
                     "diff_deleted" => colors.diff_deleted = style,
+                    "diff_deleted_lines" => colors.diff_deleted_lines = style,
                     "diff_inserted" => colors.diff_inserted = style,
+                    "diff_inserted_lines" => colors.diff_inserted_lines = style,
                     "diff_header" => colors.diff_header = style,
                     "show_header" => colors.show_header = style,
                     w => {

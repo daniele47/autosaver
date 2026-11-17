@@ -342,12 +342,12 @@ impl Prompt {
                         ChangeTag::Delete => {
                             cout!(col.diff_deleted, "-");
                             cout!(col.whitespaces, " ");
-                            cout!(col.default, "{change}");
+                            cout!(col.diff_deleted_lines, "{change}");
                         }
                         ChangeTag::Insert => {
                             cout!(col.diff_inserted, "+");
                             cout!(col.whitespaces, " ");
-                            cout!(col.default, "{change}");
+                            cout!(col.diff_inserted_lines, "{change}");
                         }
                         ChangeTag::Equal => {}
                     };

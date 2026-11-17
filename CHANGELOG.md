@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented here
 
+## v2.18.0
+
+### Features
+
+- added `diff_deleted_lines` and `diff_inserted_lines` color elements
+
 ## v2.17.1
 
 - properly handled cases of conflicts with symlinked files in `save` or `restore` actions
